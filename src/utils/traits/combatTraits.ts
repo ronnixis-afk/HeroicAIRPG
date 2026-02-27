@@ -1,0 +1,10 @@
+import { LibraryTrait } from '../traitLibrary';
+
+export const COMBAT_TRAITS: LibraryTrait[] = [
+    { name: "Single Target Damage", category: 'combat', description: "A focused offensive strike against one enemy.", usage: { type: 'passive', maxUses: 0, currentUses: 0 }, effect: { type: 'Damage', targetType: 'Single', damageDice: '1d10', damageType: 'Force', saveAbility: 'dexterity', saveEffect: 'half', dc: 10 }, tags: ['blueprint', 'combat'] },
+    { name: "Multi Target Damage", category: 'combat', description: "An explosive or sweeping attack hitting multiple hostiles.", usage: { type: 'per_short_rest', maxUses: 1, currentUses: 1 }, effect: { type: 'Damage', targetType: 'Multiple', damageDice: '2d6', damageType: 'Force', dc: 12, saveAbility: 'dexterity', saveEffect: 'half' }, tags: ['blueprint', 'combat'] },
+    { name: "Single Target Healing", category: 'combat', description: "Channel energy to restore the vitality of one ally.", usage: { type: 'per_short_rest', maxUses: 2, currentUses: 2 }, effect: { type: 'Heal', targetType: 'Single', healDice: '2d4+2' }, tags: ['blueprint', 'combat'] },
+    { name: "Multi Target Healing", category: 'combat', description: "A wave of restoration affecting all nearby allies.", usage: { type: 'per_long_rest', maxUses: 1, currentUses: 1 }, effect: { type: 'Heal', targetType: 'Multiple', healDice: '1d8+4' }, tags: ['blueprint', 'combat'] },
+    { name: "Single Target Status", category: 'combat', description: "A debilitating move that disables a single foe.", usage: { type: 'per_short_rest', maxUses: 1, currentUses: 1 }, effect: { type: 'Status', targetType: 'Single', status: 'Stunned', dc: 14, saveAbility: 'constitution', duration: 1 }, tags: ['blueprint', 'combat'] },
+    { name: "Multi Target Status", category: 'combat', description: "A chaotic effect that disrupts multiple enemies at once.", usage: { type: 'per_long_rest', maxUses: 1, currentUses: 1 }, effect: { type: 'Status', targetType: 'Multiple', status: 'Prone', dc: 13, saveAbility: 'strength', duration: 1 }, tags: ['blueprint', 'combat'] }
+];

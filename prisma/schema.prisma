@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+model User {
+  id        String     @id // Clerk User ID
+  email     String     @unique
+  createdAt DateTime   @default(now())
+  UsageLogs UsageLog[]
+  GameSaves GameSave[]
+}
+
+model UsageLog {
+  id        String   @id @default(uuid())
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+  tokens    Int      // Track AI prompt/completion tokens
+  createdAt DateTime @default(now())
+}
+
+model GameSave {
+  id        String   @id @default(uuid())
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+  worldId   String
+  name      String
+  data      Json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  // Ensure a user can only have one save per worldId if that's desired,
+  // or just index it for fast lookups. We'll leave it as a normal index so they
+  // could theoretically have multiple saves per world, but typically we overwrite.
+  @@index([userId, worldId])
+}
