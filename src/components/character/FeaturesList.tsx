@@ -49,12 +49,12 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
     const isRefining = !!ability.isRefining;
 
     return (
-        <div 
+        <div
             onClick={() => !isRefining && setIsExpanded(!isExpanded)}
             className={`flex flex-col w-full bg-brand-surface border border-brand-primary rounded-2xl p-5 shadow-xl transition-all group relative overflow-hidden ${isRefining ? 'cursor-wait opacity-80' : 'cursor-pointer hover:border-brand-accent/30'} ${isExpanded ? 'ring-1 ring-brand-accent/20' : ''} ${disabledReason ? 'opacity-80 grayscale-[0.2]' : ''}`}
         >
             {isRefining && <ShimmerOverlay />}
-            
+
             {!isRefining && (
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-accent/5 rounded-full blur-3xl group-hover:bg-brand-accent/10 transition-all" />
             )}
@@ -80,7 +80,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                 </div>
                 {!isRefining && (
                     <div className="flex items-center gap-2 shrink-0">
-                        <button 
+                        <button
                             onClick={(e) => { e.stopPropagation(); onEdit(); }}
                             className="p-1.5 text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/50 rounded-lg transition-all"
                             title="Edit Ability"
@@ -142,7 +142,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                     )}
                 </div>
             )}
-            
+
             {isRefining && (
                 <div className="mt-4 flex items-center gap-3 px-1">
                     <Icon name="sparkles" className="w-4 h-4 text-brand-accent animate-spin" />
@@ -189,9 +189,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     };
 
     const addAbility = () => {
-        const newAbility: Ability = { 
-            id: `ability-${Date.now()}`, 
-            name: 'New Feature', 
+        const newAbility: Ability = {
+            id: `ability-${Date.now()}`,
+            name: 'New Feature',
             description: '',
             usage: { type: 'passive', maxUses: 0, currentUses: 0 }
         };
@@ -203,14 +203,14 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     const addTraitFromLibrary = async (trait: LibraryTrait) => {
         const abilityId = `ability-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
         const isCombat = trait.category === 'combat';
-        
+
         const newAbility: Ability = {
             ...trait,
             id: abilityId,
             isRefining: isCombat,
             isLevelUpTrait: true // Phase 2/3: Consume point
         };
-        
+
         const newAbilities = [...character.abilities, newAbility];
         onChange(['abilities'], newAbilities);
         setIsLibraryOpen(false);
@@ -221,14 +221,14 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         if (isCombat) {
             try {
                 const { name, description, damageType } = await skinAbilityFlavor(newAbility, character, (window as any).gameDataCache || { worldSummary: '' });
-                
+
                 const updatedAbilities = newAbilities.map(a => {
                     if (a.id === abilityId) {
-                        const updated: Ability = { 
-                            ...a, 
-                            name, 
-                            description, 
-                            isRefining: false 
+                        const updated: Ability = {
+                            ...a,
+                            name,
+                            description,
+                            isRefining: false
                         };
                         if (damageType && updated.effect) {
                             updated.effect = { ...updated.effect, damageType };
@@ -270,24 +270,29 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
     const handleInitializeEffect = () => {
         if (editingIndex === null) return;
-        const defaultEffect = { 
-            type: 'Damage' as const, 
-            dc: standardDC || 10, 
-            saveAbility: 'dexterity' as const, 
-            saveEffect: 'half' as const, 
-            targetType: 'Single' as const, 
-            damageDice: '1d6', 
-            damageType: 'Force' 
+        const defaultEffect = {
+            type: 'Damage' as const,
+            dc: standardDC || 10,
+            saveAbility: 'dexterity' as const,
+            saveEffect: 'half' as const,
+            targetType: 'Single' as const,
+            damageDice: '1d6',
+            damageType: 'Force'
         };
         handleAbilityChange(editingIndex, 'effect', defaultEffect);
     };
 
     const sortedAbilities = useMemo(() => {
         if (!character.abilities) return [];
-        return [...character.abilities].sort((a: any, b: any) => {
+
+        // Phase 2 Fix: Separate level-up traits from core abilities to maintain slot positions
+        const coreAbilities = character.abilities.filter(a => !a.isLevelUpTrait);
+        const levelUpTraits = character.abilities.filter(a => a.isLevelUpTrait);
+
+        coreAbilities.sort((a: any, b: any) => {
             const catA = a.category || 'general';
             const catB = b.category || 'general';
-            
+
             const weights: Record<string, number> = { 'background': 3, 'general': 2, 'combat': 1 };
             const wA = weights[catA] || 2;
             const wB = weights[catB] || 2;
@@ -295,18 +300,21 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             if (wA !== wB) return wB - wA;
             return (a.name || '').localeCompare(b.name || '');
         });
+
+        // Level-up traits append chronologically beneath the sorted core class features
+        return [...coreAbilities, ...levelUpTraits];
     }, [character.abilities]);
 
     const filteredLibrary = useMemo(() => {
-        return TRAIT_LIBRARY.filter(trait => 
+        return TRAIT_LIBRARY.filter(trait =>
             trait.category === libraryTab &&
             (!trait.requiredConfig || trait.requiredConfig === skillConfig)
         );
     }, [skillConfig, libraryTab]);
 
     const isStrictlyUnarmed = useMemo(() => {
-        return !inventory.equipped.some(item => 
-            (item.weaponStats || item.tags?.includes('weapon')) && 
+        return !inventory.equipped.some(item =>
+            (item.weaponStats || item.tags?.includes('weapon')) &&
             (item.equippedSlot === 'Main Hand' || item.equippedSlot === 'Off Hand')
         );
     }, [inventory.equipped]);
@@ -342,8 +350,8 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     )}
                 </div>
                 <div className="flex gap-3">
-                    <button 
-                        onClick={() => setIsLibraryOpen(true)} 
+                    <button
+                        onClick={() => setIsLibraryOpen(true)}
                         className="btn-secondary btn-sm rounded-full"
                     >
                         Library
@@ -354,16 +362,16 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             <div className="flex flex-col gap-5 px-1 pb-4">
                 {sortedAbilities.length > 0 && sortedAbilities.map((ability) => {
                     const originalIndex = character.abilities.findIndex(a => a.id === ability.id);
-                    
+
                     let disabledReason = undefined;
                     if (ability.name === "Flurry of Blows" && !isStrictlyUnarmed) {
                         disabledReason = "Must be Unarmed";
                     }
 
                     return (
-                        <AbilityCard 
-                            key={ability.id} 
-                            ability={ability} 
+                        <AbilityCard
+                            key={ability.id}
+                            ability={ability}
                             onEdit={() => setEditingIndex(originalIndex)}
                             onDelete={() => removeAbility(originalIndex)}
                             standardDC={standardDC}
@@ -377,7 +385,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 {Array.from({ length: metrics.available }).map((_, i) => {
                     const earnedAtLevel = (metrics.used + i + 1) * 3;
                     return (
-                        <button 
+                        <button
                             key={`trait-slot-${i}`}
                             onClick={() => setIsLibraryOpen(true)}
                             className="w-full h-28 border-2 border-dashed border-brand-primary/40 rounded-3xl flex items-center justify-center gap-4 text-brand-text-muted hover:border-brand-accent/50 hover:text-brand-accent transition-all group animate-pulse"
@@ -390,7 +398,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     );
                 })}
 
-                <button 
+                <button
                     onClick={addAbility}
                     className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-colors mt-2"
                 >
@@ -423,13 +431,13 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title={`Trait Library (${skillConfig || 'Universal'})`}>
                 <div className="flex flex-col h-[75vh]">
                     <div className="flex justify-center mb-6 bg-brand-primary p-1 rounded-xl w-full flex-shrink-0">
-                        <button 
+                        <button
                             onClick={() => setLibraryTab('general')}
                             className={`flex-1 btn-sm transition-all ${libraryTab === 'general' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
                         >
                             General
                         </button>
-                        <button 
+                        <button
                             onClick={() => setLibraryTab('combat')}
                             className={`flex-1 btn-sm transition-all ${libraryTab === 'combat' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
                         >
@@ -468,7 +476,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                             {isLocked && <span className="text-[9px] font-bold text-brand-danger border border-brand-danger/20 px-3 py-0.5 rounded-full">Locked</span>}
                                         </div>
                                         <p className="text-body-sm text-brand-text-muted line-clamp-2 leading-relaxed italic">{trait.description}</p>
-                                        
+
                                         {isLocked && trait.requires && (
                                             <div className="mt-1">
                                                 <p className="text-brand-danger text-[10px] font-bold">Requires: {trait.requires.join(', ')}</p>
@@ -493,9 +501,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 </div>
             </Modal>
 
-            <Modal 
-                isOpen={editingIndex !== null} 
-                onClose={() => setEditingIndex(null)} 
+            <Modal
+                isOpen={editingIndex !== null}
+                onClose={() => setEditingIndex(null)}
                 title="Edit Feature"
             >
                 {editingAbility && (
@@ -520,7 +528,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                 placeholder="Describe what the ability does..."
                             />
                         </div>
-                        
+
                         <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-surface space-y-5">
                             <label className="block text-xs font-bold text-brand-text-muted ml-1 tracking-normal">Activation & Usage</label>
                             <div className="grid grid-cols-3 gap-4">
@@ -581,18 +589,18 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="space-y-8 pt-2">
-                            <ModifierBuilder 
-                                buffs={editingAbility.buffs || []} 
-                                onChange={(newBuffs) => handleAbilityChange(editingIndex!, 'buffs', newBuffs)} 
+                            <ModifierBuilder
+                                buffs={editingAbility.buffs || []}
+                                onChange={(newBuffs) => handleAbilityChange(editingIndex!, 'buffs', newBuffs)}
                                 skillConfig={skillConfig}
                             />
 
                             <div className="pt-2">
                                 {editingAbility.effect ? (
-                                    <EffectBuilder 
-                                        effect={editingAbility.effect} 
+                                    <EffectBuilder
+                                        effect={editingAbility.effect}
                                         standardDC={standardDC}
                                         standardDice={getStandardDiceForEffect(editingAbility.effect)}
                                         onChange={(newEffect) => handleAbilityChange(editingIndex!, 'effect', newEffect)}
@@ -610,13 +618,13 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                         </div>
 
                         <div className="pt-10 border-t border-brand-primary/20 flex justify-between items-center gap-4">
-                            <button 
+                            <button
                                 onClick={() => removeAbility(editingIndex!)}
                                 className="text-brand-danger hover:opacity-80 text-xs font-bold flex items-center gap-2 px-4 py-2 rounded-xl transition-all"
                             >
                                 <Icon name="trash" className="w-5 h-5" /> Purge Feature
                             </button>
-                            <button 
+                            <button
                                 onClick={() => setEditingIndex(null)}
                                 className="btn-primary btn-md flex-1"
                             >
