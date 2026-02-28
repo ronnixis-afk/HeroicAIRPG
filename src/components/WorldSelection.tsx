@@ -51,8 +51,9 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const [isRestoringCloud, setIsRestoringCloud] = useState(false);
     const [cloudError, setCloudError] = useState('');
 
-    // Modal State
+    // Modal & Drawer State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
     // Form State
     const [setting, setSetting] = useState('Fantasy');
@@ -93,6 +94,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
     useEffect(() => {
         fetchWorlds();
+        handleFetchCloudSaves();
 
         // Fetch user tier
         fetch('/api/user-tier')
@@ -406,109 +408,126 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const userEmail = user?.emailAddresses?.[0]?.emailAddress || '';
 
     return (
-        <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4 animate-page">
-            <div className="w-full max-w-2xl mx-auto">
-                {/* Top Header Row with Title and Account Info */}
-                <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-black mb-1">Heroic AI <span className="text-brand-accent">RPG</span></h1>
-                        <p className="text-body-sm text-brand-text-muted font-medium opacity-60">Powered by Gemini 3. Choose your realm or forge a new destiny.</p>
-                    </div>
+        <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
+            {/* Top Navigation Bar */}
+            <header className="flex items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent">
+                <h1 className="text-2xl font-black tracking-tighter text-brand-text">Heroic AI <span className="text-brand-accent">RPG</span></h1>
+                <button
+                    onClick={() => setIsDrawerOpen(true)}
+                    className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
+                    aria-label="Open User Menu"
+                >
+                    <Icon name="menu" className="w-7 h-7" />
+                </button>
+            </header>
 
-                    {/* User Info Panel */}
-                    <div className="bg-brand-surface py-2 px-4 rounded-full border border-brand-primary/50 flex items-center shadow-lg shrink-0 gap-4">
-                        <div className="flex flex-col items-end">
-                            <span className="text-body-sm font-bold text-brand-text leading-tight">{userEmail || 'Loading...'}</span>
-                            {isTierLoading ? (
-                                <span className="text-[10px] text-brand-text-muted">Syncing...</span>
-                            ) : (
-                                <span className={`text-[10px] font-black uppercase tracking-wider ${tierInfo.color}`}>{tierInfo.label}</span>
-                            )}
-                        </div>
-                        <div className="h-8 w-px bg-brand-primary/50"></div>
-                        <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-8 h-8 rounded-full border-2 border-brand-accent/50" } }} />
+            {/* User Account Drawer Overlay */}
+            <div className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsDrawerOpen(false)}></div>
+            <div className={`fixed inset-y-0 right-0 w-80 bg-brand-surface border-l border-brand-primary/30 z-50 transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="flex items-center justify-between p-6 border-b border-brand-primary/20">
+                    <h2 className="text-lg font-bold text-brand-text">Hero Profile</h2>
+                    <button onClick={() => setIsDrawerOpen(false)} className="text-brand-text-muted hover:text-brand-accent transition-colors p-1">
+                        <Icon name="x" className="w-6 h-6" />
+                    </button>
+                </div>
+                <div className="p-6 flex flex-col items-center gap-4">
+                    <div className="p-1 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-primary/20 border border-brand-accent/30 shadow-lg shadow-brand-accent/10">
+                        <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-16 h-16 rounded-full" } }} />
+                    </div>
+                    <div className="text-center">
+                        <span className={`text-xs font-black uppercase tracking-widest ${tierInfo.color} mb-1 block`}>{isTierLoading ? 'Syncing...' : tierInfo.label}</span>
+                        <span className="text-sm font-medium text-brand-text break-all">{userEmail || 'Loading...'}</span>
                     </div>
                 </div>
+                <div className="mt-auto p-6 text-center">
+                    <p className="text-[10px] text-brand-text-muted uppercase tracking-wider opacity-50">Powered by Gemini 3</p>
+                </div>
+            </div>
 
-                {/* Local Worlds Horizontal Scroll */}
-                <div className="mb-8">
-                    <h4 className="text-body-base font-bold text-brand-text mb-4 ml-1">Local Realms</h4>
-                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
-                        {worlds.length === 0 && !isLoadingWorlds ? (
-                            <div className="bg-brand-surface/50 border border-brand-primary/30 rounded-2xl p-6 text-center w-full max-w-sm flex-shrink-0">
-                                <p className="text-brand-text-muted text-sm font-medium">No local realms forged yet.</p>
+            <main className="flex-1 pb-20 mt-2">
+                {/* Local Worlds Horizontal Scroll (Netflix Style) */}
+                <section className="mb-10">
+                    <h2 className="text-lg font-bold text-brand-text px-6 mb-4">Your Realms</h2>
+                    <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar">
+                        {/* Forge New Realm Card */}
+                        <button
+                            onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
+                            className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start bg-gradient-to-br from-brand-surface to-brand-bg border border-dashed border-brand-primary/50 hover:border-brand-accent hover:from-brand-accent/10 hover:to-brand-bg transition-all rounded-xl flex flex-col items-center justify-center text-brand-text-muted hover:text-brand-accent group shadow-lg"
+                        >
+                            <div className="bg-brand-primary/30 group-hover:bg-brand-accent/20 p-4 rounded-full mb-4 transition-colors">
+                                <Icon name="plus" className="w-8 h-8" />
+                            </div>
+                            <span className="font-bold text-sm text-center px-4 leading-tight">Forge New<br />Realm</span>
+                        </button>
+
+                        {worlds.map(world => (
+                            <div key={world.id} className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden cursor-pointer shadow-lg bg-brand-surface border border-brand-primary/30 hover:border-brand-accent hover:shadow-brand-accent/20 transition-all flex flex-col" onClick={() => onWorldSelected(world.id)}>
+                                {/* Placeholder Map/Setting Visual */}
+                                <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 via-transparent to-black/90 z-0 text-brand-primary opacity-20 flex items-center justify-center overflow-hidden mix-blend-overlay">
+                                    <div className="w-[200%] h-[200%] absolute top-0 -left-1/2 rotate-12 bg-gradient-to-r from-transparent via-brand-text to-transparent blur-3xl opacity-10"></div>
+                                </div>
+                                <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteWorld(world.id); }} className="bg-black/40 hover:bg-brand-danger/20 text-brand-text-muted hover:text-brand-danger p-2 rounded-full backdrop-blur-sm transition-colors shadow-md">
+                                        <Icon name="trash" className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="mt-auto p-4 z-10 w-full flex flex-col relative">
+                                    <h3 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md">{world.name}</h3>
+                                    <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">Saved {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
+                                    <div className="w-full bg-brand-accent text-black font-black text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
+                                        <Icon name="play" className="w-3 h-3" /> Play
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Cloud Load Section Horizontal Scroll */}
+                <section className="mb-6">
+                    <div className="flex items-center justify-between px-6 mb-4">
+                        <h2 className="text-lg font-bold text-brand-text">Archives</h2>
+                        <button
+                            onClick={handleFetchCloudSaves}
+                            disabled={isLoadingCloud}
+                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold uppercase py-1 px-3 rounded-full tracking-wider flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
+                        >
+                            {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
+                            Sync
+                        </button>
+                    </div>
+
+                    <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar min-h-[200px]">
+                        {cloudError && <div className="w-full shrink-0"><p className="text-body-sm text-brand-danger font-bold">{cloudError}</p></div>}
+
+                        {cloudSaves.length === 0 && !isLoadingCloud && !cloudError ? (
+                            <div className="w-36 md:w-44 aspect-[2/3] shrink-0 bg-brand-primary/5 border border-brand-surface border-dashed rounded-xl flex items-center justify-center p-4">
+                                <p className="text-brand-text-muted text-xs italic text-center opacity-60">No celestial archives found.</p>
                             </div>
                         ) : (
-                            worlds.map(world => (
-                                <div key={world.id} className="bg-brand-surface p-5 rounded-2xl flex flex-col justify-between shadow-xl border border-brand-primary/50 hover:border-brand-accent/50 transition-all group w-72 shrink-0 snap-start">
-                                    <div className="mb-4">
-                                        <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{world.name}</h3>
-                                        <p className="text-xs text-brand-text-muted mt-1 opacity-70">Saved: {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
+                            cloudSaves.map(save => (
+                                <div key={save.id} className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden shadow-lg bg-brand-surface/40 border border-brand-primary/20 hover:border-brand-accent/50 transition-all flex flex-col">
+                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/50 to-[#0a0f12] z-0 mix-blend-multiply border border-brand-accent/10"></div>
+                                    <div className="absolute top-3 left-3 z-10 bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase text-brand-text/70 border border-brand-surface shadow-sm">
+                                        Cloud
                                     </div>
-                                    <div className="flex items-center gap-2 mt-auto">
-                                        <button onClick={() => onWorldSelected(world.id)} className="btn-primary btn-sm flex-1 shadow-sm">Enter</button>
-                                        <button onClick={() => handleDeleteWorld(world.id)} className="btn-icon-delete flex-shrink-0 p-2">
-                                            <Icon name="trash" className="w-[18px] h-[18px]" />
+                                    <div className="mt-auto p-4 z-10 w-full flex flex-col items-center text-center">
+                                        <h3 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md">{save.name}</h3>
+                                        <p className="text-[9px] text-brand-text-muted mb-4 opacity-70 border-b border-brand-primary/30 pb-2 w-full shadow-black drop-shadow-md">{new Date(save.updatedAt).toLocaleDateString()}</p>
+                                        <button
+                                            onClick={() => handleRestoreCloudSave(save)}
+                                            disabled={isRestoringCloud}
+                                            className="w-full bg-[#11181c] border border-brand-accent/50 text-brand-accent font-bold text-xs py-2 rounded flex items-center justify-center gap-1 hover:bg-brand-accent hover:text-black transition-colors shadow-lg"
+                                        >
+                                            {isRestoringCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin mx-auto" /> : 'Restore'}
                                         </button>
                                     </div>
                                 </div>
                             ))
                         )}
-
-                        {/* Forge New Card */}
-                        <button
-                            onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
-                            className="bg-brand-primary/20 p-5 rounded-2xl flex flex-col items-center justify-center border border-dashed border-brand-accent/50 hover:bg-brand-primary/40 transition-all w-72 shrink-0 snap-start text-brand-accent shadow-inner group"
-                        >
-                            <div className="bg-brand-accent/10 p-3 rounded-full mb-3 group-hover:scale-110 transition-transform">
-                                <Icon name="plus" className="w-6 h-6" />
-                            </div>
-                            <span className="font-bold">Forge New Realm</span>
-                        </button>
                     </div>
-                </div>
-
-                {/* Cloud Load Section Horizontal Scroll */}
-                <div className="mt-8 pt-8 border-t border-brand-primary/20">
-                    <div className="flex items-center justify-between mb-4 px-1">
-                        <h4 className="text-body-base font-bold text-brand-text">Cloud Archives</h4>
-                        <button
-                            onClick={handleFetchCloudSaves}
-                            disabled={isLoadingCloud}
-                            className="btn-secondary btn-sm flex items-center gap-2"
-                        >
-                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="cloud" className="w-4 h-4" />}
-                            Sync Archives
-                        </button>
-                    </div>
-
-                    {cloudError && <p className="text-body-sm text-brand-danger font-bold mb-3">{cloudError}</p>}
-
-                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar min-h-[140px]">
-                        {cloudSaves.length === 0 && !isLoadingCloud ? (
-                            <div className="bg-brand-primary/10 border border-brand-surface border-dashed rounded-2xl p-6 text-center w-full max-w-sm flex items-center justify-center">
-                                <p className="text-brand-text-muted text-sm italic">No archives found in the astral cloud. Click sync to retrieve.</p>
-                            </div>
-                        ) : (
-                            cloudSaves.map(save => (
-                                <div key={save.id} className="bg-brand-primary/30 p-5 rounded-2xl border border-brand-surface flex flex-col justify-between w-64 shrink-0 snap-start hover:border-brand-accent/30 transition-colors">
-                                    <div className="mb-4">
-                                        <span className="text-body-base font-bold text-brand-text block truncate">{save.name}</span>
-                                        <span className="text-[10px] text-brand-text-muted mt-1 block">Backed up: {new Date(save.updatedAt).toLocaleDateString()}</span>
-                                    </div>
-                                    <button
-                                        onClick={() => handleRestoreCloudSave(save)}
-                                        disabled={isRestoringCloud}
-                                        className="btn-tertiary btn-sm w-full mt-auto border border-brand-surface hover:bg-brand-accent/10 hover:text-brand-accent"
-                                    >
-                                        {isRestoringCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin mx-auto" /> : 'Restore from Cloud'}
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
-            </div>
+                </section>
+            </main>
 
             <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} title={previewData ? "World Preview" : "Forging a New World"}>
                 {isGenerating ? (
