@@ -9,30 +9,37 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
         case 'ADD_NPC': {
             const newNpc = action.payload;
-            
+
             // Safety: Ignore invalid payloads
             if (!newNpc || !newNpc.name || typeof newNpc.name !== 'string') {
                 return state;
             }
 
             const normalizedNewName = newNpc.name.toLowerCase().trim();
-            
+
+            // Prevent duplicating the player or companions as an NPC
+            const isPlayer = state.playerCharacter?.name && state.playerCharacter.name.toLowerCase().trim() === normalizedNewName;
+            const isCompanion = state.companions?.some(c => c.name && c.name.toLowerCase().trim() === normalizedNewName);
+            if (isPlayer || isCompanion) {
+                return state;
+            }
+
             // Check for name collision
-            const existingIndex = currentNpcs.findIndex(n => 
+            const existingIndex = currentNpcs.findIndex(n =>
                 n.name && n.name.toLowerCase().trim() === normalizedNewName
             );
-            
+
             if (existingIndex > -1) {
                 // MERGE instead of REPLACE to maintain relationship progress
                 const updatedNpcs = [...currentNpcs];
                 const existing = updatedNpcs[existingIndex];
-                
+
                 // --- LOCATION PERSISTENCE LOGIC ---
                 let finalCurrentPOI = newNpc.currentPOI;
                 if (finalCurrentPOI === 'Unknown' && existing.currentPOI && existing.currentPOI !== 'Unknown') {
                     finalCurrentPOI = existing.currentPOI;
                 }
-                
+
                 let finalLocation = newNpc.location;
                 if ((!finalLocation || finalLocation === 'Unknown') && existing.location && existing.location !== 'Unknown') {
                     finalLocation = existing.location;
@@ -41,8 +48,8 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                 // --- STATUS PERSISTENCE ---
                 let finalStatus = newNpc.status || existing.status || 'Alive';
 
-                updatedNpcs[existingIndex] = { 
-                    ...existing, 
+                updatedNpcs[existingIndex] = {
+                    ...existing,
                     ...newNpc,
                     currentPOI: finalCurrentPOI,
                     location: finalLocation,
@@ -86,18 +93,26 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
 
             npc_resolution.forEach(res => {
                 if (!res.name) return;
-                
+
                 const normalizedName = res.name.toLowerCase().trim();
+
+                // Prevent duplicating the player or companions as an NPC
+                const isPlayer = state.playerCharacter?.name && state.playerCharacter.name.toLowerCase().trim() === normalizedName;
+                const isCompanion = state.companions?.some(c => c.name && c.name.toLowerCase().trim() === normalizedName);
+                if (isPlayer || isCompanion) {
+                    return; // Skip resolution for player/companion entities
+                }
+
                 const index = updatedNpcs.findIndex(n => n.name && n.name.toLowerCase().trim() === normalizedName);
-                
+
                 if (res.action === 'leaves') {
                     // DEPARTURE LOGIC: Clear spatial anchors to remove from active scene
                     if (index > -1) {
-                        updatedNpcs[index] = { 
-                            ...updatedNpcs[index], 
-                            currentPOI: 'Unknown', 
+                        updatedNpcs[index] = {
+                            ...updatedNpcs[index],
+                            currentPOI: 'Unknown',
                             site_id: undefined,
-                            narrative_detail: res.summary 
+                            narrative_detail: res.summary
                         };
                     }
                 } else if (res.action === 'existing' || res.action === 'new') {
