@@ -6,44 +6,44 @@ import { generateSpeech } from '../../services/aiNarratorService';
  * Standardizes the handling of raw PCM data from the Neural TTS model.
  */
 function decode(base64: string) {
-  const binaryString = atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
 }
 
 /**
  * Decodes raw PCM 16-bit data into Float32 format for the Web Audio API.
  */
 async function decodeAudioData(
-  data: Uint8Array,
-  ctx: AudioContext,
-  sampleRate: number,
-  numChannels: number,
+    data: Uint8Array,
+    ctx: AudioContext,
+    sampleRate: number,
+    numChannels: number,
 ): Promise<AudioBuffer> {
-  const dataInt16 = new Int16Array(data.buffer);
-  const frameCount = dataInt16.length / numChannels;
-  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+    const dataInt16 = new Int16Array(data.buffer);
+    const frameCount = dataInt16.length / numChannels;
+    const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
 
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = buffer.getChannelData(channel);
-    for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+    for (let channel = 0; channel < numChannels; channel++) {
+        const channelData = buffer.getChannelData(channel);
+        for (let i = 0; i < frameCount; i++) {
+            channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+        }
     }
-  }
-  return buffer;
+    return buffer;
 }
 
 export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: string) => {
     const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    
+
     const audioContextRef = useRef<AudioContext | null>(null);
     const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-    
+
     // The nextStartTime acts as a cursor to track the end of the audio playback queue.
     const nextStartTimeRef = useRef<number>(0);
 
@@ -54,10 +54,10 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                 source.onended = null;
                 source.stop();
                 source.disconnect();
-            } catch (e) {}
+            } catch (e) { }
         });
         activeSourcesRef.current.clear();
-        
+
         // 2. Reset the timeline cursor
         nextStartTimeRef.current = 0;
 
@@ -65,7 +65,7 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
         if (window.speechSynthesis) {
             window.speechSynthesis.cancel();
         }
-        
+
         // 4. Update UI State
         setPlayingMessageId(null);
         setIsSpeaking(false);
@@ -73,17 +73,17 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
 
     const speak = useCallback(async (text: string, id: string) => {
         if (!text) return;
-        
+
         // Toggle logic: If clicking/triggering the currently playing message, stop it.
         // Important: We use the ref-style check in effects to prevent double-triggering
         if (playingMessageId === id) {
             stopAllSpeech();
             return;
         }
-        
+
         // Ensure clean slate before starting new narration
         stopAllSpeech();
-        
+
         setPlayingMessageId(id);
         setIsSpeaking(true);
 
@@ -92,24 +92,26 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                 if (!audioContextRef.current) {
                     audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
                 }
-                
+
                 const ctx = audioContextRef.current;
                 if (ctx.state === 'suspended') {
                     await ctx.resume();
                 }
 
-                const base64Audio = await generateSpeech(text, voiceName, tone);
-                
+                // Strip basic markdown so the AI doesn't read asterisks aloud
+                const cleanText = text.replace(/[*_#`~\[\]]/g, '').trim();
+                const base64Audio = await generateSpeech(cleanText, voiceName, tone);
+
                 if (base64Audio && ctx) {
                     const audioBytes = decode(base64Audio);
                     const audioBuffer = await decodeAudioData(audioBytes, ctx, 24000, 1);
-                    
+
                     const source = ctx.createBufferSource();
                     source.buffer = audioBuffer;
                     source.connect(ctx.destination);
-                    
+
                     activeSourcesRef.current.add(source);
-                    
+
                     source.onended = () => {
                         activeSourcesRef.current.delete(source);
                         if (activeSourcesRef.current.size === 0) {
@@ -128,9 +130,11 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                 stopAllSpeech();
             }
         } else {
-            const utterance = new SpeechSynthesisUtterance(text);
+            // Strip markdown for local TTS as well
+            const cleanText = text.replace(/[*_#`~\[\]]/g, '').trim();
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             const voices = window.speechSynthesis.getVoices();
-            
+
             if (voiceName.includes('Female')) {
                 const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha'));
                 if (femaleVoice) utterance.voice = femaleVoice;
@@ -138,15 +142,18 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                 const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel'));
                 if (maleVoice) utterance.voice = maleVoice;
             }
-            
+
             utterance.rate = 0.95;
             utterance.pitch = 1.0;
             utterance.onend = () => {
                 setPlayingMessageId(null);
                 setIsSpeaking(false);
             };
-            
-            window.speechSynthesis.speak(utterance);
+
+            // Fix for Chrome Web Speech Bug: cancel() immediately followed by speak() fails silently.
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 50);
         }
     }, [playingMessageId, stopAllSpeech, useAiTts, voiceName, tone]);
 
