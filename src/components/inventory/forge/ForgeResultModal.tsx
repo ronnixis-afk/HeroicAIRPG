@@ -36,7 +36,7 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         <div className="w-12 h-12 text-brand-accent animate-dice">
                             <Icon name="dice" className="w-full h-full drop-shadow-[0_0_8px_rgba(62,207,142,0.4)]" />
                         </div>
-                        <p className="text-body-base text-brand-accent font-black animate-pulse tracking-widest uppercase normal-case">Striking the iron...</p>
+                        <p className="text-body-base text-brand-accent font-black animate-pulse tracking-widest">Striking the iron...</p>
                     </div>
                 ) : forgedItem ? (
                     <div className="w-full space-y-8 animate-fade-in">
@@ -62,7 +62,7 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         ) : null}
 
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface text-center shadow-inner">
-                            <label className="block text-[10px] font-black text-brand-text-muted uppercase normal-case mb-1.5 opacity-60">Estimated market value</label>
+                            <label className="block text-[10px] font-black text-brand-text-muted mb-1.5 opacity-60">Estimated Market Value</label>
                             <div className="text-body-lg font-black text-brand-accent flex items-center justify-center gap-2">
                                 <Icon name="currencyCoins" className="w-5 h-5" />
                                 <span>{forgedItem.price}</span>
@@ -70,22 +70,22 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         </div>
 
                         <div className="space-y-3 pt-4">
-                            <button 
-                                onClick={onConfirm} 
+                            <button
+                                onClick={onConfirm}
                                 className="btn-primary btn-md w-full shadow-brand-accent/20"
                             >
                                 Add to inventory
                             </button>
                             <div className="flex gap-3">
-                                <button 
-                                    onClick={onRetry} 
+                                <button
+                                    onClick={onRetry}
                                     className="btn-secondary btn-md flex-1"
                                 >
                                     <Icon name="refresh" className="w-4 h-4 mr-2" />
                                     <span>Retry</span>
                                 </button>
-                                <button 
-                                    onClick={onClose} 
+                                <button
+                                    onClick={onClose}
                                     className="btn-tertiary btn-md flex-1"
                                 >
                                     Cancel

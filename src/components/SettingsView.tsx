@@ -377,7 +377,7 @@ const SettingsView: React.FC = () => {
                                 )}
                                 <div className="grid grid-cols-3 gap-4 pt-2">
                                     <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1 uppercase-none">Zone name</label>
+                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Zone name</label>
                                         <input
                                             value={gameData.mapSettings?.zoneLabel || 'Region'}
                                             onChange={e => updateMapSettings({ ...gameData.mapSettings!, zoneLabel: e.target.value, style: 'custom' })}
@@ -385,7 +385,7 @@ const SettingsView: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1 uppercase-none">Grid size</label>
+                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Grid size</label>
                                         <input
                                             type="number"
                                             value={gameData.mapSettings?.gridDistance || 24}
@@ -394,7 +394,7 @@ const SettingsView: React.FC = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1 uppercase-none">Unit</label>
+                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Unit</label>
                                         <input
                                             value={gameData.mapSettings?.gridUnit || 'Miles'}
                                             onChange={e => updateMapSettings({ ...gameData.mapSettings!, gridUnit: e.target.value, style: 'custom' })}

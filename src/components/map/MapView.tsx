@@ -59,12 +59,12 @@ const SectorManagerModal: React.FC<{
     const saveEdit = (id: string) => {
         const sector = sectors.find(s => s.id === id);
         if (sector) {
-            onUpdate({ 
-                ...sector, 
-                name: editName, 
-                description: editDesc, 
+            onUpdate({
+                ...sector,
+                name: editName,
+                description: editDesc,
                 color: editColor,
-                keywords: editKeywords 
+                keywords: editKeywords
             });
         }
         setEditingSectorId(null);
@@ -74,24 +74,24 @@ const SectorManagerModal: React.FC<{
         <Modal isOpen={isOpen} onClose={onClose} title="Sector Manager">
             {generationProgress.isActive ? (
                 <div className="p-4">
-                    <CharacterCreationLoader 
-                        title="Constructing World Map" 
-                        step={generationProgress.step} 
-                        progress={generationProgress.progress} 
+                    <CharacterCreationLoader
+                        title="Constructing World Map"
+                        step={generationProgress.step}
+                        progress={generationProgress.progress}
                     />
                 </div>
             ) : (
                 <div className="max-h-[60vh] overflow-y-auto space-y-4 px-1 custom-scroll">
                     <div className="flex flex-col gap-3 justify-center mb-6">
-                        <button 
+                        <button
                             onClick={onGenerateFromLore}
                             className="btn-primary btn-md w-full gap-2 shadow-brand-accent/20"
                         >
                             <Icon name="world" className="w-5 h-5" />
                             Load Map From Lore
                         </button>
-                        
-                        <button 
+
+                        <button
                             onClick={handleGenerate}
                             disabled={isGenerating}
                             className="btn-secondary btn-md w-full gap-2"
@@ -113,33 +113,33 @@ const SectorManagerModal: React.FC<{
                                         <div className="space-y-4">
                                             <div className="space-y-1.5">
                                                 <label className="text-[10px] font-bold text-brand-text-muted ml-1">Name</label>
-                                                <input 
-                                                    value={editName} 
-                                                    onChange={e => setEditName(e.target.value)} 
-                                                    className="w-full bg-brand-surface border border-brand-primary h-11 rounded-xl px-4 text-sm font-bold focus:outline-none focus:border-brand-accent" 
+                                                <input
+                                                    value={editName}
+                                                    onChange={e => setEditName(e.target.value)}
+                                                    className="w-full bg-brand-surface border border-brand-primary h-11 rounded-xl px-4 text-sm font-bold focus:outline-none focus:border-brand-accent"
                                                     placeholder="Sector Name"
                                                 />
                                             </div>
                                             <div className="space-y-1.5">
                                                 <label className="text-[10px] font-bold text-brand-text-muted ml-1">Description</label>
-                                                <textarea 
-                                                    value={editDesc} 
-                                                    onChange={e => setEditDesc(e.target.value)} 
-                                                    className="w-full bg-brand-surface border border-brand-primary rounded-xl px-4 py-3 text-xs h-24 resize-none focus:outline-none focus:border-brand-accent leading-relaxed" 
+                                                <textarea
+                                                    value={editDesc}
+                                                    onChange={e => setEditDesc(e.target.value)}
+                                                    className="w-full bg-brand-surface border border-brand-primary rounded-xl px-4 py-3 text-xs h-24 resize-none focus:outline-none focus:border-brand-accent leading-relaxed"
                                                     placeholder="Description"
                                                 />
                                             </div>
-                                            <KeywordEditor 
-                                                keywords={editKeywords} 
-                                                onKeywordsChange={setEditKeywords} 
+                                            <KeywordEditor
+                                                keywords={editKeywords}
+                                                onKeywordsChange={setEditKeywords}
                                             />
                                             <div className="space-y-1.5">
                                                 <label className="text-[10px] font-bold text-brand-text-muted ml-1">Color</label>
                                                 <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                                                     {SECTOR_COLORS.map(c => (
-                                                        <button 
-                                                            key={c} 
-                                                            onClick={() => setEditColor(c)} 
+                                                        <button
+                                                            key={c}
+                                                            onClick={() => setEditColor(c)}
                                                             className={`w-8 h-8 rounded-full border-2 flex-shrink-0 transition-all ${editColor === c ? 'border-white scale-110 shadow-lg' : 'border-transparent hover:scale-105'}`}
                                                             style={{ backgroundColor: c }}
                                                         />
@@ -190,14 +190,14 @@ const MapView: React.FC = () => {
     const { gameData, generateAndAddSector, deleteSector, updateSector, generateMapFromLore } = useContext(GameDataContext);
     const { mapGenerationProgress } = useUI();
     const containerRef = useRef<HTMLDivElement>(null);
-    
+
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    
+
     const pinchRef = useRef({ startDist: 0, startScale: 1 });
-    
+
     const [selectedCoords, setSelectedCoords] = useState<string | null>(null);
     const [isSectorManagerOpen, setIsSectorManagerOpen] = useState(false);
 
@@ -258,9 +258,9 @@ const MapView: React.FC = () => {
             pinchRef.current = { startDist: dist, startScale: scale };
         } else if (e.touches.length === 1) {
             setIsDragging(true);
-            setDragStart({ 
-                x: e.touches[0].clientX - position.x, 
-                y: e.touches[0].clientY - position.y 
+            setDragStart({
+                x: e.touches[0].clientX - position.x,
+                y: e.touches[0].clientY - position.y
             });
         }
     };
@@ -331,7 +331,7 @@ const MapView: React.FC = () => {
                 let content = null;
 
                 if (sector && isVisited) {
-                    cellStyle = { ...cellStyle, backgroundColor: `${sector.color}20` }; 
+                    cellStyle = { ...cellStyle, backgroundColor: `${sector.color}20` };
                 }
 
                 if (zone && isVisited) {
@@ -357,7 +357,7 @@ const MapView: React.FC = () => {
                 }
 
                 cells.push(
-                    <div 
+                    <div
                         key={coordStr}
                         onClick={() => handleGridClick(x, y)}
                         className={`absolute flex flex-col items-center justify-center cursor-pointer transition-all duration-200 border ${borderClass}`}
@@ -376,16 +376,16 @@ const MapView: React.FC = () => {
                         {(isVisited || isSelected || isPlayerHere || sector) && (
                             <span className="absolute top-0.5 left-1 text-[6px] font-mono text-brand-text-muted opacity-40 pointer-events-none select-none tracking-normal">{coordStr}</span>
                         )}
-                        
+
                         {zone && isVisited && (
-                            <div 
+                            <div
                                 className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full z-20 ${getHostilityDotClass(zone.hostility || 0)}`}
                                 title={`Hostility: ${zone.hostility}`}
                             />
                         )}
-                        
+
                         {content}
-                        
+
                         {isPlayerHere && (
                             <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
                                 <div className={`w-4 h-4 rounded-full shadow-lg animate-pulse ring-2 ring-white flex items-center justify-center ${isCombatActive ? 'bg-red-600 shadow-red-500/50' : 'bg-brand-accent shadow-[0_0_10px_#3ecf8e]'}`}>
@@ -403,7 +403,7 @@ const MapView: React.FC = () => {
     return (
         <div className="relative h-full w-full overflow-hidden bg-brand-bg select-none">
             <div className="absolute top-4 right-4 z-30 flex flex-col gap-3">
-                <button 
+                <button
                     onClick={() => setIsSectorManagerOpen(true)}
                     className="btn-icon bg-brand-surface/90 backdrop-blur-md border border-brand-primary p-3 rounded-full shadow-lg text-brand-text hover:text-brand-accent"
                     title="Manage Sectors"
@@ -421,9 +421,9 @@ const MapView: React.FC = () => {
                     </button>
                 </div>
 
-                <button 
-                    onClick={centerOnPlayer} 
-                    className="btn-icon bg-brand-surface/90 backdrop-blur-md border border-brand-primary p-3 rounded-full shadow-lg text-brand-text hover:text-brand-accent" 
+                <button
+                    onClick={centerOnPlayer}
+                    className="btn-icon bg-brand-surface/90 backdrop-blur-md border border-brand-primary p-3 rounded-full shadow-lg text-brand-text hover:text-brand-accent"
                     title="Center on Player"
                 >
                     <Icon name="location" className="w-6 h-6" />
@@ -434,13 +434,13 @@ const MapView: React.FC = () => {
                 <div className="flex flex-col">
                     <span className="text-xs font-mono text-brand-accent font-bold mb-1.5 tracking-normal">{selectedCoords || playerCoordinates}</span>
                     <div className="flex items-center gap-2 text-[10px] text-brand-text-muted border-t border-brand-primary/30 pt-1.5 mt-0.5">
-                        <div className="w-10 h-3 border border-brand-text-muted/30 flex items-center justify-center text-[7px] font-black uppercase tracking-tight">1 Cell</div>
+                        <div className="w-10 h-3 border border-brand-text-muted/30 flex items-center justify-center text-[7px] font-black tracking-tight">1 Cell</div>
                         <span className="font-bold">≈ {mapSettings.gridDistance} {mapSettings.gridUnit}</span>
                     </div>
                 </div>
             </div>
 
-            <div 
+            <div
                 ref={containerRef}
                 className="w-full h-full cursor-grab active:cursor-grabbing touch-none"
                 onMouseDown={handleMouseDown}
@@ -452,8 +452,8 @@ const MapView: React.FC = () => {
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
             >
-                <div 
-                    style={{ 
+                <div
+                    style={{
                         transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                         transformOrigin: '0 0',
                         position: 'absolute'
@@ -464,7 +464,7 @@ const MapView: React.FC = () => {
             </div>
 
             {selectedCoords && (
-                <ZoneDetailsPanel 
+                <ZoneDetailsPanel
                     isOpen={!!selectedCoords}
                     onClose={() => setSelectedCoords(null)}
                     coordinates={selectedCoords}
@@ -481,7 +481,7 @@ const MapView: React.FC = () => {
                 onGenerateFromLore={generateMapFromLore}
                 generationProgress={mapGenerationProgress}
             />
-            
+
             <style>{`
                 @keyframes bounce-in {
                     0% { transform: scale(0.8); opacity: 0; }

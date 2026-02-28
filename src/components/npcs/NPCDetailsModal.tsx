@@ -51,8 +51,8 @@ const PillSelect: React.FC<{
     label?: string;
 }> = ({ value, onChange, options, colorClass, label }) => (
     <div className={`relative inline-flex items-center border rounded-full px-4 py-1.5 ${colorClass} transition-all hover:bg-opacity-20`}>
-        <select 
-            value={value || ''} 
+        <select
+            value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             className="appearance-none bg-transparent border-none text-xs font-bold focus:outline-none cursor-pointer pr-5 w-full tracking-normal"
         >
@@ -75,12 +75,12 @@ const NPCViewContent: React.FC<{
     isRefining: boolean;
 }> = ({ npc, onEdit, onManualRefine, onInvite, isRefining }) => {
     const relInfo = getRelationshipLabel(npc.relationship);
-    
+
     const DataRow = ({ label, value, icon }: { label: string, value?: string, icon?: string }) => {
         if (!value) return null;
         return (
             <div className="space-y-1.5">
-                <label className="text-xs font-bold text-brand-text-muted opacity-60 flex items-center gap-2 tracking-normal uppercase">
+                <label className="text-xs font-bold text-brand-text-muted opacity-60 flex items-center gap-2 tracking-normal">
                     {icon && <Icon name={icon} className="w-3.5 h-3.5" />}
                     {label}
                 </label>
@@ -93,7 +93,7 @@ const NPCViewContent: React.FC<{
         if (!value) return null;
         return (
             <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] font-bold text-brand-text-muted opacity-50 tracking-normal uppercase">{label}</span>
+                <span className="text-[10px] font-bold text-brand-text-muted opacity-50 tracking-normal">{label}</span>
                 <span className="text-body-sm font-bold text-brand-text">{value}</span>
             </div>
         );
@@ -126,7 +126,7 @@ const NPCViewContent: React.FC<{
                             </span>
                         )}
                     </div>
-                    <button 
+                    <button
                         onClick={onEdit}
                         className="btn-icon bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary"
                         aria-label="Edit Profile"
@@ -137,7 +137,7 @@ const NPCViewContent: React.FC<{
 
                 <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
                     <div className="flex justify-between items-center mb-3">
-                        <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal uppercase">Current Standing</label>
+                        <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">Current Standing</label>
                         <span className={`text-xs font-bold tracking-normal ${relInfo.color.replace('bg-', 'text-')}`}>
                             {relInfo.label} ({npc.relationship > 0 ? '+' : ''}{npc.relationship})
                         </span>
@@ -153,7 +153,7 @@ const NPCViewContent: React.FC<{
 
             {(npc.location || npc.currentPOI) && (
                 <div className="p-5 rounded-2xl border border-dashed border-brand-primary/40 bg-brand-primary/5">
-                    <h5 className="text-xs font-bold text-brand-text-muted opacity-60 mb-3 tracking-normal uppercase">Last Sighted</h5>
+                    <h5 className="text-xs font-bold text-brand-text-muted opacity-60 mb-3 tracking-normal">Last Sighted</h5>
                     <div className="flex items-start gap-4">
                         <Icon name="location" className="w-6 h-6 text-brand-accent shrink-0" />
                         <div className="text-body-base font-bold leading-tight pt-0.5">
@@ -174,7 +174,7 @@ const NPCViewContent: React.FC<{
 
             <div className="space-y-4">
                 <div className="flex justify-between items-center px-1">
-                    <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal uppercase">Chronicle of Interactions</label>
+                    <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">Chronicle of Interactions</label>
                     <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">Digital Memory Active</span>
                 </div>
                 <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
@@ -199,7 +199,7 @@ const NPCViewContent: React.FC<{
 
             {!npc.companionId && (npc.template || npc.affinity || npc.archetype) && (
                 <div className="space-y-3 pt-2">
-                    <label className="text-xs font-bold text-brand-text-muted opacity-60 px-1 tracking-normal uppercase">Combat Classification</label>
+                    <label className="text-xs font-bold text-brand-text-muted opacity-60 px-1 tracking-normal">Combat Classification</label>
                     <div className="flex flex-wrap gap-2">
                         {npc.difficulty && <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1.5 rounded-full border border-brand-danger/20 tracking-normal">{npc.difficulty} Threat</span>}
                         {npc.template && <span className="text-xs font-bold text-purple-400 bg-purple-900/10 px-3 py-1.5 rounded-full border border-purple-500/20 tracking-normal">{npc.template}</span>}
@@ -211,7 +211,7 @@ const NPCViewContent: React.FC<{
 
             {!npc.companionId && npc.status === 'Alive' && (
                 <div className="pt-8 border-t border-brand-primary/20 flex flex-col gap-6">
-                    <button 
+                    <button
                         onClick={onInvite}
                         disabled={isRefining}
                         className="btn-primary btn-lg rounded-2xl w-full shadow-brand-accent/20"
@@ -219,12 +219,12 @@ const NPCViewContent: React.FC<{
                         <Icon name="character" className="w-5 h-5 mr-3" />
                         Invite to Party
                     </button>
-                    
+
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-body-sm text-brand-text-muted italic text-center px-4">
                             Incomplete profile? Use the weaver to fill in details based on your current story context.
                         </p>
-                        <button 
+                        <button
                             onClick={onManualRefine}
                             disabled={isRefining}
                             className="btn-secondary btn-md rounded-xl w-full max-w-xs text-xs"
@@ -252,7 +252,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
         if (isOpen) {
             setEditedNPC(npc);
             setIsDirty(false);
-            setIsEditing(false); 
+            setIsEditing(false);
         }
     }, [npc, isOpen]);
 
@@ -291,7 +291,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
         const params = getDifficultyParams(tag as DifficultyPreset, playerLevel);
         setEditedNPC(prev => ({
             ...prev,
-            difficulty: tag, 
+            difficulty: tag,
             cr: tag,
             rank: params.rank,
             challengeRating: params.cr
@@ -355,9 +355,9 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
             {isRefining ? (
                 <RefinementShimmer />
             ) : !isEditing ? (
-                <NPCViewContent 
-                    npc={editedNPC} 
-                    onEdit={() => setIsEditing(true)} 
+                <NPCViewContent
+                    npc={editedNPC}
+                    onEdit={() => setIsEditing(true)}
                     onManualRefine={handleManualRefine}
                     onInvite={handleInvite}
                     isRefining={isRefining}
@@ -366,12 +366,12 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                 <div className="space-y-8 pb-4 animate-page">
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
                         <div className="flex justify-between items-center mb-4">
-                            <label className="text-xs font-bold text-brand-text-muted tracking-normal uppercase">Relationship Adjustment</label>
+                            <label className="text-xs font-bold text-brand-text-muted tracking-normal">Relationship Adjustment</label>
                             <span className="text-body-sm font-black text-brand-accent tabular-nums">
                                 {editedNPC.relationship > 0 ? '+' : ''}{editedNPC.relationship}
                             </span>
                         </div>
-                        <input 
+                        <input
                             type="range" min="-50" max="50" step="1"
                             value={editedNPC.relationship}
                             onChange={(e) => handleChange('relationship', parseInt(e.target.value))}
@@ -385,9 +385,9 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                                 <span className="text-body-base font-bold text-brand-text">Essential Status</span>
                                 <span className="text-[10px] text-brand-text-muted italic">Essential NPCs are prioritized in the social ledger.</span>
                             </div>
-                            <input 
-                                type="checkbox" 
-                                checked={editedNPC.is_essential || false} 
+                            <input
+                                type="checkbox"
+                                checked={editedNPC.is_essential || false}
                                 onChange={(e) => handleChange('is_essential', e.target.checked)}
                                 className="custom-checkbox w-5 h-5"
                             />
@@ -435,9 +435,9 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                         <StyledInputGroup label="History and Background">
                             <AutoResizingTextarea value={editedNPC.description || ''} onChange={(e) => handleChange('description', e.target.value)} className={`${textareaClass} min-h-[100px]`} />
                         </StyledInputGroup>
-                        
+
                         <div className="bg-brand-primary/5 p-5 rounded-2xl border border-brand-primary/20 space-y-5">
-                            <h5 className="text-xs font-black text-brand-text-muted uppercase tracking-widest mb-2 opacity-60">Personal Disposition</h5>
+                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">Personal Disposition</h5>
                             <div className="grid grid-cols-2 gap-4">
                                 <StyledInputGroup label="Loves"><input type="text" value={editedNPC.loves || ''} onChange={(e) => handleChange('loves', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
                                 <StyledInputGroup label="Likes"><input type="text" value={editedNPC.likes || ''} onChange={(e) => handleChange('likes', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
@@ -448,7 +448,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     </div>
 
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                        <h5 className="text-xs font-black text-brand-text-muted uppercase tracking-widest mb-4 opacity-60">Spatial Registry</h5>
+                        <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">Spatial Registry</h5>
                         <div className="grid grid-cols-2 gap-4">
                             <StyledInputGroup label="Last Visited Zone">
                                 <div className="relative">
@@ -482,7 +482,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
 
                     {!editedNPC.companionId && (
                         <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                            <h5 className="text-xs font-black text-brand-text-muted uppercase tracking-widest mb-4 opacity-60">Mechanical Blueprints</h5>
+                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">Mechanical Blueprints</h5>
                             <div className="flex flex-wrap gap-3">
                                 <PillSelect label="Difficulty" value={currentDifficultyTag} onChange={handleDifficultyPresetChange} options={difficultyPresets} colorClass="bg-brand-danger/10 text-brand-danger border-brand-danger/20" />
                                 <PillSelect label="Size" value={editedNPC.size || 'Medium'} onChange={(val) => handleChange('size', val)} options={sizes} colorClass="bg-blue-400/10 text-blue-400 border-blue-400/20" />
@@ -494,22 +494,22 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     )}
 
                     <div className="flex justify-between items-center pt-10 border-t border-brand-primary/20 gap-4">
-                        <button 
-                            onClick={handleDelete} 
+                        <button
+                            onClick={handleDelete}
                             className="btn-icon-delete px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2"
                         >
                             <Icon name="trash" className="w-4 h-4" /> Purge
                         </button>
                         <div className="flex gap-3 flex-1">
-                            <button 
-                                onClick={() => setIsEditing(false)} 
+                            <button
+                                onClick={() => setIsEditing(false)}
                                 className="btn-tertiary btn-md flex-1 rounded-xl"
                             >
                                 Cancel
                             </button>
-                            <button 
-                                onClick={handleSave} 
-                                disabled={!isDirty} 
+                            <button
+                                onClick={handleSave}
+                                disabled={!isDirty}
                                 className="btn-primary btn-md flex-1 rounded-xl shadow-brand-accent/20"
                             >
                                 Commit Changes

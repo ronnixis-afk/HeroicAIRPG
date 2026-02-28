@@ -46,8 +46,8 @@ const StoryEditableContent: React.FC<{ log: StoryLog; onFinish: () => void }> = 
                 autoFocus
             />
             <div className="flex justify-end gap-3">
-                <button 
-                    onClick={onFinish} 
+                <button
+                    onClick={onFinish}
                     className="btn-tertiary btn-sm"
                 >
                     Cancel
@@ -74,7 +74,7 @@ const StoryView: React.FC = () => {
     const getLogDateGroup = (timestamp: string) => {
         const date = new Date(timestamp);
         if (!isNaN(date.getTime())) {
-             return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         }
         const lastCommaIndex = timestamp.lastIndexOf(',');
         return lastCommaIndex !== -1 ? timestamp.substring(0, lastCommaIndex).trim() : timestamp;
@@ -83,7 +83,7 @@ const StoryView: React.FC = () => {
     const getTimeOnly = (timestamp: string) => {
         const date = new Date(timestamp);
         if (!isNaN(date.getTime())) {
-             return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         }
         const parts = timestamp.split(',');
         return parts.length > 1 ? parts[parts.length - 1].trim() : timestamp;
@@ -108,7 +108,7 @@ const StoryView: React.FC = () => {
             return acc;
         }, {} as Record<string, StoryLog[]>);
     }, [gameData?.story]);
-    
+
     const sortedDays = useMemo(() => Object.keys(groupedLogs).sort((a, b) => {
         const dateA = new Date(a).getTime();
         const dateB = new Date(b).getTime();
@@ -116,7 +116,7 @@ const StoryView: React.FC = () => {
         if (isNaN(dateB)) return -1;
         return dateB - dateA;
     }), [groupedLogs]);
-    
+
     const canSummarizePast = useMemo(() => {
         if (!gameData?.story) return false;
         const calendarDays = new Set<string>();
@@ -135,7 +135,7 @@ const StoryView: React.FC = () => {
                 setOpenDayIds(prev => ({ ...prev, [newestDay]: true }));
             }
         }
-    }, [sortedDays]); 
+    }, [sortedDays]);
 
     const handleDayToggle = (day: string) => {
         const isOpening = !openDayIds[day];
@@ -159,7 +159,7 @@ const StoryView: React.FC = () => {
             }
         }
     };
-    
+
     const handleSummarizePast = async () => {
         if (window.confirm("Are you sure you want to summarize all past logs?")) {
             setIsSummarizingPast(true);
@@ -189,12 +189,12 @@ const StoryView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">Adventure Log</h1>
+                <h1 className="text-brand-text mb-2">The Chronicle</h1>
                 <p className="text-body-sm text-brand-text-muted font-medium italic">
                     The evolving chronicle of your journey through the realms.
                 </p>
             </div>
-            
+
             {sortedDays.length > 0 ? (
                 <div className="space-y-6">
                     {sortedDays.map((day, index) => {
@@ -204,7 +204,7 @@ const StoryView: React.FC = () => {
                         const previousDayIndex = index + 1;
                         const previousDayKey = sortedDays[previousDayIndex];
                         const previousDayLogs = previousDayKey ? groupedLogs[previousDayKey] : [];
-                        
+
                         return (
                             <Accordion
                                 key={day}
@@ -223,7 +223,7 @@ const StoryView: React.FC = () => {
                                             <div key={log.id} className="relative group">
                                                 {/* Visual indicator dot */}
                                                 <div className={`absolute -left-[31px] top-1.5 h-3.5 w-3.5 rounded-full bg-brand-bg border-2 z-10 transition-all duration-500 ${log.isNew ? 'border-brand-accent shadow-[0_0_12px_rgba(62,207,142,0.6)] scale-110' : 'border-brand-primary group-hover:border-brand-text-muted/40'}`} />
-                                                
+
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-center gap-3 flex-wrap">
                                                         <span className="text-body-sm font-black text-brand-accent">{getTimeOnly(log.timestamp)}</span>
@@ -234,16 +234,16 @@ const StoryView: React.FC = () => {
                                                         {log.isNew && <NewTag />}
                                                     </div>
                                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button 
-                                                            onClick={() => handleLogClick(log)} 
-                                                            className="btn-icon p-1 text-brand-text-muted hover:text-brand-accent" 
+                                                        <button
+                                                            onClick={() => handleLogClick(log)}
+                                                            className="btn-icon p-1 text-brand-text-muted hover:text-brand-accent"
                                                             title="Edit entry"
                                                         >
                                                             <Icon name="edit" className="w-4 h-4" />
                                                         </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteLog(log.id)} 
-                                                            className="btn-icon p-1 text-brand-text-muted hover:text-brand-danger" 
+                                                        <button
+                                                            onClick={() => handleDeleteLog(log.id)}
+                                                            className="btn-icon p-1 text-brand-text-muted hover:text-brand-danger"
                                                             title="Delete entry"
                                                         >
                                                             <Icon name="trash" className="w-4 h-4" />
@@ -254,7 +254,7 @@ const StoryView: React.FC = () => {
                                                 {editingLogId === log.id ? (
                                                     <StoryEditableContent log={log} onFinish={() => setEditingLogId(null)} />
                                                 ) : (
-                                                    <div 
+                                                    <div
                                                         className={`text-body-sm leading-relaxed whitespace-pre-wrap cursor-pointer transition-colors ${log.isNew ? 'text-brand-text font-medium' : 'text-brand-text-muted hover:text-brand-text'}`}
                                                         onClick={() => handleLogClick(log)}
                                                     >
@@ -273,7 +273,7 @@ const StoryView: React.FC = () => {
                                                 className="btn-tertiary btn-sm gap-2"
                                             >
                                                 {summarizingDay === day ? <Icon name="spinner" className="w-3.5 h-3.5 animate-spin" /> : <Icon name="code" className="w-3.5 h-3.5" />}
-                                                Compress day
+                                                Seal Chapter
                                             </button>
                                         </div>
                                     )}
@@ -298,7 +298,7 @@ const StoryView: React.FC = () => {
                         className="btn-tertiary btn-sm gap-2 opacity-60 hover:opacity-100"
                     >
                         {isSummarizingPast ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="boxDrawer" className="w-4 h-4" />}
-                        Archive older logs
+                        Archive Ancient Lore
                     </button>
                 </div>
             )}

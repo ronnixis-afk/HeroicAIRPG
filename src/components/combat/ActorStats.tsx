@@ -29,25 +29,25 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
     return (
         <div className="space-y-4 animate-fade-in">
             <Accordion title="Status Effects" isOpen={true}>
-               <div className="pt-2">
-                   <StatusEffectsEditor statusEffects={actor.statusEffects || []} onStatusEffectsChange={(newEffects) => onChange(['statusEffects'], newEffects)} />
-               </div>
+                <div className="pt-2">
+                    <StatusEffectsEditor statusEffects={actor.statusEffects || []} onStatusEffectsChange={(newEffects) => onChange(['statusEffects'], newEffects)} />
+                </div>
             </Accordion>
-            
+
             <Accordion title="Ability Scores & Saves" isOpen={openScores} onToggle={() => setOpenScores(!openScores)}>
                 <div className="grid grid-cols-3 gap-3 pt-2">
                     {ABILITY_SCORES.map(score => (
                         <div key={score} className="flex flex-col items-center bg-brand-primary/20 p-3 rounded-xl border border-brand-surface shadow-inner">
                             <label className="text-[10px] font-black text-brand-text-muted capitalize tracking-normal mb-1.5">{score.slice(0, 3)}</label>
-                            <input 
+                            <input
                                 type="number"
                                 value={actor.abilityScores?.[score]?.score || 10}
                                 onChange={e => onChange(['abilityScores', score, 'score'], parseInt(e.target.value) || 10)}
                                 className="w-full bg-brand-primary text-center h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-sm font-black mb-3 shadow-inner"
                             />
                             <div className="flex items-center gap-2 w-full justify-center">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={actor.savingThrows?.[score]?.proficient || false}
                                     onChange={e => onChange(['savingThrows', score, 'proficient'], e.target.checked)}
                                     className="custom-checkbox w-3 h-3"
@@ -71,7 +71,7 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-black text-brand-text-muted opacity-40 uppercase tracking-tight">Floor</span>
+                                    <span className="text-[9px] font-black text-brand-text-muted opacity-40 tracking-tight">Floor</span>
                                     <span className={`text-body-base font-black tabular-nums ${skill.proficient ? 'text-brand-accent' : 'text-brand-text-muted'}`}>
                                         {skill.passiveScore}
                                     </span>
@@ -84,23 +84,23 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
             </Accordion>
 
             <div className="mt-8 pt-6 border-t border-brand-primary/20 space-y-8">
-                <TagEditor 
+                <TagEditor
                     label="Damage Resistances"
-                    tags={actor.resistances || []} 
-                    onTagsChange={(newTags) => onChange(['resistances'], newTags)} 
-                    options={DAMAGE_TYPES} 
+                    tags={actor.resistances || []}
+                    onTagsChange={(newTags) => onChange(['resistances'], newTags)}
+                    options={DAMAGE_TYPES}
                 />
-                <TagEditor 
+                <TagEditor
                     label="Damage Immunities"
-                    tags={actor.immunities || []} 
-                    onTagsChange={(newTags) => onChange(['immunities'], newTags)} 
-                    options={DAMAGE_TYPES} 
+                    tags={actor.immunities || []}
+                    onTagsChange={(newTags) => onChange(['immunities'], newTags)}
+                    options={DAMAGE_TYPES}
                 />
-                <TagEditor 
+                <TagEditor
                     label="Damage Vulnerabilities"
-                    tags={actor.vulnerabilities || []} 
-                    onTagsChange={(newTags) => onChange(['vulnerabilities'], newTags)} 
-                    options={DAMAGE_TYPES} 
+                    tags={actor.vulnerabilities || []}
+                    onTagsChange={(newTags) => onChange(['vulnerabilities'], newTags)}
+                    options={DAMAGE_TYPES}
                 />
             </div>
         </div>

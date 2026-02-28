@@ -409,7 +409,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4 animate-page">
             <div className="w-full max-w-2xl mx-auto">
                 <h1 className="text-center mb-2">Heroic AI <span className="text-brand-accent">RPG</span></h1>
-                <p className="text-body-sm text-brand-text-muted mb-8 text-center font-medium opacity-60">Powered by Gemini 3. Select a world or create a new one.</p>
+                <p className="text-body-sm text-brand-text-muted mb-8 text-center font-medium opacity-60">Powered by Gemini 3. Choose your realm or forge a new destiny.</p>
 
                 {/* User Info Panel */}
                 <div className="bg-brand-surface p-4 rounded-2xl border border-brand-primary/50 mb-10 flex items-center justify-between">
@@ -431,7 +431,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <div key={world.id} className="bg-brand-surface p-5 rounded-2xl flex items-center justify-between shadow-xl border border-brand-primary/50 hover:border-brand-accent/20 transition-all group">
                             <span className="text-body-lg font-bold text-brand-text group-hover:text-brand-accent transition-colors">{world.name}</span>
                             <div className="flex items-center gap-3">
-                                <button onClick={() => onWorldSelected(world.id)} className="btn-primary btn-md w-32 shadow-sm">Play</button>
+                                <button onClick={() => onWorldSelected(world.id)} className="btn-primary btn-md w-32 shadow-sm">Enter Realm</button>
                                 <button onClick={() => handleDeleteWorld(world.id)} className="btn-icon-delete">
                                     <Icon name="trash" className="w-5 h-5" />
                                 </button>
@@ -446,20 +446,20 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         className="btn-primary btn-lg shadow-xl shadow-brand-accent/10"
                     >
                         <Icon name="plus" className="w-5 h-5 mr-3" />
-                        Create New World
+                        Forge New Realm
                     </button>
                 </div>
 
                 {/* Cloud Load Section */}
                 <div className="mt-10 pt-8 border-t border-brand-primary/20">
                     <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-body-sm font-bold text-brand-text-muted">Cloud Saves</h4>
+                        <h4 className="text-body-sm font-bold text-brand-text-muted">Cloud Archives</h4>
                         <button
                             onClick={handleFetchCloudSaves}
                             disabled={isLoadingCloud}
                             className="btn-secondary btn-sm"
                         >
-                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Load Cloud Saves'}
+                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Restore Archives'}
                         </button>
                     </div>
 
@@ -488,8 +488,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
                 <div className="mt-6 pt-6 border-t border-brand-primary/20 text-center">
                     <div className="flex justify-center gap-8">
-                        <button onClick={handleImportClick} className="btn-tertiary text-xs">Import Save</button>
-                        <button onClick={handleExportAll} className="btn-tertiary text-xs">Export All</button>
+                        <button onClick={handleImportClick} className="btn-tertiary text-xs">Import Tome</button>
+                        <button onClick={handleExportAll} className="btn-tertiary text-xs">Export Tomes</button>
                     </div>
                     <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept=".json" />
                     {importMessage && <p className={`mt-3 text-body-sm font-bold ${importMessage.type === 'success' ? 'text-brand-accent' : 'text-brand-danger'}`}>{importMessage.text}</p>}
@@ -550,7 +550,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 onClick={handleDeepGeneration}
                                 className="btn-primary btn-md flex-1 shadow-lg shadow-brand-accent/20"
                             >
-                                Initialize World
+                                Breathe Life into Realm
                             </button>
                         </div>
                     </div>
@@ -659,7 +659,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             disabled={!worldName.trim() || isGenerating}
                             className="btn-primary btn-lg w-full mt-4 shadow-xl shadow-brand-accent/20"
                         >
-                            {isGenerating ? <span className="flex items-center justify-center gap-2"><Icon name="spinner" className="w-5 h-5 animate-spin" /> Generating...</span> : 'Generate Preview'}
+                            {isGenerating ? <span className="flex items-center justify-center gap-2"><Icon name="spinner" className="w-5 h-5 animate-spin" /> Generating...</span> : 'Scout The Realm'}
                         </button>
                     </div>
                 )}

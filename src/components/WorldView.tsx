@@ -41,7 +41,7 @@ const EditableLoreContent: React.FC<{
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
     };
-    
+
     const handleDelete = () => {
         if (window.confirm(`Are you sure you want to delete the entry titled "${entry.title}"? This cannot be undone.`)) {
             onDelete(entry.id);
@@ -50,17 +50,17 @@ const EditableLoreContent: React.FC<{
 
     return (
         <div className="bg-brand-primary/10 p-5 rounded-2xl space-y-6 border border-brand-surface shadow-inner mt-4 animate-page">
-            <TagEditor 
-                tags={tags} 
-                onTagsChange={setTags} 
-                options={LORE_TAGS} 
+            <TagEditor
+                tags={tags}
+                onTagsChange={setTags}
+                options={LORE_TAGS}
             />
-            
+
             <KeywordEditor
                 keywords={keywords}
                 onKeywordsChange={setKeywords}
             />
-            
+
             <div className="space-y-1.5">
                 <label className="block text-body-sm font-bold text-brand-text-muted ml-1">Lore content</label>
                 <textarea
@@ -72,7 +72,7 @@ const EditableLoreContent: React.FC<{
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-brand-primary/20">
-                 <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                     {isDirty && !isSaving && !saveSuccess && (
                         <button
                             onClick={handleSave}
@@ -90,11 +90,11 @@ const EditableLoreContent: React.FC<{
                         </div>
                     )}
                 </div>
-                 <button 
+                <button
                     onClick={handleDelete}
                     className="text-brand-danger hover:opacity-80 text-body-sm font-bold flex items-center gap-1.5 px-3 py-1.5 transition-all"
                     aria-label={`Delete ${entry.title}`}
-                 >
+                >
                     <Icon name="trash" className="w-4 h-4" />
                     Delete
                 </button>
@@ -188,7 +188,7 @@ const WorldView: React.FC = () => {
                     const categoryId = `cat-${category}`;
                     const hasNew = categoryEntries.some(e => e.isNew);
                     const displayCategory = category.charAt(0).toUpperCase() + category.slice(1);
-                    
+
                     const categoryTitle = (
                         <div className="flex items-center gap-2">
                             <span className="text-brand-text tracking-tight font-black">{displayCategory}</span>
@@ -226,10 +226,10 @@ const WorldView: React.FC = () => {
                                             isOpen={!!openAccordionIds[entry.id]}
                                             onToggle={handleToggle}
                                         >
-                                            <EditableLoreContent 
-                                                entry={entry} 
-                                                onSave={updateWorldLore} 
-                                                onDelete={deleteWorldLore} 
+                                            <EditableLoreContent
+                                                entry={entry}
+                                                onSave={updateWorldLore}
+                                                onDelete={deleteWorldLore}
                                             />
                                         </Accordion>
                                     );
@@ -245,21 +245,21 @@ const WorldView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">World Lore</h1>
+                <h1 className="text-brand-text mb-2">Realm Codex</h1>
                 <p className="text-body-base text-brand-text-muted font-medium italic">
                     The history, myths, and facts that define this realm.
                 </p>
             </div>
-            
+
             <div className="bg-brand-surface rounded-3xl border border-brand-primary/30 p-6 mb-12 shadow-xl animate-page overflow-hidden group">
                 <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-brand-accent/10 flex items-center justify-center border border-brand-accent/20">
                             <Icon name="world" className="w-5 h-5 text-brand-accent" />
                         </div>
-                        <h3 className="text-brand-text mb-0">World Overview</h3>
+                        <h3 className="text-brand-text mb-0">Realm Overview</h3>
                     </div>
-                    <button 
+                    <button
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
                         className="btn-icon-refresh shadow-sm"
@@ -268,7 +268,7 @@ const WorldView: React.FC = () => {
                         {isGeneratingSummary ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : <Icon name="refresh" className="w-5 h-5" />}
                     </button>
                 </div>
-                
+
                 {gameData.worldSummary ? (
                     <div className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap pl-4 border-l-2 border-brand-accent/30 italic opacity-90">
                         {gameData.worldSummary}
@@ -279,11 +279,11 @@ const WorldView: React.FC = () => {
                             {isGeneratingSummary ? 'The architect is analyzing world data...' : 'No overview has been woven for this world yet.'}
                         </p>
                         {!isGeneratingSummary && (
-                            <button 
+                            <button
                                 onClick={handleGenerateSummary}
                                 className="text-brand-accent font-bold text-[10px] mt-2 hover:underline"
                             >
-                                Request overview
+                                Consult the Architect
                             </button>
                         )}
                     </div>
@@ -296,12 +296,12 @@ const WorldView: React.FC = () => {
 
             <div className="mt-16 pt-10 border-t border-brand-primary/20">
                 <div className="text-center mb-8">
-                    <h2 className="text-brand-text mb-2">Expand the World</h2>
+                    <h2 className="text-brand-text mb-2">Unveil Secrets</h2>
                     <p className="text-body-base text-brand-text-muted italic max-w-sm mx-auto">
                         Ask the architect to describe specific aspects of the realm or hidden histories.
                     </p>
                 </div>
-                
+
                 <div className="bg-brand-surface p-6 rounded-3xl border border-brand-primary/30 shadow-2xl space-y-6">
                     <div className="space-y-1.5">
                         <label className="block text-body-sm font-bold text-brand-text-muted ml-1">The request</label>
@@ -312,11 +312,11 @@ const WorldView: React.FC = () => {
                             className="w-full bg-brand-primary p-5 rounded-2xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-body-base leading-relaxed shadow-inner min-h-[100px]"
                         />
                     </div>
-                    
+
                     <p className="text-[10px] text-brand-text-muted text-center italic opacity-60 leading-relaxed px-4">
                         Tip: You can ask for specific tags like "Create a faction called..." or "Add history about..."
                     </p>
-                    
+
                     <div className="flex flex-col items-center">
                         <button
                             onClick={handleGenerateLore}
@@ -326,7 +326,7 @@ const WorldView: React.FC = () => {
                             {isGenerating ? (
                                 <><Icon name="spinner" className="w-5 h-5 animate-spin" /> Writing lore...</>
                             ) : (
-                                <><Icon name="sparkles" className="w-5 h-5" /> Generate lore</>
+                                <><Icon name="sparkles" className="w-5 h-5" /> Transcribe Lore</>
                             )}
                         </button>
                         {error && <p className="text-brand-danger text-[10px] font-bold mt-4 animate-pulse">{error}</p>}

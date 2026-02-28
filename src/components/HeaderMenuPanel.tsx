@@ -34,36 +34,35 @@ const MenuItem = ({ label, iconName, onClick, disabled = false, warning, isHighl
   highlightColor?: string;
   badgeCount?: number;
 }) => (
-  <button 
-    onClick={disabled ? undefined : onClick} 
-    className={`flex flex-col items-center justify-center transition-colors duration-200 group p-1 relative ${
-      disabled ? 'opacity-30 cursor-not-allowed text-brand-text-muted' : 
-      isHighlighted ? (highlightColor || 'text-brand-accent') : 
-      'text-brand-text-muted hover:text-brand-text'
-    }`}
+  <button
+    onClick={disabled ? undefined : onClick}
+    className={`flex flex-col items-center justify-center transition-colors duration-200 group p-1 relative ${disabled ? 'opacity-30 cursor-not-allowed text-brand-text-muted' :
+        isHighlighted ? (highlightColor || 'text-brand-accent') :
+          'text-brand-text-muted hover:text-brand-text'
+      }`}
     title={disabled ? warning : label}
   >
     <div className="relative">
-        <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
-        {badgeCount !== undefined && badgeCount > 0 && (
-            <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-surface z-10 shadow-sm animate-fade-in">
-                {badgeCount > 9 ? '9+' : badgeCount}
-            </span>
-        )}
+      <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
+      {badgeCount !== undefined && badgeCount > 0 && (
+        <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-surface z-10 shadow-sm animate-fade-in">
+          {badgeCount > 9 ? '9+' : badgeCount}
+        </span>
+      )}
     </div>
     <span className={`text-[9px] font-normal tracking-tight text-center leading-tight ${isHighlighted ? 'opacity-100' : ''}`}>{label}</span>
   </button>
 );
 
-const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({ 
-  isOpen, 
-  onClose, 
+const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
+  isOpen,
+  onClose,
   worldName,
   sector,
-  location, 
-  locale, 
+  location,
+  locale,
   siteDetail,
-  onLocationClick, 
+  onLocationClick,
   onSettingsClick,
   onSwitchWorldClick,
   setActiveView,
@@ -88,7 +87,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
 
   return (
     <>
-      <div 
+      <div
         className={`fixed inset-0 bg-black/60 z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
         aria-hidden="true"
@@ -112,7 +111,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                 {/* Location */}
                 <div className="space-y-2">
                   <label className="text-body-sm font-bold text-brand-text-muted opacity-60">Current Location</label>
-                  <button 
+                  <button
                     onClick={() => { onLocationClick(); onClose(); }}
                     className="w-full text-left transition-all group flex flex-row items-start gap-3 p-3 bg-transparent rounded-xl hover:bg-brand-primary/10"
                   >
@@ -132,34 +131,34 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               <div className="space-y-4 pt-4 border-t border-brand-primary/10">
                 <label className="text-body-sm font-bold text-brand-text-muted opacity-60">Menu</label>
                 <div className="grid grid-cols-3 gap-y-8 gap-x-2">
-                  <MenuItem label="Characters" iconName="character" onClick={() => handleAction('character')} />
-                  <MenuItem label="Inventory" iconName="inventory" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
-                  <MenuItem label="Story" iconName="story" onClick={() => handleAction('story')} badgeCount={badges.story} />
+                  <MenuItem label="Heroes" iconName="character" onClick={() => handleAction('character')} />
+                  <MenuItem label="Backpack" iconName="inventory" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
+                  <MenuItem label="Chronicle" iconName="story" onClick={() => handleAction('story')} badgeCount={badges.story} />
                   <MenuItem label="Quests" iconName="clipboardList" onClick={() => handleAction('objectives')} badgeCount={badges.quests} />
-                  
-                  <MenuItem label="World" iconName="world" onClick={() => handleAction('world')} badgeCount={badges.world} />
-                  <MenuItem label="Npcs" iconName="users" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} />
+
+                  <MenuItem label="Lore" iconName="world" onClick={() => handleAction('world')} badgeCount={badges.world} />
+                  <MenuItem label="People" iconName="users" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} />
                   <MenuItem label="Map" iconName="map" onClick={() => handleAction('knowledge')} badgeCount={badges.map} />
-                  <MenuItem 
-                      label="Store" 
-                      iconName="shoppingBag" 
-                      onClick={() => handleAction('store')} 
-                      disabled={isCombatActive}
-                      warning="Store is unavailable during combat."
+                  <MenuItem
+                    label="Merchant"
+                    iconName="shoppingBag"
+                    onClick={() => handleAction('store')}
+                    disabled={isCombatActive}
+                    warning="The merchant is hiding during combat."
                   />
 
-                  <MenuItem label="Gm Notes" iconName="rocket" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
-                  <MenuItem label="Item Forge" iconName="hammer" onClick={() => handleAction('item-forge')} />
-                  <MenuItem label="Scene" iconName="skull" onClick={() => handleAction('temp-stats')} />
+                  <MenuItem label="GM Notes" iconName="rocket" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
+                  <MenuItem label="The Forge" iconName="hammer" onClick={() => handleAction('item-forge')} />
+                  <MenuItem label="Visions" iconName="skull" onClick={() => handleAction('temp-stats')} />
                   <MenuItem label="Gallery" iconName="photo" onClick={() => handleAction('gallery')} />
 
-                  <MenuItem label="Nemesis" iconName="danger" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
-                  <MenuItem 
-                      label="Wait/Rest" 
-                      iconName="clock" 
-                      onClick={handleTimeClick} 
-                      disabled={isCombatActive}
-                      warning="Cannot rest while in danger."
+                  <MenuItem label="Rivals" iconName="danger" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
+                  <MenuItem
+                    label="Rest & Camp"
+                    iconName="clock"
+                    onClick={handleTimeClick}
+                    disabled={isCombatActive}
+                    warning="Cannot rest while in danger."
                   />
                 </div>
               </div>
@@ -168,19 +167,19 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
 
           {/* Footer Actions */}
           <div className="p-6 bg-brand-primary/10 border-t border-brand-primary/10 grid grid-cols-2 gap-3">
-            <button 
+            <button
               onClick={() => handleAction('settings')}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
               <Icon name="settings" className="w-5 h-5 text-brand-accent shrink-0 group-hover:rotate-180 transition-transform duration-500" />
               <span className="text-body-sm font-bold text-brand-text">Settings</span>
             </button>
-            <button 
+            <button
               onClick={() => { onSwitchWorldClick(); onClose(); }}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
               <Icon name="refresh" className="w-5 h-5 text-brand-accent shrink-0 group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-body-sm font-bold text-brand-text">Switch</span>
+              <span className="text-body-sm font-bold text-brand-text">Change Realm</span>
             </button>
           </div>
         </div>

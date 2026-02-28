@@ -25,12 +25,12 @@ const INTERACTION_SKILLS: SkillName[] = [
     'Perception', 'Insight', 'Investigation', 'Deception', 'Intimidation', 'Persuasion', 'Stealth', 'Athletics'
 ];
 
-export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({ 
-    isOpen, 
-    onClose, 
-    templates, 
-    affinities, 
-    sizeModifiers, 
+export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
+    isOpen,
+    onClose,
+    templates,
+    affinities,
+    sizeModifiers,
     baseScore,
     archetypeDefinitions,
     onUpdateTemplate,
@@ -75,7 +75,7 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
         }
         onUpdateTemplate(key, newTemplate);
     };
-    
+
     const handleAffinityDefChange = (key: string, field: string, value: any) => {
         const newAffinity = { ...affinities[key] };
         (newAffinity as any)[field] = value;
@@ -106,7 +106,7 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
             </div>
 
             <div className="h-[60vh] overflow-y-auto custom-scroll px-1">
-                
+
                 {/* Templates Editor */}
                 {templateTab === 'templates' && (
                     <div className="flex flex-col h-full">
@@ -121,11 +121,11 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                 </button>
                             ))}
                         </div>
-                        
+
                         {selectedTemplate && templates[selectedTemplate] && (
                             <div className="space-y-8 animate-fade-in pb-8">
                                 <InputField label="Attack Type" value={templates[selectedTemplate].attackType} onChange={e => handleTemplateChange(selectedTemplate, 'attackType', e.target.value)} />
-                                
+
                                 <div className="space-y-2">
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Default Archetype</label>
                                     <div className="relative">
@@ -149,10 +149,10 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                     <div className="grid grid-cols-3 gap-4">
                                         {['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].map((stat, idx) => (
                                             <div key={stat} className="space-y-1.5">
-                                                <label className="block text-[10px] font-black text-brand-text-muted mb-1 text-center uppercase tracking-tight">{stat}</label>
-                                                <input 
-                                                    type="number" 
-                                                    value={templates[selectedTemplate].mods[idx]} 
+                                                <label className="block text-[10px] font-black text-brand-text-muted mb-1 text-center capitalize tracking-tight">{stat}</label>
+                                                <input
+                                                    type="number"
+                                                    value={templates[selectedTemplate].mods[idx]}
                                                     onChange={e => handleTemplateModChange(selectedTemplate, idx, parseInt(e.target.value) || 0)}
                                                     className="w-full bg-brand-primary h-11 rounded-xl text-sm border border-brand-surface focus:border-brand-accent focus:outline-none text-center font-black shadow-inner"
                                                 />
@@ -168,10 +168,10 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                             const isProf = (templates[selectedTemplate].proficientSkills || []).includes(skill);
                                             return (
                                                 <div key={skill} className="flex items-center gap-3 p-2.5 hover:bg-brand-primary/30 rounded-xl transition-all group cursor-pointer" onClick={() => handleToggleSkill(selectedTemplate, skill)}>
-                                                    <input 
-                                                        type="checkbox" 
+                                                    <input
+                                                        type="checkbox"
                                                         checked={isProf}
-                                                        onChange={() => {}} // Handled by div click
+                                                        onChange={() => { }} // Handled by div click
                                                         className="custom-checkbox"
                                                     />
                                                     <span className={`text-body-sm font-bold transition-colors ${isProf ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
@@ -201,11 +201,11 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                             <div key={type} className="space-y-1.5">
                                                 <label className="text-[10px] font-black text-brand-text-muted block text-center capitalize tracking-tight">{type}</label>
                                                 <div className="relative">
-                                                    <input 
-                                                        type="number" 
-                                                        value={(speeds as any)[type]} 
-                                                        onChange={e => handleArchetypeSpeedChange(arch, type as any, parseInt(e.target.value) || 0)} 
-                                                        className="w-full bg-brand-primary h-10 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner" 
+                                                    <input
+                                                        type="number"
+                                                        value={(speeds as any)[type]}
+                                                        onChange={e => handleArchetypeSpeedChange(arch, type as any, parseInt(e.target.value) || 0)}
+                                                        className="w-full bg-brand-primary h-10 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
                                                     />
                                                     <span className="absolute right-1 bottom-1 text-[8px] text-brand-text-muted opacity-40 font-bold">ft</span>
                                                 </div>
@@ -235,25 +235,25 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                         {selectedAffinityKey && affinities[selectedAffinityKey] && (
                             <div className="space-y-8">
                                 <InputField label="Description" value={affinities[selectedAffinityKey].description} onChange={e => handleAffinityDefChange(selectedAffinityKey, 'description', e.target.value)} />
-                                
+
                                 <div className="space-y-10 pt-4 border-t border-brand-primary/20">
-                                    <TagEditor 
-                                        label="Resistances" 
-                                        tags={affinities[selectedAffinityKey].resistances} 
-                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'resistances', tags)} 
-                                        options={DAMAGE_TYPES} 
+                                    <TagEditor
+                                        label="Resistances"
+                                        tags={affinities[selectedAffinityKey].resistances}
+                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'resistances', tags)}
+                                        options={DAMAGE_TYPES}
                                     />
-                                    <TagEditor 
-                                        label="Immunities" 
-                                        tags={affinities[selectedAffinityKey].immunities} 
-                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'immunities', tags)} 
-                                        options={DAMAGE_TYPES} 
+                                    <TagEditor
+                                        label="Immunities"
+                                        tags={affinities[selectedAffinityKey].immunities}
+                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'immunities', tags)}
+                                        options={DAMAGE_TYPES}
                                     />
-                                    <TagEditor 
-                                        label="Vulnerabilities" 
-                                        tags={affinities[selectedAffinityKey].vulnerabilities} 
-                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'vulnerabilities', tags)} 
-                                        options={DAMAGE_TYPES} 
+                                    <TagEditor
+                                        label="Vulnerabilities"
+                                        tags={affinities[selectedAffinityKey].vulnerabilities}
+                                        onTagsChange={tags => handleAffinityDefChange(selectedAffinityKey, 'vulnerabilities', tags)}
+                                        options={DAMAGE_TYPES}
                                     />
                                 </div>
                             </div>
@@ -273,12 +273,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                     <div className="grid grid-cols-4 gap-3">
                                         {['str', 'dex', 'con', 'ac'].map((field) => (
                                             <div key={field} className="space-y-1.5">
-                                                <label className="text-[10px] font-black text-brand-text-muted block text-center uppercase tracking-tight">{field}</label>
-                                                <input 
-                                                    type="number" 
-                                                    value={(mods as any)[field]} 
-                                                    onChange={e => handleSizeModChange(size, field as any, parseInt(e.target.value) || 0)} 
-                                                    className="w-full bg-brand-primary h-11 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner" 
+                                                <label className="text-[10px] font-black text-brand-text-muted block text-center capitalize tracking-tight">{field}</label>
+                                                <input
+                                                    type="number"
+                                                    value={(mods as any)[field]}
+                                                    onChange={e => handleSizeModChange(size, field as any, parseInt(e.target.value) || 0)}
+                                                    className="w-full bg-brand-primary h-11 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
                                                 />
                                             </div>
                                         ))}
@@ -299,10 +299,10 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                             </p>
                         </div>
                         <div className="flex flex-col items-center p-8 bg-brand-primary/20 rounded-3xl border border-brand-surface shadow-inner">
-                            <label className="text-xs font-black text-brand-accent uppercase mb-4 tracking-normal">Global base score</label>
-                            <input 
-                                type="number" 
-                                value={baseScore} 
+                            <label className="text-xs font-black text-brand-accent mb-4 tracking-normal">Global Base Score</label>
+                            <input
+                                type="number"
+                                value={baseScore}
                                 onChange={e => onUpdateBaseScore(parseInt(e.target.value) || 8)}
                                 className="w-24 h-16 text-center bg-brand-surface rounded-2xl border-2 border-brand-primary focus:border-brand-accent text-3xl font-black text-brand-text focus:outline-none transition-all shadow-lg"
                             />
