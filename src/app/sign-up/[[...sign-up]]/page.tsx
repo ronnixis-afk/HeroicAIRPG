@@ -2,6 +2,7 @@
 
 import { SignUp } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
+import Link from 'next/link';
 
 export default function SignUpPage() {
     return (
@@ -14,18 +15,21 @@ export default function SignUpPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
 
             {/* Header */}
-            <header className="relative z-10 px-6 py-4 text-center lg:text-left">
+            <header className="relative z-10 px-6 py-4 text-center lg:text-left flex justify-between items-center">
                 <h3 className="font-merriweather text-brand-text tracking-tight mb-0">
                     Heroic AI <span className="text-brand-accent">RPG</span>
                 </h3>
+                <Link href="/" className="text-brand-accent text-sm font-bold hover:text-brand-accent/80 transition-colors">
+                    &larr; Back to Home
+                </Link>
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 flex items-center justify-center px-4 py-6 lg:py-0 lg:flex-1">
+            <main className="relative z-10 flex flex-col items-center justify-center px-4 py-10 flex-1">
                 <div className="w-full max-w-md mx-auto">
-                    <div className="text-center mb-4">
-                        <h3 className="font-merriweather text-brand-text mb-1">Create Account</h3>
-                        <p className="text-body-sm text-brand-text-muted font-medium">Begin your heroic journey.</p>
+                    <div className="text-center mb-6">
+                        <h3 className="font-merriweather text-brand-text mb-1 drop-shadow-md">Create Account</h3>
+                        <p className="text-body-sm text-brand-text-muted font-medium drop-shadow-sm">Begin your heroic journey.</p>
                     </div>
                     <SignUp
                         appearance={{

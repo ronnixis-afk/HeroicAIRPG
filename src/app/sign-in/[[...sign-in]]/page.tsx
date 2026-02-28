@@ -2,29 +2,7 @@
 
 import { SignIn } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
-
-const NEWS_ITEMS = [
-    {
-        date: 'Feb 28, 2026',
-        title: 'User Tier System',
-        content: 'Account tiers are now live. SuperAdmin users get exclusive AI access.'
-    },
-    {
-        date: 'Feb 27, 2026',
-        title: 'Cloud Save Sync',
-        content: 'Back up and restore your worlds from the cloud. Never lose progress again.'
-    },
-    {
-        date: 'Feb 27, 2026',
-        title: 'Gemini 3 Integration',
-        content: 'The AI engine now runs on Google Gemini 3 for richer, more immersive narratives.'
-    },
-    {
-        date: 'Feb 26, 2026',
-        title: 'Open Beta',
-        content: 'Heroic AI RPG is now in Open Beta. Create worlds, forge characters, and embark on AI-driven adventures.'
-    }
-];
+import Link from 'next/link';
 
 export default function SignInPage() {
     return (
@@ -37,19 +15,22 @@ export default function SignInPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
 
             {/* Header */}
-            <header className="relative z-10 px-6 py-4 text-center lg:text-left">
+            <header className="relative z-10 px-6 py-4 text-center lg:text-left flex justify-between items-center">
                 <h3 className="font-merriweather text-brand-text tracking-tight mb-0">
                     Heroic AI <span className="text-brand-accent">RPG</span>
                 </h3>
+                <Link href="/" className="text-brand-accent text-sm font-bold hover:text-brand-accent/80 transition-colors">
+                    &larr; Back to Home
+                </Link>
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 flex flex-col lg:flex-row items-center lg:justify-center gap-8 px-4 py-6 lg:py-0 lg:flex-1">
+            <main className="relative z-10 flex flex-col items-center justify-center px-4 py-10 flex-1">
                 {/* Sign-In Card */}
                 <div className="w-full max-w-md mx-auto">
-                    <div className="text-center mb-4">
-                        <h3 className="font-merriweather text-brand-text mb-1">Welcome Back</h3>
-                        <p className="text-body-sm text-brand-text-muted font-medium">Sign in to start your adventure.</p>
+                    <div className="text-center mb-6">
+                        <h3 className="font-merriweather text-brand-text mb-1 drop-shadow-md">Welcome Back</h3>
+                        <p className="text-body-sm text-brand-text-muted font-medium drop-shadow-sm">Sign in to start your adventure.</p>
                     </div>
                     <SignIn
                         appearance={{
@@ -98,26 +79,6 @@ export default function SignInPage() {
                         }}
                         forceRedirectUrl="/"
                     />
-                    <p className="text-[10px] text-brand-text-muted/60 text-center mt-4 font-medium">
-                        Heroic AI RPG is in Open Beta. You may experience bugs and unexpected behaviors.
-                    </p>
-                </div>
-
-                {/* News & Updates Section */}
-                <div className="w-full max-w-md mx-auto lg:max-w-xs">
-                    <h4 className="text-brand-accent font-bold mb-3 text-sm text-center lg:text-left">Recent Updates</h4>
-                    <div className="space-y-3">
-                        {NEWS_ITEMS.map((item, i) => (
-                            <div
-                                key={i}
-                                className="bg-brand-surface/60 backdrop-blur-md p-4 rounded-xl border border-brand-primary/30"
-                            >
-                                <span className="text-[9px] text-brand-accent font-bold uppercase tracking-wider">{item.date}</span>
-                                <h5 className="text-brand-text font-bold text-sm mt-1 mb-1">{item.title}</h5>
-                                <p className="text-[11px] text-brand-text-muted leading-relaxed">{item.content}</p>
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </main>
         </div>
