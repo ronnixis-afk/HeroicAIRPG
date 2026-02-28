@@ -87,6 +87,33 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
         setPlayingMessageId(id);
         setIsSpeaking(true);
 
+        const playNativeTTS = (fallbackText: string) => {
+            // Strip markdown for local TTS as well
+            const cleanText = fallbackText.replace(/[*_#`~\[\]]/g, '').trim();
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            const voices = window.speechSynthesis.getVoices();
+
+            if (voiceName.includes('Female')) {
+                const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha'));
+                if (femaleVoice) utterance.voice = femaleVoice;
+            } else {
+                const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel'));
+                if (maleVoice) utterance.voice = maleVoice;
+            }
+
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.onend = () => {
+                setPlayingMessageId(null);
+                setIsSpeaking(false);
+            };
+
+            // Fix for Chrome Web Speech Bug: cancel() immediately followed by speak() fails silently.
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 50);
+        };
+
         if (useAiTts) {
             try {
                 if (!audioContextRef.current) {
@@ -124,36 +151,16 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                     const startTime = Math.max(ctx.currentTime, nextStartTimeRef.current);
                     source.start(startTime);
                     nextStartTimeRef.current = startTime + audioBuffer.duration;
+                } else {
+                    console.warn("AI TTS returned no audio, falling back to native TTS...");
+                    playNativeTTS(text);
                 }
             } catch (err) {
-                console.error("AI TTS playback failed:", err);
-                stopAllSpeech();
+                console.error("AI TTS playback failed, falling back to native TTS:", err);
+                playNativeTTS(text);
             }
         } else {
-            // Strip markdown for local TTS as well
-            const cleanText = text.replace(/[*_#`~\[\]]/g, '').trim();
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            const voices = window.speechSynthesis.getVoices();
-
-            if (voiceName.includes('Female')) {
-                const femaleVoice = voices.find(v => v.name.includes('Female') || v.name.includes('Google UK English Female') || v.name.includes('Samantha'));
-                if (femaleVoice) utterance.voice = femaleVoice;
-            } else {
-                const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('Google UK English Male') || v.name.includes('Daniel'));
-                if (maleVoice) utterance.voice = maleVoice;
-            }
-
-            utterance.rate = 0.95;
-            utterance.pitch = 1.0;
-            utterance.onend = () => {
-                setPlayingMessageId(null);
-                setIsSpeaking(false);
-            };
-
-            // Fix for Chrome Web Speech Bug: cancel() immediately followed by speak() fails silently.
-            setTimeout(() => {
-                window.speechSynthesis.speak(utterance);
-            }, 50);
+            playNativeTTS(text);
         }
     }, [playingMessageId, stopAllSpeech, useAiTts, voiceName, tone]);
 
