@@ -478,17 +478,20 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             }
 
             if (updates.knowledge && Array.isArray(updates.knowledge)) {
-                if (!newState.knowledge) newState.knowledge = [];
+                newState.knowledge = [...(newState.knowledge || [])];
                 updates.knowledge.forEach(entry => {
                     if (!entry) return;
-                    const existing = newState.knowledge.find(k => k.id === entry.id || (entry.title && k.title && String(k.title).toLowerCase().trim() === String(entry.title).toLowerCase().trim()));
-                    if (existing) Object.assign(existing, entry);
-                    else newState.knowledge.push({ ...entry, id: entry.id || `know-${Date.now()}-${Math.random()}`, isNew: true } as LoreEntry);
+                    const existingIdx = newState.knowledge!.findIndex(k => k.id === entry.id || (entry.title && k.title && String(k.title).toLowerCase().trim() === String(entry.title).toLowerCase().trim()));
+                    if (existingIdx > -1) {
+                        newState.knowledge![existingIdx] = { ...newState.knowledge![existingIdx], ...entry };
+                    } else {
+                        newState.knowledge!.push({ ...entry, id: entry.id || `know-${Date.now()}-${Math.random()}`, isNew: true } as LoreEntry);
+                    }
                 });
             }
 
             if (updates.objectives && Array.isArray(updates.objectives)) {
-                if (!newState.objectives) newState.objectives = [];
+                newState.objectives = [...(newState.objectives || [])];
                 const hasNewTracked = updates.objectives.some(o => o.isTracked);
 
                 if (hasNewTracked) {
@@ -497,29 +500,32 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
 
                 updates.objectives.forEach(obj => {
                     if (!obj) return;
-                    const isUpdate = !!obj.id && newState.objectives.some(o => o.id === obj.id);
+                    const isUpdate = !!obj.id && newState.objectives!.some(o => o.id === obj.id);
                     if (!isUpdate && (!obj.title || obj.title.trim().length < 3)) {
                         return;
                     }
-                    let existing = newState.objectives.find(o => o.id === obj.id);
-                    if (!existing && obj.title) {
-                        existing = newState.objectives.find(o => o.title && String(o.title).toLowerCase().trim() === String(obj.title).toLowerCase().trim());
+                    let existingIdx = newState.objectives!.findIndex(o => o.id === obj.id);
+                    if (existingIdx === -1 && obj.title) {
+                        existingIdx = newState.objectives!.findIndex(o => o.title && String(o.title).toLowerCase().trim() === String(obj.title).toLowerCase().trim());
                     }
-                    if (existing) {
-                        if (obj.status) existing.status = obj.status;
-                        if (obj.content) existing.content = obj.content;
-                        if (obj.nextStep) existing.nextStep = obj.nextStep;
-                        if (obj.coordinates) existing.coordinates = obj.coordinates;
-                        if (obj.isTracked !== undefined) existing.isTracked = obj.isTracked;
-                        if (obj.milestones && Array.isArray(obj.milestones)) {
-                            existing.milestones = Array.from(new Set([...(existing.milestones || []), ...obj.milestones]));
-                        }
+
+                    if (existingIdx > -1) {
+                        const existing = newState.objectives![existingIdx];
+                        newState.objectives![existingIdx] = {
+                            ...existing,
+                            status: obj.status ? (String(obj.status).toLowerCase() as any) : existing.status,
+                            content: obj.content || existing.content,
+                            nextStep: obj.nextStep || existing.nextStep,
+                            coordinates: obj.coordinates || existing.coordinates,
+                            isTracked: obj.isTracked !== undefined ? obj.isTracked : existing.isTracked,
+                            milestones: obj.milestones && Array.isArray(obj.milestones) ? Array.from(new Set([...(existing.milestones || []), ...obj.milestones])) : existing.milestones
+                        };
                     } else if (obj.title && obj.content) {
-                        newState.objectives.push({
+                        newState.objectives!.push({
                             ...obj,
                             id: obj.id || `obj-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                             isNew: true,
-                            status: obj.status || 'active',
+                            status: obj.status ? (String(obj.status).toLowerCase() as any) : 'active',
                             nextStep: obj.nextStep || 'Establish a path.',
                             milestones: obj.milestones || [],
                             updates: []
@@ -529,12 +535,12 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             }
 
             if (updates.mapZones && Array.isArray(updates.mapZones)) {
-                if (!newState.mapZones) newState.mapZones = [];
+                newState.mapZones = [...(newState.mapZones || [])];
                 updates.mapZones.forEach(zone => {
                     if (!zone || !zone.coordinates) return;
-                    const existing = newState.mapZones!.find(z => z.id === zone.id || z.coordinates === zone.coordinates);
-                    if (existing) {
-                        Object.assign(existing, zone);
+                    const existingIdx = newState.mapZones!.findIndex(z => z.id === zone.id || z.coordinates === zone.coordinates);
+                    if (existingIdx > -1) {
+                        newState.mapZones![existingIdx] = { ...newState.mapZones![existingIdx], ...zone };
                     } else {
                         const sector = (newState.mapSectors || []).find(s => s.coordinates.includes(zone.coordinates as string));
                         newState.mapZones!.push({
