@@ -5,10 +5,10 @@ import { ChatMessage, PlayerCharacter, Companion, CombatActor, ImageGenerationSt
 // Helper to extract base64 and mimeType from data URI
 const parseBase64 = (dataUri: string | undefined): { data: string, mimeType: string } | null => {
     if (!dataUri || !dataUri.startsWith('data:')) return null;
-    
+
     const matches = dataUri.match(/^data:(.+);base64,(.+)$/);
     if (!matches || matches.length !== 3) return null;
-    
+
     return {
         mimeType: matches[1],
         data: matches[2]
@@ -55,7 +55,7 @@ export const generateCharacterImage = async (description: string, items: any[], 
     Aspect Ratio: 1:1.
     High quality, detailed, no text, no borders.
     ${isMature ? '' : 'Safe for work, no explicit content.'}`;
-    
+
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
@@ -68,7 +68,7 @@ export const generateCharacterImage = async (description: string, items: any[], 
                 }
             }
         });
-        
+
         if (response.candidates && response.candidates[0].content.parts) {
             for (const part of response.candidates[0].content.parts) {
                 if (part.inlineData) {
@@ -89,16 +89,16 @@ export const generateCharacterImage = async (description: string, items: any[], 
  */
 export const generateSceneVisuals = async (
     gameData: GameData,
-    style: ImageGenerationStyle, 
+    style: ImageGenerationStyle,
     enemies?: CombatActor[]
 ): Promise<string | null> => {
     const messages = gameData.messages;
     const player = gameData.playerCharacter;
     const companions = gameData.companions;
-    
+
     const lastMessage = messages[messages.length - 1];
     const location = lastMessage?.location || 'Unknown';
-    
+
     // Get last few narrative messages for context
     const narrativeContext = messages
         .filter(m => m.sender === 'ai' || m.sender === 'user')
@@ -110,53 +110,44 @@ export const generateSceneVisuals = async (
     const supplementaryLore = extractRelevantLore(messages, gameData);
 
     // 1. Construct the Text Prompt
-    let prompt = `Generate a vertical portrait-format illustration of the current scene in a Tabletop RPG.
-    
-    **ART STYLE**: ${style}
-    **SETTING**: ${location}
-    **NARRATIVE CONTEXT**: 
-    "${narrativeContext}"
-
-    ${supplementaryLore ? `**SUPPLEMENTARY LORE & ENTITY DETAILS (STRICT ADHERENCE)**:\n${supplementaryLore}` : ''}
-
-    **CHARACTERS & REFERENCES**:
-    `;
+    let prompt = `Tabletop RPG illustration. Style: ${style}. Setting: ${location}. 
+    Context: ${narrativeContext.substring(0, 200)}...
+    ${supplementaryLore ? `Lore: ${supplementaryLore.substring(0, 200)}...` : ''}`;
 
     const parts: any[] = [];
     let imageIndex = 1;
 
     // Player Reference
-    prompt += `\n1. MAIN HERO (${player.name}): See Reference Image ${imageIndex}. Use this character's visual design (face, hair, gear) but IGNORE the pose in the reference image. Put them in a dynamic pose fitting the narrative action.`;
     const playerImg = parseBase64(player.imageUrl);
     if (playerImg) {
+        prompt += `\n[Ref Image ${imageIndex}: ${player.name}]. Dynamic action pose.`;
         parts.push({ inlineData: { mimeType: playerImg.mimeType, data: playerImg.data } });
         imageIndex++;
     }
 
     // Companion References (Only include those in party)
     const activeCompanions = companions.filter(c => c.isInParty !== false);
-    activeCompanions.forEach(c => {
-        prompt += `\n2. ALLY (${c.name}): ${c.imageUrl ? `See Reference Image ${imageIndex}.` : 'No reference provided.'} ${c.appearance}. IGNORE any reference pose; render them interacting with the scene.`;
+    for (const c of activeCompanions) {
         const compImg = parseBase64(c.imageUrl);
         if (compImg) {
+            prompt += `\n[Ref Image ${imageIndex}: Ally ${c.name}].`;
             parts.push({ inlineData: { mimeType: compImg.mimeType, data: compImg.data } });
             imageIndex++;
         }
-    });
+    }
 
     // Enemies
     if (enemies && enemies.length > 0) {
         const uniqueEnemies = Array.from(new Set(enemies.map(e => e.name.replace(/\s\d+$/, ''))));
-        prompt += `\n\n**ENEMIES/THREATS**:
-        ${uniqueEnemies.join(', ')}.
-        Depict these threats looming or engaging the characters.`;
+        prompt += `\nEnemies: ${uniqueEnemies.join(', ').substring(0, 100)}.`;
     }
 
-    prompt += `\n\n**IMPORTANT REQUIREMENTS**:
-    - COMPOSITION: Vertical Portrait (9:16 ratio). Cinematic lighting.
-    - POSING: Dynamic, action-oriented or dramatic standing. Do NOT copy the static poses from the reference images.
-    - BACKGROUND: Detailed environment matching the Setting and Supplementary Lore.
-    - FORMAT: Full bleed, NO borders, NO frames, NO text overlays.`;
+    prompt += `\nVertical 9:16. Cinematic lighting. No text.`;
+
+    // Safety truncation if it still exceeds general limits (Imagen typically accepts up to ~480 chars easily)
+    if (prompt.length > 480) {
+        prompt = prompt.substring(0, 477) + '...';
+    }
 
     // Add prompt as the last part
     parts.push({ text: prompt });
@@ -164,7 +155,7 @@ export const generateSceneVisuals = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-image-preview', 
+            model: 'gemini-3-pro-image-preview',
             contents: { parts: parts },
             config: {
                 imageConfig: {
