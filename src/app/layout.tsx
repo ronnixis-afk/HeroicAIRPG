@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" className={`${inter.variable} ${merriweather.variable} h-full`}>
-        <body className="h-full overflow-x-hidden font-sans">
+        <body className="h-full overflow-hidden font-sans">
           {children}
         </body>
       </html>

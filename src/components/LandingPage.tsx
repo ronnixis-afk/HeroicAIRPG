@@ -45,7 +45,7 @@ export default function LandingPage() {
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col relative overflow-y-auto bg-black">
+        <div className="h-[100dvh] w-full flex flex-col relative overflow-y-auto bg-black">
             {/* Background Images with Cross-Fade */}
             <div className="fixed inset-0 z-0">
                 {BACKGROUNDS.map((bg, index) => (

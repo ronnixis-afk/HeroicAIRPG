@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function SignInPage() {
     return (
-        <div className="min-h-screen flex flex-col relative overflow-y-auto">
+        <div className="h-[100dvh] w-full flex flex-col relative overflow-y-auto">
             {/* Background Image */}
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
