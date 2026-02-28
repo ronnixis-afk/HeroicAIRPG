@@ -299,7 +299,7 @@ export const generateStoreCategoryInventory = async (category: string, blueprint
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-flash-lite-latest',
             contents: input,
             config: {
                 responseMimeType: "application/json",
