@@ -5,7 +5,7 @@ import { dark } from '@clerk/themes';
 
 export default function SignUpPage() {
     return (
-        <div className="min-h-screen flex flex-col relative overflow-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-y-auto">
             {/* Background Image */}
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -14,17 +14,17 @@ export default function SignUpPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
 
             {/* Header */}
-            <header className="relative z-10 px-6 py-5">
-                <h2 className="font-merriweather text-brand-text tracking-tight mb-0">
+            <header className="relative z-10 px-6 py-4 text-center lg:text-left">
+                <h3 className="font-merriweather text-brand-text tracking-tight mb-0">
                     Heroic AI <span className="text-brand-accent">RPG</span>
-                </h2>
+                </h3>
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 flex-1 flex items-center justify-center px-4 pb-8">
-                <div className="w-full max-w-md">
-                    <div className="text-center mb-6">
-                        <h1 className="font-merriweather text-brand-text mb-2">Create Account</h1>
+            <main className="relative z-10 flex items-center justify-center px-4 py-6 lg:py-0 lg:flex-1">
+                <div className="w-full max-w-md mx-auto">
+                    <div className="text-center mb-4">
+                        <h3 className="font-merriweather text-brand-text mb-1">Create Account</h3>
                         <p className="text-body-sm text-brand-text-muted font-medium">Begin your heroic journey.</p>
                     </div>
                     <SignUp

@@ -28,7 +28,7 @@ const NEWS_ITEMS = [
 
 export default function SignInPage() {
     return (
-        <div className="min-h-screen flex flex-col relative overflow-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-y-auto">
             {/* Background Image */}
             <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -37,18 +37,18 @@ export default function SignInPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/80" />
 
             {/* Header */}
-            <header className="relative z-10 px-6 py-5">
-                <h2 className="font-merriweather text-brand-text tracking-tight mb-0">
+            <header className="relative z-10 px-6 py-4 text-center lg:text-left">
+                <h3 className="font-merriweather text-brand-text tracking-tight mb-0">
                     Heroic AI <span className="text-brand-accent">RPG</span>
-                </h2>
+                </h3>
             </header>
 
             {/* Main Content */}
-            <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center gap-10 px-4 pb-8">
+            <main className="relative z-10 flex flex-col lg:flex-row items-center lg:justify-center gap-8 px-4 py-6 lg:py-0 lg:flex-1">
                 {/* Sign-In Card */}
-                <div className="w-full max-w-md">
-                    <div className="text-center mb-6">
-                        <h1 className="font-merriweather text-brand-text mb-2">Welcome Back</h1>
+                <div className="w-full max-w-md mx-auto">
+                    <div className="text-center mb-4">
+                        <h3 className="font-merriweather text-brand-text mb-1">Welcome Back</h3>
                         <p className="text-body-sm text-brand-text-muted font-medium">Sign in to start your adventure.</p>
                     </div>
                     <SignIn
@@ -104,8 +104,8 @@ export default function SignInPage() {
                 </div>
 
                 {/* News & Updates Section */}
-                <div className="w-full max-w-sm lg:max-w-xs">
-                    <h4 className="text-brand-accent font-bold mb-4 text-sm">Recent Updates</h4>
+                <div className="w-full max-w-md mx-auto lg:max-w-xs">
+                    <h4 className="text-brand-accent font-bold mb-3 text-sm text-center lg:text-left">Recent Updates</h4>
                     <div className="space-y-3">
                         {NEWS_ITEMS.map((item, i) => (
                             <div
