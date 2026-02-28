@@ -81,9 +81,6 @@ const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, onTimeClick
       </button>
 
       <div className="flex items-center gap-3">
-        <SignedIn>
-          <UserButton afterSignOutUrl="/" />
-        </SignedIn>
         <button onClick={onMenuClick} className="btn-icon p-1 text-brand-text-muted hover:text-brand-accent transition-colors relative">
           <Icon name="menu" className="w-[24px] h-[24px]" />
           {badgeCount !== undefined && badgeCount > 0 && (

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, UserButton } from '@clerk/nextjs';
 import { worldService } from '../services/worldService';
 import { cloudSaveService, CloudSaveMetadata } from '../services/cloudSaveService';
 import {
@@ -408,91 +408,105 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     return (
         <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4 animate-page">
             <div className="w-full max-w-2xl mx-auto">
-                <h1 className="text-center mb-2">Heroic AI <span className="text-brand-accent">RPG</span></h1>
-                <p className="text-body-sm text-brand-text-muted mb-8 text-center font-medium opacity-60">Powered by Gemini 3. Choose your realm or forge a new destiny.</p>
-
-                {/* User Info Panel */}
-                <div className="bg-brand-surface p-4 rounded-2xl border border-brand-primary/50 mb-10 flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <Icon name="character" className="w-5 h-5 text-brand-text-muted flex-shrink-0" />
-                        <span className="text-body-sm font-bold text-brand-text truncate">{userEmail || 'Loading...'}</span>
+                {/* Top Header Row with Title and Account Info */}
+                <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black mb-1">Heroic AI <span className="text-brand-accent">RPG</span></h1>
+                        <p className="text-body-sm text-brand-text-muted font-medium opacity-60">Powered by Gemini 3. Choose your realm or forge a new destiny.</p>
                     </div>
-                    <div className="flex-shrink-0">
-                        {isTierLoading ? (
-                            <span className="text-body-sm text-brand-text-muted">...</span>
-                        ) : (
-                            <span className={`text-body-sm font-black ${tierInfo.color}`}>{tierInfo.label}</span>
-                        )}
-                    </div>
-                </div>
 
-                <div className="space-y-4 mb-10">
-                    {worlds.map(world => (
-                        <div key={world.id} className="bg-brand-surface p-5 rounded-2xl flex items-center justify-between shadow-xl border border-brand-primary/50 hover:border-brand-accent/20 transition-all group">
-                            <span className="text-body-lg font-bold text-brand-text group-hover:text-brand-accent transition-colors">{world.name}</span>
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => onWorldSelected(world.id)} className="btn-primary btn-md w-32 shadow-sm">Enter Realm</button>
-                                <button onClick={() => handleDeleteWorld(world.id)} className="btn-icon-delete">
-                                    <Icon name="trash" className="w-5 h-5" />
-                                </button>
-                            </div>
+                    {/* User Info Panel */}
+                    <div className="bg-brand-surface py-2 px-4 rounded-full border border-brand-primary/50 flex items-center shadow-lg shrink-0 gap-4">
+                        <div className="flex flex-col items-end">
+                            <span className="text-body-sm font-bold text-brand-text leading-tight">{userEmail || 'Loading...'}</span>
+                            {isTierLoading ? (
+                                <span className="text-[10px] text-brand-text-muted">Syncing...</span>
+                            ) : (
+                                <span className={`text-[10px] font-black uppercase tracking-wider ${tierInfo.color}`}>{tierInfo.label}</span>
+                            )}
                         </div>
-                    ))}
+                        <div className="h-8 w-px bg-brand-primary/50"></div>
+                        <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-8 h-8 rounded-full border-2 border-brand-accent/50" } }} />
+                    </div>
                 </div>
 
-                <div className="flex justify-center gap-4">
-                    <button
-                        onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
-                        className="btn-primary btn-lg shadow-xl shadow-brand-accent/10"
-                    >
-                        <Icon name="plus" className="w-5 h-5 mr-3" />
-                        Forge New Realm
-                    </button>
+                {/* Local Worlds Horizontal Scroll */}
+                <div className="mb-8">
+                    <h4 className="text-body-base font-bold text-brand-text mb-4 ml-1">Local Realms</h4>
+                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+                        {worlds.length === 0 && !isLoadingWorlds ? (
+                            <div className="bg-brand-surface/50 border border-brand-primary/30 rounded-2xl p-6 text-center w-full max-w-sm flex-shrink-0">
+                                <p className="text-brand-text-muted text-sm font-medium">No local realms forged yet.</p>
+                            </div>
+                        ) : (
+                            worlds.map(world => (
+                                <div key={world.id} className="bg-brand-surface p-5 rounded-2xl flex flex-col justify-between shadow-xl border border-brand-primary/50 hover:border-brand-accent/50 transition-all group w-72 shrink-0 snap-start">
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{world.name}</h3>
+                                        <p className="text-xs text-brand-text-muted mt-1 opacity-70">Saved: {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-auto">
+                                        <button onClick={() => onWorldSelected(world.id)} className="btn-primary btn-sm flex-1 shadow-sm">Enter</button>
+                                        <button onClick={() => handleDeleteWorld(world.id)} className="btn-icon-delete flex-shrink-0 p-2">
+                                            <Icon name="trash" className="w-[18px] h-[18px]" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+
+                        {/* Forge New Card */}
+                        <button
+                            onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
+                            className="bg-brand-primary/20 p-5 rounded-2xl flex flex-col items-center justify-center border border-dashed border-brand-accent/50 hover:bg-brand-primary/40 transition-all w-72 shrink-0 snap-start text-brand-accent shadow-inner group"
+                        >
+                            <div className="bg-brand-accent/10 p-3 rounded-full mb-3 group-hover:scale-110 transition-transform">
+                                <Icon name="plus" className="w-6 h-6" />
+                            </div>
+                            <span className="font-bold">Forge New Realm</span>
+                        </button>
+                    </div>
                 </div>
 
-                {/* Cloud Load Section */}
-                <div className="mt-10 pt-8 border-t border-brand-primary/20">
-                    <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-body-sm font-bold text-brand-text-muted">Cloud Archives</h4>
+                {/* Cloud Load Section Horizontal Scroll */}
+                <div className="mt-8 pt-8 border-t border-brand-primary/20">
+                    <div className="flex items-center justify-between mb-4 px-1">
+                        <h4 className="text-body-base font-bold text-brand-text">Cloud Archives</h4>
                         <button
                             onClick={handleFetchCloudSaves}
                             disabled={isLoadingCloud}
-                            className="btn-secondary btn-sm"
+                            className="btn-secondary btn-sm flex items-center gap-2"
                         >
-                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Restore Archives'}
+                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="cloud" className="w-4 h-4" />}
+                            Sync Archives
                         </button>
                     </div>
 
                     {cloudError && <p className="text-body-sm text-brand-danger font-bold mb-3">{cloudError}</p>}
 
-                    {cloudSaves.length > 0 && (
-                        <div className="space-y-3 mb-6">
-                            {cloudSaves.map(save => (
-                                <div key={save.id} className="bg-brand-primary/20 p-4 rounded-xl border border-brand-surface flex items-center justify-between">
-                                    <div className="min-w-0">
-                                        <span className="text-body-sm font-bold text-brand-text block truncate">{save.name}</span>
-                                        <span className="text-[10px] text-brand-text-muted">{new Date(save.updatedAt).toLocaleString()}</span>
+                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar min-h-[140px]">
+                        {cloudSaves.length === 0 && !isLoadingCloud ? (
+                            <div className="bg-brand-primary/10 border border-brand-surface border-dashed rounded-2xl p-6 text-center w-full max-w-sm flex items-center justify-center">
+                                <p className="text-brand-text-muted text-sm italic">No archives found in the astral cloud. Click sync to retrieve.</p>
+                            </div>
+                        ) : (
+                            cloudSaves.map(save => (
+                                <div key={save.id} className="bg-brand-primary/30 p-5 rounded-2xl border border-brand-surface flex flex-col justify-between w-64 shrink-0 snap-start hover:border-brand-accent/30 transition-colors">
+                                    <div className="mb-4">
+                                        <span className="text-body-base font-bold text-brand-text block truncate">{save.name}</span>
+                                        <span className="text-[10px] text-brand-text-muted mt-1 block">Backed up: {new Date(save.updatedAt).toLocaleDateString()}</span>
                                     </div>
                                     <button
                                         onClick={() => handleRestoreCloudSave(save)}
                                         disabled={isRestoringCloud}
-                                        className="btn-primary btn-sm flex-shrink-0"
+                                        className="btn-tertiary btn-sm w-full mt-auto border border-brand-surface hover:bg-brand-accent/10 hover:text-brand-accent"
                                     >
-                                        {isRestoringCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Restore'}
+                                        {isRestoringCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin mx-auto" /> : 'Restore from Cloud'}
                                     </button>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-brand-primary/20 text-center">
-                    <div className="flex justify-center gap-8">
-                        <button onClick={handleImportClick} className="btn-tertiary text-xs">Import Tome</button>
-                        <button onClick={handleExportAll} className="btn-tertiary text-xs">Export Tomes</button>
+                            ))
+                        )}
                     </div>
-                    <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept=".json" />
-                    {importMessage && <p className={`mt-3 text-body-sm font-bold ${importMessage.type === 'success' ? 'text-brand-accent' : 'text-brand-danger'}`}>{importMessage.text}</p>}
                 </div>
             </div>
 
