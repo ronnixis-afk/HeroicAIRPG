@@ -7,13 +7,13 @@ import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessag
 import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillConfiguration, BodySlot, CombatActorSize, StatusEffect, ArchetypeName, ActiveBuff } from './Core';
 
 export interface CombatConfiguration {
-    aiNarratesTurns: boolean;
-    manualCompanionControl: boolean;
-    aiGeneratesLoot: boolean;
-    smarterGm: boolean;
-    fasterGm: boolean;
-    narrativeCombat: boolean;
-    autoIncludeNearbyNpcs: boolean;
+  aiNarratesTurns: boolean;
+  manualCompanionControl: boolean;
+  aiGeneratesLoot: boolean;
+  smarterGm: boolean;
+  fasterGm: boolean;
+  narrativeCombat: boolean;
+  autoIncludeNearbyNpcs: boolean;
 }
 
 export interface GameData {
@@ -23,7 +23,7 @@ export interface GameData {
   playerInventory: Inventory;
   companionInventories: Record<string, Inventory>;
   story: StoryLog[];
-  gallery: GalleryMetadata[]; 
+  gallery: GalleryMetadata[];
   world: LoreEntry[];
   knowledge: LoreEntry[];
   objectives: LoreEntry[];
@@ -31,7 +31,7 @@ export interface GameData {
   messages: ChatMessage[];
   gmSettings?: string;
   gmNotes?: string;
-  grandDesign?: string; 
+  grandDesign?: string;
   connectedNpcIds?: string[]; // NEW: Links NPCs mentioned in the Grand Design
   adventureBrief?: string; // NEW: 10-word concise direction
   plotPoints?: PlotPoint[];
@@ -56,7 +56,7 @@ export interface GameData {
   archetypes?: Record<ArchetypeName, { ground: number, climb: number, swim: number, fly: number }>;
   combatBaseScore?: number;
   playerCoordinates?: string;
-  currentLocale?: string; 
+  currentLocale?: string;
   current_site_id?: string; // NEW: Machine-readable spatial anchor
   current_site_name?: string; // NEW: Canonical site name
   current_site_detail?: string; // NEW: Narrative context of the immediate site
@@ -88,13 +88,13 @@ export interface AIUpdatePayload {
   npcUpdates?: (Partial<NPC> & { id: string })[];
   world?: LoreEntry[];
   knowledge?: LoreEntry[];
-  objectives?: LoreEntry[];
+  objectives?: (Partial<LoreEntry> & { progressUpdate?: string })[];
   combatState?: Partial<CombatState>;
   gmNotes?: string;
-  grandDesign?: string; 
+  grandDesign?: string;
   adventureBrief?: string; // NEW: Consequence extraction field
   playerCoordinates?: string;
-  currentLocale?: string; 
+  currentLocale?: string;
   current_site_id?: string;
   current_site_name?: string;
   current_site_detail?: string; // NEW: Narrative context of the immediate site

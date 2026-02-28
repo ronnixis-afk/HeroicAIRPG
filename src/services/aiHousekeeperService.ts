@@ -11,49 +11,49 @@ import { isLocaleMatch } from '../utils/mapUtils';
  * Optimized for logic and reliability using gemini-flash-lite-latest.
  */
 export const performHousekeeping = async (
-    userAction: string,
-    narrativeResult: string,
-    gameData: GameData
+  userAction: string,
+  narrativeResult: string,
+  gameData: GameData
 ): Promise<{
-    inventoryUpdates: any[];
-    relationshipChanges: { npcId: string, change: number, reason: string }[];
-    objectives: any[];
-    npcMemories: { npcId: string, memory: string }[];
+  inventoryUpdates: any[];
+  relationshipChanges: { npcId: string, change: number, reason: string }[];
+  objectives: any[];
+  npcMemories: { npcId: string, memory: string }[];
 }> => {
 
-    // Create a unified, deduplicated social registry for the Housekeeper
-    const socialMap = new Map<string, any>();
-    const currentLocale = gameData.currentLocale || "";
-    const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
+  // Create a unified, deduplicated social registry for the Housekeeper
+  const socialMap = new Map<string, any>();
+  const currentLocale = gameData.currentLocale || "";
+  const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
 
-    (gameData.npcs || []).forEach(n => {
-        const npcPOI = n.currentPOI || "";
-        const isAtLocale = isLocaleMatch(npcPOI, currentLocale) ||
-            npcPOI === 'Current' ||
-            npcPOI === 'With Party';
+  (gameData.npcs || []).forEach(n => {
+    const npcPOI = n.currentPOI || "";
+    const isAtLocale = isLocaleMatch(npcPOI, currentLocale) ||
+      npcPOI === 'Current' ||
+      npcPOI === 'With Party';
 
-        const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
-        const isAlive = n.status !== 'Dead';
-        const isSentient = n.isSentient !== false && !n.isShip;
+    const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
+    const isAlive = n.status !== 'Dead';
+    const isSentient = n.isSentient !== false && !n.isShip;
 
-        if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
-            socialMap.set(n.id, {
-                id: n.id,
-                name: n.name,
-                type: isActiveCompanion ? 'Active Companion' : 'Local NPC',
-                loves: n.loves,
-                likes: n.likes,
-                dislikes: n.dislikes,
-                hates: n.hates,
-                currentRel: n.relationship,
-                isCompanion: !!n.companionId
-            });
-        }
-    });
+    if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
+      socialMap.set(n.id, {
+        id: n.id,
+        name: n.name,
+        type: isActiveCompanion ? 'Active Companion' : 'Local NPC',
+        loves: n.loves,
+        likes: n.likes,
+        dislikes: n.dislikes,
+        hates: n.hates,
+        currentRel: n.relationship,
+        isCompanion: !!n.companionId
+      });
+    }
+  });
 
-    const socialRegistry = Array.from(socialMap.values());
+  const socialRegistry = Array.from(socialMap.values());
 
-    const prompt = `
+  const prompt = `
     You are the "Social & Mechanical Housekeeper". 
     Your task is to extract relationship shifts, inventory changes, and specific NPC memories from the narrative.
     
@@ -86,9 +86,10 @@ export const performHousekeeping = async (
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
 
     [QUEST AUDIT INSTRUCTIONS]
-    1. Did the narrative introduce a NEW mission, task, or overarching goal? If so, extract it into 'objectives' with a 'title' and 'content', and status 'active'.
-    2. Did the narrative explicitly resolve (complete/fail) an existing quest? Extract it in 'objectives' with 'status' set to 'completed' or 'failed'.
-    3. If there are no quest changes, leave 'objectives' empty.
+    1. Did the narrative introduce a NEW mission, task, or overarching goal? If so, extract it into 'objectives' with a 'title' and 'content' (which must define the static completion condition), and status 'active'.
+    2. Did the narrative explicitly advance an active quest? Extract it in 'objectives' with the new 'nextStep' and a short 'progressUpdate' summarizing the advancement.
+    3. Did the narrative explicitly resolve (complete/fail) an existing quest? Extract it in 'objectives' with 'status' set to 'completed' or 'failed', along with a final 'progressUpdate'.
+    4. If there are no quest changes, leave 'objectives' empty.
 
     [OUTPUT JSON SCHEMA]
     {
@@ -107,31 +108,31 @@ export const performHousekeeping = async (
         { "npcId": "string", "memory": "string" }
       ],
       "objectives": [
-        { "title": "string", "content": "string", "status": "active|completed|failed" }
+        { "title": "string", "content": "string", "nextStep": "string", "progressUpdate": "string", "status": "active|completed|failed" }
       ]
     }
     `;
 
-    try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json"
-            }
-        });
+  try {
+    const ai = getAi();
+    const response = await ai.models.generateContent({
+      model: 'gemini-flash-lite-latest',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json"
+      }
+    });
 
-        const result = JSON.parse(cleanJson(response.text || "{}"));
+    const result = JSON.parse(cleanJson(response.text || "{}"));
 
-        return {
-            inventoryUpdates: result.inventoryUpdates || [],
-            relationshipChanges: result.relationshipChanges || [],
-            npcMemories: result.npcMemories || [],
-            objectives: result.objectives || []
-        };
-    } catch (e) {
-        console.error("Housekeeper failed:", e);
-        return { inventoryUpdates: [], relationshipChanges: [], npcMemories: [], objectives: [] };
-    }
+    return {
+      inventoryUpdates: result.inventoryUpdates || [],
+      relationshipChanges: result.relationshipChanges || [],
+      npcMemories: result.npcMemories || [],
+      objectives: result.objectives || []
+    };
+  } catch (e) {
+    console.error("Housekeeper failed:", e);
+    return { inventoryUpdates: [], relationshipChanges: [], npcMemories: [], objectives: [] };
+  }
 };

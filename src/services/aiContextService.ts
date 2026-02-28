@@ -346,8 +346,9 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 2. PLAIN TEXT ONLY: No Markdown (**, *) in 'narration'.
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.
-5. QUEST GENERATION: If the narrative organically introduces a new mission, task, or overarching goal for the party, you MUST generate a new objective in 'updates.objectives'. Provide a 'title' and 'content'.
-6. QUEST STATUS: If the player completes or fails an existing quest, include it in 'updates.objectives' and set 'status' to 'completed' or 'failed'.
+5. QUEST GENERATION: If the narrative organically introduces a new mission, task, or overarching goal for the party, you MUST generate a new objective in 'updates.objectives'. Provide a 'title' and a 'content' that explicitly defines the completion condition.
+6. QUEST PROGRESSION: If the player advances an existing active quest (especially the one marked as isTracked), you MUST update it in 'updates.objectives'. Provide the new 'nextStep' (Current Lead) and a short 'progressUpdate' string summarizing the advancement.
+7. QUEST STATUS: If the player completes or fails an existing quest, include it in 'updates.objectives' and set 'status' to 'completed' or 'failed', along with a final 'progressUpdate'.
 `;
 
     let builtContext = `${narratorPersona}\n${tier1Mandatory}\n${heroicDirective}\n${tier2Resonance}\n${tier3Recency}\n${tier4Social}\n${coreDirectives}`;

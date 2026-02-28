@@ -511,14 +511,28 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
 
                     if (existingIdx > -1) {
                         const existing = newState.objectives![existingIdx];
+                        // If it's the currently tracked quest, allow 'nextStep' to update and accept 'progressUpdate' strings
+                        const isThisQuestTracked = existing.isTracked;
+                        const newNextStep = isThisQuestTracked ? (obj.nextStep || existing.nextStep) : existing.nextStep;
+
+                        let newMilestones = [...(existing.milestones || [])];
+                        // Only auto-append chronological logs for tracked quests
+                        if (isThisQuestTracked && obj.progressUpdate) {
+                            const timestampFormatted = `[${newState.currentTime}] ${obj.progressUpdate}`;
+                            newMilestones.push(timestampFormatted);
+                        } else if (obj.milestones && Array.isArray(obj.milestones)) {
+                            // Legacy support
+                            newMilestones = Array.from(new Set([...newMilestones, ...obj.milestones]));
+                        }
+
                         newState.objectives![existingIdx] = {
                             ...existing,
                             status: obj.status ? (String(obj.status).toLowerCase() as any) : existing.status,
-                            content: obj.content || existing.content,
-                            nextStep: obj.nextStep || existing.nextStep,
+                            content: existing.content, // ALWAYS retain originally generated completion condition
+                            nextStep: newNextStep,
                             coordinates: obj.coordinates || existing.coordinates,
                             isTracked: obj.isTracked !== undefined ? obj.isTracked : existing.isTracked,
-                            milestones: obj.milestones && Array.isArray(obj.milestones) ? Array.from(new Set([...(existing.milestones || []), ...obj.milestones])) : existing.milestones
+                            milestones: newMilestones
                         };
                     } else if (obj.title && obj.content) {
                         newState.objectives!.push({
@@ -527,7 +541,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                             isNew: true,
                             status: obj.status ? (String(obj.status).toLowerCase() as any) : 'active',
                             nextStep: obj.nextStep || 'Establish a path.',
-                            milestones: obj.milestones || [],
+                            milestones: obj.progressUpdate ? [`[${newState.currentTime}] ${obj.progressUpdate}`] : [],
                             updates: []
                         } as LoreEntry);
                     }
