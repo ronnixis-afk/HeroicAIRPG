@@ -20,7 +20,7 @@ export const performHousekeeping = async (
     objectives: any[];
     npcMemories: { npcId: string, memory: string }[];
 }> => {
-    
+
     // Create a unified, deduplicated social registry for the Housekeeper
     const socialMap = new Map<string, any>();
     const currentLocale = gameData.currentLocale || "";
@@ -28,14 +28,14 @@ export const performHousekeeping = async (
 
     (gameData.npcs || []).forEach(n => {
         const npcPOI = n.currentPOI || "";
-        const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || 
-                          npcPOI === 'Current' || 
-                          npcPOI === 'With Party';
-                          
+        const isAtLocale = isLocaleMatch(npcPOI, currentLocale) ||
+            npcPOI === 'Current' ||
+            npcPOI === 'With Party';
+
         const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
         const isAlive = n.status !== 'Dead';
         const isSentient = n.isSentient !== false && !n.isShip;
-        
+
         if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
             socialMap.set(n.id, {
                 id: n.id,
@@ -85,6 +85,11 @@ export const performHousekeeping = async (
     [NPC MEMORY INSTRUCTIONS]
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
 
+    [QUEST AUDIT INSTRUCTIONS]
+    1. Did the narrative introduce a NEW mission, task, or overarching goal? If so, extract it into 'objectives' with a 'title' and 'content', and status 'active'.
+    2. Did the narrative explicitly resolve (complete/fail) an existing quest? Extract it in 'objectives' with 'status' set to 'completed' or 'failed'.
+    3. If there are no quest changes, leave 'objectives' empty.
+
     [OUTPUT JSON SCHEMA]
     {
       "inventoryUpdates": [
@@ -101,7 +106,9 @@ export const performHousekeeping = async (
       "npcMemories": [
         { "npcId": "string", "memory": "string" }
       ],
-      "objectives": []
+      "objectives": [
+        { "title": "string", "content": "string", "status": "active|completed|failed" }
+      ]
     }
     `;
 
@@ -110,13 +117,13 @@ export const performHousekeeping = async (
         const response = await ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json"
             }
         });
-        
+
         const result = JSON.parse(cleanJson(response.text || "{}"));
-        
+
         return {
             inventoryUpdates: result.inventoryUpdates || [],
             relationshipChanges: result.relationshipChanges || [],

@@ -24,12 +24,12 @@ const DATA_MENU: Record<ContextKey, string> = {
 
 // 1. THE LIBRARIAN (Selector Agent)
 export const determineContextRequirements = async (
-    userContent: string, 
-    isCombatActive: boolean, 
+    userContent: string,
+    isCombatActive: boolean,
     lastAiMessage: string
 ): Promise<{ keys: ContextKey[], usage?: any }> => {
-    
-    const defaults: ContextKey[] = ['core_stats', 'recent_history', 'active_quests', 'social_registry']; 
+
+    const defaults: ContextKey[] = ['core_stats', 'recent_history', 'active_quests', 'social_registry'];
     if (isCombatActive) defaults.push('combat_state', 'inventory');
 
     const menuItems = Object.entries(DATA_MENU).map(([key, desc]) => `- "${key}": ${desc}`).join('\n');
@@ -59,13 +59,13 @@ Return JSON: { "keys": ["key1", "key2"] }`;
         const response = await ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json"
             }
         });
-        
+
         const result = JSON.parse(response.text || "{}");
-        const finalKeys = Array.isArray(result.keys) 
+        const finalKeys = Array.isArray(result.keys)
             ? Array.from(new Set([...defaults, ...result.keys])) as ContextKey[]
             : defaults;
 
@@ -83,7 +83,7 @@ Return JSON: { "keys": ["key1", "key2"] }`;
  */
 export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = []): string => {
     if (!memories || memories.length === 0) return 'First meeting.';
-    
+
     // 1. Get 5 most recent (Chronological)
     const recent = memories.slice(-5);
     const recentIds = new Set(recent.map(m => m.timestamp + m.content));
@@ -113,7 +113,7 @@ export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = 
 
     // 3. Merge and Format
     const composite = [...resonant, ...recent].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-    
+
     return composite.map(m => `[${m.timestamp}]: ${m.content}`).join('; ');
 };
 
@@ -149,12 +149,12 @@ export const getAdjacencyContext = (gameData: GameData, coords: string): string 
     const rowCode = rowChar.charCodeAt(0);
 
     const adjCoords = [
-        `${colChar}-${String.fromCharCode(rowCode - 1)}`, 
-        `${colChar}-${String.fromCharCode(rowCode + 1)}`, 
-        `${String.fromCharCode(colCode - 1)}-${rowChar}`, 
-        `${String.fromCharCode(colCode + 1)}-${rowChar}` 
+        `${colChar}-${String.fromCharCode(rowCode - 1)}`,
+        `${colChar}-${String.fromCharCode(rowCode + 1)}`,
+        `${String.fromCharCode(colCode - 1)}-${rowChar}`,
+        `${String.fromCharCode(colCode + 1)}-${rowChar}`
     ];
-    
+
     return (gameData.mapZones || [])
         .filter(z => adjCoords.includes(z.coordinates) && z.visited)
         .map(z => `[ADJACENT: ${z.name} (${z.coordinates})]: ${z.description}`)
@@ -167,7 +167,7 @@ export const getAvailableSkillsContext = (gameData: GameData): string => {
         const def = SKILL_DEFINITIONS[s];
         return def.usedIn === 'All' || def.usedIn.includes(config as any);
     });
-    
+
     const skillListWithKeywords = activeSkills.map(s => {
         const def = SKILL_DEFINITIONS[s];
         return `- ${s} (Keywords: ${def.keywords.join(', ')})`;
@@ -178,14 +178,14 @@ export const getAvailableSkillsContext = (gameData: GameData): string => {
 
 // 2. THE NARRATOR CONTEXT BUILDER
 export const buildSystemInstruction = (
-    gameData: GameData, 
-    lastMessage: ChatMessage, 
+    gameData: GameData,
+    lastMessage: ChatMessage,
     requiredKeys: ContextKey[],
-    intervention?: string, 
+    intervention?: string,
     systemGeneratedCombatants?: Partial<ActorSuggestion>[],
     isHeroic: boolean = false
 ): string => {
-    
+
     // --- FOUNDATIONAL PERSONA (THE GM CORE) ---
     const narratorPersona = `
 ### CORE NARRATOR IDENTITY
@@ -205,7 +205,7 @@ You are a legendary TTRPG Storyteller and Game Master. Your goal is to create vi
 
     const z = (gameData.mapZones ?? []).find(z => z.coordinates === gameData.playerCoordinates);
     const tracked = (gameData.objectives ?? []).find(o => o.isTracked && o.status === 'active');
-    
+
     // --- TEMPORAL REASONING ---
     const period = getTimePeriod(gameData.currentTime);
     const zoneDesc = z?.description?.toLowerCase() || "";
@@ -272,7 +272,7 @@ ${localPOIs || "No specific local landmarks."}
             .slice(-3)
             .map(log => `- ${log.summary || log.content}`)
             .join('\n');
-        
+
         tier3Recency = `
 ### TIER 3: NARRATIVE CONTINUITY
 [OVERARCHING ARC (GRAND DESIGN)]: ${gameData.grandDesign || "The path is yet to be woven."}
@@ -286,7 +286,7 @@ ${recentMemory || "The journey has just begun."}
     if (requiredKeys.includes('social_registry')) {
         // --- REFINED NPC REGISTRY INJECTION ---
         const activeCompanionIds = new Set(activeCompanions.map(c => c.id));
-        
+
         const npcRegistryDisplay = (gameData.npcs || [])
             .filter(n => {
                 const isAtLocale = isLocaleMatch(n.currentPOI || "", gameData.currentLocale || "");
@@ -346,6 +346,8 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 2. PLAIN TEXT ONLY: No Markdown (**, *) in 'narration'.
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.
+5. QUEST GENERATION: If the narrative organically introduces a new mission, task, or overarching goal for the party, you MUST generate a new objective in 'updates.objectives'. Provide a 'title' and 'content'.
+6. QUEST STATUS: If the player completes or fails an existing quest, include it in 'updates.objectives' and set 'status' to 'completed' or 'failed'.
 `;
 
     let builtContext = `${narratorPersona}\n${tier1Mandatory}\n${heroicDirective}\n${tier2Resonance}\n${tier3Recency}\n${tier4Social}\n${coreDirectives}`;
@@ -355,17 +357,17 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
         const pc = char as PlayerCharacter;
         const npc = char as CombatActor;
         const inCombatContext = !!(gameData.combatState?.isActive || gameData.combatConfiguration?.narrativeCombat);
-        
+
         const profession = pc.profession || npc.description || 'Unknown';
         const sentient = char.isSentient !== false ? 'YES' : 'NO';
         const status = (char as any).status || 'Alive';
-        
+
         let details = `- ${char.name} (${profession})`;
-        
+
         if (requiredKeys.includes('core_stats')) {
             details += ` [HP: ${char.currentHitPoints}/${char.maxHitPoints}] [STATUS: ${status}] [SENTIENT: ${sentient}]`;
         }
-        
+
         if (isPC) {
             if (pc.background && requiredKeys.includes('social_registry')) details += ` | Background: ${pc.background.slice(0, 100)}...`;
             // GATED CONTEXT: Only include weapon stance detail if we are in a combat situation.
@@ -376,7 +378,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
                 else if (stats.isDualWielding) stance = "Dual Wielding";
                 else if (stats.isTwoHanding) stance = "Two-Handed (Heavy Weapon)";
                 else if (stats.isDueling) stance = "Dueling (Precision single blade)";
-                
+
                 details += ` | Weapon Stance: ${stance}`;
                 if (stats.isFlurryActive) {
                     details += ` | [Combat Style: Unarmed Multi-Striker (Flurry Active)]`;
@@ -400,7 +402,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 
     const partyDetails = [
         buildActorDetail(gameData.playerCharacter, gameData.playerInventory),
-        ...activeCompanions.map(c => 
+        ...activeCompanions.map(c =>
             buildActorDetail(c, gameData.companionInventories?.[c.id])
         )
     ].join('\n');
