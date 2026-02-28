@@ -106,8 +106,8 @@ const TabButton: React.FC<{ label: string, isActive: boolean, onClick: () => voi
     <button
         onClick={onClick}
         className={`flex-1 h-11 px-4 rounded-xl text-body-sm font-bold transition-all duration-200 focus:outline-none ${isActive
-                ? 'bg-brand-surface text-brand-accent shadow-sm'
-                : 'text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/50'
+            ? 'bg-brand-surface text-brand-accent shadow-sm'
+            : 'text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/50'
             }`}
     >
         {label}
@@ -359,8 +359,8 @@ const SettingsView: React.FC = () => {
                                             key={s}
                                             onClick={() => handleCombinedConfigChange(s as SkillConfiguration)}
                                             className={`h-11 rounded-xl text-body-sm font-bold border transition-all capitalize ${gameData.skillConfiguration === s
-                                                    ? 'bg-brand-accent text-black border-brand-accent shadow-sm'
-                                                    : 'bg-brand-surface text-brand-text-muted border-brand-primary hover:border-brand-accent/30'
+                                                ? 'bg-brand-accent text-black border-brand-accent shadow-sm'
+                                                : 'bg-brand-surface text-brand-text-muted border-brand-primary hover:border-brand-accent/30'
                                                 }`}
                                         >
                                             {s}
@@ -497,7 +497,7 @@ const SettingsView: React.FC = () => {
                             </button>
 
                             <button onClick={switchWorld} className="btn-secondary btn-md rounded-xl shadow-sm">
-                                Switch world
+                                Back to Main
                             </button>
                         </div>
 

@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { worldService } from '../services/worldService';
+import { cloudSaveService, CloudSaveMetadata } from '../services/cloudSaveService';
 import {
     generateWorldPreview,
     generateWorldSectors,
@@ -27,9 +29,27 @@ const formatCoordinates = (x: number, y: number): string => {
     return `${x}-${y}`;
 };
 
+const TIER_CONFIG: Record<string, { label: string; color: string }> = {
+    'newbie': { label: 'Newbie', color: 'text-brand-text-muted' },
+    'adventurer': { label: 'Adventurer', color: 'text-blue-400' },
+    'hero': { label: 'Hero', color: 'text-yellow-400' },
+    'super_admin': { label: 'Super Admin', color: 'text-brand-accent' }
+};
+
 const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
+    const { user } = useUser();
     const [worlds, setWorlds] = useState<World[]>([]);
     const [isLoadingWorlds, setIsLoadingWorlds] = useState(true);
+
+    // User Tier State
+    const [userTier, setUserTier] = useState<string>('newbie');
+    const [isTierLoading, setIsTierLoading] = useState(true);
+
+    // Cloud Save State
+    const [cloudSaves, setCloudSaves] = useState<CloudSaveMetadata[]>([]);
+    const [isLoadingCloud, setIsLoadingCloud] = useState(false);
+    const [isRestoringCloud, setIsRestoringCloud] = useState(false);
+    const [cloudError, setCloudError] = useState('');
 
     // Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -74,12 +94,54 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     useEffect(() => {
         fetchWorlds();
 
+        // Fetch user tier
+        fetch('/api/user-tier')
+            .then(res => res.ok ? res.json() : null)
+            .then(data => { if (data?.tier) setUserTier(data.tier); })
+            .catch(() => { })
+            .finally(() => setIsTierLoading(false));
+
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         setStartingDate(`${year}-${month}-${day}`);
     }, []);
+
+    const handleFetchCloudSaves = async () => {
+        setIsLoadingCloud(true);
+        setCloudError('');
+        try {
+            const saves = await cloudSaveService.fetchCloudSavesMetadata();
+            setCloudSaves(saves);
+        } catch (e: any) {
+            setCloudError(e.message || 'Failed to load cloud saves.');
+        } finally {
+            setIsLoadingCloud(false);
+        }
+    };
+
+    const handleRestoreCloudSave = async (save: CloudSaveMetadata) => {
+        setIsRestoringCloud(true);
+        setCloudError('');
+        try {
+            const { data, name, worldId } = await cloudSaveService.fetchCloudSaveContext(save.id);
+            // Import as a local world
+            const existingWorlds = await worldService.getAllWorlds();
+            const existingWorld = existingWorlds.find(w => w.id === worldId);
+            if (existingWorld) {
+                await worldService.saveGameData(worldId, data);
+            } else {
+                await worldService.importWorldsFromJson(JSON.stringify([{ id: worldId, name, gameData: data }]));
+            }
+            await fetchWorlds();
+            onWorldSelected(worldId);
+        } catch (e: any) {
+            setCloudError(e.message || 'Failed to restore cloud save.');
+        } finally {
+            setIsRestoringCloud(false);
+        }
+    };
 
     const resetForm = () => {
         setPreviewData(null);
@@ -340,11 +402,29 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         return <div className="min-h-screen bg-brand-bg flex items-center justify-center text-brand-text-muted"><Icon name="spinner" className="w-8 h-8 animate-spin" /></div>;
     }
 
+    const tierInfo = TIER_CONFIG[userTier] || TIER_CONFIG['newbie'];
+    const userEmail = user?.emailAddresses?.[0]?.emailAddress || '';
+
     return (
         <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4 animate-page">
             <div className="w-full max-w-2xl mx-auto">
                 <h1 className="text-center mb-2">Heroic AI <span className="text-brand-accent">RPG</span></h1>
-                <p className="text-body-sm text-brand-text-muted mb-12 text-center font-medium opacity-60">Powered by Gemini 3. Select a world or create a new one.</p>
+                <p className="text-body-sm text-brand-text-muted mb-8 text-center font-medium opacity-60">Powered by Gemini 3. Select a world or create a new one.</p>
+
+                {/* User Info Panel */}
+                <div className="bg-brand-surface p-4 rounded-2xl border border-brand-primary/50 mb-10 flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <Icon name="character" className="w-5 h-5 text-brand-text-muted flex-shrink-0" />
+                        <span className="text-body-sm font-bold text-brand-text truncate">{userEmail || 'Loading...'}</span>
+                    </div>
+                    <div className="flex-shrink-0">
+                        {isTierLoading ? (
+                            <span className="text-body-sm text-brand-text-muted">...</span>
+                        ) : (
+                            <span className={`text-body-sm font-black ${tierInfo.color}`}>{tierInfo.label}</span>
+                        )}
+                    </div>
+                </div>
 
                 <div className="space-y-4 mb-10">
                     {worlds.map(world => (
@@ -360,7 +440,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                     ))}
                 </div>
 
-                <div className="flex justify-center">
+                <div className="flex justify-center gap-4">
                     <button
                         onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
                         className="btn-primary btn-lg shadow-xl shadow-brand-accent/10"
@@ -370,7 +450,43 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                     </button>
                 </div>
 
-                <div className="mt-16 pt-8 border-t border-brand-primary/20 text-center">
+                {/* Cloud Load Section */}
+                <div className="mt-10 pt-8 border-t border-brand-primary/20">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-body-sm font-bold text-brand-text-muted">Cloud Saves</h4>
+                        <button
+                            onClick={handleFetchCloudSaves}
+                            disabled={isLoadingCloud}
+                            className="btn-secondary btn-sm"
+                        >
+                            {isLoadingCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Load Cloud Saves'}
+                        </button>
+                    </div>
+
+                    {cloudError && <p className="text-body-sm text-brand-danger font-bold mb-3">{cloudError}</p>}
+
+                    {cloudSaves.length > 0 && (
+                        <div className="space-y-3 mb-6">
+                            {cloudSaves.map(save => (
+                                <div key={save.id} className="bg-brand-primary/20 p-4 rounded-xl border border-brand-surface flex items-center justify-between">
+                                    <div className="min-w-0">
+                                        <span className="text-body-sm font-bold text-brand-text block truncate">{save.name}</span>
+                                        <span className="text-[10px] text-brand-text-muted">{new Date(save.updatedAt).toLocaleString()}</span>
+                                    </div>
+                                    <button
+                                        onClick={() => handleRestoreCloudSave(save)}
+                                        disabled={isRestoringCloud}
+                                        className="btn-primary btn-sm flex-shrink-0"
+                                    >
+                                        {isRestoringCloud ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Restore'}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-brand-primary/20 text-center">
                     <div className="flex justify-center gap-8">
                         <button onClick={handleImportClick} className="btn-tertiary text-xs">Import Save</button>
                         <button onClick={handleExportAll} className="btn-tertiary text-xs">Export All</button>
