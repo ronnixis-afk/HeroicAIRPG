@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { model, contents, systemInstruction, tools, generationConfig } = body;
+        const { model, contents, config } = body;
 
         const apiKey = process.env.GEMINI_API_KEY;
 
@@ -27,20 +27,12 @@ export async function POST(req: NextRequest) {
 
         const ai = new GoogleGenAI({ apiKey });
 
-        // Ensure we are passing valid fields to the SDK request
+        // Forward the entire config object from the client to the Gemini SDK.
+        // The client sends: { model, contents, config: { systemInstruction, responseMimeType, responseSchema, tools, thinkingConfig, ... } }
         const response = await ai.models.generateContent({
             model: model,
             contents: contents,
-            config: {
-                systemInstruction: systemInstruction,
-                tools: tools,
-                responseMimeType: generationConfig?.responseMimeType,
-                temperature: generationConfig?.temperature,
-                topP: generationConfig?.topP,
-                topK: generationConfig?.topK,
-                candidateCount: generationConfig?.candidateCount,
-                maxOutputTokens: generationConfig?.maxOutputTokens,
-            }
+            config: config
         });
 
         const tokenCount = response.usageMetadata?.totalTokenCount || 0;
@@ -60,7 +52,11 @@ export async function POST(req: NextRequest) {
             })
         ]).catch(err => console.error("Failed to log usage:", err));
 
-        return NextResponse.json({ text: response.text });
+        return NextResponse.json({
+            text: response.text,
+            usageMetadata: response.usageMetadata,
+            candidates: response.candidates
+        });
     } catch (error: any) {
         console.error('Error generating AI content:', error);
         return NextResponse.json(

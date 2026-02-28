@@ -35,7 +35,7 @@ export const getAi = (): any => {
                         }
 
                         const data = await response.json();
-                        return { text: data.text };
+                        return { text: data.text, usageMetadata: data.usageMetadata, candidates: data.candidates };
                     } catch (error: any) {
                         // If it's the last attempt or NOT a 503 error, propogate it outwards
                         if (attempt >= MAX_RETRIES || (!error.message?.includes('503') && !error.message?.includes('UNAVAILABLE'))) {
