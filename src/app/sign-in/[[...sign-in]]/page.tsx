@@ -1,6 +1,7 @@
 'use client';
 
 import { SignIn } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 
 const NEWS_ITEMS = [
     {
@@ -52,27 +53,39 @@ export default function SignInPage() {
                     </div>
                     <SignIn
                         appearance={{
+                            baseTheme: dark,
+                            variables: {
+                                colorPrimary: '#3ecf8e',
+                                colorBackground: '#1e1e1e',
+                                colorInputBackground: '#333333',
+                                colorInputText: '#f8f9fa',
+                                colorText: '#f8f9fa',
+                                colorTextSecondary: '#a1a1a1',
+                                colorDanger: '#ef4444',
+                                borderRadius: '0.75rem',
+                                fontFamily: 'var(--font-inter), sans-serif',
+                            },
                             elements: {
                                 rootBox: 'w-full',
                                 cardBox: 'w-full shadow-none',
-                                card: 'bg-brand-surface/90 backdrop-blur-xl border border-brand-primary/50 rounded-2xl shadow-2xl p-6',
+                                card: 'backdrop-blur-xl border border-brand-primary/50 rounded-2xl shadow-2xl !bg-brand-surface/90',
                                 headerTitle: 'hidden',
                                 headerSubtitle: 'hidden',
-                                socialButtonsBlockButton: 'bg-brand-primary/80 border border-brand-primary hover:bg-brand-primary text-brand-text font-bold rounded-xl h-12 transition-all',
+                                socialButtonsBlockButton: '!bg-brand-primary/80 border border-brand-primary hover:!bg-brand-primary text-brand-text font-bold rounded-xl h-12 transition-all',
                                 socialButtonsBlockButtonText: 'text-brand-text font-bold text-sm',
                                 dividerLine: 'bg-brand-primary',
                                 dividerText: 'text-brand-text-muted text-xs',
                                 formFieldLabel: 'text-brand-text-muted text-xs font-bold',
-                                formFieldInput: 'bg-brand-primary border-brand-surface text-brand-text rounded-xl h-12 focus:ring-brand-accent focus:border-brand-accent font-bold text-sm',
-                                formButtonPrimary: 'bg-brand-accent hover:bg-brand-accent/80 text-black font-black rounded-xl h-12 text-sm shadow-lg shadow-brand-accent/20 transition-all',
+                                formFieldInput: '!bg-brand-primary border-brand-surface text-brand-text rounded-xl h-12 font-bold text-sm',
+                                formButtonPrimary: '!bg-brand-accent hover:!bg-brand-accent/80 !text-black font-black rounded-xl h-12 text-sm shadow-lg shadow-brand-accent/20 transition-all',
                                 footerAction: 'hidden',
                                 footer: 'hidden',
-                                identityPreview: 'bg-brand-primary/50 border-brand-primary rounded-xl',
+                                identityPreview: '!bg-brand-primary/50 border-brand-primary rounded-xl',
                                 identityPreviewText: 'text-brand-text text-sm font-bold',
                                 identityPreviewEditButton: 'text-brand-accent hover:text-brand-accent/80',
                                 formFieldAction: 'text-brand-accent hover:text-brand-accent/80 text-xs font-bold',
-                                alternativeMethodsBlockButton: 'bg-brand-primary/80 border border-brand-primary hover:bg-brand-primary text-brand-text font-bold rounded-xl h-12',
-                                otpCodeFieldInput: 'bg-brand-primary border-brand-surface text-brand-text rounded-lg',
+                                alternativeMethodsBlockButton: '!bg-brand-primary/80 border border-brand-primary hover:!bg-brand-primary text-brand-text font-bold rounded-xl h-12',
+                                otpCodeFieldInput: '!bg-brand-primary border-brand-surface text-brand-text rounded-lg',
                                 formHeaderTitle: 'text-brand-text font-merriweather',
                                 formHeaderSubtitle: 'text-brand-text-muted text-sm',
                                 backLink: 'text-brand-accent hover:text-brand-accent/80',
