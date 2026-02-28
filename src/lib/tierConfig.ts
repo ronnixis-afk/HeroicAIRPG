@@ -1,10 +1,7 @@
 // lib/tierConfig.ts
 // Resolves user access tiers. SuperAdmin is determined by env var, not DB.
 
-const SUPER_ADMIN_EMAILS = (process.env.SUPER_ADMIN_EMAILS || '')
-    .split(',')
-    .map(e => e.trim().toLowerCase())
-    .filter(Boolean);
+
 
 export type UserTier = 'newbie' | 'adventurer' | 'hero' | 'super_admin';
 
@@ -14,7 +11,12 @@ export type UserTier = 'newbie' | 'adventurer' | 'hero' | 'super_admin';
  * All other tiers come from the DB field.
  */
 export function resolveUserTier(email: string, dbTier?: string): UserTier {
-    if (SUPER_ADMIN_EMAILS.includes(email.toLowerCase())) return 'super_admin';
+    const superAdmins = (process.env.SUPER_ADMIN_EMAILS || '')
+        .split(',')
+        .map(e => e.trim().toLowerCase())
+        .filter(Boolean);
+
+    if (superAdmins.includes(email.toLowerCase())) return 'super_admin';
     if (dbTier && ['adventurer', 'hero'].includes(dbTier)) return dbTier as UserTier;
     return 'newbie';
 }
