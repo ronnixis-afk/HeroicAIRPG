@@ -83,7 +83,7 @@ export const generateNarrativeResponse = async (
                 properties: {
                     sector: { type: Type.STRING },
                     zone: { type: Type.STRING },
-                    site_name: { type: Type.STRING },
+                    site_name: { type: Type.STRING, description: "Physical location name ONLY (e.g. 'The Iron Forge'). NEVER use event names like 'Death of X' or 'Aftermath of Y'. If no move occurred, return the current site_name unchanged." },
                     site_id: { type: Type.STRING },
                     narrative_detail: { type: Type.STRING },
                     is_new_site: { type: Type.BOOLEAN }

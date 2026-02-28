@@ -48,7 +48,23 @@ export const useExtractionStep = (
             const isAttemptingMove = narratorLoc.site_id !== gameData.current_site_id;
             const isShipDestination = (gameData.companions ?? []).some(c => c.isShip && c.name.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim());
 
-            if (isAttemptingMove) {
+            // EVENT LANGUAGE FILTER: Prevent dramatic narrative events from creating fake POIs.
+            // The AI sometimes names the "location" after story events (e.g., "Death of Grimbold", "Aftermath of the Battle").
+            const eventPatterns = /\b(death|dying|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb)\b/i;
+            const isEventName = eventPatterns.test(narratorLoc.site_name);
+
+            if (isAttemptingMove && isEventName) {
+                // Snap back to current location — the player hasn't physically moved, something just happened here.
+                finalUpdates.location_update = {
+                    ...narratorLoc,
+                    sector: gameData.playerCoordinates || '0-0',
+                    zone: gameData.current_site_name || 'The Wilds',
+                    site_name: gameData.current_site_name || 'Open Area',
+                    site_id: gameData.current_site_id || 'open-area',
+                    is_new_site: false
+                };
+                resolvedLocale = gameData.current_site_name || '';
+            } else if (isAttemptingMove) {
                 try {
                     const validationResult = await resolveLocaleCreation(narratorLoc.site_name, gameData);
                     if (!validationResult.validation_passed) {
