@@ -13,6 +13,7 @@ datasource db {
 model User {
   id        String     @id // Clerk User ID
   email     String     @unique
+  tier      String     @default("newbie") // newbie | adventurer | hero
   createdAt DateTime   @default(now())
   UsageLogs UsageLog[]
   GameSaves GameSave[]

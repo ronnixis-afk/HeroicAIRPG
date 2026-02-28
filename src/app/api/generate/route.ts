@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { PrismaClient } from '../../../generated/prisma';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { resolveUserTier, canAccessAI } from '../../../lib/tierConfig';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -14,6 +15,20 @@ export async function POST(req: NextRequest) {
         const { userId } = await auth();
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Resolve user tier from Clerk email + DB
+        const client = await clerkClient();
+        const clerkUser = await client.users.getUser(userId);
+        const email = clerkUser.emailAddresses[0]?.emailAddress || '';
+        const dbUser = await prisma.user.findUnique({ where: { id: userId } });
+        const tier = resolveUserTier(email, dbUser?.tier);
+
+        if (!canAccessAI(tier)) {
+            return NextResponse.json(
+                { error: 'AI access is not available for your account tier.' },
+                { status: 403 }
+            );
         }
 
         const body = await req.json();
