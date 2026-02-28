@@ -32,7 +32,7 @@ export default function SignUpPage() {
                             baseTheme: dark,
                             variables: {
                                 colorPrimary: '#3ecf8e',
-                                colorBackground: '#1e1e1e',
+                                colorBackground: 'transparent',
                                 colorInputBackground: '#333333',
                                 colorInputText: '#f8f9fa',
                                 colorText: '#f8f9fa',
@@ -42,9 +42,9 @@ export default function SignUpPage() {
                                 fontFamily: 'var(--font-inter), sans-serif',
                             },
                             elements: {
-                                rootBox: 'w-full',
-                                cardBox: 'w-full shadow-none',
-                                card: 'backdrop-blur-xl border border-brand-primary/50 rounded-2xl shadow-2xl !bg-brand-surface/90',
+                                rootBox: 'w-full flex justify-center',
+                                cardBox: 'w-full max-w-sm mx-auto shadow-none',
+                                card: 'backdrop-blur-md border border-white/10 rounded-2xl !bg-white/5 !shadow-none',
                                 headerTitle: 'hidden',
                                 headerSubtitle: 'hidden',
                                 socialButtonsBlockButton: '!bg-brand-primary/80 border border-brand-primary hover:!bg-brand-primary text-brand-text font-bold rounded-xl h-12 transition-all',
