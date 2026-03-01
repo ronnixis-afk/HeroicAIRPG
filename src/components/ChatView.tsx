@@ -323,7 +323,7 @@ const ChatView: React.FC = () => {
 
                                 renderLocationHeader = (
                                     <div className="w-full flex flex-col items-start mt-10 mb-4 animate-fade-in text-left">
-                                        <h3 className="text-xl font-black text-brand-text font-serif tracking-tight drop-shadow-md mb-0.5 capitalize">
+                                        <h3 className="text-2xl font-black text-brand-text font-serif tracking-tight drop-shadow-md mb-0.5 capitalize">
                                             {currentLocName}
                                         </h3>
                                         <div className="flex items-center gap-2">
