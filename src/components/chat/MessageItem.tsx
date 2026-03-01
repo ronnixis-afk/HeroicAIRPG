@@ -40,8 +40,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
     return (
         <div className="flex flex-col items-start animate-fade-in w-full">
             <div className={`relative group w-full ${isUser
-                    ? "bg-transparent border-none max-w-[98%]"
-                    : "bg-transparent max-w-[88%] font-normal mb-1"
+                ? "bg-transparent border-none max-w-[83%]"
+                : "bg-transparent max-w-[83%] font-normal mb-1"
                 }`}>
                 {isUser ? (
                     <p className="text-body-base text-brand-text-muted/50 leading-relaxed font-medium py-1">
