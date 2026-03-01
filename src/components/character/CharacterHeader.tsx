@@ -46,9 +46,10 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
     const isCustomRace = !availableRaces.includes(character.race) && character.race !== 'Unknown';
 
     // HEROIC POTENTIAL VISUALIZATION
-    const isPlayer = 'heroicPoints' in character;
-    const currentHeroic = isPlayer ? (character as PlayerCharacter).heroicPoints : 0;
-    const maxHeroic = isPlayer ? (character as PlayerCharacter).maxHeroicPoints : 0;
+    // HEROIC POTENTIAL VISUALIZATION
+    const showHeroicPoints = !isCompanion;
+    const currentHeroic = showHeroicPoints ? (character as PlayerCharacter).heroicPoints : 0;
+    const maxHeroic = showHeroicPoints ? (character as PlayerCharacter).maxHeroicPoints : 0;
 
     return (
         <div>
@@ -112,7 +113,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             </div>
 
             {/* Heroic Potential Section */}
-            {isPlayer && (
+            {showHeroicPoints && (
                 <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner group">
                     <div className="flex justify-between items-center">
                         <h3 className="mb-0 text-brand-text text-lg">Heroic Potential</h3>

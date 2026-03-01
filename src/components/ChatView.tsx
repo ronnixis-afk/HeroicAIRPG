@@ -287,11 +287,50 @@ const ChatView: React.FC = () => {
 
             <div className="flex-1 overflow-y-auto chat-scroll-container">
                 <div className="max-w-3xl mx-auto p-4 space-y-4">
-                    {processedMessages.map((msg) => {
+                    {processedMessages.map((msg, index) => {
                         if (!msg) return null;
 
+                        // Location Change Detection Logic
+                        let renderLocationHeader = null;
+                        if (msg.sender === 'ai' || msg.sender === 'system') {
+                            const currentLocName = msg.current_site_name || msg.currentPOI || msg.location;
+                            const currentZoneName = msg.location;
+                            // Search backwards for the last relevant AI/System message to compare location
+                            let prevLocName = null;
+                            for (let k = index - 1; k >= 0; k--) {
+                                const prevMsg = processedMessages[k];
+                                if (prevMsg && (prevMsg.sender === 'ai' || prevMsg.sender === 'system')) {
+                                    prevLocName = prevMsg.current_site_name || prevMsg.currentPOI || prevMsg.location;
+                                    break;
+                                }
+                            }
+
+                            if (currentLocName && currentLocName !== prevLocName) {
+                                renderLocationHeader = (
+                                    <div className="w-full flex flex-col items-center mt-12 mb-6 animate-fade-in px-4">
+                                        <div className="h-[1px] w-1/3 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent mb-4"></div>
+                                        <h3 className="text-2xl font-black text-brand-text font-serif tracking-tight text-center drop-shadow-md mb-1 capitalize">
+                                            {currentLocName}
+                                        </h3>
+                                        {currentZoneName && currentZoneName !== currentLocName && (
+                                            <span className="text-body-base font-semibold text-brand-accent/80 tracking-normal uppercase text-center flex items-center gap-2">
+                                                <Icon name="location" className="w-4 h-4" />
+                                                {currentZoneName}
+                                            </span>
+                                        )}
+                                        <div className="h-[1px] w-1/3 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent mt-4"></div>
+                                    </div>
+                                );
+                            }
+                        }
+
                         if (msg.sender === 'system_group') {
-                            return <SystemMessageGroup key={msg.id} messages={msg.group} />;
+                            return (
+                                <React.Fragment key={msg.id}>
+                                    {renderLocationHeader}
+                                    <SystemMessageGroup messages={msg.group} />
+                                </React.Fragment>
+                            );
                         }
 
                         if (msg.sender === 'system') {
@@ -317,14 +356,16 @@ const ChatView: React.FC = () => {
                         }
 
                         return (
-                            <MessageItem
-                                key={msg.id}
-                                msg={msg}
-                                onSpeak={speak}
-                                isPlaying={playingMessageId === msg.id}
-                                showAlignmentOptions={msg.id === latestAiMessageWithAlignment}
-                                onClearChat={() => handleClearPrevious(msg.id)}
-                            />
+                            <React.Fragment key={msg.id}>
+                                {renderLocationHeader}
+                                <MessageItem
+                                    msg={msg}
+                                    onSpeak={speak}
+                                    isPlaying={playingMessageId === msg.id}
+                                    showAlignmentOptions={msg.id === latestAiMessageWithAlignment}
+                                    onClearChat={() => handleClearPrevious(msg.id)}
+                                />
+                            </React.Fragment>
                         );
                     })}
 
