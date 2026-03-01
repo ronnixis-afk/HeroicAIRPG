@@ -3,13 +3,13 @@
 
 import React, { useReducer, useCallback, useEffect, useState } from 'react';
 import { gameReducer } from '../reducers/game_reducer';
-import { 
+import {
     GameData,
-    GalleryMetadata, 
+    GalleryMetadata,
     GalleryEntry,
     StoryLog
 } from '../types';
-import { 
+import {
     generateNemesis,
     generateActionSuggestions,
     generateGrandDesign
@@ -29,15 +29,16 @@ import { detectMentionedNpcs } from '../utils/npcUtils';
 import { dbService } from '../services/dbService';
 import { worldService } from '../services/worldService';
 import { useEffectLocaleSync } from './world/useEffectLocaleSync';
+import { useSemanticIndexer } from './persistence/useSemanticIndexer';
 
 export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
     const [gameData, dispatch] = useReducer(gameReducer, null);
     const [gallery, setGallery] = useState<GalleryMetadata[]>([]);
     const [worldName, setWorldName] = useState<string>('Adventure');
-    
-    const { 
-        setIsLoading, 
-        setError, 
+
+    const {
+        setIsLoading,
+        setError,
         setIsAiGenerating,
         isLoading,
         setActiveView
@@ -56,6 +57,9 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
 
     useEffectLocaleSync(gameData, dispatch);
 
+    // Background Indexer: Scans GameData for missing vectors (retroactive indexing)
+    useSemanticIndexer(gameData, dispatch);
+
     const weaveGrandDesign = useCallback(async () => {
         if (!gameData) return;
         setIsAiGenerating(true);
@@ -73,21 +77,21 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
     const characterActions = useCharacterActions(gameData, dispatch, ui, weaveGrandDesign);
     const inventoryActions = useInventoryActions(gameData, dispatch);
     const combatActions = useCombatActions(gameData, dispatch, ui, weaveGrandDesign);
-    
+
     // Core Managers (Pre-declared for Hook dependencies)
     const systemSettings = useSystemSettings(gameData, dispatch);
 
-    const { 
+    const {
         submitUserMessage,
         submitAutomatedEvent,
-        setMessages, 
+        setMessages,
         applyAiUpdates,
         summarizeDayLog,
         summarizePastStoryLogs,
         generateObjectiveFollowUp
-    } = useNarrativeManager(gameData, dispatch, { 
-        combatActions, 
-        setIsAiGenerating, 
+    } = useNarrativeManager(gameData, dispatch, {
+        combatActions,
+        setIsAiGenerating,
         processUserInitiatedTravel: (content: string, intent?: any) => worldActions.processUserInitiatedTravel(content, intent),
         weaveGrandDesign
     });
@@ -107,33 +111,33 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
             dispatch({ type: 'UPDATE_OBJECTIVE', payload: { ...objective, status: 'completed' } });
             dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-obj-comp-${Date.now()}`, sender: 'system', content: `Objective completed: ${objective.title}`, type: 'positive' } });
             weaveGrandDesign();
-        } finally { 
-            setIsLoading(false); 
+        } finally {
+            setIsLoading(false);
         }
     }, [gameData, dispatch, setIsLoading, weaveGrandDesign]);
 
-    const updateStoryLog = useCallback(async (log: StoryLog) => { 
-        dispatch({ type: 'UPDATE_STORY_LOG', payload: log }); 
+    const updateStoryLog = useCallback(async (log: StoryLog) => {
+        dispatch({ type: 'UPDATE_STORY_LOG', payload: log });
     }, [dispatch]);
 
-    const removeStoryLogsByMessageIds = useCallback((messageIds: string[]) => { 
-        dispatch({ type: 'REMOVE_STORY_LOGS_BY_MESSAGE', payload: messageIds }); 
+    const removeStoryLogsByMessageIds = useCallback((messageIds: string[]) => {
+        dispatch({ type: 'REMOVE_STORY_LOGS_BY_MESSAGE', payload: messageIds });
     }, [dispatch]);
 
-    const deleteStoryLog = useCallback((id: string) => { 
-        dispatch({ type: 'DELETE_STORY_LOG', payload: id }); 
+    const deleteStoryLog = useCallback((id: string) => {
+        dispatch({ type: 'DELETE_STORY_LOG', payload: id });
     }, [dispatch]);
 
-    const weaveNarrative = useCallback(async () => {}, []);
-    
+    const weaveNarrative = useCallback(async () => { }, []);
+
     const generateAndAddNemesis = useCallback(async (prompt: string) => {
         if (!gameData) return;
         setIsLoading(true);
         try {
             const nemesis = await generateNemesis(prompt, gameData);
             dispatch({ type: 'ADD_NEMESIS', payload: { ...nemesis, id: `nem-${Date.now()}`, isNew: true } });
-        } finally { 
-            setIsLoading(false); 
+        } finally {
+            setIsLoading(false);
         }
     }, [gameData, dispatch, setIsLoading]);
 
@@ -164,44 +168,44 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
     }, [gameData]);
 
     return {
-        gameData, 
-        gallery, 
-        worldName, 
-        storageUsage, 
-        ...characterActions, 
-        ...inventoryActions, 
-        ...combatActions, 
-        ...worldActions, 
-        ...loreActions, 
-        ...npcActions, 
+        gameData,
+        gallery,
+        worldName,
+        storageUsage,
+        ...characterActions,
+        ...inventoryActions,
+        ...combatActions,
+        ...worldActions,
+        ...loreActions,
+        ...npcActions,
         ...notificationActions,
         ...systemSettings,
         useHeroicPoint: characterActions.useHeroicPoint,
         submitUserMessage,
         submitAutomatedEvent,
-        setMessages, 
-        applyAiUpdates, 
+        setMessages,
+        applyAiUpdates,
         attemptObjectiveTurnIn,
-        generateObjectiveFollowUp, 
-        updateStoryLog, 
-        removeStoryLogsByMessageIds, 
+        generateObjectiveFollowUp,
+        updateStoryLog,
+        removeStoryLogsByMessageIds,
         deleteStoryLog,
-        summarizeDayLog, 
-        summarizePastStoryLogs, 
+        summarizeDayLog,
+        summarizePastStoryLogs,
         weaveNarrative,
-        updateMapZoneAction: worldActions.updateMapZone, 
+        updateMapZoneAction: worldActions.updateMapZone,
         movePlayerOnMapAction: worldActions.movePlayerOnMap,
         updateBaseScoreAction: combatActions.updateBaseScore,
         generateMapFromLoreAction: worldActions.generateMapFromLore,
         fetchActionSuggestions,
-        saveWorldProgress, 
-        integrateRefinedCharacter: characterActions.integrateRefinedCharacter, 
+        saveWorldProgress,
+        integrateRefinedCharacter: characterActions.integrateRefinedCharacter,
         integrateCharacter: characterActions.integrateCharacter,
-        addGalleryEntry, 
+        addGalleryEntry,
         deleteGalleryEntry,
         weaveGrandDesign,
-        generateAndAddNemesis, 
-        deleteNemesis, 
+        generateAndAddNemesis,
+        deleteNemesis,
         updateNemesis,
         dispatch
     };

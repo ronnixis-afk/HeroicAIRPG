@@ -6,12 +6,13 @@ import { GameAction, GameData, ChatMessage, AIUpdatePayload, ActorSuggestion, In
 import { useUI } from '../../context/UIContext';
 import { useWorldSelectors } from '../world/useWorldSelectors';
 import { useCombatActions } from '../useCombatActions';
-import { 
-    summarizeDay, 
-    generateStorySummary, 
+import {
+    summarizeDay,
+    generateStorySummary,
     generateObjectiveFollowUpAction,
     checkObjectiveCompletion,
     determineContextRequirements,
+    generateEmbedding,
     ContextKey
 } from '../../services/geminiService';
 
@@ -24,19 +25,19 @@ import { useExtractionStep } from './pipeline/useExtractionStep';
 import { AssessmentResult } from '../../services/aiSkillAssessorService';
 
 export const useNarrativeManager = (
-    gameData: GameData | null, 
+    gameData: GameData | null,
     dispatch: React.Dispatch<GameAction>,
     deps: NarrativeDependencies
 ) => {
     const { combatActions, setIsAiGenerating, processUserInitiatedTravel, weaveGrandDesign } = deps;
-    const { 
-        setIsAuditing, 
-        setIsAssessing, 
-        setIsHousekeeping, 
-        setPendingCombat, 
-        setIsHeroicModeActive, 
+    const {
+        setIsAuditing,
+        setIsAssessing,
+        setIsHousekeeping,
+        setPendingCombat,
+        setIsHeroicModeActive,
         setIsLoading,
-        setChatInput 
+        setChatInput
     } = useUI();
     const { getCombatSlots } = useWorldSelectors(gameData);
 
@@ -44,7 +45,7 @@ export const useNarrativeManager = (
     const { assessIntent } = useIntentStep();
     const { resolveMechanics } = useResolutionStep(dispatch, combatActions);
     const { generateNarrative } = useNarrationStep();
-    
+
     const notifyInventoryChanges = useCallback((inventoryUpdates: InventoryUpdatePayload[]) => {
         if (!gameData || !Array.isArray(inventoryUpdates)) return;
         inventoryUpdates.forEach(batch => {
@@ -54,13 +55,13 @@ export const useNarrativeManager = (
             const isRemoval = action === 'remove';
             batch.items.forEach(item => {
                 if (!item) return;
-                dispatch({ 
-                    type: 'ADD_MESSAGE', 
-                    payload: { 
-                        id: `sys-inv-${isRemoval ? 'loss' : 'gain'}-${Date.now()}-${Math.random()}`, 
-                        sender: 'system', 
-                        content: `${owner} ${isRemoval ? 'lost' : 'acquired'}: **${item.name}**`, 
-                        type: isRemoval ? 'neutral' : 'positive' 
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-inv-${isRemoval ? 'loss' : 'gain'}-${Date.now()}-${Math.random()}`,
+                        sender: 'system',
+                        content: `${owner} ${isRemoval ? 'lost' : 'acquired'}: **${item.name}**`,
+                        type: isRemoval ? 'neutral' : 'positive'
                     }
                 });
             });
@@ -111,32 +112,32 @@ export const useNarrativeManager = (
             // --- PHASE 3: NARRATION (Creative Prose) ---
             setIsAiGenerating(true);
             const combatSlots = resolution.isHostileIntent ? getCombatSlots() : undefined;
-            
+
             const aiResponse = await generateNarrative(
-                userMessage, 
-                gameData, 
-                resolution.mechanicsSummary, 
-                systemInstruction || resolution.combatInstruction, 
-                combatSlots, 
+                userMessage,
+                gameData,
+                resolution.mechanicsSummary,
+                systemInstruction || resolution.combatInstruction,
+                combatSlots,
                 undefined, // intervention
                 isHeroic,
-                requiredKeys 
+                requiredKeys
             );
-            
+
             // Inject the explicitly generated GM Notes from the resolution step
             if (resolution.newGmNotes) {
                 aiResponse.updates = aiResponse.updates || {};
                 aiResponse.updates.gmNotes = resolution.newGmNotes;
             }
-            
+
             setIsAiGenerating(false);
 
             // Commit Narrator Result to Chat
             const aiMessage: ChatMessage = {
-                id: `ai-${Date.now()}`, 
-                sender: 'ai', 
+                id: `ai-${Date.now()}`,
+                sender: 'ai',
                 content: aiResponse.narration || "...",
-                location: aiResponse.location_update?.site_name || gameData.currentLocale, 
+                location: aiResponse.location_update?.site_name || gameData.currentLocale,
                 rolls: resolution.diceRolls || [],
                 alignmentOptions: Array.isArray(aiResponse.alignmentOptions) ? aiResponse.alignmentOptions : undefined,
                 usage: { ...(aiResponse.usage || {}), latencyMs: performance.now() - startTime } as any
@@ -148,17 +149,17 @@ export const useNarrativeManager = (
             setIsAuditing(true);
             setIsHousekeeping(true);
             processConsequences(
-                userMessage.content, 
-                aiResponse.narration || "", 
-                gameData, 
-                aiMessage.id, 
+                userMessage.content,
+                aiResponse.narration || "",
+                gameData,
+                aiMessage.id,
                 aiResponse
             ).then(extraction => {
                 // --- VERIFIED ENGAGEMENT TRIGGER ---
                 // Only trigger consensus panel if the player explicitly chose to fight (Intent)
                 // OR if the AI Auditor confirmed the player is actually being attacked in the narrative.
                 const shouldForceCombat = (assessment?.intentType === 'combat' && resolution.isHostileIntent) || extraction.engagementConfirmed;
-                
+
                 if (shouldForceCombat) {
                     const finalSuggestions = Array.isArray(aiResponse.suggestedActors) ? aiResponse.suggestedActors : [];
                     combatActions.initiateCombatSequence(aiResponse.narration || '', finalSuggestions as ActorSuggestion[], 'Narrative');
@@ -183,7 +184,7 @@ export const useNarrativeManager = (
     const submitUserMessage = useCallback(async (message: ChatMessage, isHeroic: boolean = false) => {
         if (!gameData) return;
         dispatch({ type: 'ADD_MESSAGE', payload: message });
-        
+
         if (isHeroic) {
             dispatch({ type: 'USE_HEROIC_POINT' });
             setIsHeroicModeActive(false);
@@ -196,7 +197,7 @@ export const useNarrativeManager = (
      * Automated Event Entry Point (Travel, Wait, Rest, Exploration)
      */
     const submitAutomatedEvent = useCallback(async (
-        intentText: string, 
+        intentText: string,
         mechanics: { diceRolls: any[], mechanicsSummary: string, combatInstruction: string, isHostileIntent: boolean, newGmNotes?: string },
         systemInstruction?: string
     ) => {
@@ -210,7 +211,9 @@ export const useNarrativeManager = (
         try {
             const summaryText = await summarizeDay(dayEntries, previousDayEntries);
             const removeIds = dayEntries.map(e => e.id);
-            const newLog: StoryLog = { id: `summary-${day}-${Date.now()}`, timestamp: dayEntries[0].timestamp, location: dayEntries[dayEntries.length-1].location, content: `[Daily Summary: ${day}]\n${summaryText}`, summary: summaryText, isNew: false };
+            const content = `[Daily Summary: ${day}]\n${summaryText}`;
+            const embedding = await generateEmbedding(`${summaryText} ${content}`) || undefined;
+            const newLog: StoryLog = { id: `summary-${day}-${Date.now()}`, timestamp: dayEntries[0].timestamp, location: dayEntries[dayEntries.length - 1].location, content, summary: summaryText, isNew: false, embedding };
             dispatch({ type: 'COMPRESS_DAY_LOGS', payload: { removeIds, newLog } });
         } finally { setIsLoading(false); }
     }, [dispatch, setIsLoading]);
@@ -220,7 +223,9 @@ export const useNarrativeManager = (
         setIsLoading(true);
         try {
             const historySummary = await generateStorySummary(gameData.story);
-            const newLog: StoryLog = { id: `archive-${Date.now()}`, timestamp: "Previous Adventures", location: "Various", content: `[Archive Summary]\n${historySummary}`, summary: historySummary, isNew: false };
+            const content = `[Archive Summary]\n${historySummary}`;
+            const embedding = await generateEmbedding(`${historySummary} ${content}`) || undefined;
+            const newLog: StoryLog = { id: `archive-${Date.now()}`, timestamp: "Previous Adventures", location: "Various", content, summary: historySummary, isNew: false, embedding };
             const allIds = gameData.story.map(s => s.id);
             dispatch({ type: 'COMPRESS_DAY_LOGS', payload: { removeIds: allIds, newLog } });
         } catch (e) { console.error(e); }
@@ -251,14 +256,72 @@ export const useNarrativeManager = (
 
     const applyAiUpdates = useCallback(async (updates: AIUpdatePayload, aiMessage?: ChatMessage) => {
         if (updates.inventoryUpdates) notifyInventoryChanges(updates.inventoryUpdates);
+
+        // --- BACKGROUND INDEXER (RAG EMBEDDINGS) ---
+        // Before hitting the synchronous reducer, we asynchronously fetch embeddings for any new Semantic entities
+        const indexingTasks: Promise<void>[] = [];
+
+        // 1. Index Knowledge (Lore)
+        if (updates.knowledge && updates.knowledge.length > 0) {
+            updates.knowledge.forEach(k => {
+                const textToEmbed = `${k.title || ''} ${k.content || ''}`.trim();
+                if (textToEmbed) {
+                    indexingTasks.push(generateEmbedding(textToEmbed).then(vec => {
+                        if (vec) k.embedding = vec;
+                    }));
+                }
+            });
+        }
+
+        // 2. Index Objectives (Quests)
+        if (updates.objectives && updates.objectives.length > 0) {
+            updates.objectives.forEach(o => {
+                const textToEmbed = `${o.title || ''} ${o.content || ''}`.trim();
+                if (textToEmbed) {
+                    indexingTasks.push(generateEmbedding(textToEmbed).then(vec => {
+                        if (vec) o.embedding = vec;
+                    }));
+                }
+            });
+        }
+
+        // 3. Index NPC Memories
+        if (updates.npcMemories && updates.npcMemories.length > 0) {
+            updates.npcMemories.forEach(m => {
+                if (m.memory) {
+                    indexingTasks.push(generateEmbedding(m.memory).then(vec => {
+                        // Note: We mutate the actual object reference inside the payload
+                        if (vec) (m as any).embedding = vec;
+                    }));
+                }
+            });
+        }
+
+        // 4. Index Story Logs
+        if (updates.storyUpdates && updates.storyUpdates.length > 0) {
+            updates.storyUpdates.forEach(su => {
+                const textToEmbed = `${su.summary || ''} ${su.content || ''}`.trim();
+                if (textToEmbed) {
+                    indexingTasks.push(generateEmbedding(textToEmbed).then(vec => {
+                        if (vec) su.embedding = vec;
+                    }));
+                }
+            });
+        }
+
+        // Wait for all embeddings to resolve (these are very fast API calls)
+        if (indexingTasks.length > 0) {
+            await Promise.allSettled(indexingTasks);
+        }
+
         dispatch({ type: 'AI_UPDATE', payload: updates });
         if (aiMessage) dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
     }, [dispatch, notifyInventoryChanges]);
 
-    return { 
+    return {
         submitUserMessage,
         submitAutomatedEvent,
-        setMessages, 
+        setMessages,
         applyAiUpdates,
         summarizeDayLog,
         summarizePastStoryLogs,

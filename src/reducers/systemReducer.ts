@@ -568,6 +568,47 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 });
             }
 
+            if (updates.npcMemories && Array.isArray(updates.npcMemories)) {
+                newState.npcs = [...(newState.npcs || [])];
+                updates.npcMemories.forEach(memData => {
+                    if (!memData || !memData.npcId || !memData.memory) return;
+
+                    const npcIdx = newState.npcs!.findIndex(n => n.id === memData.npcId);
+                    if (npcIdx > -1) {
+                        const existingNpc = newState.npcs![npcIdx];
+                        newState.npcs![npcIdx] = {
+                            ...existingNpc,
+                            memories: [
+                                ...(existingNpc.memories || []),
+                                {
+                                    content: memData.memory,
+                                    timestamp: newState.currentTime || new Date().toISOString(),
+                                    embedding: memData.embedding // Inject the vector created by the Background Indexer!
+                                }
+                            ]
+                        };
+                    }
+                });
+            }
+
+            if (updates.storyUpdates && Array.isArray(updates.storyUpdates)) {
+                newState.story = [...(newState.story || [])];
+                const nowStamp = new Date().toISOString();
+                updates.storyUpdates.forEach(su => {
+                    newState.story!.push({
+                        id: su.id || `story-${Date.now()}-${Math.random()}`,
+                        content: su.content,
+                        summary: su.summary,
+                        location: newState.current_site_name || newState.currentLocale || 'Unknown',
+                        locale: newState.current_site_detail || 'No detail available',
+                        timestamp: newState.currentTime || nowStamp,
+                        embedding: su.embedding,
+                        isNew: su.isNew,
+                        originatingMessageId: su.originatingMessageId
+                    });
+                });
+            }
+
             return newState;
         }
 

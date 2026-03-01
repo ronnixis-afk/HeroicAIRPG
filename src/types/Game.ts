@@ -89,6 +89,9 @@ export interface AIUpdatePayload {
   world?: LoreEntry[];
   knowledge?: LoreEntry[];
   objectives?: (Partial<LoreEntry> & { progressUpdate?: string })[];
+  npcMemories?: { npcId: string, memory: string, embedding?: number[] }[];
+  storyUpdates?: { id: string, content: string, summary?: string, embedding?: number[], isNew?: boolean, originatingMessageId?: string }[];
+  story?: StoryLog[];
   combatState?: Partial<CombatState>;
   gmNotes?: string;
   grandDesign?: string;

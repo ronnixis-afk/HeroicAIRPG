@@ -1,9 +1,8 @@
-// services/aiNarratorService.ts
-
 import { getAi, cleanJson } from './aiClient';
 import { GameData, ChatMessage, ActorSuggestion, UsageStats, DiceRoll, LoreEntry, PlayerCharacter } from '../types';
 import { Type, Modality } from "@google/genai";
 import { buildSystemInstruction, ContextKey } from './aiContextService';
+import { generateEmbedding } from './geminiService';
 
 // Mapping UI voices to Gemini Neural Voices
 const VOICE_MAP: Record<string, string> = {
@@ -44,7 +43,18 @@ export const generateNarrativeResponse = async (
 
     const requiredKeys = contextKeysOverride || ['core_stats', 'inventory', 'combat_state', 'location_details', 'active_quests', 'recent_history', 'world_lore', 'social_registry'];
 
-    const systemInstruction = buildSystemInstruction(gameData, lastMessage, requiredKeys, nemesisContext, systemGeneratedCombatants, isHeroic);
+    // --- RAG EMBEDDING INJECTION ---
+    // Generate a vector representation of the player's action for semantic search
+    let userActionVector: number[] | undefined;
+    if (lastMessage && lastMessage.content) {
+        try {
+            userActionVector = await generateEmbedding(lastMessage.content);
+        } catch (e) {
+            console.log("Vector generation failed before narrative context build (fallback to lexical)");
+        }
+    }
+
+    const systemInstruction = buildSystemInstruction(gameData, lastMessage, requiredKeys, nemesisContext, systemGeneratedCombatants, isHeroic, userActionVector);
 
     const recentHistory = (gameData.messages ?? []).slice(-4).map(m => ({
         role: m.sender === 'user' ? 'user' : 'model',

@@ -181,19 +181,14 @@ export const useExtractionStep = (
         if (!gameData.combatState?.isActive && !isEngaged) {
             const logSummary = aiResponse.turnSummary || auditResult.turnSummary || "Interaction deed.";
             const truncatedSummary = logSummary.split(' ').slice(0, 10).join(' ');
-            dispatch({
-                type: 'ADD_STORY_LOG', payload: {
-                    id: `log-${Date.now()}`,
-                    timestamp: finalUpdates.currentTime || gameData.currentTime,
-                    location: resolvedLocale || 'Unknown',
-                    content: aiNarrative,
-                    summary: truncatedSummary,
-                    isNew: true,
-                    originatingMessageId: aiMessageId,
-                    site_id: finalUpdates.location_update?.site_id,
-                    narrative_detail: finalUpdates.location_update?.narrative_detail
-                } as StoryLog
-            });
+
+            finalUpdates.storyUpdates = [{
+                id: `log-${Date.now()}`,
+                content: aiNarrative,
+                summary: truncatedSummary,
+                isNew: true,
+                originatingMessageId: aiMessageId
+            }];
         }
 
         dispatch({ type: 'AI_UPDATE', payload: finalUpdates });

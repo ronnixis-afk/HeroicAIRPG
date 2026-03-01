@@ -1,7 +1,7 @@
 
 // services/aiContextService.ts
 
-import { GameData, ChatMessage, LoreEntry, ActorSuggestion, SKILL_DEFINITIONS, SKILL_NAMES, PlayerCharacter, Companion, CombatActor, CalculatedCombatStats, Inventory, NPC, NPCMemory } from '../types';
+import { GameData, ChatMessage, LoreEntry, ActorSuggestion, SKILL_DEFINITIONS, SKILL_NAMES, PlayerCharacter, Companion, CombatActor, CalculatedCombatStats, Inventory, NPC, NPCMemory, StoryLog } from '../types';
 import { getAi, cleanJson } from './aiClient';
 import { ThinkingLevel } from '@google/genai';
 import { isLocaleMatch } from '../utils/mapUtils';
@@ -75,13 +75,15 @@ Return JSON: { "keys": ["key1", "key2"] }`;
     }
 };
 
+import { searchEmbeddings } from '../utils/mathUtils';
+
 // --- RAG HELPERS ---
 
 /**
  * Retrieves relevant memories for an NPC based on the current user action.
- * Uses a "Composite Memory" strategy: 5 most recent + 5 most resonant.
+ * Uses a "Composite Memory" strategy: 5 most recent + up to 5 most resonant (via semantic vector search).
  */
-export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = []): string => {
+export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = [], queryEmbedding?: number[]): string => {
     if (!memories || memories.length === 0) return 'First meeting.';
 
     // 1. Get 5 most recent (Chronological)
@@ -89,27 +91,41 @@ export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = 
     const recentIds = new Set(recent.map(m => m.timestamp + m.content));
 
     // 2. Score remaining for resonance
-    const terms = (searchText || '').toLowerCase().split(/[\W_]+/).filter(t => t.length > 3);
     const pool = memories.filter(m => !recentIds.has(m.timestamp + m.content));
+    let resonant: NPCMemory[] = [];
 
-    if (terms.length === 0 || pool.length === 0) {
-        return memories.slice(-10).map(m => `[${m.timestamp}]: ${m.content}`).join('; ');
+    if (queryEmbedding && queryEmbedding.length > 0) {
+        // --- LOCAL VECTOR RAG ---
+        // We have a mathematical vector of the user's current action.
+        // We compare it against the vectors of all past memories to find the absolute most relevant ones.
+        const semanticResults = searchEmbeddings<NPCMemory>(
+            queryEmbedding,
+            pool,
+            (m) => m.embedding,
+            5,    // Top K
+            0.4   // Similarity threshold (adjustable based on testing, 0.4 is usually a decent baseline for text-embedding models)
+        );
+        resonant = semanticResults.map(r => r.item);
+    } else {
+        // --- LEGACY LEXICAL FALLBACK ---
+        const terms = (searchText || '').toLowerCase().split(/[\W_]+/).filter(t => t.length > 3);
+        if (terms.length > 0) {
+            const scored = pool.map(m => {
+                let score = 0;
+                const content = m.content.toLowerCase();
+                terms.forEach(term => {
+                    if (content.includes(term)) score += 10;
+                });
+                return { memory: m, score };
+            });
+
+            resonant = scored
+                .filter(s => s.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 5)
+                .map(s => s.memory);
+        }
     }
-
-    const scored = pool.map(m => {
-        let score = 0;
-        const content = m.content.toLowerCase();
-        terms.forEach(term => {
-            if (content.includes(term)) score += 10;
-        });
-        return { memory: m, score };
-    });
-
-    const resonant = scored
-        .filter(s => s.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 5)
-        .map(s => s.memory);
 
     // 3. Merge and Format
     const composite = [...resonant, ...recent].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
@@ -117,25 +133,43 @@ export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = 
     return composite.map(m => `[${m.timestamp}]: ${m.content}`).join('; ');
 };
 
-export const getRelevantLore = (searchText: string, worldLore: LoreEntry[]): string => {
-    if (!searchText || !worldLore || worldLore.length === 0) return '';
-    const terms = (searchText || '').toLowerCase().split(/[\W_]+/).filter(t => t.length > 3);
-    if (terms.length === 0) return '';
-    const scored = worldLore.map(entry => {
-        let score = 0;
-        const title = (entry.title || '').toLowerCase();
-        const content = (entry.content || '').toLowerCase();
-        const kw = (entry.keywords || []).map(k => k.toLowerCase());
+export const getRelevantLore = (searchText: string, worldLore: LoreEntry[], queryEmbedding?: number[]): string => {
+    if (!worldLore || worldLore.length === 0) return '';
+    let topEntries: { entry: LoreEntry, score: number }[] = [];
 
-        terms.forEach(term => {
-            if (title === term) score += 20;
-            else if (title.includes(term)) score += 10;
-            if (kw.includes(term)) score += 8;
-            if (content.includes(term)) score += 2;
-        });
-        return { entry, score };
-    });
-    const topEntries = scored.filter(s => s.score > 5).sort((a, b) => b.score - a.score).slice(0, 3);
+    if (queryEmbedding && queryEmbedding.length > 0) {
+        // --- LOCAL VECTOR RAG ---
+        const semanticResults = searchEmbeddings<LoreEntry>(
+            queryEmbedding,
+            worldLore,
+            (l) => l.embedding,
+            3,      // Top K (We keep this low because Lore entries can be long, preserving token space)
+            0.4     // Similarity threshold
+        );
+        topEntries = semanticResults.map(r => ({ entry: r.item, score: r.score }));
+    } else {
+        // --- LEGACY LEXICAL FALLBACK ---
+        const terms = (searchText || '').toLowerCase().split(/[\W_]+/).filter(t => t.length > 3);
+        if (terms.length > 0) {
+            const scored = worldLore.map(entry => {
+                let score = 0;
+                const title = (entry.title || '').toLowerCase();
+                const content = (entry.content || '').toLowerCase();
+                const kw = (entry.keywords || []).map(k => k.toLowerCase());
+
+                terms.forEach(term => {
+                    if (title === term) score += 20;
+                    else if (title.includes(term)) score += 10;
+                    if (kw.includes(term)) score += 8;
+                    if (content.includes(term)) score += 2;
+                });
+                return { entry, score };
+            });
+            topEntries = scored.filter(s => s.score > 5).sort((a, b) => b.score - a.score).slice(0, 3);
+        }
+    }
+
+    if (topEntries.length === 0) return '';
     return topEntries.map(s => `[RESONANT LORE (${s.entry.title})]: ${s.entry.content}`).join('\n');
 };
 
@@ -183,7 +217,8 @@ export const buildSystemInstruction = (
     requiredKeys: ContextKey[],
     intervention?: string,
     systemGeneratedCombatants?: Partial<ActorSuggestion>[],
-    isHeroic: boolean = false
+    isHeroic: boolean = false,
+    queryEmbedding?: number[]
 ): string => {
 
     // --- FOUNDATIONAL PERSONA (THE GM CORE) ---
@@ -252,7 +287,7 @@ The user has expended a HEROIC POINT.
 
     let tier2Resonance = "";
     if (requiredKeys.includes('world_lore') || requiredKeys.includes('location_details')) {
-        const resonantLore = getRelevantLore(lastMessage.content, [...(gameData.world || []), ...(gameData.knowledge || [])]);
+        const resonantLore = getRelevantLore(lastMessage.content, [...(gameData.world || []), ...(gameData.knowledge || [])], queryEmbedding);
         const localPOIs = (gameData.knowledge ?? [])
             .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'))
             .map(k => `- ${k.title}: ${k.content}`)
@@ -268,15 +303,36 @@ ${localPOIs || "No specific local landmarks."}
 
     let tier3Recency = "";
     if (requiredKeys.includes('recent_history')) {
-        const recentMemory = (gameData.story ?? [])
-            .slice(-3)
+        const recentStoryLogs = (gameData.story ?? []).slice(-3);
+        const recentMemory = recentStoryLogs
             .map(log => `- ${log.summary || log.content}`)
             .join('\n');
+
+        let historicalEchoes = "";
+
+        if (queryEmbedding && (gameData.story?.length || 0) > 3) {
+            const recentIds = new Set(recentStoryLogs.map(l => l.id));
+            const olderLogs = gameData.story!.filter(l => !recentIds.has(l.id));
+
+            const semanticLogs = searchEmbeddings<StoryLog>(
+                queryEmbedding,
+                olderLogs,
+                (l) => l.embedding,
+                3, // Top K
+                0.4
+            );
+
+            if (semanticLogs.length > 0) {
+                // Sort chronologically by original timestamp/order
+                const sortedLogs = semanticLogs.map(r => r.item).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+                historicalEchoes = `[HISTORICAL ECHOES]:\n` + sortedLogs.map(log => `- (Archived Memory): ${log.summary || log.content}`).join('\n') + `\n`;
+            }
+        }
 
         tier3Recency = `
 ### TIER 3: NARRATIVE CONTINUITY
 [OVERARCHING ARC (GRAND DESIGN)]: ${gameData.grandDesign || "The path is yet to be woven."}
-[RECENT DEEDS]:
+${historicalEchoes}[RECENT DEEDS]:
 ${recentMemory || "The journey has just begun."}
 `;
     }
@@ -294,7 +350,7 @@ ${recentMemory || "The journey has just begun."}
                 return (isAtLocale || isActiveCompanion) && !n.isBodyCleared;
             })
             .map(n => {
-                const memoryBlock = getRelevantMemories(lastMessage.content, n.memories);
+                const memoryBlock = getRelevantMemories(lastMessage.content, n.memories, queryEmbedding);
                 if (n.status === 'Dead') {
                     return `- [CORPSE]: ${n.name}. [CONDITION]: Dead. [FINAL MEMORY]: ${memoryBlock}`;
                 }

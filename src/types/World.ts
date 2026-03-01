@@ -29,6 +29,7 @@ export interface ObjectiveUpdate {
 export interface NPCMemory {
   timestamp: string;
   content: string;
+  embedding?: number[]; // Semantic Retrieval Vector
 }
 
 export type ActorAlignment = 'ally' | 'neutral' | 'enemy';
@@ -45,19 +46,22 @@ export interface LoreEntry {
   isTracked?: boolean;
   coordinates?: string;
   visited?: boolean;
-  
+
   // Journal System Additions
   nextStep?: string; // The "Compass": What the player should do RIGHT NOW
   milestones?: string[]; // The "Journal": Chronological list of major accomplishments
+
+  // AI Architecture
+  embedding?: number[]; // Semantic Retrieval Vector
 }
 
 export interface GalleryEntry {
-    id: string;
-    worldId: string; // NEW: Link to specific adventure
-    imageUrl: string;
-    description: string;
-    timestamp: string; // In-game time
-    realTimestamp: number; // Real world time for sorting
+  id: string;
+  worldId: string; // NEW: Link to specific adventure
+  imageUrl: string;
+  description: string;
+  timestamp: string; // In-game time
+  realTimestamp: number; // Real world time for sorting
 }
 
 /**
@@ -67,7 +71,7 @@ export interface GalleryEntry {
 export type GalleryMetadata = Omit<GalleryEntry, 'imageUrl'>;
 
 export interface StoryLog {
-  id:string;
+  id: string;
   timestamp: string;
   location: string;
   locale?: string; // New field for immediate sub-location
@@ -75,56 +79,57 @@ export interface StoryLog {
   summary?: string;
   originatingMessageId?: string;
   isNew?: boolean;
+  embedding?: number[]; // Semantic Retrieval Vector
 }
 
 export interface NPC {
-    id: string;
-    name: string;
-    description?: string;
-    relationship: number; // -50 to 50
-    status: string; // 'Alive', 'Dead', 'Unknown'
-    deathTimestamp?: string; // In-game time of death
-    isBodyCleared?: boolean; // True if the corpse was removed
-    location?: string; // The Zone name
-    currentPOI?: string; // The specific site/locale name (replaces 'sector')
-    // Fix: Added site_id to NPC interface to support machine-readable spatial anchoring
-    site_id?: string;
-    // Fix: Added narrative_detail property to NPC interface to support social state reconciliation.
-    narrative_detail?: string;
-    gender?: string;
-    race?: string;
-    appearance?: string;
-    companionId?: string; // Link to companion if applicable
-    image?: string; // Optional avatar
-    isNew?: boolean; // Notification flag
-    isShip?: boolean; // NEW: Explicitly identify non-sentient vehicles in registry
-    isMount?: boolean; // NEW: Explicitly identify companions who can be used as mounts
-    // Fix: Added isSentient to NPC interface to support tracked vehicles/entities.
-    isSentient?: boolean; // NEW: Track if the vehicle/entity can talk
-    is_essential?: boolean; // NEW: Determines if the NPC appears in the social ledger
-    // Combat Actor Data
-    currentHitPoints?: number;
-    maxHitPoints?: number;
-    temporaryHitPoints?: number;
-    maxTemporaryHitPoints?: number;
-    rank?: 'normal' | 'elite' | 'boss';
-    size?: CombatActorSize;
-    template?: string; // e.g. "Brute", "Sniper"
-    difficulty?: string; // NEW: Replaces separate CR/Rank in suggestions
-    cr?: string; // Keep for legacy
-    challengeRating?: number; 
-    affinity?: string; // e.g. "Thermal", "None"
-    archetype?: ArchetypeName | string;
-    loves?: string;
-    likes?: string;
-    dislikes?: string;
-    hates?: string;
-    // Fix: Added alignment to NPC to support social stance resolution
-    alignment?: ActorAlignment;
-    // Fix: Added memories to NPC registry for narrative continuity
-    memories?: NPCMemory[];
-    // Fix: Added statusEffects to NPC to support untargetable logic (e.g. Invisible/Hidden)
-    statusEffects?: StatusEffect[];
+  id: string;
+  name: string;
+  description?: string;
+  relationship: number; // -50 to 50
+  status: string; // 'Alive', 'Dead', 'Unknown'
+  deathTimestamp?: string; // In-game time of death
+  isBodyCleared?: boolean; // True if the corpse was removed
+  location?: string; // The Zone name
+  currentPOI?: string; // The specific site/locale name (replaces 'sector')
+  // Fix: Added site_id to NPC interface to support machine-readable spatial anchoring
+  site_id?: string;
+  // Fix: Added narrative_detail property to NPC interface to support social state reconciliation.
+  narrative_detail?: string;
+  gender?: string;
+  race?: string;
+  appearance?: string;
+  companionId?: string; // Link to companion if applicable
+  image?: string; // Optional avatar
+  isNew?: boolean; // Notification flag
+  isShip?: boolean; // NEW: Explicitly identify non-sentient vehicles in registry
+  isMount?: boolean; // NEW: Explicitly identify companions who can be used as mounts
+  // Fix: Added isSentient to NPC interface to support tracked vehicles/entities.
+  isSentient?: boolean; // NEW: Track if the vehicle/entity can talk
+  is_essential?: boolean; // NEW: Determines if the NPC appears in the social ledger
+  // Combat Actor Data
+  currentHitPoints?: number;
+  maxHitPoints?: number;
+  temporaryHitPoints?: number;
+  maxTemporaryHitPoints?: number;
+  rank?: 'normal' | 'elite' | 'boss';
+  size?: CombatActorSize;
+  template?: string; // e.g. "Brute", "Sniper"
+  difficulty?: string; // NEW: Replaces separate CR/Rank in suggestions
+  cr?: string; // Keep for legacy
+  challengeRating?: number;
+  affinity?: string; // e.g. "Thermal", "None"
+  archetype?: ArchetypeName | string;
+  loves?: string;
+  likes?: string;
+  dislikes?: string;
+  hates?: string;
+  // Fix: Added alignment to NPC to support social stance resolution
+  alignment?: ActorAlignment;
+  // Fix: Added memories to NPC registry for narrative continuity
+  memories?: NPCMemory[];
+  // Fix: Added statusEffects to NPC to support untargetable logic (e.g. Invisible/Hidden)
+  statusEffects?: StatusEffect[];
 }
 
 export interface DiceRoll {
@@ -153,11 +158,11 @@ export interface DiceRoll {
 }
 
 export interface UsageStats {
-    promptTokens: number;
-    candidatesTokens: number;
-    totalTokens: number;
-    costUsd: number;
-    latencyMs?: number;
+  promptTokens: number;
+  candidatesTokens: number;
+  totalTokens: number;
+  costUsd: number;
+  latencyMs?: number;
 }
 
 export interface AlignmentOption {
@@ -205,8 +210,8 @@ export interface CombatActorAttack {
 }
 
 export interface CombatActorSpecialAbility extends AbilityEffect {
-    name: string;
-    description: string;
+  name: string;
+  description: string;
 }
 
 export interface CombatActor {
@@ -256,10 +261,10 @@ export interface CombatState {
 }
 
 export interface LootState {
-    isOpen: boolean;
-    isLoading: boolean;
-    items: any[]; // Avoid circular dependency with Item class here if possible, or use 'any' for loose coupling in state
-    defeatedEnemies: CombatActor[];
+  isOpen: boolean;
+  isLoading: boolean;
+  items: any[]; // Avoid circular dependency with Item class here if possible, or use 'any' for loose coupling in state
+  defeatedEnemies: CombatActor[];
 }
 
 export interface Nemesis {
@@ -272,116 +277,116 @@ export interface Nemesis {
 }
 
 export interface EnemyTemplate {
-    name: string;
-    attackType: string;
-    mods: number[];
-    saves: AbilityScoreName[];
-    proficientSkills: SkillName[];
-    /* Fix: Replaced 'effect' with 'status' to align with AbilityEffect type and fix Object Literal errors in mechanics templates */
-    abilities: { 
-        target: 'Single' | 'Multiple'; 
-        type: 'Damage' | 'Status' | 'Heal'; 
-        status?: string; 
-        save?: AbilityScoreName;
-        saveEffect?: 'half' | 'negate';
-    }[];
-    defaultArchetype?: ArchetypeName;
+  name: string;
+  attackType: string;
+  mods: number[];
+  saves: AbilityScoreName[];
+  proficientSkills: SkillName[];
+  /* Fix: Replaced 'effect' with 'status' to align with AbilityEffect type and fix Object Literal errors in mechanics templates */
+  abilities: {
+    target: 'Single' | 'Multiple';
+    type: 'Damage' | 'Status' | 'Heal';
+    status?: string;
+    save?: AbilityScoreName;
+    saveEffect?: 'half' | 'negate';
+  }[];
+  defaultArchetype?: ArchetypeName;
 }
 
 export interface AffinityDefinition {
-    name: string;
-    description: string;
-    immunities: string[];
-    resistances: string[];
-    vulnerabilities: string[];
+  name: string;
+  description: string;
+  immunities: string[];
+  resistances: string[];
+  vulnerabilities: string[];
 }
 
 export type PlotPointType = 'Choice' | 'Background' | 'Milestone' | 'Secret' | 'World' | 'Objective' | 'Achievement';
 
 export interface PlotPoint {
-    id: string;
-    content: string;
-    type: PlotPointType;
-    isNew: boolean;
+  id: string;
+  content: string;
+  type: PlotPointType;
+  isNew: boolean;
 }
 
 export interface MapZone {
-    id: string;
-    coordinates: string;
-    name: string;
-    hostility: number;
-    description?: string;
-    sectorId?: string;
-    visited?: boolean;
-    isNew?: boolean; // Notification flag
-    tags?: string[];
-    keywords?: string[];
-    isMajorHub?: boolean; // New: Explicitly identifies Faction Seats of Power
+  id: string;
+  coordinates: string;
+  name: string;
+  hostility: number;
+  description?: string;
+  sectorId?: string;
+  visited?: boolean;
+  isNew?: boolean; // Notification flag
+  tags?: string[];
+  keywords?: string[];
+  isMajorHub?: boolean; // New: Explicitly identifies Faction Seats of Power
 }
 
 export interface MapSector {
-    id: string;
-    name: string;
-    description: string;
-    color: string;
-    coordinates: string[];
-    keywords?: string[];
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  coordinates: string[];
+  keywords?: string[];
 }
 
 export interface MapSettings {
-    style: string;
-    gridUnit: string;
-    gridDistance: number;
-    zoneLabel: string;
+  style: string;
+  gridUnit: string;
+  gridDistance: number;
+  zoneLabel: string;
 }
 
 export interface MapGenerationProgress {
-    isActive: boolean;
-    step: string;
-    progress: number;
+  isActive: boolean;
+  step: string;
+  progress: number;
 }
 
 export interface Shop {
-    name: string;
-    type: string;
-    greeting: string;
-    inventory?: any[]; // StoreItems
+  name: string;
+  type: string;
+  greeting: string;
+  inventory?: any[]; // StoreItems
 }
 
 export interface ActorSuggestion {
-    id?: string; // Standardize with ID support for deterministic resolution
-    name: string;
-    template: string;
-    size: CombatActorSize;
-    difficulty: 'Weak' | 'Normal' | 'Elite' | 'Boss' | string;
-    cr?: number; // Keep for legacy
-    rank?: 'normal' | 'elite' | 'boss'; // Keep for legacy
-    description?: string;
-    isAlly: boolean;
-    alignment?: ActorAlignment; // NEW: Combat alignment
-    isShip?: boolean;
-    affinity?: string;
-    archetype?: ArchetypeName;
+  id?: string; // Standardize with ID support for deterministic resolution
+  name: string;
+  template: string;
+  size: CombatActorSize;
+  difficulty: 'Weak' | 'Normal' | 'Elite' | 'Boss' | string;
+  cr?: number; // Keep for legacy
+  rank?: 'normal' | 'elite' | 'boss'; // Keep for legacy
+  description?: string;
+  isAlly: boolean;
+  alignment?: ActorAlignment; // NEW: Combat alignment
+  isShip?: boolean;
+  affinity?: string;
+  archetype?: ArchetypeName;
 }
 
 export interface Race {
-    name: string;
-    description: string;
-    personality: string;
-    faction?: string;
-    keywords?: string[];
+  name: string;
+  description: string;
+  personality: string;
+  faction?: string;
+  keywords?: string[];
 }
 
 export interface Faction {
-    name: string;
-    goals: string;
-    relationships: string;
-    racialComposition?: string;
-    keywords?: string[];
+  name: string;
+  goals: string;
+  relationships: string;
+  racialComposition?: string;
+  keywords?: string[];
 }
 
 export interface WorldPreview {
-    context: string;
-    races: Race[];
-    factions: Faction[];
+  context: string;
+  races: Race[];
+  factions: Faction[];
 }

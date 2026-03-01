@@ -48,6 +48,31 @@ export const getAi = (): any => {
     };
 };
 
+export const getEmbeddingAi = (): any => {
+    return {
+        models: {
+            embedContent: async (requestOptions: { model?: string, contents: string }) => {
+                const response = await fetch('/api/embed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: requestOptions.contents,
+                        model: requestOptions.model || 'text-embedding-004'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errStr = await response.text();
+                    throw new Error(errStr);
+                }
+
+                const data = await response.json();
+                return { embeddings: [{ values: data.embedding }] };
+            }
+        }
+    };
+};
+
 /**
  * Strips markdown code blocks and extracts the primary JSON structure (object or array).
  */
