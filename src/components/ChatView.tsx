@@ -306,19 +306,40 @@ const ChatView: React.FC = () => {
                             }
 
                             if (currentLocName && currentLocName !== prevLocName) {
+                                // Time Formatting
+                                const rawTime = msg.timestamp || gameData?.currentTime || new Date().toISOString();
+                                const dateObj = new Date(rawTime);
+                                let timeString = "Unknown Time";
+
+                                if (!isNaN(dateObj.getTime())) {
+                                    timeString = new Intl.DateTimeFormat('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        year: 'numeric'
+                                    }).format(dateObj).replace(' AM', 'am').replace(' PM', 'pm');
+                                }
+
                                 renderLocationHeader = (
-                                    <div className="w-full flex flex-col items-center mt-12 mb-6 animate-fade-in px-4">
-                                        <div className="h-[1px] w-1/3 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent mb-4"></div>
-                                        <h3 className="text-2xl font-black text-brand-text font-serif tracking-tight text-center drop-shadow-md mb-1 capitalize">
+                                    <div className="w-full flex flex-col items-start mt-10 mb-4 animate-fade-in text-left">
+                                        <h3 className="text-xl font-black text-brand-text font-serif tracking-tight drop-shadow-md mb-0.5 capitalize">
                                             {currentLocName}
                                         </h3>
-                                        {currentZoneName && currentZoneName !== currentLocName && (
-                                            <span className="text-body-base font-semibold text-brand-accent/80 tracking-normal uppercase text-center flex items-center gap-2">
-                                                <Icon name="location" className="w-4 h-4" />
-                                                {currentZoneName}
+                                        <div className="flex items-center gap-2">
+                                            {currentZoneName && currentZoneName !== currentLocName && (
+                                                <>
+                                                    <span className="text-[12px] font-medium text-brand-accent/90 capitalize tracking-normal flex items-center gap-1.5 font-sans">
+                                                        <Icon name="location" className="w-3.5 h-3.5" />
+                                                        {currentZoneName}
+                                                    </span>
+                                                    <span className="text-brand-text-muted/40 text-[10px]">•</span>
+                                                </>
+                                            )}
+                                            <span className="text-[10px] font-medium text-brand-text-muted tracking-wide font-sans mt-0.5">
+                                                {timeString}
                                             </span>
-                                        )}
-                                        <div className="h-[1px] w-1/3 bg-gradient-to-r from-transparent via-brand-primary/50 to-transparent mt-4"></div>
+                                        </div>
                                     </div>
                                 );
                             }
