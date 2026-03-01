@@ -12,14 +12,14 @@ interface CharacterHeaderProps {
     onRegenerateImage: () => void;
     onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isCompanion: boolean;
-    onLevelChange?: (level: number) => void; 
+    onLevelChange?: (level: number) => void;
     availableRaces: string[];
     hideImageSection?: boolean;
 }
 
-export const CharacterHeader: React.FC<CharacterHeaderProps> = ({ 
-    character, 
-    onChange, 
+export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
+    character,
+    onChange,
     isGeneratingImage,
     imageCooldown,
     onRegenerateImage,
@@ -31,7 +31,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
     const currentXP = character.experiencePoints || 0;
     const prevLevelXP = getXPForLevel(character.level);
     const nextLevelXP = getNextLevelXP(character.level);
-    
+
     let xpPercentage = 0;
     if (currentXP < prevLevelXP) {
         xpPercentage = nextLevelXP > 0 ? (currentXP / nextLevelXP) * 100 : 0;
@@ -103,7 +103,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                     </span>
                 </div>
                 <div className="relative w-full h-2.5 bg-brand-primary/50 rounded-full overflow-hidden border border-brand-surface shadow-inner">
-                    <div 
+                    <div
                         className="absolute top-0 left-0 h-full bg-brand-accent transition-all duration-500 ease-out shadow-[0_0_10px_rgba(62,207,142,0.3)]"
                         style={{ width: `${xpPercentage}%` }}
                     />
@@ -117,13 +117,13 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                         <h3 className="mb-0 text-brand-text text-lg">Heroic Potential</h3>
                         <div className="flex flex-wrap gap-2.5">
                             {Array.from({ length: maxHeroic }).map((_, i) => (
-                                <div 
-                                    key={i} 
+                                <div
+                                    key={i}
                                     className={`transition-all duration-700 transform ${i < currentHeroic ? 'scale-110' : 'opacity-20 scale-100'}`}
                                 >
-                                    <Icon 
-                                        name={i < currentHeroic ? "starFill" : "star"} 
-                                        className={`w-6 h-6 ${i < currentHeroic ? 'text-brand-accent drop-shadow-[0_0_10px_rgba(62,207,142,0.5)]' : 'text-brand-text-muted'}`} 
+                                    <Icon
+                                        name={i < currentHeroic ? "starFill" : "star"}
+                                        className={`w-6 h-6 ${i < currentHeroic ? 'text-brand-accent drop-shadow-[0_0_10px_rgba(62,207,142,0.5)]' : 'text-brand-text-muted'}`}
                                     />
                                 </div>
                             ))}
@@ -137,28 +137,28 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 <InputField label="Name" value={character.name} onChange={(e) => onChange(['name'], e.target.value)} />
                 <InputField label="Class" value={character.profession} onChange={(e) => onChange(['profession'], e.target.value)} />
                 <SelectField label="Gender" value={character.gender} onChange={(e) => onChange(['gender'], e.target.value)} options={['Male', 'Female', 'Non-binary', 'Unspecified']} />
-                <SelectField 
-                    label="Race" 
-                    value={availableRaces.includes(character.race) ? character.race : 'Other'} 
+                <SelectField
+                    label="Race"
+                    value={availableRaces.includes(character.race) ? character.race : 'Other'}
                     onChange={(e) => {
                         const val = e.target.value;
                         if (val === 'Other') {
-                            onChange(['race'], ''); 
+                            onChange(['race'], '');
                         } else {
                             onChange(['race'], val);
                         }
-                    }} 
-                    options={availableRaces} 
+                    }}
+                    options={availableRaces}
                 />
             </div>
 
             {/* Custom Race Specification */}
             {(character.race === 'Other' || isCustomRace) && (
                 <div className="mb-4 animate-fade-in">
-                    <InputField 
-                        label="Specify custom race" 
-                        value={availableRaces.includes(character.race) ? '' : character.race} 
-                        onChange={(e) => onChange(['race'], e.target.value)} 
+                    <InputField
+                        label="Specify custom race"
+                        value={availableRaces.includes(character.race) ? '' : character.race}
+                        onChange={(e) => onChange(['race'], e.target.value)}
                         placeholder="e.g. Half-Dragon, Automaton..."
                     />
                 </div>
@@ -170,65 +170,67 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                     <TextareaField label="Personality" value={(character as Companion).personality} onChange={(e) => onChange(['personality'], e.target.value)} />
                 )}
                 <TextareaField label="Background" value={character.background} onChange={(e) => onChange(['background'], e.target.value)} />
-                
-                {/* Alignment Sliders */}
-                <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                    <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
-                    
-                    <div className="w-full">
-                        <div className="flex justify-center items-end mb-2 px-1">
-                            <label className="text-xs font-bold text-brand-text tracking-normal">
-                                {(() => {
-                                    const score = character.alignment?.goodEvil || 0;
-                                    if (score >= 100) return 'Pure Good';
-                                    if (score >= 75) return 'Altruistic';
-                                    if (score >= 25) return 'Compassionate';
-                                    if (score >= 10) return 'Kind';
-                                    if (score > -10) return 'Neutral';
-                                    if (score > -30) return 'Selfish';
-                                    if (score > -75) return 'Ruthless';
-                                    if (score > -100) return 'Malicious';
-                                    return 'Pure Evil';
-                                })()}({character.alignment?.goodEvil || 0})
-                            </label>
-                        </div>
-                        <input 
-                            type="range" 
-                            min="-100" 
-                            max="100" 
-                            value={character.alignment?.goodEvil || 0} 
-                            onChange={(e) => onChange(['alignment', 'goodEvil'], parseInt(e.target.value))}
-                            className="w-full h-2.5 bg-brand-primary/50 rounded-full appearance-none cursor-pointer accent-brand-accent border border-brand-surface shadow-inner"
-                        />
-                    </div>
 
-                    <div className="w-full">
-                        <div className="flex justify-center items-end mb-2 px-1">
-                            <label className="text-xs font-bold text-brand-text tracking-normal">
-                                {(() => {
-                                    const score = character.alignment?.lawChaos || 0;
-                                    if (score >= 100) return 'Pure Law';
-                                    if (score >= 75) return 'Strict';
-                                    if (score >= 30) return 'Disciplined';
-                                    if (score >= 10) return 'Methodical';
-                                    if (score > -10) return 'Neutral';
-                                    if (score > -30) return 'Spontaneous';
-                                    if (score > -75) return 'Unbound';
-                                    if (score > -100) return 'Rebellious';
-                                    return 'Pure Chaos';
-                                })()}({character.alignment?.lawChaos || 0})
-                            </label>
+                {/* Alignment Sliders */}
+                {!isCompanion && (
+                    <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
+                        <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
+
+                        <div className="w-full">
+                            <div className="flex justify-center items-end mb-2 px-1">
+                                <label className="text-xs font-bold text-brand-text tracking-normal">
+                                    {(() => {
+                                        const score = character.alignment?.goodEvil || 0;
+                                        if (score >= 100) return 'Pure Good';
+                                        if (score >= 75) return 'Altruistic';
+                                        if (score >= 25) return 'Compassionate';
+                                        if (score >= 10) return 'Kind';
+                                        if (score > -10) return 'Neutral';
+                                        if (score > -30) return 'Selfish';
+                                        if (score > -75) return 'Ruthless';
+                                        if (score > -100) return 'Malicious';
+                                        return 'Pure Evil';
+                                    })()}({character.alignment?.goodEvil || 0})
+                                </label>
+                            </div>
+                            <input
+                                type="range"
+                                min="-100"
+                                max="100"
+                                value={character.alignment?.goodEvil || 0}
+                                onChange={(e) => onChange(['alignment', 'goodEvil'], parseInt(e.target.value))}
+                                className="w-full h-2.5 bg-brand-primary/50 rounded-full appearance-none cursor-pointer accent-brand-accent border border-brand-surface shadow-inner"
+                            />
                         </div>
-                        <input 
-                            type="range" 
-                            min="-100" 
-                            max="100" 
-                            value={character.alignment?.lawChaos || 0} 
-                            onChange={(e) => onChange(['alignment', 'lawChaos'], parseInt(e.target.value))}
-                            className="w-full h-2.5 bg-brand-primary/50 rounded-full appearance-none cursor-pointer accent-brand-accent border border-brand-surface shadow-inner"
-                        />
+
+                        <div className="w-full">
+                            <div className="flex justify-center items-end mb-2 px-1">
+                                <label className="text-xs font-bold text-brand-text tracking-normal">
+                                    {(() => {
+                                        const score = character.alignment?.lawChaos || 0;
+                                        if (score >= 100) return 'Pure Law';
+                                        if (score >= 75) return 'Strict';
+                                        if (score >= 30) return 'Disciplined';
+                                        if (score >= 10) return 'Methodical';
+                                        if (score > -10) return 'Neutral';
+                                        if (score > -30) return 'Spontaneous';
+                                        if (score > -75) return 'Unbound';
+                                        if (score > -100) return 'Rebellious';
+                                        return 'Pure Chaos';
+                                    })()}({character.alignment?.lawChaos || 0})
+                                </label>
+                            </div>
+                            <input
+                                type="range"
+                                min="-100"
+                                max="100"
+                                value={character.alignment?.lawChaos || 0}
+                                onChange={(e) => onChange(['alignment', 'lawChaos'], parseInt(e.target.value))}
+                                className="w-full h-2.5 bg-brand-primary/50 rounded-full appearance-none cursor-pointer accent-brand-accent border border-brand-surface shadow-inner"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -175,16 +175,11 @@ const ChatView: React.FC = () => {
 
                 await updatePlayerCharacter(updatedPlayer as any);
 
-                dispatch({
-                    type: 'ADD_STORY_LOG',
-                    payload: {
-                        id: `log-align-${Date.now()}`,
-                        timestamp: gameData.currentTime || new Date().toISOString(),
-                        location: gameData.currentLocale || 'Unknown',
-                        content: `Alignment Shift: ${change} (${axis} axis).`,
-                        summary: `Alignment shifted by ${roll} points towards ${alignment}.`,
-                        isNew: true
-                    }
+                await submitUserMessage({
+                    id: `msg-align-${Date.now()}`,
+                    sender: 'system',
+                    content: `**Alignment Shift**: *${change}* (${axis} axis).`,
+                    timestamp: gameData.currentTime || new Date().toISOString()
                 });
             }
 
