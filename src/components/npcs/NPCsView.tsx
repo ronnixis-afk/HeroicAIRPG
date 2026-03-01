@@ -12,7 +12,7 @@ const NPCsView: React.FC = () => {
     const [selectedNPC, setSelectedNPC] = useState<NPC | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    
+
     if (!gameData) return <div className="text-center p-12 text-brand-text-muted animate-pulse">Loading social ledger...</div>;
 
     const currentLocale = gameData.currentLocale || "";
@@ -24,7 +24,7 @@ const NPCsView: React.FC = () => {
             .map(c => companionToNPC(c));
 
         const partyNames = new Set(party.map(p => p.name.toLowerCase().trim()));
-        
+
         // Registry NPCs excluding those already in party
         const registry = (gameData.npcs || [])
             .filter(npc => {
@@ -38,13 +38,13 @@ const NPCsView: React.FC = () => {
         const filtered = all.filter(npc => {
             const isCompanion = !!npc.companionId;
             const isEssential = npc.is_essential === true;
-            
+
             // Show if essential OR already in our party
             if (!isEssential && !isCompanion) return false;
 
             if (searchQuery.trim()) {
-                return npc.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                       npc.description?.toLowerCase().includes(searchQuery.toLowerCase());
+                return npc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    npc.description?.toLowerCase().includes(searchQuery.toLowerCase());
             }
             return true;
         });
@@ -100,10 +100,7 @@ const NPCsView: React.FC = () => {
                     appearance: updatedNPC.appearance,
                     personality: updatedNPC.description,
                     relationship: updatedNPC.relationship,
-                    loves: updatedNPC.loves,
-                    likes: updatedNPC.likes,
-                    dislikes: updatedNPC.dislikes,
-                    hates: updatedNPC.hates,
+                    alignment: updatedNPC.moralAlignment,
                     race: updatedNPC.race,
                     gender: updatedNPC.gender,
                     rank: updatedNPC.rank,
@@ -132,10 +129,7 @@ const NPCsView: React.FC = () => {
             location: zoneName,
             currentPOI: localeName,
             description: '',
-            loves: '',
-            likes: '',
-            dislikes: '',
-            hates: '',
+            moralAlignment: { lawChaos: 0, goodEvil: 0 },
             is_essential: true // Manually created NPCs are always essential by default
         };
         addNPC(newNPC);
@@ -157,7 +151,7 @@ const NPCsView: React.FC = () => {
                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-brand-text-muted group-focus-within:text-brand-accent transition-colors duration-300">
                     <Icon name="search" className="w-4 h-4" />
                 </div>
-                <input 
+                <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -165,7 +159,7 @@ const NPCsView: React.FC = () => {
                     className="w-full bg-brand-surface h-14 pl-12 pr-12 rounded-2xl border-2 border-brand-primary/50 focus:border-brand-accent focus:bg-brand-bg outline-none text-body-base text-brand-text transition-all shadow-inner"
                 />
                 {searchQuery && (
-                    <button 
+                    <button
                         onClick={() => setSearchQuery('')}
                         className="absolute inset-y-0 right-5 flex items-center text-brand-text-muted hover:text-brand-text transition-colors"
                     >
@@ -173,13 +167,13 @@ const NPCsView: React.FC = () => {
                     </button>
                 )}
             </div>
-            
+
             {sortedNPCs.length > 0 ? (
                 <div className="space-y-4 px-1 pb-8">
                     {sortedNPCs.map(npc => (
-                        <NPCCard 
-                            key={npc.id} 
-                            npc={npc} 
+                        <NPCCard
+                            key={npc.id}
+                            npc={npc}
                             onClick={handleCardClick}
                             onDelete={npc.companionId ? undefined : deleteNPC}
                         />
@@ -189,13 +183,13 @@ const NPCsView: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-brand-primary/40 rounded-3xl bg-brand-surface/20 animate-page mx-1">
                     <Icon name="users" className="w-16 h-16 text-brand-text-muted opacity-20 mb-4" />
                     <p className="text-body-base text-brand-text-muted italic px-8 text-center leading-relaxed">
-                        {searchQuery 
-                            ? `The chronicles contain no record of "${searchQuery}" in this context.` 
+                        {searchQuery
+                            ? `The chronicles contain no record of "${searchQuery}" in this context.`
                             : 'No acquaintances have been recorded in this world yet.'}
                     </p>
                     {!searchQuery && (
-                        <button 
-                            onClick={handleCreateNew} 
+                        <button
+                            onClick={handleCreateNew}
                             className="btn-tertiary btn-md mt-6 text-brand-accent hover:underline underline-offset-4"
                         >
                             Log Manual Entry
@@ -205,7 +199,7 @@ const NPCsView: React.FC = () => {
             )}
 
             {selectedNPC && (
-                <NPCDetailsModal 
+                <NPCDetailsModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     npc={selectedNPC}

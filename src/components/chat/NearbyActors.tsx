@@ -56,7 +56,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
         const currentIds = new Set<string>(nearbyNPCs.map((n: NPC) => n.id));
         // Fix: Explicitly type id as string for set compatibility check
         const departed = Array.from(lastNearbyIdsRef.current).filter((id: string) => !currentIds.has(id));
-        
+
         if (departed.length > 0) {
             // Fix: Explicitly type prev state and use typed collection cloning to resolve assignment errors
             setLeavingIds((prev: Set<string>) => {
@@ -81,8 +81,8 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
     useEffect(() => {
         nearbyNPCs.forEach(async npc => {
             const isDefaultDesc = npc.description === 'Analyzing entity...' || !npc.description;
-            const needsRefinement = !npc.appearance || isDefaultDesc || !npc.loves;
-            
+            const needsRefinement = !npc.appearance || isDefaultDesc || !npc.moralAlignment;
+
             if (needsRefinement && !enrichingIds.has(npc.id)) {
                 setEnrichingIds(prev => new Set(prev).add(npc.id));
                 try {
@@ -142,28 +142,28 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
 
     const NPCContextMenu = ({ npc }: { npc: NPC }) => (
         <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-2xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px]">
-            <button 
-                onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }} 
+            <button
+                onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
                 <Icon name="character" className="w-4 h-4 text-brand-accent" />
                 <span>View Profile</span>
             </button>
-            <button 
+            <button
                 onClick={() => { setSelectedCharacterId(npc.id); setActiveView('temp-stats'); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
                 <Icon name="clipboardList" className="w-4 h-4 text-brand-accent" />
                 <span>View Stats</span>
             </button>
-            <button 
+            <button
                 onClick={() => handleAttack(npc)}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
                 <Icon name="sword" className="w-4 h-4 text-brand-accent" />
                 <span>Attack</span>
             </button>
-            <button 
+            <button
                 onClick={() => {
                     setPickpocketTarget(npc);
                     setIsPickpocketModalOpen(true);
@@ -175,8 +175,8 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 <span>Pickpocket</span>
             </button>
             <div className="h-px bg-brand-primary/50 my-1 mx-2" />
-            <button 
-                onClick={() => setOpenMenuId(null)} 
+            <button
+                onClick={() => setOpenMenuId(null)}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text-muted active:bg-brand-primary flex items-center gap-3"
             >
                 <Icon name="close" className="w-4 h-4" />
@@ -196,14 +196,14 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                     const isMenuOpen = openMenuId === npc.id;
 
                     return (
-                        <div 
-                            key={npc.id} 
+                        <div
+                            key={npc.id}
                             className={`relative transition-all duration-300 ${npc.isNew ? 'animate-entrance' : ''} ${isLeaving ? 'animate-exit' : ''}`}
                         >
-                            <StatusAvatar 
-                                char={npc} 
-                                size={30} 
-                                showRing={true} 
+                            <StatusAvatar
+                                char={npc}
+                                size={30}
+                                showRing={true}
                                 isEnriching={enrichingIds.has(npc.id)}
                                 isStealthed={!canBeTargeted(npc)}
                                 isTargeted={isMenuOpen}

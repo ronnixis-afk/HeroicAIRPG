@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import Modal from '../Modal';
 import { type NPC, type CombatActorSize, type ArchetypeName, ARCHETYPE_NAMES, type NPCMemory } from '../../types';
-import { getRelationshipLabel } from '../../utils/npcUtils';
+import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../../utils/npcUtils';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { Icon } from '../../components/Icon';
 import { DEFAULT_TEMPLATES, DEFAULT_AFFINITIES, getDifficultyParams, DifficultyPreset } from '../../utils/mechanics';
@@ -166,10 +166,8 @@ const NPCViewContent: React.FC<{
             )}
 
             <div className="grid grid-cols-2 gap-4 bg-brand-primary/5 p-5 rounded-2xl border border-brand-surface">
-                <TraitPill label="Loves" value={npc.loves} />
-                <TraitPill label="Likes" value={npc.likes} />
-                <TraitPill label="Dislikes" value={npc.dislikes} />
-                <TraitPill label="Hates" value={npc.hates} />
+                <TraitPill label="Moral Alignment (Good/Evil)" value={getGoodEvilLabel(npc.moralAlignment?.goodEvil || 0)} />
+                <TraitPill label="Ethical Alignment (Law/Chaos)" value={getLawChaosLabel(npc.moralAlignment?.lawChaos || 0)} />
             </div>
 
             <div className="space-y-4">
@@ -397,7 +395,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             <input type="text" value={editedNPC.name} onChange={(e) => handleChange('name', e.target.value)} className={inputClass} />
                         </StyledInputGroup>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <StyledInputGroup label="Ancestry">
                                 <div className="relative">
                                     <select
@@ -426,6 +424,20 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                                     </div>
                                 </div>
                             </StyledInputGroup>
+                            <StyledInputGroup label="Status">
+                                <div className="relative">
+                                    <select
+                                        value={editedNPC.status || 'Alive'}
+                                        onChange={(e) => handleChange('status', e.target.value)}
+                                        className={selectClass}
+                                    >
+                                        {['Alive', 'Dead', 'Unknown'].map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text-muted">
+                                        <Icon name="chevronDown" className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </StyledInputGroup>
                         </div>
 
                         <StyledInputGroup label="Physical Appearance">
@@ -437,12 +449,38 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                         </StyledInputGroup>
 
                         <div className="bg-brand-primary/5 p-5 rounded-2xl border border-brand-primary/20 space-y-5">
-                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">Personal Disposition</h5>
+                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">Alignment Disposition</h5>
                             <div className="grid grid-cols-2 gap-4">
-                                <StyledInputGroup label="Loves"><input type="text" value={editedNPC.loves || ''} onChange={(e) => handleChange('loves', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
-                                <StyledInputGroup label="Likes"><input type="text" value={editedNPC.likes || ''} onChange={(e) => handleChange('likes', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
-                                <StyledInputGroup label="Dislikes"><input type="text" value={editedNPC.dislikes || ''} onChange={(e) => handleChange('dislikes', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
-                                <StyledInputGroup label="Hates"><input type="text" value={editedNPC.hates || ''} onChange={(e) => handleChange('hates', e.target.value)} className={`${inputClass} text-sm h-10`} /></StyledInputGroup>
+                                <StyledInputGroup label="Moral Alignment (Good/Evil)">
+                                    <div className="relative">
+                                        <select
+                                            value={getGoodEvilLabel(editedNPC.moralAlignment?.goodEvil || 0)}
+                                            onChange={(e) => {
+                                                const match = GOOD_EVIL_ALIASES.find(a => a.label === e.target.value);
+                                                if (match) handleChange('moralAlignment', { ...editedNPC.moralAlignment, goodEvil: match.value, lawChaos: editedNPC.moralAlignment?.lawChaos || 0 });
+                                            }}
+                                            className={`${selectClass} h-10 text-sm`}
+                                        >
+                                            {GOOD_EVIL_ALIASES.map(a => <option key={a.value} value={a.label}>{a.label}</option>)}
+                                        </select>
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"><Icon name="chevronDown" className="w-3.5 h-3.5" /></div>
+                                    </div>
+                                </StyledInputGroup>
+                                <StyledInputGroup label="Ethical Alignment (Law/Chaos)">
+                                    <div className="relative">
+                                        <select
+                                            value={getLawChaosLabel(editedNPC.moralAlignment?.lawChaos || 0)}
+                                            onChange={(e) => {
+                                                const match = LAW_CHAOS_ALIASES.find(a => a.label === e.target.value);
+                                                if (match) handleChange('moralAlignment', { ...editedNPC.moralAlignment, lawChaos: match.value, goodEvil: editedNPC.moralAlignment?.goodEvil || 0 });
+                                            }}
+                                            className={`${selectClass} h-10 text-sm`}
+                                        >
+                                            {LAW_CHAOS_ALIASES.map(a => <option key={a.value} value={a.label}>{a.label}</option>)}
+                                        </select>
+                                        <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"><Icon name="chevronDown" className="w-3.5 h-3.5" /></div>
+                                    </div>
+                                </StyledInputGroup>
                             </div>
                         </div>
                     </div>

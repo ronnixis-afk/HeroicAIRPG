@@ -120,10 +120,7 @@ export interface NPC {
   challengeRating?: number;
   affinity?: string; // e.g. "Thermal", "None"
   archetype?: ArchetypeName | string;
-  loves?: string;
-  likes?: string;
-  dislikes?: string;
-  hates?: string;
+  moralAlignment?: { lawChaos: number; goodEvil: number };
   // Fix: Added alignment to NPC to support social stance resolution
   alignment?: ActorAlignment;
   // Fix: Added memories to NPC registry for narrative continuity

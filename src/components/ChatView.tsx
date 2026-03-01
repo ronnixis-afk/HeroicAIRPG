@@ -12,6 +12,8 @@ import { MessageItem } from './chat/MessageItem';
 import { SystemMessageGroup } from './chat/SystemGroup';
 import { CombatControls } from './chat/CombatControls';
 import { EntityLinker } from './chat/EntityLinker';
+import { calculateAlignmentRelationshipShift } from '../utils/npcUtils';
+import { isLocaleMatch } from '../utils/mapUtils';
 import CombatConsensusPanel from './combat/CombatConsensusModal';
 import { EntityLightbox } from './chat/EntityLightbox';
 
@@ -29,6 +31,8 @@ const ChatView: React.FC = () => {
         removeStoryLogsByMessageIds,
         submitUserMessage,
         updatePlayerCharacter,
+        updateNPC,
+        updateCompanion,
         dispatch
     } = useContext(GameDataContext);
 
@@ -175,10 +179,43 @@ const ChatView: React.FC = () => {
 
                 await updatePlayerCharacter(updatedPlayer as any);
 
+                // Determine relationship shifts for present NPCs
+                const shifts: string[] = [];
+                const currentLocale = gameData.currentLocale || "";
+                const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
+
+                for (const npc of (gameData.npcs || [])) {
+                    const npcPOI = npc.currentPOI || "";
+                    const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npcPOI === 'Current' || npcPOI === 'With Party';
+                    const isActiveCompanion = npc.companionId && activeCompanionIds.has(npc.companionId);
+                    const isAlive = npc.status !== 'Dead';
+                    const isSentient = npc.isSentient !== false && !npc.isShip;
+
+                    if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
+                        const relChange = calculateAlignmentRelationshipShift(alignment, npc.moralAlignment);
+                        if (relChange !== 0) {
+                            const updatedNpc = { ...npc, relationship: (npc.relationship || 0) + relChange };
+                            updateNPC(updatedNpc);
+                            if (updatedNpc.companionId) {
+                                const comp = gameData.companions.find(c => c.id === updatedNpc.companionId);
+                                if (comp) {
+                                    updateCompanion({ ...comp, relationship: updatedNpc.relationship } as any);
+                                }
+                            }
+                            shifts.push(`${npc.name} (${relChange > 0 ? '+' : ''}${relChange})`);
+                        }
+                    }
+                }
+
+                let syncMessage = `**Alignment Shift**: *${change}* (${axis} axis).`;
+                if (shifts.length > 0) {
+                    syncMessage += `\n**Reactions**: ${shifts.join(', ')}`;
+                }
+
                 await submitUserMessage({
                     id: `msg-align-${Date.now()}`,
                     sender: 'system',
-                    content: `**Alignment Shift**: *${change}* (${axis} axis).`,
+                    content: syncMessage,
                     timestamp: gameData.currentTime || new Date().toISOString()
                 });
             }
@@ -193,7 +230,7 @@ const ChatView: React.FC = () => {
 
         window.addEventListener('alignment-action', handleAlignmentAction);
         return () => window.removeEventListener('alignment-action', handleAlignmentAction);
-    }, [gameData?.playerCharacter, submitUserMessage, updatePlayerCharacter, dispatch, gameData?.currentTime, gameData?.currentLocale]);
+    }, [gameData, submitUserMessage, updatePlayerCharacter, updateNPC, updateCompanion, dispatch]);
 
     const handleFollowUp = async () => {
         if (trackedObjective) {

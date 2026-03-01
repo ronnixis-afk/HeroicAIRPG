@@ -1,6 +1,7 @@
 import React from 'react';
 import { PlayerCharacter, Companion } from '../../types';
 import { getXPForLevel, getNextLevelXP } from '../../utils/mechanics';
+import { getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../../utils/npcUtils';
 import { Icon } from '../Icon';
 import { InputField, SelectField, TextareaField } from './FormFields';
 
@@ -171,7 +172,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 )}
                 <TextareaField label="Background" value={character.background} onChange={(e) => onChange(['background'], e.target.value)} />
 
-                {/* Alignment Sliders */}
+                {/* Alignment Sliders for Player only */}
                 {!isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
                         <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
@@ -179,18 +180,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
                                 <label className="text-xs font-bold text-brand-text tracking-normal">
-                                    {(() => {
-                                        const score = character.alignment?.goodEvil || 0;
-                                        if (score >= 100) return 'Pure Good';
-                                        if (score >= 75) return 'Altruistic';
-                                        if (score >= 25) return 'Compassionate';
-                                        if (score >= 10) return 'Kind';
-                                        if (score > -10) return 'Neutral';
-                                        if (score > -30) return 'Selfish';
-                                        if (score > -75) return 'Ruthless';
-                                        if (score > -100) return 'Malicious';
-                                        return 'Pure Evil';
-                                    })()}({character.alignment?.goodEvil || 0})
+                                    {getGoodEvilLabel(character.alignment?.goodEvil || 0)}({character.alignment?.goodEvil || 0})
                                 </label>
                             </div>
                             <input
@@ -206,18 +196,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
                                 <label className="text-xs font-bold text-brand-text tracking-normal">
-                                    {(() => {
-                                        const score = character.alignment?.lawChaos || 0;
-                                        if (score >= 100) return 'Pure Law';
-                                        if (score >= 75) return 'Strict';
-                                        if (score >= 30) return 'Disciplined';
-                                        if (score >= 10) return 'Methodical';
-                                        if (score > -10) return 'Neutral';
-                                        if (score > -30) return 'Spontaneous';
-                                        if (score > -75) return 'Unbound';
-                                        if (score > -100) return 'Rebellious';
-                                        return 'Pure Chaos';
-                                    })()}({character.alignment?.lawChaos || 0})
+                                    {getLawChaosLabel(character.alignment?.lawChaos || 0)}({character.alignment?.lawChaos || 0})
                                 </label>
                             </div>
                             <input
@@ -227,6 +206,33 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                                 value={character.alignment?.lawChaos || 0}
                                 onChange={(e) => onChange(['alignment', 'lawChaos'], parseInt(e.target.value))}
                                 className="w-full h-2.5 bg-brand-primary/50 rounded-full appearance-none cursor-pointer accent-brand-accent border border-brand-surface shadow-inner"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Alignment Dropdowns for Companions only */}
+                {isCompanion && (
+                    <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
+                        <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <SelectField
+                                label="Moral Alignment (Good/Evil)"
+                                value={getGoodEvilLabel(character.alignment?.goodEvil || 0)}
+                                onChange={(e) => {
+                                    const match = GOOD_EVIL_ALIASES.find(a => a.label === e.target.value);
+                                    if (match) onChange(['alignment', 'goodEvil'], match.value);
+                                }}
+                                options={GOOD_EVIL_ALIASES.map(a => a.label)}
+                            />
+                            <SelectField
+                                label="Ethical Alignment (Law/Chaos)"
+                                value={getLawChaosLabel(character.alignment?.lawChaos || 0)}
+                                onChange={(e) => {
+                                    const match = LAW_CHAOS_ALIASES.find(a => a.label === e.target.value);
+                                    if (match) onChange(['alignment', 'lawChaos'], match.value);
+                                }}
+                                options={LAW_CHAOS_ALIASES.map(a => a.label)}
                             />
                         </div>
                     </div>

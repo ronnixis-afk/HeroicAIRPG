@@ -26,7 +26,7 @@ export const EntityLightbox: React.FC = () => {
 
     const handleNpcSave = (updatedNpc: NPC) => {
         updateNPC(updatedNpc);
-        
+
         // If this NPC is a companion, sync back to the companion state as well
         if (updatedNpc.companionId) {
             const companion = gameData.companions.find(c => c.id === updatedNpc.companionId);
@@ -37,10 +37,7 @@ export const EntityLightbox: React.FC = () => {
                     appearance: updatedNpc.appearance,
                     personality: updatedNpc.description,
                     relationship: updatedNpc.relationship,
-                    loves: updatedNpc.loves,
-                    likes: updatedNpc.likes,
-                    dislikes: updatedNpc.dislikes,
-                    hates: updatedNpc.hates,
+                    alignment: updatedNpc.moralAlignment,
                     race: updatedNpc.race,
                     gender: updatedNpc.gender,
                     rank: updatedNpc.rank,
@@ -59,9 +56,9 @@ export const EntityLightbox: React.FC = () => {
         switch (type) {
             case 'item':
                 return (
-                    <ItemDetailView 
+                    <ItemDetailView
                         item={data as Item}
-                        ownerId="player" 
+                        ownerId="player"
                         character={gameData.playerCharacter}
                         fromList="carried"
                         onActionCompleted={onClose}
@@ -69,7 +66,7 @@ export const EntityLightbox: React.FC = () => {
                 );
             case 'npc':
                 let npcData: NPC;
-                if ('experiencePoints' in data) { 
+                if ('experiencePoints' in data) {
                     const registryEntry = gameData.npcs?.find(n => n.companionId === data.id);
                     npcData = registryEntry || companionToNPC(data as Companion);
                 } else {
@@ -77,7 +74,7 @@ export const EntityLightbox: React.FC = () => {
                 }
 
                 return (
-                    <NPCDetailsModal 
+                    <NPCDetailsModal
                         isOpen={true}
                         onClose={onClose}
                         npc={npcData}
@@ -120,9 +117,9 @@ export const EntityLightbox: React.FC = () => {
                                     ))}
                                 </div>
                             )}
-                            
+
                             <div className="pt-4 border-t border-brand-primary/10 flex justify-center">
-                                <button 
+                                <button
                                     onClick={onClose}
                                     className="btn-primary btn-md px-10"
                                 >
@@ -132,7 +129,7 @@ export const EntityLightbox: React.FC = () => {
                         </div>
                     );
                 }
-                
+
                 const sector = data as MapSector;
                 return (
                     <div className="space-y-4 p-2">
@@ -156,7 +153,7 @@ export const EntityLightbox: React.FC = () => {
                             </div>
                         )}
                         <div className="pt-4 border-t border-brand-primary/10 flex justify-center">
-                            <button 
+                            <button
                                 onClick={onClose}
                                 className="btn-primary btn-md px-10"
                             >
@@ -192,7 +189,7 @@ export const EntityLightbox: React.FC = () => {
                             </div>
                         )}
                         <div className="pt-4 border-t border-brand-primary/10 flex justify-center">
-                            <button 
+                            <button
                                 onClick={onClose}
                                 className="btn-primary btn-md px-10"
                             >
@@ -209,9 +206,9 @@ export const EntityLightbox: React.FC = () => {
     if (type === 'npc') return renderContent();
 
     return (
-        <Modal 
-            isOpen={true} 
-            onClose={onClose} 
+        <Modal
+            isOpen={true}
+            onClose={onClose}
             title={type === 'location' ? 'Discovery Detail' : 'Information'}
         >
             {renderContent()}

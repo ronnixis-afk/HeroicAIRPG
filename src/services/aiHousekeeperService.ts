@@ -16,7 +16,7 @@ export const performHousekeeping = async (
   gameData: GameData
 ): Promise<{
   inventoryUpdates: any[];
-  relationshipChanges: { npcId: string, change: number, reason: string }[];
+  userAlignmentShift: string;
   objectives: any[];
   npcMemories: { npcId: string, memory: string }[];
 }> => {
@@ -41,10 +41,7 @@ export const performHousekeeping = async (
         id: n.id,
         name: n.name,
         type: isActiveCompanion ? 'Active Companion' : 'Local NPC',
-        loves: n.loves,
-        likes: n.likes,
-        dislikes: n.dislikes,
-        hates: n.hates,
+        moralAlignment: n.moralAlignment,
         currentRel: n.relationship,
         isCompanion: !!n.companionId
       });
@@ -77,10 +74,14 @@ export const performHousekeeping = async (
        - DEFAULT: If it is unclear but the Player is the one acting, default to ownerId: "player".
     3. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
 
-    [RELATIONSHIP AUDIT INSTRUCTIONS]
-    1. **PREFERENCE CHECK**: Did the player's action directly engage with an NPC's "Loves", "Likes", "Dislikes", or "Hates"?
-    2. **SCALING TIERS**: LIKED/DISLIKED (+/- 1-7), LOVED/HATED (+/- 8-10).
-    3. **GATING**: ONLY provide updates for NPCs listed in the [SOCIAL REGISTRY].
+    [ALIGNMENT AUDIT INSTRUCTIONS]
+    1. Read the user's action and classify their intent into ONE of the following precise alignment strings:
+       - "Good" (healing, helping, altruism, protecting the weak)
+       - "Evil" (murder, cruelty, theft, selfishness)
+       - "Lawful" (following rules, deferring to authority, methodical checks)
+       - "Chaotic" (breaking rules, reckless behavior, spontaneous actions)
+       - "Neutral" (casual conversation, basic exploration, walking)
+    2. Output this single string into the 'userAlignmentShift' field.
 
     [NPC MEMORY INSTRUCTIONS]
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
@@ -101,9 +102,7 @@ export const performHousekeeping = async (
           "items": [ { "name": "string", "quantity": number, "description": "flavor summary", "rarity": "string" } ] 
         }
       ],
-      "relationshipChanges": [
-        { "npcId": "string", "change": number, "reason": "string" }
-      ],
+      "userAlignmentShift": "Good|Evil|Lawful|Chaotic|Neutral",
       "npcMemories": [
         { "npcId": "string", "memory": "string" }
       ],
@@ -127,12 +126,12 @@ export const performHousekeeping = async (
 
     return {
       inventoryUpdates: result.inventoryUpdates || [],
-      relationshipChanges: result.relationshipChanges || [],
+      userAlignmentShift: result.userAlignmentShift || "Neutral",
       npcMemories: result.npcMemories || [],
       objectives: result.objectives || []
     };
   } catch (e) {
     console.error("Housekeeper failed:", e);
-    return { inventoryUpdates: [], relationshipChanges: [], npcMemories: [], objectives: [] };
+    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [], objectives: [] };
   }
 };

@@ -5,7 +5,8 @@ import React, { useCallback } from 'react';
 import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse } from '../../../types';
 import { auditSystemState, performHousekeeping, resolveLocaleCreation } from '../../../services/geminiService';
 import { forgeSkins } from '../../../utils/itemMechanics';
-import { formatRelationshipChange } from '../../../utils/npcUtils';
+import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
+import { isLocaleMatch } from '../../../utils/mapUtils';
 import { parseGameTime, addDuration, formatGameTime } from '../../../utils/timeUtils';
 
 export const useExtractionStep = (
@@ -130,15 +131,73 @@ export const useExtractionStep = (
             });
         }
 
-        // 3. Resolve Relationships & Memories
-        housekeepingResult.relationshipChanges?.forEach(r => {
-            const npc = gameData.npcs?.find(n => n.id === r.npcId || (n.name && String(n.name).toLowerCase().trim() === String(r.npcId).toLowerCase().trim()));
-            if (npc && !npc.isShip) {
-                const newRel = Math.max(-50, Math.min(50, Number(npc.relationship || 0) + Number(r.change)));
-                dispatch({ type: 'UPDATE_NPC', payload: { ...npc, relationship: newRel } });
-                dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-rel-${Date.now()}-${Math.random()}`, sender: 'system', content: formatRelationshipChange(npc.name, r.change), type: r.change > 0 ? 'positive' : 'negative' } });
+        // 3. Resolve Relationships mathematically & Add Memories
+        const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
+        const currentLocale = resolvedLocale || gameData.currentLocale || "";
+
+        let relChangeDisplay: string[] = [];
+
+        (gameData.npcs || []).forEach(n => {
+            const npcPOI = n.currentPOI || "";
+            const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npcPOI === 'Current' || npcPOI === 'With Party';
+            const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
+            const isAlive = n.status !== 'Dead';
+            const isSentient = n.isSentient !== false && !n.isShip;
+
+            if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
+                let changeAmount = 0;
+                let triggerCombat = false;
+
+                // Unconditionally drop relationship if in Combat and AI resolution considers them enemies
+                // (Note: To accurately identify engaged enemies in the future, we rely on combat turn order)
+                if (gameData.combatState?.isActive) {
+                    const isEnemy = gameData.combatState.enemies?.some((e: any) => e.id === n.id);
+                    if (isEnemy) {
+                        changeAmount = -50 - (n.relationship || 0); // Force to -50 exactly, or subtract if already lower
+                    }
+                }
+                // Or calculate relationship based on intent, if not immediately fighting them
+                else if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+                    changeAmount = calculateAlignmentRelationshipShift(housekeepingResult.userAlignmentShift, n.moralAlignment);
+                }
+
+                if (changeAmount !== 0) {
+                    const newRel = Math.max(-100, Math.min(100, Number(n.relationship || 0) + changeAmount));
+                    dispatch({ type: 'UPDATE_NPC', payload: { ...n, relationship: newRel } });
+
+                    if (newRel <= -50 && !gameData.combatState?.isActive) {
+                        dispatch({
+                            type: 'ADD_MESSAGE',
+                            payload: {
+                                id: `sys-combat-trig-${Date.now()}-${n.id}`,
+                                sender: 'system',
+                                content: `**Combat Triggered!** Your relationship with ${n.name} has deteriorated past the breaking point. They are now hostile!`,
+                                type: 'negative'
+                            }
+                        });
+                        // Combat Initialization should theoretically be called here via a pipeline trigger, 
+                        // but for now, the system message alerts the player.
+                    }
+
+                    if (!gameData.combatState?.isActive) {
+                        relChangeDisplay.push(`${n.name} (${changeAmount > 0 ? '+' : ''}${changeAmount})`);
+                    }
+                }
             }
         });
+
+        // Announce the collective narrative alignment shift
+        if (relChangeDisplay.length > 0 && housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `sys-align-${Date.now()}`,
+                    sender: 'system',
+                    content: `**Action Alignment Detected**: *${housekeepingResult.userAlignmentShift}*\n**Reactions**: ${relChangeDisplay.join(', ')}`,
+                    type: 'neutral'
+                }
+            });
+        }
 
         if (!gameData.combatState?.isActive && housekeepingResult.npcMemories?.length > 0) {
             housekeepingResult.npcMemories.forEach(m => {

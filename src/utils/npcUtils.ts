@@ -7,7 +7,7 @@ export const getRelationshipLabel = (score: number): { label: string, color: str
     if (score >= 50) return { label: 'Loyal', color: 'bg-brand-accent' }; // +50
     if (score >= 30) return { label: 'Trusted', color: 'bg-emerald-400' };
     if (score >= 10) return { label: 'Friendly', color: 'bg-teal-400' };
-    if (score > -10) return { label: 'Neutral', color: 'bg-yellow-400' }; 
+    if (score > -10) return { label: 'Neutral', color: 'bg-yellow-400' };
     if (score >= -30) return { label: 'Unfriendly', color: 'bg-orange-400' };
     if (score >= -49) return { label: 'Hostile', color: 'bg-red-500' };
     return { label: 'Nemesis', color: 'bg-red-700' }; // -50
@@ -33,10 +33,10 @@ export const formatRelationshipChange = (npcName: string, change: number): strin
  */
 export const detectMentionedNpcs = (text: string, npcs: NPC[], limit: number = 2): string[] => {
     if (!text || !npcs || npcs.length === 0) return [];
-    
+
     const textLower = text.toLowerCase();
     const mentionedIds: string[] = [];
-    
+
     const candidates = npcs.filter(npc => {
         const isGenericUnit = /\s\d+$/.test(npc.name || '');
         const isClearedCorpse = npc.status === 'Dead' && npc.isBodyCleared;
@@ -50,7 +50,7 @@ export const detectMentionedNpcs = (text: string, npcs: NPC[], limit: number = 2
         // Escape special chars for regex
         const escapedName = nameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const fullRegex = new RegExp(`\\b${escapedName}\\b`, 'i');
-        
+
         if (fullRegex.test(textLower)) {
             mentionedIds.push(npc.id);
         } else {
@@ -65,7 +65,7 @@ export const detectMentionedNpcs = (text: string, npcs: NPC[], limit: number = 2
             }
         }
     }
-    
+
     return mentionedIds;
 };
 
@@ -77,19 +77,16 @@ export const companionToNPC = (companion: Companion): NPC => {
         relationship: Number(companion.relationship || 0),
         status: 'Alive',
         location: 'With Party',
-        currentPOI: 'Current', 
+        currentPOI: 'Current',
         gender: companion.gender,
-        race: companion.race || 'Unknown', 
+        race: companion.race || 'Unknown',
         appearance: companion.appearance,
         companionId: companion.id,
         image: companion.imageUrl,
         isShip: !!companion.isShip,
         isMount: !!companion.isMount,
         isSentient: companion.isSentient !== undefined ? companion.isSentient : true,
-        loves: companion.loves || '',
-        likes: companion.likes || '',
-        dislikes: companion.dislikes || '',
-        hates: companion.hates || '',
+        moralAlignment: companion.alignment || { lawChaos: 0, goodEvil: 0 },
         rank: companion.rank || 'normal',
         size: companion.size || 'Medium',
         template: companion.template || 'Brute',
@@ -151,16 +148,16 @@ export const npcToCombatActor = (npc: NPC, playerLevel: number, baseScore: numbe
     };
 
     const params = getParams(crTag, playerLevel);
-    
+
     let actor = generateEnemyFromTemplate(
         template,
         params.cr,
-        params.rank, 
+        params.rank,
         size,
         npc.name,
         templates || DEFAULT_TEMPLATES,
         DEFAULT_SIZE_MODIFIERS,
-        baseScore, 
+        baseScore,
         archetype,
         DEFAULT_ARCHETYPE_DEFINITIONS
     );
@@ -171,15 +168,96 @@ export const npcToCombatActor = (npc: NPC, playerLevel: number, baseScore: numbe
     actor.isShip = !!npc.isShip;
     actor.isMount = !!npc.isMount;
     actor.isSentient = npc.isSentient !== undefined ? npc.isSentient : true;
-    
+
     if (affinity && DEFAULT_AFFINITIES[affinity]) {
         const affDef = DEFAULT_AFFINITIES[affinity];
         actor.resistances = [...(affDef.resistances || [])];
         actor.immunities = [...(affDef.immunities || [])];
         actor.vulnerabilities = [...(affDef.vulnerabilities || [])];
     }
-    
+
     actor = recalculateCombatActorStats(actor, templates, baseScore);
-    
+
     return actor;
+};
+
+export const GOOD_EVIL_ALIASES = [
+    { label: 'Pure Good', value: 100 },
+    { label: 'Altruistic', value: 75 },
+    { label: 'Compassionate', value: 25 },
+    { label: 'Kind', value: 10 },
+    { label: 'Neutral', value: 0 },
+    { label: 'Selfish', value: -25 },
+    { label: 'Ruthless', value: -75 },
+    { label: 'Malicious', value: -85 },
+    { label: 'Pure Evil', value: -100 }
+];
+
+export const LAW_CHAOS_ALIASES = [
+    { label: 'Pure Law', value: 100 },
+    { label: 'Strict', value: 75 },
+    { label: 'Disciplined', value: 30 },
+    { label: 'Methodical', value: 10 },
+    { label: 'Neutral', value: 0 },
+    { label: 'Spontaneous', value: -20 },
+    { label: 'Unbound', value: -75 },
+    { label: 'Rebellious', value: -85 },
+    { label: 'Pure Chaos', value: -100 }
+];
+
+export const getGoodEvilLabel = (score: number) => {
+    if (score >= 100) return 'Pure Good';
+    if (score >= 75) return 'Altruistic';
+    if (score >= 25) return 'Compassionate';
+    if (score >= 10) return 'Kind';
+    if (score > -10) return 'Neutral';
+    if (score > -30) return 'Selfish';
+    if (score > -75) return 'Ruthless';
+    if (score > -100) return 'Malicious';
+    return 'Pure Evil';
+};
+
+export const getLawChaosLabel = (score: number) => {
+    if (score >= 100) return 'Pure Law';
+    if (score >= 75) return 'Strict';
+    if (score >= 30) return 'Disciplined';
+    if (score >= 10) return 'Methodical';
+    if (score > -10) return 'Neutral';
+    if (score > -30) return 'Spontaneous';
+    if (score > -75) return 'Unbound';
+    if (score > -100) return 'Rebellious';
+    return 'Pure Chaos';
+};
+
+export const calculateAlignmentRelationshipShift = (
+    actionAlignment: string, // "Good", "Evil", "Lawful", "Chaotic"
+    npcAlignment?: { lawChaos?: number; goodEvil?: number }
+): number => {
+    if (!npcAlignment) return 0;
+
+    if (actionAlignment === 'Good' || actionAlignment === 'Evil') {
+        const score = npcAlignment.goodEvil || 0;
+        const label = getGoodEvilLabel(score);
+        const index = GOOD_EVIL_ALIASES.findIndex(a => a.label === label);
+        if (index === -1 || index === 4) return 0; // 4 is Neutral
+
+        // Neutral is index 4
+        // Good action: 4 - index (Pure Good [0] -> +4, Pure Evil [8] -> -4)
+        // Evil action: index - 4 (Pure Good [0] -> -4, Pure Evil [8] -> +4)
+        return actionAlignment === 'Good' ? (4 - index) : (index - 4);
+    }
+
+    if (actionAlignment === 'Lawful' || actionAlignment === 'Chaotic') {
+        const score = npcAlignment.lawChaos || 0;
+        const label = getLawChaosLabel(score);
+        const index = LAW_CHAOS_ALIASES.findIndex(a => a.label === label);
+        if (index === -1 || index === 4) return 0; // 4 is Neutral
+
+        // Neutral is index 4
+        // Lawful action: 4 - index
+        // Chaotic action: index - 4
+        return actionAlignment === 'Lawful' ? (4 - index) : (index - 4);
+    }
+
+    return 0;
 };
