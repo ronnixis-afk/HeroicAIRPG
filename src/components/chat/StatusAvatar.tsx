@@ -18,15 +18,15 @@ interface StatusAvatarProps {
     maxTempHp?: number;
 }
 
-export const StatusAvatar: React.FC<StatusAvatarProps> = ({ 
-    char, 
-    size, 
-    isPlayer, 
-    showRing = true, 
-    onClick, 
-    isTargeted, 
-    isStealthed, 
-    isEnriching, 
+export const StatusAvatar: React.FC<StatusAvatarProps> = ({
+    char,
+    size,
+    isPlayer,
+    showRing = true,
+    onClick,
+    isTargeted,
+    isStealthed,
+    isEnriching,
     className = "",
     tempHp = 0,
     maxTempHp = 0
@@ -35,10 +35,10 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     const currentHp = (char as any).currentHitPoints;
     const maxHp = (char as any).maxHitPoints;
     const hasHp = currentHp !== undefined && maxHp !== undefined;
-    
+
     const displayCurrentHp = hasHp ? currentHp : 1;
     const displayMaxHp = hasHp ? maxHp : 1;
-    
+
     // PC/Companion specific temp HP detection if not provided via props
     const actualTempHp = tempHp || (char as any).temporaryHitPoints || 0;
     const actualMaxTempHp = maxTempHp || (char as any).maxTemporaryHitPoints || 0;
@@ -48,20 +48,20 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
 
     const tempHpRatio = actualMaxTempHp > 0 ? actualTempHp / actualMaxTempHp : 0;
     const tempPercent = Math.max(0, Math.min(1, tempHpRatio));
-    
+
     const strokeWidth = isPlayer ? 3 : 2;
-    const center = size / 2 + 4; 
+    const center = size / 2 + 4;
     const totalSize = size + 8;
     const radius = size / 2;
-    
+
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference * (1 - hpPercent);
 
     const tempRadius = radius + 3;
     const tempCircumference = 2 * Math.PI * tempRadius;
     const tempDashoffset = tempCircumference * (1 - tempPercent);
-    
-    const ringColor = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444'; 
+
+    const ringColor = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
     const tempColor = '#38bdf8'; // Shield blue
     const initials = char.name.slice(0, 2);
 
@@ -74,18 +74,18 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     const finalRingColor = isDead ? '#ef4444' : ringColor;
 
     return (
-        <div 
-            className={`relative transition-all duration-300 ease-out ${isTargeted ? 'scale-110 translate-x-[-12px] z-50' : 'scale-100 z-10'} ${className}`} 
+        <div
+            className={`relative transition-all duration-300 ease-out ${isTargeted ? 'scale-110 translate-x-[-12px] z-50' : 'scale-100 z-10'} ${className}`}
             style={{ width: totalSize, height: totalSize }}
         >
             {showRing && (
-                <svg 
-                    className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none" 
+                <svg
+                    className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none"
                     viewBox={`0 0 ${totalSize} ${totalSize}`}
                 >
                     {/* Background Ring */}
                     <circle cx={center} cy={center} r={radius} fill="transparent" stroke="#242424" strokeWidth={strokeWidth} />
-                    
+
                     {/* Health Ring */}
                     <circle
                         cx={center}
@@ -118,18 +118,18 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                 </svg>
             )}
 
-            <button 
+            <button
                 onClick={onClick}
                 className={`absolute rounded-full overflow-hidden flex items-center justify-center bg-brand-surface border transition-all duration-300
-                    ${isTargeted 
-                        ? 'border-white ring-4 ring-brand-accent/30 shadow-[0_0_25px_rgba(62,207,142,0.8)] z-30' 
+                    ${isTargeted
+                        ? 'border-white ring-4 ring-brand-accent/30 shadow-[0_0_25px_rgba(62,207,142,0.8)] z-30'
                         : (showRing ? 'border-brand-primary' : 'border-brand-primary/40')
                     } 
                     ${isDead ? 'grayscale brightness-50' : ''}
                     ${isStealthed ? 'brightness-50' : ''}
                 `}
-                style={{ 
-                    width: size, 
+                style={{
+                    width: size,
                     height: size,
                     top: 4,
                     left: 4
@@ -142,7 +142,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                         {initials}
                     </span>
                 )}
-                
+
                 {isLowHp && (
                     <div className="absolute inset-0 bg-red-600/20 animate-pulse pointer-events-none" />
                 )}
@@ -153,6 +153,20 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                     </div>
                 )}
             </button>
+
+            {isDead && (
+                <div
+                    className="absolute z-40 flex items-center justify-center pointer-events-none"
+                    style={{
+                        width: size,
+                        height: size,
+                        top: 4,
+                        left: 4
+                    }}
+                >
+                    <Icon name="skull" className="w-3/5 h-3/5 text-brand-danger opacity-50 drop-shadow-md" />
+                </div>
+            )}
 
             {isStealthed && !isEnriching && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none text-brand-accent drop-shadow-lg">
