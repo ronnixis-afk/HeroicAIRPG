@@ -410,8 +410,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     return (
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
-            <header className="flex items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent">
-                <h1 className="text-2xl font-black tracking-tighter text-brand-text">Heroic AI <span className="text-brand-accent">RPG</span></h1>
+            <header className="flex flex-row items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
+                <h1 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none">Heroic AI <span className="text-brand-accent">RPG</span></h1>
                 <button
                     onClick={() => setIsDrawerOpen(true)}
                     className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
@@ -511,7 +511,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     <div className="absolute top-3 left-3 z-10 bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase text-brand-text/70 border border-brand-surface shadow-sm">
                                         Cloud
                                     </div>
-                                    <div className="mt-auto p-4 z-10 w-full flex flex-col items-center text-center">
+                                    <div className="mt-auto p-4 z-10 w-full flex flex-col items-start text-left">
                                         <h3 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md">{save.name}</h3>
                                         <p className="text-[9px] text-brand-text-muted mb-4 opacity-70 border-b border-brand-primary/30 pb-2 w-full shadow-black drop-shadow-md">{new Date(save.updatedAt).toLocaleDateString()}</p>
                                         <button
