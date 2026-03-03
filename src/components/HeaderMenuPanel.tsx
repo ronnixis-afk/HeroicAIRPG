@@ -37,8 +37,8 @@ const MenuItem = ({ label, iconName, onClick, disabled = false, warning, isHighl
   <button
     onClick={disabled ? undefined : onClick}
     className={`flex flex-col items-center justify-center transition-colors duration-200 group p-1 relative ${disabled ? 'opacity-30 cursor-not-allowed text-brand-text-muted' :
-        isHighlighted ? (highlightColor || 'text-brand-accent') :
-          'text-brand-text-muted hover:text-brand-text'
+      isHighlighted ? (highlightColor || 'text-brand-accent') :
+        'text-brand-text-muted hover:text-brand-text'
       }`}
     title={disabled ? warning : label}
   >
@@ -149,7 +149,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
 
                   <MenuItem label="GM Notes" iconName="rocket" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
                   <MenuItem label="The Forge" iconName="hammer" onClick={() => handleAction('item-forge')} />
-                  <MenuItem label="Visions" iconName="skull" onClick={() => handleAction('temp-stats')} />
+                  <MenuItem label="Scene" iconName="drama" onClick={() => handleAction('temp-stats')} />
                   <MenuItem label="Gallery" iconName="photo" onClick={() => handleAction('gallery')} />
 
                   <MenuItem label="Rivals" iconName="danger" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
