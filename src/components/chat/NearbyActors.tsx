@@ -174,14 +174,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
                 <span>Pickpocket</span>
             </button>
-            <div className="h-px bg-brand-primary/50 my-1 mx-2" />
-            <button
-                onClick={() => setOpenMenuId(null)}
-                className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text-muted active:bg-brand-primary flex items-center gap-3"
-            >
-                <Icon name="close" className="w-4 h-4" />
-                <span>Dismiss Menu</span>
-            </button>
+
         </div>
     );
 
