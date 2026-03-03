@@ -55,11 +55,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                         {showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-4 animate-fade-in">
                                 {msg.alignmentOptions.map((opt, idx) => {
-                                    let alignmentColor = "text-brand-text-muted";
-                                    if (opt.alignment === 'Good') alignmentColor = "text-blue-500";
-                                    if (opt.alignment === 'Evil') alignmentColor = "text-red-500";
-                                    if (opt.alignment === 'Lawful') alignmentColor = "text-yellow-500";
-                                    if (opt.alignment === 'Chaotic') alignmentColor = "text-purple-500";
+                                    let colorClass = "border-brand-text-muted text-brand-text-muted hover:bg-brand-text-muted/10";
+                                    if (opt.alignment === 'Good') colorClass = "border-blue-500 text-blue-500 hover:bg-blue-500/10";
+                                    if (opt.alignment === 'Evil') colorClass = "border-red-500 text-red-500 hover:bg-red-500/10";
+                                    if (opt.alignment === 'Lawful') colorClass = "border-yellow-500 text-yellow-500 hover:bg-yellow-500/10";
+                                    if (opt.alignment === 'Chaotic') colorClass = "border-purple-500 text-purple-500 hover:bg-purple-500/10";
 
                                     return (
                                         <button
@@ -70,9 +70,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                                 });
                                                 window.dispatchEvent(event);
                                             }}
-                                            className="px-3 py-1.5 text-xs font-bold rounded-full border border-brand-text/30 bg-transparent transition-colors hover:bg-brand-text/5 text-brand-text"
+                                            className={`px-3 py-1.5 text-xs font-bold rounded-full border bg-transparent transition-colors ${colorClass}`}
                                         >
-                                            <span className={alignmentColor}>{opt.alignment}</span> | {opt.label}
+                                            {opt.label}
                                         </button>
                                     );
                                 })}
