@@ -32,10 +32,10 @@ export const generateNarrativeResponse = async (
     contextKeysOverride?: ContextKey[]
 ) => {
     const useSmartGm = gameData.combatConfiguration?.smarterGm !== false;
-    const useFasterGm = gameData.combatConfiguration?.fasterGm === true;
+
     const isHidden = gameData.isPartyHidden;
 
-    const primaryModel = modelOverride || (useFasterGm ? 'gemini-3-flash-preview' : (useSmartGm ? 'gemini-3-pro-preview' : 'gemini-3-flash-preview'));
+    const primaryModel = modelOverride || 'gemini-3-flash-preview';
 
     let totalPromptTokens = 0;
     let totalCandidateTokens = 0;
@@ -229,7 +229,7 @@ export const generateNarrativeRoundResponse = async (
     const isMature = gameData.isMature;
     const tone = gameData.narrationTone || "Cinematic";
     const gmDirectives = gameData.gmSettings || "Roleplay as a legendary storyteller.";
-    const useFasterGm = gameData.combatConfiguration?.fasterGm === true;
+
 
     const lastAiMsg = [...gameData.messages].reverse().find(m => m.sender === 'ai')?.content || "";
     const previously = lastAiMsg ? `\n[Previously]:\n${lastAiMsg}\n` : '';
@@ -275,7 +275,7 @@ The player has expended a HEROIC POINT this round.
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: useFasterGm ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview',
+            model: 'gemini-3-flash-preview',
             contents: [{ parts: [{ text: prompt }] }],
             config: {
                 systemInstruction: systemInstruction,
@@ -338,7 +338,7 @@ export const generateGrandDesign = async (gameData: any): Promise<string> => {
     const ai = getAi();
     const prompt = `You are the Master Architect. Analyze the world lore, character goals, and recent history to weave an overarching narrative "Grand Design". This brief acts as a compass for long-term consistency.\n\nWORLD LORE: ${gameData.worldSummary}\nPLAYER HISTORY: ${JSON.stringify((gameData.story || []).slice(-10))}\n\nReturn a 2-paragraph strategic brief for the Game Master.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
         config: { thinkingConfig: { thinkingBudget: 2000 } }
     });

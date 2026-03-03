@@ -34,7 +34,7 @@ export const draftCompanionFromPrompt = async (
 }> => {
     const worldContext = getWorldContext(gameData);
     const recentHistory = gameData.messages.slice(-5).map(m => `${m.sender.toUpperCase()}: ${m.content}`).join('\n');
-    
+
     const traitList = availableTraits.map(t => `- [${t.category.toUpperCase()}]: ${t.name} (${t.description})`).join('\n');
 
     const prompt = `
@@ -81,7 +81,7 @@ export const draftCompanionFromPrompt = async (
             contents: prompt,
             config: { responseMimeType: "application/json" }
         });
-        
+
         const data = JSON.parse(cleanJson(response.text || "{}"));
         return {
             name: data.name || "New Companion",
@@ -108,7 +108,7 @@ export const generateRecruitSkins = async (
     seeds: { race: string, gender: string, traits: string[] }[]
 ): Promise<{ name: string, description: string, personality: string }[]> => {
     const worldContext = getWorldContext(gameData);
-    
+
     const prompt = `
     You are a Master Storyteller and Tavern Recruiter. Provide thematic names, short descriptions, and quirky personalities for 6 potential companions.
     
@@ -116,7 +116,7 @@ export const generateRecruitSkins = async (
     ${worldContext}
 
     [Mechanical Seeds]
-    ${seeds.map((s, i) => `Recruit ${i+1}: Race: ${s.race}, Gender: ${s.gender}, Traits: ${s.traits.join(', ')}`).join('\n')}
+    ${seeds.map((s, i) => `Recruit ${i + 1}: Race: ${s.race}, Gender: ${s.gender}, Traits: ${s.traits.join(', ')}`).join('\n')}
 
     [Instructions]
     1. For each Recruit, generate a unique name appropriate for their Race and Gender.
@@ -138,14 +138,14 @@ export const generateRecruitSkins = async (
         const response = await ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 } 
+                thinkingConfig: { thinkingBudget: 0 }
             }
         });
-        
+
         let results = JSON.parse(cleanJson(response.text || "[]"));
-        
+
         // Handle Gemini wrapping array in an object
         if (!Array.isArray(results) && results.recruits && Array.isArray(results.recruits)) {
             results = results.recruits;
@@ -154,15 +154,15 @@ export const generateRecruitSkins = async (
         if (Array.isArray(results) && results.length > 0) {
             return results;
         }
-        
+
         throw new Error("Invalid or empty AI response structure");
     } catch (e) {
         console.error("Recruit skinning failed", e);
         // Robust fallback: Return basic names derived from seeds
-        return seeds.map(s => ({ 
-            name: `${s.race} Adventurer`, 
-            description: "A mysterious traveler seeking purpose in the uncharted lands.", 
-            personality: "Quiet, observant, and reliable." 
+        return seeds.map(s => ({
+            name: `${s.race} Adventurer`,
+            description: "A mysterious traveler seeking purpose in the uncharted lands.",
+            personality: "Quiet, observant, and reliable."
         }));
     }
 };
@@ -196,15 +196,15 @@ export const weaveHero = async (
 }> => {
     const worldContext = getWorldContext(gameData);
     const config = gameData.skillConfiguration || 'Fantasy';
-    
+
     // Performance Update: Always prioritize gemini-3-flash-preview for companion recruitment to ensure snappy UI.
-    const useFasterGm = gameData.combatConfiguration?.fasterGm === true || isCompanion;
+
 
     const availableSkillsList = SKILL_NAMES.filter(s => {
         const def = SKILL_DEFINITIONS[s];
         return def.usedIn === 'All' || def.usedIn.includes(config);
     });
-    
+
     const contextTerm = isCompanion ? "companion" : "player character";
     const possessiveTerm = isCompanion ? "their" : "your";
 
@@ -269,13 +269,13 @@ export const weaveHero = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: useFasterGm ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: { responseMimeType: "application/json" }
         });
-        
+
         const result = JSON.parse(cleanJson(response.text || "{}"));
-        
+
         return {
             profession: result.profession || "Adventurer",
             appearance: result.appearance || "A determined explorer.",
@@ -318,13 +318,13 @@ export const generateCharacterDetails = async (world: any[], prompt: string, cha
     - Active Effects (damage/heal) MUST have usage limits (per_short_rest or per_long_rest).
 
     Return a comprehensive JSON object representing the character.`;
-    
+
     // Check window cache for faster setting as GameData may not be fully available to this service
-    const isFaster = (window as any).gameDataCache?.combatConfiguration?.fasterGm === true;
+
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: isFaster ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: input,
         config: { responseMimeType: "application/json" }
     });
@@ -339,11 +339,11 @@ export const generateCompanionDetails = async (world: any[], prompt: string, com
     
     Return a comprehensive JSON object for the Companion.`;
 
-    const isFaster = (window as any).gameDataCache?.combatConfiguration?.fasterGm === true;
+
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: isFaster ? 'gemini-3-flash-preview' : 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: input,
         config: { responseMimeType: "application/json" }
     });
@@ -354,7 +354,7 @@ export const generateNemesis = async (prompt: string, gameData: GameData) => {
     const input = `Create a Nemesis based on: "${prompt}".
     World: ${gameData.gmSettings}
     Return JSON: { title, description, maxHeat (10-20) }`;
-    
+
     const ai = getAi();
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -366,7 +366,7 @@ export const generateNemesis = async (prompt: string, gameData: GameData) => {
 
 export const generatePersonalDiscoveries = async (character: any, gameData: GameData) => {
     const worldContext = getWorldContext(gameData);
-    
+
     const prompt = `Establish 2 new geographical locations significant to ${character.name}'s past.
     These locations MUST be anchored immediately around the starting coordinates (0-0).
     
@@ -387,7 +387,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     4. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
     
     Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "sectorId", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
-    
+
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
@@ -405,7 +405,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 
 export const generateStartingScenario = async (character: any, gameData: GameData, hookIndex: number) => {
     const worldContext = getWorldContext(gameData);
-    
+
     const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
 
 [WORLD CONTEXT]
@@ -452,20 +452,20 @@ You MUST base the catalyst of this adventure on Hook #${hookIndex} from the libr
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
     
 Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "startingZone": { "name", "description", "hostility", "knowledge": [{ "title", "content", "isBackgroundRelated" }] } }`;
-    
+
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 4000 }
             }
         });
-        
+
         const data = JSON.parse(cleanJson(response.text || '{}'));
-        
+
         // Deterministic assembly of the 3 paragraphs to satisfy the 3-paragraph requirement 100% of the time.
         if (data.narrativeLens && data.narrativePath && data.narrativeCatalyst) {
             data.introNarrative = `${data.narrativeLens}\n\n${data.narrativePath}\n\n${data.narrativeCatalyst}`;
@@ -476,7 +476,7 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             // Fallback for unexpected model output format
             console.warn("AI failed to provide structured narrative parts; falling back to unstructured narrative.");
         }
-        
+
         return data;
     } catch (e) {
         console.error("Starting scenario generation failed", e);

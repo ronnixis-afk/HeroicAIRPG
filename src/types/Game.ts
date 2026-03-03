@@ -11,7 +11,7 @@ export interface CombatConfiguration {
   manualCompanionControl: boolean;
   aiGeneratesLoot: boolean;
   smarterGm: boolean;
-  fasterGm: boolean;
+
   narrativeCombat: boolean;
   autoIncludeNearbyNpcs: boolean;
 }

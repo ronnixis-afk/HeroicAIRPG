@@ -154,7 +154,7 @@ const SettingsView: React.FC = () => {
 
     // Safe Access for Configuration (Defaults if undefined in older saves)
     const combatConfig = useMemo(() => {
-        return gameData?.combatConfiguration || { aiNarratesTurns: true, manualCompanionControl: false, aiGeneratesLoot: true, smarterGm: true, fasterGm: false, narrativeCombat: false, autoIncludeNearbyNpcs: true };
+        return gameData?.combatConfiguration || { aiNarratesTurns: true, manualCompanionControl: false, aiGeneratesLoot: true, smarterGm: true, narrativeCombat: false, autoIncludeNearbyNpcs: true };
     }, [gameData]);
 
     useEffect(() => {
@@ -419,12 +419,7 @@ const SettingsView: React.FC = () => {
                                 onChange={(val) => updateCombatConfiguration({ ...combatConfig, smarterGm: val })}
                                 description="Utilizes advanced tiered context injection for higher narrative continuity."
                             />
-                            <ToggleSwitch
-                                label="Faster AI Game Master"
-                                enabled={combatConfig.fasterGm}
-                                onChange={(val) => updateCombatConfiguration({ ...combatConfig, fasterGm: val })}
-                                description="Switches to high-speed models for lower latency during interaction loops."
-                            />
+
                             <ToggleSwitch
                                 label="Use Gemini Neural TTS"
                                 enabled={gameData.useAiTts || false}

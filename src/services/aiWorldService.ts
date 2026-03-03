@@ -38,7 +38,7 @@ export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSu
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 thinkingConfig: { thinkingBudget: 0 }
             }
         });
@@ -55,11 +55,11 @@ export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSu
  * Uses a strict responseSchema to ensure the UI can parse the complex lore.
  */
 export const generateWorldPreview = async (
-    setting: string, 
-    themes: string[], 
-    numRaces: number, 
-    numFactions: number, 
-    name: string, 
+    setting: string,
+    themes: string[],
+    numRaces: number,
+    numFactions: number,
+    name: string,
     context: string
 ): Promise<WorldPreview> => {
     const prompt = `You are a World-Building Architect. Create a cohesive TTRPG world preview.
@@ -80,9 +80,9 @@ export const generateWorldPreview = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 4000 },
                 responseSchema: {
@@ -123,7 +123,7 @@ export const generateWorldPreview = async (
                 }
             }
         });
-        
+
         const rawData = JSON.parse(cleanJson(response.text || '{}')) || {};
         return {
             context: rawData.summary || "A mysterious world awaits.",
@@ -155,12 +155,12 @@ export const generateWorldSectors = async (lore: any[], settings: MapSettings): 
     const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: prompt,
-        config: { 
+        config: {
             responseMimeType: "application/json",
             thinkingConfig: { thinkingBudget: 0 }
         }
     });
-    
+
     const data = JSON.parse(cleanJson(response.text || '[]')) || [];
     return Array.isArray(data) ? data : (data.sectors || []);
 };
@@ -173,7 +173,7 @@ export const generateAdditionalLore = async (prompt: string, existingLore: LoreE
     const input = `Create a new Lore Entry based on: "${prompt}".
     Existing lore context (last 5 entries): ${JSON.stringify(existingLore.slice(-5))}
     Return JSON: { "title": "string", "content": "string", "tags": ["string"], "keywords": ["string"] }`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: input,
@@ -202,9 +202,9 @@ export const generateGlobalWorldSummary = async (lore: LoreEntry[]): Promise<str
     - Return ONLY plain text. 
     - NO Markdown formatting.
     - MAXIMUM 200 WORDS.`;
-    
+
     const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: input,
         config: {
             thinkingConfig: { thinkingBudget: 4000 }
@@ -224,7 +224,7 @@ export const generateMapSectorDetails = async (gameData: GameData): Promise<Part
     - name: MAX 3 WORDS.
     - description: MAX 30 WORDS.
     Return JSON: { "name": "string", "description": "string", "color": "hex string", "keywords": ["string"] }`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: input,
@@ -242,9 +242,9 @@ export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: Map
     Lore: ${JSON.stringify(lore.slice(0, 10))}
     Settings: ${JSON.stringify(settings)}
     Return JSON: { "sectors": [], "zones": [] }`;
-    
+
     const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: input,
         config: { responseMimeType: "application/json" }
     });
@@ -263,7 +263,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     - title: MUST NOT be identical to the zone name "${zone.name}".
     - content: MAX 30 WORDS.
     Return JSON array: [{ "title": "string", "content": "string" }]`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: input,
@@ -282,7 +282,7 @@ export const generatePoiDetail = async (localeName: string, zoneName: string, zo
     World context: ${worldSummary}
     [STRICT CONSTRAINTS]
     - Write an atmospheric description (MAX 30 WORDS).`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: input,
@@ -295,11 +295,11 @@ export const generatePoiDetail = async (localeName: string, zoneName: string, zo
  * Enforces strict brevity for the world state.
  */
 export const generateZoneDetails = async (
-    coords: string, 
-    nameHint: string, 
-    sector?: MapSector, 
-    additionalContext?: string, 
-    mapSettings?: MapSettings, 
+    coords: string,
+    nameHint: string,
+    sector?: MapSector,
+    additionalContext?: string,
+    mapSettings?: MapSettings,
     worldSummary?: string
 ): Promise<{ name: string, description: string, hostility: number, keywords: string[] }> => {
     const ai = getAi();
@@ -314,7 +314,7 @@ export const generateZoneDetails = async (
     - description: MAX 30 WORDS.
     
     Return JSON: { "name": "string", "description": "string", "hostility": number, "keywords": ["string"] }`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-flash-lite-latest',
         contents: input,
@@ -332,7 +332,7 @@ export const parseTravelIntent = async (userContent: string, history: ChatMessag
     Current message: "${userContent}"
     Recent history: ${JSON.stringify(history.slice(-3))}
     Return JSON: { "destination": "string", "method": "string" }`;
-    
+
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: input,
