@@ -21,15 +21,15 @@
   --text-4xl: 35px;
   --text-4xl--line-height: 41px;
 
-  --color-brand-bg: #121212;
-  --color-brand-surface: #1e1e1e;
-  --color-brand-surface-raised: #2a2a2a;
-  --color-brand-primary: #333333;
+  --color-brand-bg: #0A0A0A;
+  --color-brand-surface: #1C1C1E;
+  --color-brand-surface-raised: #2C2C2E;
+  --color-brand-primary: #4C4C4F;
   --color-brand-secondary: #3a3a3a;
   --color-brand-accent: #3ecf8e;
   --color-brand-accent-muted: rgba(62, 207, 142, 0.1);
-  --color-brand-text: #f8f9fa;
-  --color-brand-text-muted: #a1a1a1;
+  --color-brand-text: #E5E5E7;
+  --color-brand-text-muted: #8E8E93;
   --color-brand-danger: #ef4444;
 
   --radius-md: 4px;
