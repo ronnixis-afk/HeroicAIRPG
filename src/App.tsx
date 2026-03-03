@@ -240,17 +240,26 @@ const GameInterface: React.FC = () => {
     return (Object.values(menuBadges) as number[]).reduce((a: number, b: number) => a + b, 0);
   }, [menuBadges]);
 
+  const isSubmittingRef = React.useRef(false);
+
   const handleSubmitChat = async () => {
+    if (isSubmittingRef.current) return;
     const content = chatInput.trim();
     if (!content || !gameData) return;
-    stopAllSpeech();
 
-    // Phase 3: Correct propagation of Heroic state to the async narrative pipeline
-    const wasHeroic = isHeroicModeActive;
+    isSubmittingRef.current = true;
+    try {
+      stopAllSpeech();
 
-    setChatInput('');
-    const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: 'user', mode: 'CHAR', content };
-    await submitUserMessage(userMessage, wasHeroic);
+      // Phase 3: Correct propagation of Heroic state to the async narrative pipeline
+      const wasHeroic = isHeroicModeActive;
+
+      setChatInput('');
+      const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: 'user', mode: 'CHAR', content };
+      await submitUserMessage(userMessage, wasHeroic);
+    } finally {
+      isSubmittingRef.current = false;
+    }
   };
 
   const handleViewScene = async () => {

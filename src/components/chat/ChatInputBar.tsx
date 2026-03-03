@@ -59,17 +59,17 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
 
     if (props.isHandsFree) {
         return (
-            <div 
+            <div
                 onClick={handleInteraction}
                 className={`flex items-center justify-center p-4 gap-8 bg-brand-bg/80 rounded-3xl border border-brand-primary/30 shadow-2xl animate-fade-in relative overflow-hidden transition-all ${!props.isChatViewActive ? 'hover:scale-[1.02] active:scale-95' : ''}`}
             >
                 <button onClick={props.onRepeatLast} className="w-16 h-16 rounded-full bg-brand-surface flex items-center justify-center text-brand-text-muted hover:text-brand-text hover:bg-brand-primary transition-all active:scale-95 border border-brand-primary shadow-lg">
                     <Icon name="play" className="w-8 h-8" />
                 </button>
-                
+
                 {props.isCombatActive && props.isPlayerTurn && (
-                    <button 
-                        onClick={props.onAutoResolve} 
+                    <button
+                        onClick={props.onAutoResolve}
                         className="w-16 h-16 rounded-full bg-brand-surface flex items-center justify-center text-brand-danger hover:bg-brand-primary transition-all active:scale-95 shadow-lg border-2 border-brand-danger"
                         title="Auto-Combat Player Turn"
                     >
@@ -87,59 +87,65 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
     }
 
     return (
-        <div 
+        <div
             onClick={handleInteraction}
             className={`bg-brand-bg rounded-2xl flex items-center p-2 gap-2 shadow-sm border relative overflow-visible transition-all duration-500
-                ${isHeroicModeActive 
-                    ? 'border-brand-accent shadow-[0_0_15px_rgba(62,207,142,0.3)] ring-1 ring-brand-accent/20' 
+                ${isHeroicModeActive
+                    ? 'border-brand-accent shadow-[0_0_15px_rgba(62,207,142,0.3)] ring-1 ring-brand-accent/20'
                     : 'border-brand-primary/20'}
                 ${!props.isChatViewActive ? 'hover:scale-[1.01] active:scale-[0.99]' : ''}`}
         >
             <div className={`flex items-center gap-2 transition-all duration-500 ease-in-out overflow-visible whitespace-nowrap ${isFocused ? 'max-w-0 opacity-0 -translate-x-10 pointer-events-none' : 'max-w-[150px] opacity-100 translate-x-0'}`}>
-                <button 
+                <button
                     onClick={handleHeroicToggle}
                     disabled={!canActivateHeroic}
                     className={`btn-icon relative transition-all duration-300 ${!canActivateHeroic ? 'opacity-20 cursor-not-allowed' : ''} ${isHeroicModeActive ? 'scale-[1.15]' : ''}`}
-                    title={canActivateHeroic 
-                        ? `${isHeroicModeActive ? "Heroic Mode Active" : "Enable Heroic Mode"} (${heroicPoints}/${maxHeroicPoints} Available)` 
+                    title={canActivateHeroic
+                        ? `${isHeroicModeActive ? "Heroic Mode Active" : "Enable Heroic Mode"} (${heroicPoints}/${maxHeroicPoints} Available)`
                         : `No Heroic Points Remaining (0/${maxHeroicPoints})`}
                 >
-                    <Icon 
-                        name={isHeroicModeActive ? "starFill" : "star"} 
-                        className={`w-6 h-6 transition-colors duration-300 ${isHeroicModeActive ? 'text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-accent'}`} 
+                    <Icon
+                        name={isHeroicModeActive ? "starFill" : "star"}
+                        className={`w-6 h-6 transition-colors duration-300 ${isHeroicModeActive ? 'text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-accent'}`}
                     />
-                    
+
                     {/* Heroic Points Badge */}
                     <span className="absolute -top-1 -right-1 bg-brand-accent text-black text-[8px] font-black h-4 min-w-[20px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-10 shadow-sm transition-transform duration-300 tabular-nums">
                         {heroicPoints}/{maxHeroicPoints}
                     </span>
                 </button>
-                <button 
-                    onClick={() => setMode(mode === 'Char' ? 'Ooc' : 'Char')} 
-                    className={`btn-secondary btn-sm rounded-full transition-all flex-shrink-0 ${
-                        mode === 'Char' 
-                            ? 'border-brand-accent text-brand-accent bg-brand-accent/5' 
+                <button
+                    onClick={() => setMode(mode === 'Char' ? 'Ooc' : 'Char')}
+                    className={`btn-secondary btn-sm rounded-full transition-all flex-shrink-0 ${mode === 'Char'
+                            ? 'border-brand-accent text-brand-accent bg-brand-accent/5'
                             : 'border-brand-primary text-brand-text-muted bg-brand-primary/20'
-                    }`}
+                        }`}
                 >
                     {mode}
                 </button>
             </div>
-            
-            <AutoResizingTextarea 
-                value={props.value} 
-                onChange={(e) => props.onChange(e.target.value)} 
+
+            <AutoResizingTextarea
+                value={props.value}
+                onChange={(e) => props.onChange(e.target.value)}
                 onFocus={() => {
                     setIsFocused(true);
                     handleInteraction();
-                }} 
-                onBlur={() => setIsFocused(false)} 
-                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); props.onSubmit(); } }} 
-                placeholder={isHeroicModeActive ? "Say or Do" : (mode === 'Char' ? "Say or Do" : "Ask The Game Master")} 
-                className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''}`} 
-                style={{ maxHeight: '120px' }} 
+                }}
+                onBlur={() => setIsFocused(false)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (props.value.trim() && !props.isLocked) {
+                            props.onSubmit();
+                        }
+                    }
+                }}
+                placeholder={isHeroicModeActive ? "Say or Do" : (mode === 'Char' ? "Say or Do" : "Ask The Game Master")}
+                className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''}`}
+                style={{ maxHeight: '120px' }}
             />
-            
+
             <div className="flex items-center self-center gap-1">
                 <div className={`flex items-center gap-1 transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap ${isFocused ? 'max-w-0 opacity-0 translate-x-10' : 'max-w-[100px] opacity-100 translate-x-0'}`}>
                     <button onClick={props.onViewScene} disabled={props.isGeneratingImage} className="btn-icon">
@@ -147,9 +153,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     </button>
                     <SpeechToTextButton onClick={props.onMicClick} className="btn-icon" />
                 </div>
-                <button 
-                    onClick={props.onSubmit} 
-                    disabled={!props.value.trim() || props.isLocked} 
+                <button
+                    onClick={props.onSubmit}
+                    disabled={!props.value.trim() || props.isLocked}
                     className={`btn-primary w-11 h-11 rounded-full p-0 flex-shrink-0 disabled:opacity-40 transition-all duration-300 ${isHeroicModeActive ? 'shadow-[0_0_15px_rgba(62,207,142,0.4)] scale-105' : ''}`}
                 >
                     {props.isLocked ? <Icon name="spinner" className="w-5 h-5 animate-spin" /> : <Icon name="send" className="w-5 h-5" />}

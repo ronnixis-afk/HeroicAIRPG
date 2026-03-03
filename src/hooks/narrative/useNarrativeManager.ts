@@ -46,6 +46,8 @@ export const useNarrativeManager = (
     const { resolveMechanics } = useResolutionStep(dispatch, combatActions);
     const { generateNarrative } = useNarrationStep();
 
+    const isPipelineActiveRef = React.useRef(false);
+
     const notifyInventoryChanges = useCallback((inventoryUpdates: InventoryUpdatePayload[]) => {
         if (!gameData || !Array.isArray(inventoryUpdates)) return;
         inventoryUpdates.forEach(batch => {
@@ -77,7 +79,8 @@ export const useNarrativeManager = (
     const executePipeline = useCallback(async (
         input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean }
     ) => {
-        if (!gameData) return;
+        if (!gameData || isPipelineActiveRef.current) return;
+        isPipelineActiveRef.current = true;
         const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false } = input;
 
         try {
@@ -178,6 +181,7 @@ export const useNarrativeManager = (
             setIsAuditing(false);
             setIsAssessing(false);
             setIsHousekeeping(false);
+            isPipelineActiveRef.current = false;
         }
     }, [gameData, dispatch, assessIntent, resolveMechanics, generateNarrative, processConsequences, getCombatSlots, combatActions, processUserInitiatedTravel, setIsAiGenerating, setIsAssessing, setIsAuditing, setIsHousekeeping]);
 
