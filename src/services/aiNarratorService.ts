@@ -107,7 +107,8 @@ export const generateNarrativeResponse = async (
                     properties: {
                         name: { type: Type.STRING },
                         action: { type: Type.STRING, description: "existing | new | leaves" },
-                        summary: { type: Type.STRING }
+                        summary: { type: Type.STRING },
+                        isFollowing: { type: Type.BOOLEAN, description: "TRUE if travelling with the player. FALSE if staying behind or if DEAD. Dead NPCs MUST be FALSE." }
                     },
                     required: ["name", "action", "summary"]
                 }

@@ -91,6 +91,23 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
 
             let updatedNpcs = [...currentNpcs];
 
+            // 1. AUTOMATIC FOLLOWERS: Move any existing NPC who is flagged as following (and not dead)
+            if (location_update) {
+                updatedNpcs = updatedNpcs.map(npc => {
+                    if (npc.isFollowing && npc.status !== 'Dead') {
+                        return {
+                            ...npc,
+                            currentPOI: location_update.site_name || 'Current',
+                            site_id: location_update.site_id
+                        };
+                    }
+                    if (npc.status === 'Dead') {
+                        return { ...npc, isFollowing: false };
+                    }
+                    return npc;
+                });
+            }
+
             npc_resolution.forEach(res => {
                 if (!res.name) return;
 
@@ -112,7 +129,8 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                             ...updatedNpcs[index],
                             currentPOI: 'Unknown',
                             site_id: undefined,
-                            narrative_detail: res.summary
+                            narrative_detail: res.summary,
+                            isFollowing: false
                         };
                     }
                 } else if (res.action === 'existing' || res.action === 'new') {
@@ -121,7 +139,8 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                         name: res.name,
                         currentPOI: location_update?.site_name || 'Current',
                         site_id: location_update?.site_id,
-                        narrative_detail: res.summary
+                        narrative_detail: res.summary,
+                        isFollowing: res.isFollowing
                     };
 
                     if (index > -1) {

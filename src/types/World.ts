@@ -18,6 +18,7 @@ export interface NPCResolution {
   name: string;
   action: string; // e.g., "existing", "new", "leaves"
   summary: string;
+  isFollowing?: boolean;
 }
 
 export interface ObjectiveUpdate {
@@ -127,6 +128,7 @@ export interface NPC {
   memories?: NPCMemory[];
   // Fix: Added statusEffects to NPC to support untargetable logic (e.g. Invisible/Hidden)
   statusEffects?: StatusEffect[];
+  isFollowing?: boolean;
 }
 
 export interface DiceRoll {

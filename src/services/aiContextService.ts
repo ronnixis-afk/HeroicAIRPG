@@ -378,6 +378,12 @@ The following NPCs are in your immediate vicinity or are active party members.
 4. For [SENTIENT: NO] animals: Describe their instinctual reactions (e.g., "whinnying in fear", "pawing the ground").
 5. Only [SENTIENT: YES] entities (Androids, AI-Ships, Humans) are permitted to engage in dialogue.
 
+**FOLLOW STATUS RULE (CRITICAL)**:
+For each NPC in the resolution block, you MUST determine if they are currently traveling with the player.
+1. If they are actively accompanying the party to new locations, set \`isFollowing: true\`.
+2. If they are staying behind, parting ways, or guarding a specific location, set \`isFollowing: false\`.
+3. If their [STATUS: Dead], they CANNOT follow. You MUST set \`isFollowing: false\`.
+
 **MEMORY RULE**: Use the provided [MEMORIES] to inform NPC reactions. These are a composite of recent interactions and specific past events relevant to the current situation.
 
 [ACTIVE SOCIAL CONTEXT]:
