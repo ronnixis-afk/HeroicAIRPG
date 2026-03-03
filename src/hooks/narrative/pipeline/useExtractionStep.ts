@@ -46,26 +46,52 @@ export const useExtractionStep = (
         let resolvedLocale = gameData.currentLocale || '';
 
         if (narratorLoc) {
-            const isAttemptingMove = narratorLoc.site_id !== gameData.current_site_id;
             const isShipDestination = (gameData.companions ?? []).some(c => c.isShip && c.name.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim());
 
             // EVENT LANGUAGE FILTER: Prevent dramatic narrative events from creating fake POIs.
-            // The AI sometimes names the "location" after story events (e.g., "Death of Grimbold", "Aftermath of the Battle").
             const eventPatterns = /\b(death|dying|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb)\b/i;
             const isEventName = eventPatterns.test(narratorLoc.site_name);
 
-            if (isAttemptingMove && isEventName) {
-                // Snap back to current location — the player hasn't physically moved, something just happened here.
+            if (narratorLoc.transition_type === 'staying' || isEventName) {
+                // Snap back to current location — no physical movement occurred.
                 finalUpdates.location_update = {
                     ...narratorLoc,
                     sector: gameData.playerCoordinates || '0-0',
                     zone: gameData.current_site_name || 'The Wilds',
                     site_name: gameData.current_site_name || 'Open Area',
                     site_id: gameData.current_site_id || 'open-area',
-                    is_new_site: false
+                    is_new_site: false,
+                    transition_type: 'staying'
                 };
                 resolvedLocale = gameData.current_site_name || '';
-            } else if (isAttemptingMove) {
+            } else if (narratorLoc.transition_type === 'returning') {
+                // Try to find the existing location in knowledge
+                const knownLocation = (gameData.knowledge || []).find(k =>
+                    k.tags?.includes('location') &&
+                    k.coordinates === gameData.playerCoordinates &&
+                    k.title.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim()
+                );
+
+                if (knownLocation) {
+                    // Snap to the known POI
+                    finalUpdates.location_update = {
+                        ...narratorLoc,
+                        sector: gameData.playerCoordinates || '0-0',
+                        zone: gameData.current_site_name || 'The Wilds',
+                        site_name: knownLocation.title,
+                        site_id: knownLocation.id,
+                        is_new_site: false,
+                        transition_type: 'returning'
+                    };
+                    resolvedLocale = knownLocation.title;
+                } else {
+                    // Fallback to exploring_new if we can't find it to prevent game breaking
+                    narratorLoc.transition_type = 'exploring_new';
+                }
+            }
+
+            // Note: Not an 'else if' because a failed 'returning' falls through to this block
+            if (narratorLoc.transition_type === 'exploring_new' || !narratorLoc.transition_type) {
                 try {
                     const validationResult = await resolveLocaleCreation(narratorLoc.site_name, gameData);
                     if (!validationResult.validation_passed) {
@@ -75,11 +101,21 @@ export const useExtractionStep = (
                             zone: gameData.current_site_name || 'The Wilds',
                             site_name: gameData.current_site_name || 'Open Area',
                             site_id: gameData.current_site_id || 'open-area',
-                            is_new_site: false
+                            is_new_site: false,
+                            transition_type: 'staying'
                         };
                         resolvedLocale = gameData.current_site_name || '';
                     } else {
                         resolvedLocale = validationResult.name;
+                        // Inject the validated details
+                        finalUpdates.location_update = {
+                            ...narratorLoc,
+                            site_name: validationResult.name,
+                            site_id: `poi-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                            is_new_site: validationResult.isNew,
+                            transition_type: 'exploring_new'
+                        };
+
                         if (validationResult.isNew && validationResult.isLiteralTransition && !isShipDestination) {
                             const newEntry: Omit<LoreEntry, 'id'> = {
                                 title: validationResult.name,
@@ -95,9 +131,8 @@ export const useExtractionStep = (
                 } catch (e) {
                     resolvedLocale = narratorLoc.site_name;
                 }
-            } else {
-                resolvedLocale = narratorLoc.site_name;
             }
+
         } else {
             resolvedLocale = auditResult.currentLocale || gameData.currentLocale || '';
         }

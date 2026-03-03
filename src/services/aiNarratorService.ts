@@ -96,9 +96,10 @@ export const generateNarrativeResponse = async (
                     site_name: { type: Type.STRING, description: "Physical location name ONLY (e.g. 'The Iron Forge'). NEVER use event names like 'Death of X' or 'Aftermath of Y'. If no move occurred, return the current site_name unchanged." },
                     site_id: { type: Type.STRING },
                     narrative_detail: { type: Type.STRING },
-                    is_new_site: { type: Type.BOOLEAN }
+                    is_new_site: { type: Type.BOOLEAN, description: "TRUE only if transition_type is 'exploring_new'. FALSE otherwise." },
+                    transition_type: { type: Type.STRING, description: "staying | returning | exploring_new. 'staying' if no movement occurred. 'returning' if visiting a previously established POI. 'exploring_new' if moving to an entirely unestablished area." }
                 },
-                required: ["sector", "zone", "site_name", "site_id", "narrative_detail", "is_new_site"]
+                required: ["sector", "zone", "site_name", "site_id", "narrative_detail", "is_new_site", "transition_type"]
             },
             npc_resolution: {
                 type: Type.ARRAY,

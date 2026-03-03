@@ -11,6 +11,7 @@ export interface LocationUpdate {
   site_id: string;
   narrative_detail: string;
   is_new_site: boolean;
+  transition_type?: 'staying' | 'returning' | 'exploring_new';
 }
 
 // Fix: Added NPCResolution interface to support structured AI social status updates

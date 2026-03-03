@@ -404,7 +404,10 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 - Specifically, if [SYSTEM_OVERRIDE: ENCOUNTER QUEST] is present, you MUST generate a new objective in 'updates.objectives' following the provided constraints.
 
 [CRITICAL INVARIANTS]:
-1. SPATIAL ANCHORING: If the player moves within the zone, you MUST update 'location_update.site_name' in the JSON.
+1. SPATIAL ANCHORING: If the player moves, you MUST update 'location_update.site_name' and provide a 'transition_type'.
+   - Use 'staying' if no movement occurred.
+   - Use 'returning' if visiting a previously established POI from the [LOCAL POINTS OF INTEREST] list, and use its exact title.
+   - Use 'exploring_new' ONLY if moving to an entirely unestablished or new location.
 2. PLAIN TEXT ONLY: No Markdown (**, *) in 'narration'.
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.
