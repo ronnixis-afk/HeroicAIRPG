@@ -2,13 +2,13 @@
 
 import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../context/GameDataContext';
-import type { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, MapSettings, SkillConfiguration } from '../types';
+import type { NarrationVoice, ImageGenerationStyle } from '../types';
 import { Icon } from './Icon';
-import { NARRATION_TONES, IMAGE_GENERATION_STYLES, DIFFICULTIES } from '../constants';
-import { NARRATION_VOICES, SKILL_DEFINITIONS, SKILL_NAMES } from '../types';
+import { IMAGE_GENERATION_STYLES } from '../constants';
+import { NARRATION_VOICES } from '../types';
 import { parseGameTime, formatGameTime } from '../utils/timeUtils';
 import { worldService } from '../services/worldService';
-import { cloudSaveService, CloudSaveMetadata } from '../services/cloudSaveService';
+import { cloudSaveService } from '../services/cloudSaveService';
 import { downloadAsTxt, DOCUMENTATION_FILES } from '../utils/documentation';
 import Modal from './Modal';
 
@@ -118,17 +118,14 @@ const SettingsView: React.FC = () => {
     const {
         gameData,
         updateGmSettings,
-        switchWorld,
         resetWorld,
         updateNarrationVoice,
-        updateNarrationTone,
         updateImageGenerationStyle,
         updateIsMature,
         updateIsHandsFree,
         updateUseAiTts,
         updateCurrentTime,
         storageUsage,
-        updateDifficulty,
         worldId,
         updateMapSettings,
         updateSkillConfiguration,
@@ -146,9 +143,7 @@ const SettingsView: React.FC = () => {
     const [saveTimeSuccess, setSaveTimeSuccess] = useState(false);
     const [isDocModalOpen, setIsDocModalOpen] = useState(false);
 
-    // --- Cloud Save State ---
-    const [cloudSaves, setCloudSaves] = useState<CloudSaveMetadata[]>([]);
-    const [isFetchingSaves, setIsFetchingSaves] = useState(false);
+    // --- Cloud Sync State ---
     const [isSyncingCloud, setIsSyncingCloud] = useState(false);
     const [cloudMessage, setCloudMessage] = useState('');
 
@@ -168,24 +163,6 @@ const SettingsView: React.FC = () => {
         }
     }, [gameData]);
 
-    useEffect(() => {
-        if (activeTab === 'system') {
-            fetchCloudSaves();
-        }
-    }, [activeTab]);
-
-    const fetchCloudSaves = async () => {
-        setIsFetchingSaves(true);
-        try {
-            const saves = await cloudSaveService.fetchCloudSavesMetadata();
-            setCloudSaves(saves);
-        } catch (err) {
-            console.error("Failed to load cloud saves", err);
-        } finally {
-            setIsFetchingSaves(false);
-        }
-    };
-
     const handleCloudBackup = async () => {
         if (!gameData || isSyncingCloud) return;
         setIsSyncingCloud(true);
@@ -198,36 +175,10 @@ const SettingsView: React.FC = () => {
             if (world) {
                 await cloudSaveService.pushSaveToCloud(worldId, world.name, world.gameData);
                 setCloudMessage('Backup successful!');
-                await fetchCloudSaves(); // refresh list
             }
         } catch (err: any) {
             setCloudMessage(`Backup failed: ${err.message}`);
         } finally {
-            setIsSyncingCloud(false);
-            setTimeout(() => setCloudMessage(''), 3000);
-        }
-    };
-
-    const handleCloudRestore = async (saveId: string) => {
-        if (isSyncingCloud) return;
-        if (!window.confirm("Warning: Restoring this cloud save will completely overwrite your current local progress for this world. Proceed?")) return;
-
-        setIsSyncingCloud(true);
-        setCloudMessage('Downloading save data from cloud...');
-        try {
-            const result = await cloudSaveService.fetchCloudSaveContext(saveId);
-
-            // Overwrite into IndexedDB
-            await worldService.saveGameData(worldId, result.data);
-
-            setCloudMessage('Restore successful! Reloading...');
-
-            // Force reload to pick up new state easily
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } catch (err: any) {
-            setCloudMessage(`Restore failed: ${err.message}`);
             setIsSyncingCloud(false);
             setTimeout(() => setCloudMessage(''), 3000);
         }
@@ -243,15 +194,6 @@ const SettingsView: React.FC = () => {
     const formatTimeForInput = (date: Date): string => {
         return date.toTimeString().slice(0, 5);
     };
-
-    const uniqueSkills = useMemo(() => {
-        if (!gameData) return '';
-        const config = gameData.skillConfiguration || 'Fantasy';
-        return SKILL_NAMES.filter(s => {
-            const def = SKILL_DEFINITIONS[s];
-            return def.usedIn !== 'All' && def.usedIn.includes(config);
-        }).join(', ');
-    }, [gameData]);
 
     if (!gameData) return <div className="text-center p-8 animate-pulse text-brand-text-muted">Loading settings...</div>;
 
@@ -302,29 +244,6 @@ const SettingsView: React.FC = () => {
         worldService.exportWorldById(worldId);
     };
 
-    const handleCombinedConfigChange = (config: SkillConfiguration) => {
-        updateSkillConfiguration(config);
-
-        let mapUpdate: MapSettings;
-        let yearOffset = 0;
-
-        if (config === 'Fantasy') {
-            mapUpdate = { style: 'fantasy', gridUnit: 'Miles', gridDistance: 24, zoneLabel: 'Region' };
-            yearOffset = -1500;
-        } else if (config === 'Modern') {
-            mapUpdate = { style: 'modern', gridUnit: 'Km', gridDistance: 2, zoneLabel: 'District' };
-            yearOffset = 0;
-        } else { // Sci-Fi and Magitech
-            mapUpdate = { style: 'sci-fi', gridUnit: 'Light Years', gridDistance: 5, zoneLabel: 'System' };
-            yearOffset = 1000;
-        }
-
-        const now = new Date();
-        now.setFullYear(now.getFullYear() + yearOffset);
-        updateCurrentTime(formatGameTime(now));
-        updateMapSettings(mapUpdate);
-    };
-
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <h1 className="text-center mb-2">Settings</h1>
@@ -348,61 +267,6 @@ const SettingsView: React.FC = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-brand-primary/20">
                             <SelectField label="Image generation style" value={gameData.imageGenerationStyle} onChange={(e) => updateImageGenerationStyle(e.target.value as ImageGenerationStyle)} options={[...IMAGE_GENERATION_STYLES]} />
                             <SelectField label="Narration voice" value={gameData.narrationVoice || ''} onChange={(e) => updateNarrationVoice(e.target.value as NarrationVoice)} options={[...NARRATION_VOICES]} />
-                        </div>
-
-                        <div className="pt-8 border-t border-brand-primary/20">
-                            <h3 className="text-center mb-6">Skill and Map Configuration</h3>
-                            <div className="bg-brand-primary/10 p-6 rounded-3xl border border-brand-surface shadow-inner">
-                                <div className="grid grid-cols-2 gap-3 mb-6">
-                                    {['Fantasy', 'Modern', 'Sci-Fi', 'Magitech'].map(s => (
-                                        <button
-                                            key={s}
-                                            onClick={() => handleCombinedConfigChange(s as SkillConfiguration)}
-                                            className={`h-11 rounded-xl text-body-sm font-bold border transition-all capitalize ${gameData.skillConfiguration === s
-                                                ? 'bg-brand-accent text-black border-brand-accent shadow-sm'
-                                                : 'bg-brand-surface text-brand-text-muted border-brand-primary hover:border-brand-accent/30'
-                                                }`}
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
-                                </div>
-                                {uniqueSkills && (
-                                    <div className="bg-brand-bg/40 p-4 rounded-xl border border-brand-surface mb-6">
-                                        <p className="text-[10px] text-brand-accent leading-relaxed text-center font-bold">
-                                            <span className="text-brand-text-muted mr-1">Unique Skills:</span>
-                                            {uniqueSkills}
-                                        </p>
-                                    </div>
-                                )}
-                                <div className="grid grid-cols-3 gap-4 pt-2">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Zone name</label>
-                                        <input
-                                            value={gameData.mapSettings?.zoneLabel || 'Region'}
-                                            onChange={e => updateMapSettings({ ...gameData.mapSettings!, zoneLabel: e.target.value, style: 'custom' })}
-                                            className="w-full bg-brand-surface h-11 border border-brand-primary rounded-xl px-4 text-body-sm focus:outline-none focus:border-brand-accent shadow-inner font-bold"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Grid size</label>
-                                        <input
-                                            type="number"
-                                            value={gameData.mapSettings?.gridDistance || 24}
-                                            onChange={e => updateMapSettings({ ...gameData.mapSettings!, gridDistance: parseInt(e.target.value) || 1, style: 'custom' })}
-                                            className="w-full bg-brand-surface h-11 border border-brand-primary rounded-xl px-4 text-body-sm focus:outline-none focus:border-brand-accent shadow-inner font-bold"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-brand-text-muted mb-2 ml-1">Unit</label>
-                                        <input
-                                            value={gameData.mapSettings?.gridUnit || 'Miles'}
-                                            onChange={e => updateMapSettings({ ...gameData.mapSettings!, gridUnit: e.target.value, style: 'custom' })}
-                                            className="w-full bg-brand-surface h-11 border border-brand-primary rounded-xl px-4 text-body-sm focus:outline-none focus:border-brand-accent shadow-inner font-bold"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="pt-8 border-t border-brand-primary/20 space-y-4">
@@ -485,84 +349,34 @@ const SettingsView: React.FC = () => {
 
                 {activeTab === 'system' && (
                     <div className="space-y-10 animate-fade-in pb-10">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button onClick={handleExportWorld} className="btn-primary btn-md rounded-xl gap-3 shadow-lg shadow-brand-accent/20">
-                                <Icon name="download" className="w-5 h-5" />
-                                Export world
+                        <div className="flex flex-col gap-4 relative">
+                            {isSyncingCloud && (
+                                <div className="absolute inset-0 bg-brand-bg/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl z-10 text-center p-4">
+                                    <Icon name="spinner" className="w-8 h-8 animate-spin text-brand-accent mb-2 mx-auto" />
+                                    <div className="text-brand-text font-bold animate-pulse">{cloudMessage}</div>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleCloudBackup}
+                                disabled={isSyncingCloud}
+                                className="btn-primary w-full h-11 px-6 rounded-xl shadow-lg shadow-brand-accent/20 text-body-sm font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
+                            >
+                                <Icon name="upload" className="w-4 h-4 mr-2" /> Sync to Cloud
                             </button>
 
-                            <button onClick={switchWorld} className="btn-secondary btn-md rounded-xl shadow-sm">
-                                Back to Main
+                            {cloudMessage && !isSyncingCloud && (
+                                <div className="text-center text-body-sm font-bold text-brand-accent animate-fade-in py-1 absolute top-12 left-0 right-0 z-20 pointer-events-none">
+                                    {cloudMessage}
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleExportWorld}
+                                className="btn-secondary w-full h-11 rounded-xl shadow-sm border border-brand-primary text-body-sm font-bold flex items-center justify-center hover:bg-brand-primary/50 transition-colors"
+                            >
+                                <Icon name="download" className="w-4 h-4 mr-2" /> Export world
                             </button>
-                        </div>
-
-                        {/* Cloud Save Section */}
-                        <div className="pt-6 border-t border-brand-primary/20">
-                            <h3 className="text-center mb-6 text-brand-accent">Cloud Sync</h3>
-                            <div className="bg-brand-primary/10 p-6 rounded-3xl border border-brand-surface shadow-inner flex flex-col gap-4 relative">
-                                {isSyncingCloud && (
-                                    <div className="absolute inset-0 bg-brand-bg/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl z-10">
-                                        <Icon name="spinner" className="w-8 h-8 animate-spin text-brand-accent mb-2" />
-                                        <div className="text-brand-text font-bold animate-pulse">{cloudMessage}</div>
-                                    </div>
-                                )}
-
-                                <div className="flex justify-between items-center bg-brand-surface p-4 rounded-xl border border-brand-primary shadow-sm">
-                                    <div>
-                                        <h4 className="text-body-base font-bold text-brand-text">Backup Current World</h4>
-                                        <p className="text-body-sm text-brand-text-muted mt-1">Uploads your game progress to your account securely.</p>
-                                    </div>
-                                    <button
-                                        onClick={handleCloudBackup}
-                                        disabled={isSyncingCloud}
-                                        className="btn-primary btn-sm whitespace-nowrap px-6 rounded-lg shadow-md hover:scale-105 transition-transform"
-                                    >
-                                        <Icon name="upload" className="w-4 h-4 mr-2" /> Backup
-                                    </button>
-                                </div>
-
-                                {cloudMessage && !isSyncingCloud && (
-                                    <div className="text-center text-body-sm font-bold text-brand-accent animate-fade-in py-2">
-                                        {cloudMessage}
-                                    </div>
-                                )}
-
-                                <div>
-                                    <div className="flex justify-between items-end mb-3 mt-4">
-                                        <h4 className="text-body-sm font-bold text-brand-text-muted ml-1">Available Cloud Backups</h4>
-                                        <button onClick={fetchCloudSaves} className="text-brand-accent hover:text-white transition-colors p-1" aria-label="Refresh cloud saves">
-                                            <Icon name="refresh" className={`w-4 h-4 ${isFetchingSaves ? 'animate-spin' : ''}`} />
-                                        </button>
-                                    </div>
-
-                                    <div className="bg-brand-primary rounded-xl border border-brand-surface overflow-hidden shadow-inner max-h-48 overflow-y-auto custom-scroll">
-                                        {isFetchingSaves && cloudSaves.length === 0 ? (
-                                            <div className="p-6 text-center text-brand-text-muted animate-pulse">Loading backups...</div>
-                                        ) : cloudSaves.length === 0 ? (
-                                            <div className="p-6 text-center text-brand-text-muted italic">No cloud backups found for your account.</div>
-                                        ) : (
-                                            <div className="divide-y divide-brand-surface">
-                                                {cloudSaves.map(save => (
-                                                    <div key={save.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-brand-surface/30 transition-colors">
-                                                        <div>
-                                                            <div className="font-bold text-brand-text text-body-sm">{save.name}</div>
-                                                            <div className="text-[10px] text-brand-text-muted mt-1">
-                                                                {new Date(save.updatedAt).toLocaleString()}
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => handleCloudRestore(save.id)}
-                                                            className="btn-secondary btn-sm px-4 rounded-lg self-start sm:self-auto text-brand-accent hover:bg-brand-accent hover:text-black border-brand-accent/30"
-                                                        >
-                                                            <Icon name="download" className="w-4 h-4 mr-1.5" /> Restore Here
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div className="pt-6 border-t border-brand-primary/20">

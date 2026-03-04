@@ -204,7 +204,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 current_site_name: "",
                 current_site_detail: "",
                 currentTime: "Day 1, 08:00",
-                skillConfiguration: 'Fantasy',
+                skillConfiguration: state.skillConfiguration || 'Fantasy',
                 isPartyHidden: false,
                 partyStealthScore: 10
             };
