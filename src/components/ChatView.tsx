@@ -212,11 +212,14 @@ const ChatView: React.FC = () => {
                     syncMessage += `\n**Reactions**: ${shifts.join(', ')}`;
                 }
 
-                await submitUserMessage({
-                    id: `msg-align-${Date.now()}`,
-                    sender: 'system',
-                    content: syncMessage,
-                    timestamp: gameData.currentTime || new Date().toISOString()
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-align-${Date.now()}`,
+                        sender: 'system',
+                        content: syncMessage,
+                        timestamp: gameData.currentTime || new Date().toISOString()
+                    }
                 });
             }
 
