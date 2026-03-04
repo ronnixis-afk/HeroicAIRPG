@@ -334,22 +334,33 @@ const MapView: React.FC = () => {
                     cellStyle = { ...cellStyle, backgroundColor: `${sector.color}20` };
                 }
 
-                if (zone && isVisited) {
-                    let zoneStyle: React.CSSProperties = {};
-                    if (sector) {
-                        zoneStyle = {
-                            ...zoneStyle,
-                            backgroundColor: `${sector.color}40`,
-                            boxShadow: `inset 0 0 10px ${sector.color}20`
-                        };
+                if (zone) {
+                    if (isVisited) {
+                        let zoneStyle: React.CSSProperties = {};
+                        if (sector) {
+                            zoneStyle = {
+                                ...zoneStyle,
+                                backgroundColor: `${sector.color}40`,
+                                boxShadow: `inset 0 0 10px ${sector.color}20`
+                            };
+                        }
+                        content = (
+                            <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative" style={zoneStyle}>
+                                <span className="text-[9px] font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none tracking-normal">
+                                    {zone.name}
+                                </span>
+                            </div>
+                        );
+                    } else {
+                        // Preloaded but unvisited zones
+                        content = (
+                            <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative pointer-events-none">
+                                <span className="text-[9px] font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 tracking-normal italic">
+                                    {zone.name}
+                                </span>
+                            </div>
+                        );
                     }
-                    content = (
-                        <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative" style={zoneStyle}>
-                            <span className="text-[9px] font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none tracking-normal">
-                                {zone.name}
-                            </span>
-                        </div>
-                    );
                 }
 
                 if (isSelected) {
