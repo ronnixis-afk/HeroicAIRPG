@@ -348,10 +348,11 @@ export const parseTravelIntent = async (userContent: string, history: ChatMessag
 export const preloadAdjacentZones = async (
     currentCoords: string,
     existingZones: MapZone[],
-    gameData: GameData
-): Promise<MapZone[]> => {
+    gameData: GameData,
+    dispatchZoneUpdate: (zone: MapZone) => void
+): Promise<void> => {
     const p = parseCoords(currentCoords);
-    if (!p) return [];
+    if (!p) return;
 
     const directions = [
         { dx: 0, dy: -1 }, // north
@@ -364,20 +365,21 @@ export const preloadAdjacentZones = async (
         { dx: -1, dy: 1 }  // southwest
     ];
 
-    const generatePromises: Promise<MapZone | null>[] = [];
+    // Maintain a running list of existing zones to avoid generating duplicates during the sequential loop
+    const runningZones = [...existingZones];
 
     for (const d of directions) {
         const targetX = p.x + d.dx;
         const targetY = p.y + d.dy;
         const targetCoords = `${targetX}-${targetY}`;
 
-        const existing = existingZones.find(z => z.coordinates === targetCoords);
+        const existing = runningZones.find(z => z.coordinates === targetCoords);
         if (!existing) {
             // Uncharted zone. Preload it.
             const sector = gameData.mapSectors?.find(s => s.coordinates.includes(targetCoords));
 
             // Gather immediate neighbor names for context
-            const neighborNames = existingZones
+            const neighborNames = runningZones
                 .filter(z => {
                     const zp = parseCoords(z.coordinates);
                     if (!zp) return false;
@@ -389,14 +391,41 @@ export const preloadAdjacentZones = async (
                 ? `Adjacent to: ${neighborNames.join(', ')}.`
                 : '';
 
-            const promise = generateZoneDetails(
-                targetCoords,
-                "Uncharted Lands",
-                sector,
-                contextStr,
-                gameData.mapSettings,
-                gameData.worldSummary
-            ).then(details => {
+            // Emit Shimmer UI Zone immediately
+            const shimmerZone: MapZone = {
+                id: `zone-${targetCoords}-loading`,
+                coordinates: targetCoords,
+                name: "...", // Placeholder
+                hostility: 0,
+                sectorId: sector?.id,
+                visited: false,
+                isNew: false,
+                isLoading: true
+            };
+            dispatchZoneUpdate(shimmerZone);
+
+            // Fetch actual details sequentially
+            try {
+                // Determine uniqueness context
+                const allNamesList = runningZones.map(z => z.name).join(', ');
+                const validationContext = `
+                CRITICAL UNIQUENESS VALIDATION:
+                The new zone name MUST NOT match or be highly similar to ANY of these existing zones: [${allNamesList}].
+                If there is too much similarity, choose a completely different noun or adjective.
+                Additionally, the name must fit the thematic tone of the world summary: ${gameData.worldSummary || 'Fantasy'}.
+                `;
+
+                const completeContext = `${contextStr}\n${validationContext}`;
+
+                const details = await generateZoneDetails(
+                    targetCoords,
+                    "Uncharted Lands",
+                    sector,
+                    completeContext,
+                    gameData.mapSettings,
+                    gameData.worldSummary
+                );
+
                 const newZone: MapZone = {
                     id: `zone-${targetCoords}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
                     coordinates: targetCoords,
@@ -404,20 +433,22 @@ export const preloadAdjacentZones = async (
                     description: details.description,
                     hostility: typeof details.hostility === 'number' ? details.hostility : 0,
                     sectorId: sector?.id,
-                    visited: false, // Critical: Not visited yet
-                    isNew: false,   // Don't show UI toast for silent preloaded zones
+                    visited: false,
+                    isNew: false,
+                    isLoading: false,
                     tags: ['location'],
                     keywords: details.keywords || []
                 };
-                return newZone;
-            }).catch(e => {
-                console.error("Silent preload failed for:", targetCoords, e);
-                return null;
-            });
-            generatePromises.push(promise);
+
+                // Add to our running list so subsequent loops avoid duplicating this newly generated name
+                runningZones.push(newZone);
+
+                // Dispatch resolved zone
+                dispatchZoneUpdate(newZone);
+            } catch (e) {
+                console.error("Silent sequential preload failed for:", targetCoords, e);
+                // Optionally remove the shimmer if it fails, or leave it to be retried by the redundancy check
+            }
         }
     }
-
-    const results = await Promise.all(generatePromises);
-    return results.filter((z): z is MapZone => z !== null);
 };

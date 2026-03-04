@@ -349,7 +349,13 @@ const MapView: React.FC = () => {
                     // and maintains absolute screen-space font size.
                     const fontSize = Math.max(5, Math.min(14, 9 / scale));
 
-                    if (isVisited) {
+                    if (zone.isLoading) {
+                        content = (
+                            <div className="flex items-center justify-center w-full h-full p-2">
+                                <div className="w-full h-2 rounded animate-pulse bg-brand-primary/40"></div>
+                            </div>
+                        );
+                    } else if (isVisited) {
                         let zoneStyle: React.CSSProperties = {};
                         if (sector) {
                             zoneStyle = {

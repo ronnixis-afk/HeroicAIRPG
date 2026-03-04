@@ -320,6 +320,7 @@ export interface MapZone {
   sectorId?: string;
   visited?: boolean;
   isNew?: boolean; // Notification flag
+  isLoading?: boolean; // NEW: Indicates background generation
   tags?: string[];
   keywords?: string[];
   isMajorHub?: boolean; // New: Explicitly identifies Faction Seats of Power

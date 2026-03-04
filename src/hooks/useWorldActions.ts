@@ -18,6 +18,11 @@ export const useWorldActions = (
     // Fix: Accept submitAutomatedEvent as the 5th argument to resolve argument count errors in useGameData.tsx
     submitAutomatedEvent?: any
 ) => {
+    // This function can be passed into parallel background loaders to dispatch loading/resolved states individually
+    const dispatchZoneUpdate = useCallback((zone: MapZone) => {
+        dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
+    }, [dispatch]);
+
     const { setMapGenerationProgress } = useUI();
 
     // 1. Data Selectors
