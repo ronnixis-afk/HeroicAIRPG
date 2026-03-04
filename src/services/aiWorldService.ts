@@ -4,6 +4,7 @@ import { getAi, cleanJson } from './aiClient';
 import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapSector, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
+import { parseCoords } from '../utils/mapUtils';
 
 /**
  * THE PLOT EXPANDER (Tactical Specialist)
@@ -339,4 +340,84 @@ export const parseTravelIntent = async (userContent: string, history: ChatMessag
         config: { responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{"destination":"","method":""}'));
+};
+
+/**
+ * Silently preloads adjacent zones around the current coordinates
+ */
+export const preloadAdjacentZones = async (
+    currentCoords: string,
+    existingZones: MapZone[],
+    gameData: GameData
+): Promise<MapZone[]> => {
+    const p = parseCoords(currentCoords);
+    if (!p) return [];
+
+    const directions = [
+        { dx: 0, dy: -1 }, // north
+        { dx: 0, dy: 1 },  // south
+        { dx: 1, dy: 0 },  // east
+        { dx: -1, dy: 0 }, // west
+        { dx: 1, dy: -1 }, // northeast
+        { dx: -1, dy: -1 },// northwest
+        { dx: 1, dy: 1 },  // southeast
+        { dx: -1, dy: 1 }  // southwest
+    ];
+
+    const generatePromises: Promise<MapZone | null>[] = [];
+
+    for (const d of directions) {
+        const targetX = p.x + d.dx;
+        const targetY = p.y + d.dy;
+        const targetCoords = `${targetX}-${targetY}`;
+
+        const existing = existingZones.find(z => z.coordinates === targetCoords);
+        if (!existing) {
+            // Uncharted zone. Preload it.
+            const sector = gameData.mapSectors?.find(s => s.coordinates.includes(targetCoords));
+
+            // Gather immediate neighbor names for context
+            const neighborNames = existingZones
+                .filter(z => {
+                    const zp = parseCoords(z.coordinates);
+                    if (!zp) return false;
+                    return Math.abs(zp.x - targetX) <= 1 && Math.abs(zp.y - targetY) <= 1;
+                })
+                .map(z => z.name);
+
+            const contextStr = neighborNames.length > 0
+                ? `Adjacent to: ${neighborNames.join(', ')}.`
+                : '';
+
+            const promise = generateZoneDetails(
+                targetCoords,
+                "Uncharted Lands",
+                sector,
+                contextStr,
+                gameData.mapSettings,
+                gameData.worldSummary
+            ).then(details => {
+                const newZone: MapZone = {
+                    id: `zone-${targetCoords}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+                    coordinates: targetCoords,
+                    name: details.name || "Uncharted Lands",
+                    description: details.description,
+                    hostility: typeof details.hostility === 'number' ? details.hostility : 0,
+                    sectorId: sector?.id,
+                    visited: false, // Critical: Not visited yet
+                    isNew: false,   // Don't show UI toast for silent preloaded zones
+                    tags: ['location'],
+                    keywords: details.keywords || []
+                };
+                return newZone;
+            }).catch(e => {
+                console.error("Silent preload failed for:", targetCoords, e);
+                return null;
+            });
+            generatePromises.push(promise);
+        }
+    }
+
+    const results = await Promise.all(generatePromises);
+    return results.filter((z): z is MapZone => z !== null);
 };

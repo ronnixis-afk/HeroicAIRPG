@@ -3,7 +3,7 @@
 
 import React, { useCallback } from 'react';
 import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, InventoryUpdatePayload } from '../../types';
-import { generateZoneDetails, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot } from '../../services/geminiService';
+import { generateZoneDetails, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
 import { getTravelSpeed, parseCoords, parseHostility } from '../../utils/mapUtils';
@@ -138,6 +138,15 @@ export const useTravel = (
             ${localeEntry ? `Focal Point Lore: ${localeEntry.content}` : ''}`;
 
             await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
+
+            // Trigger silent preloading of adjacent zones WITHOUT blocking or setting isAiGenerating(true)
+            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData).then(newZones => {
+                if (newZones && newZones.length > 0) {
+                    newZones.forEach(z => {
+                        dispatch({ type: 'UPDATE_MAP_ZONE', payload: z });
+                    });
+                }
+            }).catch(e => console.error("Silent preloading failed at top-level:", e));
 
         } catch (e) {
             console.error("Arrival failed", e);
