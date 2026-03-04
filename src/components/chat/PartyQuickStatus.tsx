@@ -28,7 +28,7 @@ export const PartyQuickStatus: React.FC = () => {
         if (!gameData) return [];
         return gameData.companions.filter(c => c.isInParty !== false);
     }, [gameData]);
-    
+
     // Close context menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -76,7 +76,7 @@ export const PartyQuickStatus: React.FC = () => {
                 }))
             };
             await applyAiUpdates(removalUpdates);
-            dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-stealth-off-${Date.now()}`, sender: 'system', content: "Stealth mode disabled. The party is now visible.", type: 'neutral' } });
+            dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-stealth-off-${Date.now()}`, sender: 'ai', content: "You step out of the shadows, revealing your presence. The party is now visible.", type: 'neutral' } });
             setOpenMenuId(null);
             return;
         }
@@ -85,13 +85,13 @@ export const PartyQuickStatus: React.FC = () => {
         const hideableParty = [playerCharacter, ...activeCompanions.filter(c => !c.isShip)];
         const aiNarrates = gameData.combatConfiguration?.aiNarratesTurns ?? true;
         const partyShip = activeCompanions.find(c => c.isShip === true);
-        
+
         // Find highest perception among nearby observers
         const nearbyNPCs = (gameData.npcs || []).filter(n => n.currentPOI === gameData.currentLocale && n.status !== 'Dead' && !n.isShip);
-        const highestInsight = nearbyNPCs.length > 0 
+        const highestInsight = nearbyNPCs.length > 0
             ? Math.max(...nearbyNPCs.map(n => npcToCombatActor(n, playerCharacter.level).skills?.Insight?.passiveScore || 10))
             : 10;
-        const highestPerception = nearbyNPCs.length > 0 
+        const highestPerception = nearbyNPCs.length > 0
             ? Math.max(...nearbyNPCs.map(n => npcToCombatActor(n, playerCharacter.level).skills?.Perception?.passiveScore || 10))
             : 10;
 
@@ -139,7 +139,7 @@ export const PartyQuickStatus: React.FC = () => {
                 if (!pcCurrent.some(s => s.name === 'Invisible')) {
                     updates.playerCharacter = { ...updates.playerCharacter, statusEffects: [...pcCurrent, hiddenStatus] };
                 }
-                
+
                 updates.companions = activeCompanions.filter(c => !c.isShip).map(comp => {
                     const current = comp.statusEffects || [];
                     const hasStatus = current.some(s => s.name === 'Invisible');
@@ -155,9 +155,11 @@ export const PartyQuickStatus: React.FC = () => {
             const finalUpdates = getMechanicalUpdates();
             const manualMessage: ChatMessage = {
                 id: `sys-stealth-manual-${Date.now()}`,
-                sender: 'system',
+                sender: 'ai',
                 type: finalSuccess ? 'positive' : 'negative',
-                content: `**Group Hide Attempt**: ${finalSuccess ? 'SUCCESS' : 'SPOTTED'}. Avg Stealth: **${avgStealthScore}**.`,
+                content: finalSuccess
+                    ? `You melt into the shadows, your movements silent and deliberate. The party is now hidden from view. \n\n(Avg Stealth Score: **${avgStealthScore}**)`
+                    : `You attempted to hide, but eyes remained locked on you. Your movements drew too much attention. \n\n(Avg Stealth Score: **${avgStealthScore}**)`,
                 rolls: allRolls
             };
             await applyAiUpdates(finalUpdates, manualMessage);
@@ -191,7 +193,7 @@ export const PartyQuickStatus: React.FC = () => {
     const ContextMenu = ({ charId }: { charId: string }) => {
         const char = [playerCharacter, ...activeCompanions].find(c => c.id === charId);
         const isHidden = char ? !canBeTargeted(char) : false;
-        
+
         return (
             <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px]">
                 <button onClick={() => navigateToView('character', charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
@@ -215,7 +217,7 @@ export const PartyQuickStatus: React.FC = () => {
     };
 
     return (
-        <div 
+        <div
             ref={menuRef}
             className={`flex flex-col items-center gap-1.5 p-2 transition-all duration-500 ${isPartyHidden ? 'pt-4' : 'pt-2'}`}
             style={{ pointerEvents: 'auto' }}
@@ -227,12 +229,12 @@ export const PartyQuickStatus: React.FC = () => {
                         Dc {partyStealthScore}
                     </div>
                 )}
-                
+
                 <div className="relative">
-                    <StatusAvatar 
-                        char={playerCharacter} 
-                        size={40} 
-                        isPlayer={true} 
+                    <StatusAvatar
+                        char={playerCharacter}
+                        size={40}
+                        isPlayer={true}
                         tempHp={playerCharacter.temporaryHitPoints}
                         maxTempHp={playerCharacter.getMaxTemporaryHitPoints(gameData.playerInventory)}
                         onClick={() => handleCharacterClick(playerCharacter.id)}
@@ -244,9 +246,9 @@ export const PartyQuickStatus: React.FC = () => {
 
                 {activeCompanions.map(companion => (
                     <div key={companion.id} className="relative">
-                        <StatusAvatar 
-                            char={companion} 
-                            size={30} 
+                        <StatusAvatar
+                            char={companion}
+                            size={30}
                             tempHp={companion.temporaryHitPoints}
                             maxTempHp={companion.getMaxTemporaryHitPoints(gameData.companionInventories[companion.id] || { equipped: [], carried: [], storage: [], assets: [] })}
                             onClick={() => handleCharacterClick(companion.id)}

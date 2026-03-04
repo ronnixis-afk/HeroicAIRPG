@@ -18,21 +18,21 @@ export const useNpcActions = (
 ) => {
     const { setIsLoading, setCreationProgress } = ui;
 
-    const addNPC = useCallback((npc: NPC) => { 
-        dispatch({ type: 'ADD_NPC', payload: npc }); 
+    const addNPC = useCallback((npc: NPC) => {
+        dispatch({ type: 'ADD_NPC', payload: npc });
     }, [dispatch]);
 
-    const updateNPC = useCallback((npc: NPC) => { 
-        dispatch({ type: 'UPDATE_NPC', payload: npc }); 
+    const updateNPC = useCallback((npc: NPC) => {
+        dispatch({ type: 'UPDATE_NPC', payload: npc });
     }, [dispatch]);
 
-    const deleteNPC = useCallback((id: string) => { 
-        dispatch({ type: 'DELETE_NPC', payload: id }); 
+    const deleteNPC = useCallback((id: string) => {
+        dispatch({ type: 'DELETE_NPC', payload: id });
     }, [dispatch]);
 
     const refineNPC = useCallback(async (npc: NPC) => {
         if (!gameData) return;
-        
+
         // Extract established ancestries for context reinforcement
         const availableRaces = (gameData.world || [])
             .filter(l => l.tags?.includes('race'))
@@ -48,9 +48,9 @@ export const useNpcActions = (
 
     const performPickpocket = useCallback(async (npc: NPC, intendedItem: string) => {
         if (!gameData) return;
-        
+
         setIsLoading(true);
-        
+
         const isHidden = gameData.isPartyHidden;
 
         // 1. Calculate DC based on target's passive perception
@@ -58,7 +58,7 @@ export const useNpcActions = (
         const targetActor = npcToCombatActor(npc, playerLevel, gameData.combatBaseScore, gameData.templates);
         const targetPassivePerception = targetActor.skills?.Perception?.passiveScore || 10;
         const dc = targetPassivePerception + 5;
-        
+
         // 2. Request a Sleight of Hand check with advantage if hidden
         const request: DiceRollRequest = {
             rollerName: gameData.playerCharacter.name,
@@ -68,11 +68,11 @@ export const useNpcActions = (
             targetName: npc.name,
             mode: isHidden ? 'advantage' : 'normal'
         };
-        
+
         const { rolls } = combatActions.processDiceRolls([request]);
         const roll = rolls[0];
         const isSuccess = roll.outcome === 'Success' || roll.outcome === 'Critical Success';
-        
+
         // Calculate Failure Margin
         const failureMargin = dc - roll.total;
 
@@ -95,8 +95,8 @@ export const useNpcActions = (
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `pickpocket-success-${Date.now()}`,
-                        sender: 'system',
-                        content: `Success! ${isHidden ? 'Striking from the shadows, you' : 'You'} successfully lift the **${stolenItem.name}** from ${npc.name}'s pocket.`,
+                        sender: 'ai',
+                        content: `**Success!** ${isHidden ? 'Striking from the shadows, you' : 'You'} successfully lift the **${stolenItem.name}** from ${npc.name}'s pocket.`,
                         rolls: rolls,
                         type: 'positive'
                     }
@@ -107,8 +107,8 @@ export const useNpcActions = (
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `pickpocket-success-fallback-${Date.now()}`,
-                        sender: 'system',
-                        content: `Success! ${isHidden ? 'Leveraging your cover, you' : 'You'} successfully lift the ${intendedItem} from ${npc.name}'s pocket.`,
+                        sender: 'ai',
+                        content: `**Success!** ${isHidden ? 'Leveraging your cover, you' : 'You'} successfully lift the ${intendedItem} from ${npc.name}'s pocket.`,
                         rolls: rolls,
                         type: 'positive'
                     }
@@ -120,18 +120,18 @@ export const useNpcActions = (
 
             // Phase 3 Update: Refined "Caught" narrative emphasizing clumsiness
             const caughtNarrative = `Caught red-handed! Your fingers fumble with the clasp, snagging on the fabric. ${npc.name} catches your wrist in a crushing grip, eyes flashing with immediate hostility.`;
-            
+
             dispatch({
                 type: 'ADD_MESSAGE',
                 payload: {
                     id: `pickpocket-fail-${Date.now()}`,
-                    sender: 'system',
-                    content: `Caught! Your clumsy attempt snagged on ${npc.name}'s clothing. They have spotted you and turned hostile.`,
+                    sender: 'ai',
+                    content: `**Caught!** Your clumsy attempt snagged on ${npc.name}'s clothing. They have spotted you and turned hostile.`,
                     rolls: rolls,
                     type: 'negative'
                 }
             });
-            
+
             await combatActions.executeInitiationPipeline(caughtNarrative, []);
         } else {
             // Logic Gate B: Close Call (Failure by less than 10)
@@ -140,20 +140,20 @@ export const useNpcActions = (
                 type: 'ADD_MESSAGE',
                 payload: {
                     id: `pickpocket-close-call-${Date.now()}`,
-                    sender: 'system',
-                    content: `A tense moment passes. You couldn't find a clean opening to reach the item, but ${npc.name} remains completely unaware of your attempt. You withdraw your hand just in time.`,
+                    sender: 'ai',
+                    content: `A tense moment passes. You couldn't find a clean opening to reach the item, but **${npc.name}** remains completely unaware of your attempt. You withdraw your hand just in time.`,
                     rolls: rolls,
                     type: 'neutral'
                 }
             });
         }
-        
+
         setIsLoading(false);
     }, [gameData, combatActions, dispatch, setIsLoading]);
 
     const inviteNpcToParty = useCallback(async (npc: NPC) => {
         if (!gameData) return;
-        
+
         // Corpses can't join parties
         if (npc.status === 'Dead') {
             dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-invite-dead-${Date.now()}`, sender: 'system', content: `${npc.name} is deceased and cannot join your party.`, type: 'negative' } });
@@ -162,10 +162,10 @@ export const useNpcActions = (
 
         setIsLoading(true);
         const rel = npc.relationship;
-        
+
         // Relationship-based Dc
         const dc = rel >= 50 ? 5 : rel >= 30 ? 10 : rel >= 10 ? 12 : rel >= -10 ? 15 : rel >= -30 ? 20 : 25;
-        
+
         const request: DiceRollRequest = {
             rollerName: gameData.playerCharacter.name,
             rollType: 'Skill Check',
@@ -173,7 +173,7 @@ export const useNpcActions = (
             dc: dc,
             targetName: npc.name
         };
-        
+
         const { rolls, groupOutcomes } = combatActions.processDiceRolls([request]);
         const groupResult = groupOutcomes.find((g: any) => g.checkName === 'Persuasion');
         const isSuccess = groupResult ? groupResult.isGroupSuccess : (rolls[0].outcome === 'Success' || rolls[0].outcome === 'Critical Success');
@@ -198,13 +198,13 @@ export const useNpcActions = (
         try {
             // Speed Update: Explicitly override to gemini-3-flash-preview for recruitment dialogue.
             const aiRes = await generateResponse(
-                systemPrompt, 
+                systemPrompt,
                 { ...gameData, messages: [...gameData.messages, systemPrompt] },
                 undefined,
                 undefined,
                 'gemini-3-flash-preview'
             );
-            
+
             const aiMessage: ChatMessage = {
                 id: `ai-invite-res-${Date.now()}`,
                 sender: 'ai',
@@ -216,14 +216,14 @@ export const useNpcActions = (
 
             if (isSuccess) {
                 setCreationProgress({ isActive: true, step: `Welcoming ${npc.name}...`, progress: 10 });
-                
+
                 // Blueprint Selection: Select a mechanical template based on the NPC's profile
                 const templateKey = npc.template || 'Brute';
                 const config = gameData.skillConfiguration || 'Fantasy';
                 const availableTemplates = TEMPLATE_LIBRARY[config] || [];
-                const template = availableTemplates.find(t => t.name.toLowerCase() === templateKey.toLowerCase()) || 
-                                   availableTemplates.find(t => t.role.toLowerCase() === templateKey.toLowerCase()) ||
-                                   availableTemplates[0];
+                const template = availableTemplates.find(t => t.name.toLowerCase() === templateKey.toLowerCase()) ||
+                    availableTemplates.find(t => t.role.toLowerCase() === templateKey.toLowerCase()) ||
+                    availableTemplates[0];
 
                 const bgTraits = TRAIT_LIBRARY.filter(t => template.backgroundTraitNames.includes(t.name));
                 const genTraits = TRAIT_LIBRARY.filter(t => template.generalTraitNames.includes(t.name));
@@ -246,9 +246,9 @@ export const useNpcActions = (
 
                 // Automatic Skill Proficiency from Traits
                 const traitSkills = new Set(allAbilities.flatMap(a => a.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
-                const fullSkills = SKILL_NAMES.reduce((acc, skill) => { 
-                    acc[skill] = { proficient: traitSkills.has(skill) || !!(woven.skills?.[skill]?.proficient) }; 
-                    return acc; 
+                const fullSkills = SKILL_NAMES.reduce((acc, skill) => {
+                    acc[skill] = { proficient: traitSkills.has(skill) || !!(woven.skills?.[skill]?.proficient) };
+                    return acc;
                 }, {} as any);
 
                 const companionData = {
@@ -275,7 +275,7 @@ export const useNpcActions = (
                 };
 
                 await integrateCharacter(new Companion(companionData), true);
-                
+
                 // Update registry to record that this NPC is now a party member
                 dispatch({ type: 'UPDATE_NPC', payload: { ...npc, companionId: (companionData as any).id } });
             }
