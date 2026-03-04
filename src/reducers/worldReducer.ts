@@ -4,12 +4,11 @@ import { GameData, GameAction } from '../types';
 export const worldReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
         case 'UPDATE_MAP_ZONE': {
-            const newState = { ...state };
-            if (!newState.mapZones) newState.mapZones = [];
-            const idx = newState.mapZones.findIndex(z => z.id === action.payload.id);
-            if (idx > -1) newState.mapZones[idx] = action.payload;
-            else newState.mapZones.push(action.payload);
-            return newState;
+            const mapZones = state.mapZones ? [...state.mapZones] : [];
+            const idx = mapZones.findIndex(z => z.id === action.payload.id || z.coordinates === action.payload.coordinates);
+            if (idx > -1) mapZones[idx] = action.payload;
+            else mapZones.push(action.payload);
+            return { ...state, mapZones };
         }
 
         case 'MOVE_PLAYER_ON_MAP':
@@ -19,10 +18,9 @@ export const worldReducer = (state: GameData, action: GameAction): GameData => {
             return { ...state, mapSettings: action.payload };
 
         case 'ADD_SECTOR': {
-            const newState = { ...state };
-            if (!newState.mapSectors) newState.mapSectors = [];
-            newState.mapSectors.push(action.payload);
-            return newState;
+            const mapSectors = state.mapSectors ? [...state.mapSectors] : [];
+            mapSectors.push(action.payload);
+            return { ...state, mapSectors };
         }
 
         case 'UPDATE_SECTOR':
