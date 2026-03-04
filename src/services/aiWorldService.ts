@@ -291,6 +291,8 @@ export const generatePoiDetail = async (localeName: string, zoneName: string, zo
     return response.text || "A place of significance.";
 };
 
+import { getRandomZoneProperties } from '../constants/zoneProperties';
+
 /**
  * Generates details for a zone during travel discovery.
  * Enforces strict brevity for the world state.
@@ -303,12 +305,30 @@ export const generateZoneDetails = async (
     mapSettings?: MapSettings,
     worldSummary?: string
 ): Promise<{ name: string, description: string, hostility: number, keywords: string[] }> => {
+
+    // Extract theme from worldSummary or mapSettings (usually derived from skillConfiguration)
+    // The preload function could pass it, but analyzing worldSummary is a safe fallback.
+    let currentTheme = 'Fantasy';
+    const summaryLower = (worldSummary || '').toLowerCase();
+    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'Sci-Fi';
+    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'Modern';
+    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'Magitech';
+
+    const randomProperties = getRandomZoneProperties(currentTheme);
+    const propertiesContext = `
+    [ZONE PROPERTIES]
+    The zone has the following randomized localized properties based on the world's setting:
+    ${randomProperties.map(p => `- ${p}`).join('\n')}
+    Incorporate the essence of these properties into the generated zone's name, description, and atmosphere.
+    `;
+
     const ai = getAi();
     const input = `Generate details for a new map zone at coordinates ${coords}.
     Name hint: ${nameHint}
     Sector: ${sector?.name || 'The Wilds'}
     World context: ${worldSummary || ''}
     Additional context: ${additionalContext || ''}
+    ${propertiesContext}
     
     [STRICT CONSTRAINTS]
     - name: MAX 3 WORDS.
