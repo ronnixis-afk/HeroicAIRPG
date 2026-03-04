@@ -292,6 +292,13 @@ const MapView: React.FC = () => {
         setSelectedCoords(coords);
     };
 
+    const toTitleCase = (str: string) => {
+        return str.replace(
+            /\w\S*/g,
+            (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
+        );
+    };
+
     const renderGrid = () => {
         // Calculate dynamic bounds based on discovered territory and player position
         const allKnownCoords = [
@@ -335,6 +342,13 @@ const MapView: React.FC = () => {
                 }
 
                 if (zone) {
+                    const zoneName = toTitleCase(zone.name);
+                    // Base size 9px, adjust universally inverse to scale, clamped between 5px and 14px
+                    // This way zooming in makes text physically larger but keeps its "relative" grid size
+                    // Since the grid scales via CSS transform, dividing by scale counteracts the zoom 
+                    // and maintains absolute screen-space font size.
+                    const fontSize = Math.max(5, Math.min(14, 9 / scale));
+
                     if (isVisited) {
                         let zoneStyle: React.CSSProperties = {};
                         if (sector) {
@@ -346,8 +360,11 @@ const MapView: React.FC = () => {
                         }
                         content = (
                             <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative" style={zoneStyle}>
-                                <span className="text-[9px] font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none tracking-normal">
-                                    {zone.name}
+                                <span
+                                    className="font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none tracking-normal"
+                                    style={{ fontSize: `${fontSize}px` }}
+                                >
+                                    {zoneName}
                                 </span>
                             </div>
                         );
@@ -355,8 +372,11 @@ const MapView: React.FC = () => {
                         // Preloaded but unvisited zones
                         content = (
                             <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative pointer-events-none">
-                                <span className="text-[9px] font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 tracking-normal italic">
-                                    {zone.name}
+                                <span
+                                    className="font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 tracking-normal"
+                                    style={{ fontSize: `${fontSize}px` }}
+                                >
+                                    {zoneName}
                                 </span>
                             </div>
                         );
