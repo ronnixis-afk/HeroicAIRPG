@@ -442,7 +442,7 @@ You MUST base the catalyst of this adventure on Hook #${hookIndex} from the libr
 20. Following a vision to a contact who claims your arrival was prophesied and your wealth is a "key."
 
 [INSTRUCTIONS]
-1. Weave a three-part narrative introduction:
+1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
    - narrativeLens: A colourful blend of ${character.name}'s background based on their race (${character.race}) and traits (${character.background}). Use evocative, sensory language.
    - narrativePath: Explain ${character.name}'s reason to survive and why they chose their life as a ${character.profession}.
    - narrativeCatalyst: Immersive implementation of the specific Hook provided above. This should be the longest part.
@@ -450,8 +450,10 @@ You MUST base the catalyst of this adventure on Hook #${hookIndex} from the libr
 3. startingObjective: A primary quest to guide the player immediately.
 4. startingZone: Create a safe haven or starting area with unique points of interest.
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
-    
-Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "startingZone": { "name", "description", "hostility", "knowledge": [{ "title", "content", "isBackgroundRelated" }] } }`;
+5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
+   - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
+
+Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "startingZone": { "name", "description", "hostility", "knowledge": [{ "title", "content", "isBackgroundRelated" }] }, "alignmentOptions": [{ "label", "alignment" }] }`;
 
     try {
         const ai = getAi();
