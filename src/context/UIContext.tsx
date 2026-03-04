@@ -38,6 +38,12 @@ export interface UnsavedChanges {
     data: any;
 }
 
+export interface PendingTravel {
+    destination: string;
+    targetCoords: string;
+    method: string;
+}
+
 interface UIContextType {
     // Navigation
     activeView: View;
@@ -61,7 +67,7 @@ interface UIContextType {
     setChatInput: React.Dispatch<React.SetStateAction<string>>;
     isHeroicModeActive: boolean;
     setIsHeroicModeActive: (active: boolean) => void;
-    
+
     // Status & Loading
     isLoading: boolean;
     setIsLoading: (loading: boolean) => void;
@@ -89,12 +95,14 @@ interface UIContextType {
     setPendingCombat: (pending: PendingCombat | null) => void;
     lootState: LootState;
     setLootState: React.Dispatch<React.SetStateAction<LootState>>;
-    
+
     // Entity Inspection (Chat Links)
     inspectedEntity: InspectedEntity | null;
     setInspectedEntity: (entity: InspectedEntity | null) => void;
 
-    // Modals
+    // Interrupts & Modals
+    pendingTravelConfirmation: PendingTravel | null;
+    setPendingTravelConfirmation: (travel: PendingTravel | null) => void;
     isTimeModalOpen: boolean;
     setIsTimeModalOpen: (open: boolean) => void;
     isLocationModalOpen: boolean;
@@ -189,7 +197,8 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [lootState, setLootState] = useState<LootState>({ isOpen: false, isLoading: false, items: [], defeatedEnemies: [] });
     const [inspectedEntity, setInspectedEntity] = useState<InspectedEntity | null>(null);
 
-    // Modals
+    // Interrupts & Modals
+    const [pendingTravelConfirmation, setPendingTravelConfirmation] = useState<PendingTravel | null>(null);
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [isZonePanelOpen, setIsZonePanelOpen] = useState(false);
@@ -222,6 +231,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         pendingCombat, setPendingCombat,
         lootState, setLootState,
         inspectedEntity, setInspectedEntity,
+        pendingTravelConfirmation, setPendingTravelConfirmation,
         isTimeModalOpen, setIsTimeModalOpen,
         isLocationModalOpen, setIsLocationModalOpen,
         isZonePanelOpen, setIsZonePanelOpen,

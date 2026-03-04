@@ -2,8 +2,8 @@
 // hooks/narrative/pipeline/useExtractionStep.ts
 
 import React, { useCallback } from 'react';
-import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse } from '../../../types';
-import { auditSystemState, performHousekeeping, resolveLocaleCreation } from '../../../services/geminiService';
+import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone } from '../../../types';
+import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails } from '../../../services/geminiService';
 import { forgeSkins } from '../../../utils/itemMechanics';
 import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
 import { isLocaleMatch } from '../../../utils/mapUtils';
@@ -52,7 +52,68 @@ export const useExtractionStep = (
             const eventPatterns = /\b(death|dying|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb)\b/i;
             const isEventName = eventPatterns.test(narratorLoc.site_name);
 
-            if (narratorLoc.transition_type === 'staying' || isEventName) {
+            if (narratorLoc.transition_type === 'zone_change') {
+                const destHint = narratorLoc.destination_zone_hint || narratorLoc.site_name;
+                const destHintLower = destHint.toLowerCase().trim();
+
+                // 1. Try to find the zone
+                let targetZone = (gameData.mapZones || []).find(z => z.name.toLowerCase().includes(destHintLower) || destHintLower.includes(z.name.toLowerCase()));
+
+                let newCoords = gameData.playerCoordinates || '0-0';
+
+                if (targetZone) {
+                    newCoords = targetZone.coordinates;
+                    finalUpdates.location_update = {
+                        ...narratorLoc,
+                        sector: newCoords,
+                        zone: targetZone.name,
+                        is_new_site: true,
+                        transition_type: 'zone_change'
+                    };
+                } else {
+                    // Generate new offset coordinate
+                    const p = newCoords.split('-');
+                    let nx = parseInt(p[0]) || 0;
+                    let ny = parseInt(p[1]) || 0;
+                    nx += (Math.random() > 0.5 ? 1 : -1);
+                    ny += (Math.random() > 0.5 ? 1 : -1);
+                    newCoords = `${nx}-${ny}`;
+
+                    try {
+                        const details = await generateZoneDetails(newCoords, destHint, undefined, undefined, gameData.mapSettings, gameData.worldSummary);
+                        const newZone: MapZone = {
+                            id: `zone-${newCoords}-${Date.now()}`,
+                            coordinates: newCoords,
+                            name: details.name || destHint,
+                            description: details.description,
+                            hostility: typeof details.hostility === 'string' ? parseInt(details.hostility) || 0 : (details.hostility || 0),
+                            visited: true,
+                            tags: ['location'],
+                            keywords: details.keywords || []
+                        };
+                        dispatch({ type: 'UPDATE_MAP_ZONE', payload: newZone });
+
+                        finalUpdates.location_update = {
+                            ...narratorLoc,
+                            sector: newCoords,
+                            zone: details.name || destHint,
+                            site_name: narratorLoc.site_name || 'Open Area',
+                            is_new_site: true,
+                            transition_type: 'zone_change'
+                        };
+                    } catch (e) {
+                        finalUpdates.location_update = {
+                            ...narratorLoc,
+                            sector: newCoords,
+                            zone: destHint,
+                            site_name: narratorLoc.site_name || 'Open Area',
+                            is_new_site: true,
+                            transition_type: 'zone_change'
+                        };
+                    }
+                }
+                resolvedLocale = finalUpdates.location_update.site_name || destHint;
+            } else if (narratorLoc.transition_type === 'staying' || isEventName) {
                 // Snap back to current location — no physical movement occurred.
                 finalUpdates.location_update = {
                     ...narratorLoc,
@@ -66,11 +127,18 @@ export const useExtractionStep = (
                 resolvedLocale = gameData.current_site_name || '';
             } else if (narratorLoc.transition_type === 'returning') {
                 // Try to find the existing location in knowledge
-                const knownLocation = (gameData.knowledge || []).find(k =>
-                    k.tags?.includes('location') &&
-                    k.coordinates === gameData.playerCoordinates &&
-                    k.title.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim()
-                );
+                const knownLocation = (gameData.knowledge || []).find(k => {
+                    if (!k.tags?.includes('location') || k.coordinates !== gameData.playerCoordinates) return false;
+
+                    const kTitleParts = k.title.toLowerCase().trim().split(/\s+/);
+                    const nTitleParts = narratorLoc.site_name.toLowerCase().trim().split(/\s+/);
+
+                    // Simple similarity check: do they share significant words?
+                    const sharedWords = kTitleParts.filter(word => nTitleParts.includes(word) && word.length > 3);
+
+                    // Exact match or at least one significant shared word (like 'interrogation')
+                    return k.title.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim() || sharedWords.length > 0;
+                });
 
                 if (knownLocation) {
                     // Snap to the known POI

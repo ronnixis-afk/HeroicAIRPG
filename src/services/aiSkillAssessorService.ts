@@ -26,7 +26,8 @@ export const assessSkillIntent = async (
     skillsContext: string,
     partyNames: string[],
     isCombatActive: boolean,
-    lastAiMessage: string
+    lastAiMessage: string,
+    knownZones: string[] = []
 ): Promise<AssessmentResult> => {
     const prompt = `
     Analyze the User's action and classify their intent and data requirements.
@@ -44,6 +45,7 @@ export const assessSkillIntent = async (
        - DO NOT flag as "combat" if user is just DRAWING a weapon or PREPARING.
     2. "skill": User is attempting a risky or challenging non-combat action (climbing, lying, searching).
     3. "travel": User is expressing intent to move to a new location.
+       - IMPORTANT: If the intent is travel, attempt to map the destination to one of the following Known Zones/Hubs: ${knownZones.join(', ') || 'None established'}. If no match, formulate a logical destination name from the user's prompt.
     4. "narrative": User is talking, observing, or preparing. No immediate mechanics needed.
 
     [DATA MODULE MENU]
@@ -72,17 +74,17 @@ export const assessSkillIntent = async (
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json"
             }
         });
-        
+
         const result = JSON.parse(cleanJson(response.text || "{}"));
-        
+
         const defaults: ContextKey[] = ['core_stats', 'recent_history', 'active_quests', 'social_registry'];
         if (isCombatActive) defaults.push('combat_state', 'inventory');
 
-        const finalKeys = Array.isArray(result.requiredKeys) 
+        const finalKeys = Array.isArray(result.requiredKeys)
             ? Array.from(new Set([...defaults, ...result.requiredKeys])) as ContextKey[]
             : defaults;
 
@@ -94,10 +96,10 @@ export const assessSkillIntent = async (
         };
     } catch (e) {
         console.error("Skill Assessor failed:", e);
-        return { 
-            intentType: 'narrative', 
-            requests: [], 
-            requiredKeys: ['core_stats', 'recent_history', 'active_quests', 'social_registry'] 
+        return {
+            intentType: 'narrative',
+            requests: [],
+            requiredKeys: ['core_stats', 'recent_history', 'active_quests', 'social_registry']
         };
     }
 };
@@ -135,11 +137,11 @@ export const verifyCombatRelevance = async (
         const response = await ai.models.generateContent({
             model: 'gemini-flash-lite-latest',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json"
             }
         });
-        
+
         const result = JSON.parse(cleanJson(response.text || "{}"));
         return {
             shouldTriggerCombat: !!result.shouldTriggerCombat,

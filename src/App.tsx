@@ -40,6 +40,7 @@ import { SpeechToTextModal } from './components/SpeechToTextButton';
 import { generateSceneVisuals } from './services/imageGenerationService';
 import { useAudioPlayback } from './components/chat/useAudioPlayback';
 import { PickpocketModal } from './components/modals/PickpocketModal';
+import { TravelConfirmationModal } from './components/map/TravelConfirmationModal';
 
 interface HeaderProps {
   currentTime: string;
@@ -453,6 +454,7 @@ const GameInterface: React.FC = () => {
       )}
       <UnsavedChangesModal />
       <PickpocketModal />
+      <TravelConfirmationModal />
     </div>
   );
 }

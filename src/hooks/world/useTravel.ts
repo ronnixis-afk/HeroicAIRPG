@@ -8,28 +8,30 @@ import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, 
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
 import { getTravelSpeed, parseCoords, parseHostility } from '../../utils/mapUtils';
 import { useWorldSelectors } from './useWorldSelectors';
+import { useUI } from '../../context/UIContext';
 
 export const useTravel = (
-    gameData: GameData | null, 
+    gameData: GameData | null,
     dispatch: React.Dispatch<GameAction>,
     initiateCombatSequence: (narrative: string, suggestions: ActorSuggestion[], source?: any) => Promise<void>,
     setIsAiGenerating: (isGenerating: boolean) => void,
     submitAutomatedEvent?: any // Injected from Narrative Manager
 ) => {
     const { getCombatSlots } = useWorldSelectors(gameData);
+    const { setPendingTravelConfirmation } = useUI();
 
     const processArrival = useCallback(async (
-        coordinates: string, 
-        locationName: string, 
+        coordinates: string,
+        locationName: string,
         history: ChatMessage[],
         travelMethod?: string,
         targetLocale?: string
     ) => {
         if (!gameData || !submitAutomatedEvent) return;
-        
+
         let zone = gameData.mapZones?.find(z => z.coordinates === coordinates);
         let localeEntry = targetLocale ? gameData.knowledge?.find(k => k.title === targetLocale && k.coordinates === coordinates) : null;
-        
+
         let isDiscovery = false;
         let generatedDescription = "";
 
@@ -40,22 +42,22 @@ export const useTravel = (
             if (!zone) {
                 isDiscovery = true;
                 const sector = gameData.mapSectors?.find(s => s.coordinates.includes(coordinates));
-                
+
                 const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
                 const effectiveHint = directions.includes(locationName.toLowerCase()) ? "Uncharted Lands" : locationName;
 
                 const details = await generateZoneDetails(coordinates, effectiveHint, sector, "", gameData.mapSettings, gameData.worldSummary);
                 generatedDescription = details.description;
-                const newZone: MapZone = { 
-                    id: `zone-${coordinates}-${Date.now()}`, 
-                    coordinates, 
-                    name: details.name || effectiveHint, 
-                    description: details.description, 
+                const newZone: MapZone = {
+                    id: `zone-${coordinates}-${Date.now()}`,
+                    coordinates,
+                    name: details.name || effectiveHint,
+                    description: details.description,
                     hostility: parseHostility(details.hostility),
-                    sectorId: sector?.id, 
-                    visited: true, 
-                    tags: ['location'], 
-                    keywords: details.keywords || [] 
+                    sectorId: sector?.id,
+                    visited: true,
+                    tags: ['location'],
+                    keywords: details.keywords || []
                 };
                 zone = newZone;
                 dispatch({ type: 'UPDATE_MAP_ZONE', payload: newZone });
@@ -74,7 +76,7 @@ export const useTravel = (
             const rawHostility = zone ? parseHostility(zone.hostility) : 0;
             const discoveryBonus = isDiscovery ? 75 : 0;
             const { roll, matrix } = generateEncounterRoll(`Arrival at ${locationName}`, rawHostility + discoveryBonus);
-            
+
             let isHostileIntent = false;
             let generativeCombatInstruction = "";
             let preRolledSummary = "";
@@ -110,15 +112,15 @@ export const useTravel = (
                 generativeCombatInstruction = getClearPlotPrompt();
             }
 
-            dispatch({ 
-                type: 'ADD_MESSAGE', 
-                payload: { 
-                    id: `sys-arr-enc-${Date.now()}`, 
-                    sender: 'system', 
-                    content: `Danger Check: ${roll.total} (Threshold 75)${preRolledSummary ? '\n' + preRolledSummary : ''}`, 
-                    rolls: preRolledRolls, 
-                    type: 'neutral' 
-                } 
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `sys-arr-enc-${Date.now()}`,
+                    sender: 'system',
+                    content: `Danger Check: ${roll.total} (Threshold 75)${preRolledSummary ? '\n' + preRolledSummary : ''}`,
+                    rolls: preRolledRolls,
+                    type: 'neutral'
+                }
             });
 
             // 3. Delegate Narration to Master Pipeline
@@ -146,7 +148,7 @@ export const useTravel = (
 
     const initiateTravel = useCallback(async (destination: string, method: string, targetCoordinates?: string) => {
         if (!gameData) return;
-        
+
         const currentCoords = gameData.playerCoordinates;
         let travelTimeHours = 1;
         if (targetCoordinates && currentCoords) {
@@ -158,7 +160,7 @@ export const useTravel = (
                 travelTimeHours = Math.max(1, Math.round((rawDist * 24) / speed));
             }
         }
-        
+
         const startDate = parseGameTime(gameData.currentTime);
         if (startDate) {
             const arrivalTimeStr = formatGameTime(addDuration(startDate, travelTimeHours));
@@ -166,8 +168,8 @@ export const useTravel = (
         }
 
         if (targetCoordinates) {
-             dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: targetCoordinates });
-             await processArrival(targetCoordinates, destination, gameData.messages, method, destination);
+            dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: targetCoordinates });
+            await processArrival(targetCoordinates, destination, gameData.messages, method, destination);
         }
     }, [gameData, dispatch, processArrival]);
 
@@ -176,7 +178,7 @@ export const useTravel = (
         if (!preParsedIntent) {
             dispatch({ type: 'ADD_MESSAGE', payload: { id: `user-travel-trigger-${Date.now()}`, sender: 'user', mode: 'CHAR', content: userContent } });
         }
-        
+
         setIsAiGenerating(true);
         try {
             const intent = preParsedIntent || await parseTravelIntent(userContent, gameData.messages);
@@ -184,14 +186,17 @@ export const useTravel = (
                 const dest = intent.destination;
                 const method = intent.method || "walking";
                 let targetCoords: string | undefined = undefined;
-                
-                const directionMap: Record<string, {dx: number, dy: number}> = { 
-                    'north': {dx: 0, dy: -1}, 'south': {dx: 0, dy: 1}, 
-                    'east': {dx: 1, dy: 0}, 'west': {dx: -1, dy: 0}, 
-                    'northeast': {dx: 1, dy: -1}, 'northwest': {dx: -1, dy: -1}, 
-                    'southeast': {dx: 1, dy: 1}, 'southwest': {dx: -1, dy: 1} 
+
+                let isKnownZone = false;
+                let matchedZoneName = dest; // Initialize with original destination
+
+                const directionMap: Record<string, { dx: number, dy: number }> = {
+                    'north': { dx: 0, dy: -1 }, 'south': { dx: 0, dy: 1 },
+                    'east': { dx: 1, dy: 0 }, 'west': { dx: -1, dy: 0 },
+                    'northeast': { dx: 1, dy: -1 }, 'northwest': { dx: -1, dy: -1 },
+                    'southeast': { dx: 1, dy: 1 }, 'southwest': { dx: -1, dy: 1 }
                 };
-                
+
                 const p = parseCoords(gameData.playerCoordinates || '');
                 const normalizedDest = String(dest || "").toLowerCase().trim();
 
@@ -202,19 +207,48 @@ export const useTravel = (
                 }
 
                 if (!targetCoords) {
-                    targetCoords = gameData.mapZones?.find(z => z.name?.toLowerCase().includes(normalizedDest))?.coordinates || 
-                                   gameData.knowledge?.find(k => k.title?.toLowerCase().includes(normalizedDest))?.coordinates;
+                    // Try to fuzzy match against known zones first
+                    const matchedZone = gameData.mapZones?.find(z => {
+                        const zName = (z.name || "").toLowerCase();
+                        // Allows passing "I travel to Iron Forge" and matching "The Iron Forge"
+                        return zName.includes(normalizedDest) || normalizedDest.includes(zName);
+                    });
+
+                    if (matchedZone) {
+                        targetCoords = matchedZone.coordinates;
+                        matchedZoneName = matchedZone.name;
+                        isKnownZone = true;
+                    } else {
+                        // Or against POIs
+                        const matchedPoi = gameData.knowledge?.find(k => k.title?.toLowerCase().includes(normalizedDest));
+                        if (matchedPoi) {
+                            targetCoords = matchedPoi.coordinates;
+                            matchedZoneName = matchedPoi.title;
+                            isKnownZone = true;
+                        }
+                    }
                 }
 
                 if (!targetCoords) targetCoords = gameData.playerCoordinates || '0-0';
                 setIsAiGenerating(false);
-                await initiateTravel(dest, method, targetCoords);
+
+                if (isKnownZone) {
+                    // Interrupt and wait for user confirmation
+                    setPendingTravelConfirmation({
+                        destination: matchedZoneName,
+                        targetCoords,
+                        method
+                    });
+                } else {
+                    // Uncharted exploration proceeds without interruption
+                    await initiateTravel(dest, method, targetCoords);
+                }
             } else {
                 setIsAiGenerating(false);
             }
-        } catch (e) { 
-            console.error("Travel intent parsing failed", e); 
-            setIsAiGenerating(false); 
+        } catch (e) {
+            console.error("Travel intent parsing failed", e);
+            setIsAiGenerating(false);
         }
     }, [gameData, dispatch, initiateTravel, setIsAiGenerating]);
 

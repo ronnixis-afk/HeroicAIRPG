@@ -19,7 +19,11 @@ export const useIntentStep = () => {
         const isCombat = !!gameData.combatState?.isActive;
         const lastAiMsg = (gameData.messages ?? []).filter(m => m.sender === 'ai').pop()?.content || "";
 
-        return await assessSkillIntent(message.content, skillsContext, partyNames, isCombat, lastAiMsg);
+        const knownZones = (gameData.mapZones || [])
+            .map(z => z.name)
+            .filter((value, index, self) => self.indexOf(value) === index);
+
+        return await assessSkillIntent(message.content, skillsContext, partyNames, isCombat, lastAiMsg, knownZones);
     }, []);
 
     return { assessIntent };
