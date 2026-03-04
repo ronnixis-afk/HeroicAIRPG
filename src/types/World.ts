@@ -180,6 +180,7 @@ export interface ChatMessage {
   type?: 'positive' | 'negative' | 'neutral';
   options?: string[];
   alignmentOptions?: AlignmentOption[];
+  explicitAlignment?: string; // NEW: Tells the pipeline that alignment was already handled
   location?: string;
   timestamp?: string;
   rolls?: DiceRoll[];

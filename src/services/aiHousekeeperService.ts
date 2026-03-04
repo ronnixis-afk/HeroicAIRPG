@@ -13,7 +13,8 @@ import { isLocaleMatch } from '../utils/mapUtils';
 export const performHousekeeping = async (
   userAction: string,
   narrativeResult: string,
-  gameData: GameData
+  gameData: GameData,
+  explicitAlignment?: string
 ): Promise<{
   inventoryUpdates: any[];
   userAlignmentShift: string;
@@ -75,6 +76,10 @@ export const performHousekeeping = async (
     3. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
 
     [ALIGNMENT AUDIT INSTRUCTIONS]
+    ${explicitAlignment ? `
+    1. The player's action has already been explicitly aligned as "${explicitAlignment}".
+    2. Therefore, you MUST output exactly "${explicitAlignment}" into the 'userAlignmentShift' field. Do not analyze.
+    ` : `
     1. Read the user's action and classify their intent into ONE of the following precise alignment strings:
        - "Good" (healing, helping, altruism, protecting the weak)
        - "Evil" (murder, cruelty, theft, selfishness)
@@ -82,6 +87,7 @@ export const performHousekeeping = async (
        - "Chaotic" (breaking rules, reckless behavior, spontaneous actions)
        - "Neutral" (casual conversation, basic exploration, walking)
     2. Output this single string into the 'userAlignmentShift' field.
+    `}
 
     [NPC MEMORY INSTRUCTIONS]
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).

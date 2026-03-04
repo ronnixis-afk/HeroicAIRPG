@@ -227,7 +227,8 @@ const ChatView: React.FC = () => {
                 id: `msg-${Date.now()}`,
                 sender: 'user',
                 content: label,
-                mode: 'CHAR'
+                mode: 'CHAR',
+                explicitAlignment: alignment
             });
         };
 

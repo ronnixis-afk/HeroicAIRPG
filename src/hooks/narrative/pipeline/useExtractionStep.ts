@@ -31,7 +31,7 @@ export const useExtractionStep = (
         // 1. Concurrent Audit & Housekeeping
         const [auditResult, housekeepingResult] = await Promise.all([
             auditSystemState(userContent, aiNarrative, gameData, excludeList),
-            performHousekeeping(userContent, aiNarrative, gameData)
+            performHousekeeping(userContent, aiNarrative, gameData, aiResponse.updates?.adventureBrief || (gameData.messages.slice(-1)[0]?.explicitAlignment))
         ]);
 
         const finalUpdates: AIUpdatePayload = {
