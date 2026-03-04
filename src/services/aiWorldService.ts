@@ -261,7 +261,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     World: ${worldSummary}
     [STRICT CONSTRAINTS]
     - title: MAX 3 WORDS.
-    - title: MUST NOT be identical to the zone name "${zone.name}".
+    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
     - content: MAX 30 WORDS.
     Return JSON array: [{ "title": "string", "content": "string" }]`;
 
