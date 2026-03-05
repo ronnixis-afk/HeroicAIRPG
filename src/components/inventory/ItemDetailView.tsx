@@ -411,20 +411,14 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         })()}
 
                         {item.description && (
-                            <div className="bg-brand-primary/10 p-5 rounded-2xl border-l-4 border-brand-accent shadow-inner mb-6">
-                                <p className="text-body-base text-brand-text leading-relaxed font-bold italic opacity-90">
+                            <div className="bg-brand-primary/10 p-4 rounded-2xl mb-4">
+                                <p className="text-body-base text-brand-text-muted leading-relaxed opacity-90">
                                     {item.description}
                                 </p>
                             </div>
                         )}
 
-                        {item.details && (
-                            <div className="mb-6 px-1">
-                                <p className="text-body-sm text-brand-text-muted leading-relaxed whitespace-pre-wrap font-medium">
-                                    {item.details}
-                                </p>
-                            </div>
-                        )}
+
                     </div>
 
                     {(item.weaponStats || item.armorStats) && (
