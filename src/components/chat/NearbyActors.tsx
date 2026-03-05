@@ -125,9 +125,10 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 type: 'ADD_MESSAGE',
                 payload: {
                     id: `surprise-atk-${Date.now()}`,
-                    sender: 'system',
+                    sender: 'user',
                     content: `**Surprise Attack!** You strike ${npc.name} from the shadows before the fray officially begins.`,
                     rolls: result.rolls,
+                    mode: 'CHAR',
                     type: 'positive'
                 }
             });

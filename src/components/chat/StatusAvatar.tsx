@@ -164,7 +164,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                         left: 4
                     }}
                 >
-                    <Icon name="skull" className="w-3/5 h-3/5 text-brand-danger opacity-50 drop-shadow-md" />
+                    <Icon name="close" className="w-3/5 h-3/5 text-brand-danger opacity-50 drop-shadow-md" />
                 </div>
             )}
 
