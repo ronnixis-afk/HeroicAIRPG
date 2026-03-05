@@ -22,19 +22,19 @@ export const useManualActions = (
         // Phase 2: Capture and consume Heroic state immediately to anchor the async flow.
         // We spending the point here as the single source of authority for manual actions.
         const wasHeroic = isHeroicModeActive;
-        
+
         if (wasHeroic) {
             dispatch({ type: 'USE_HEROIC_POINT' });
             setIsHeroicModeActive(false);
         }
 
         if (!gameData || targetIds.length === 0) return;
-        
+
         if (gameData.combatConfiguration?.narrativeCombat) {
             // Future compatibility: Ensure narrative rounds can eventually receive the heroic intent
             return performNarrativeRound(source, targetIds, flavorText, mode, sourceActorId, wasHeroic);
         }
-        
+
         let actorInstance = gameData.playerCharacter as PlayerCharacter | Companion;
         let actorInventory = gameData.playerInventory;
         const ownerId = sourceActorId || gameData.playerCharacter.id;
@@ -46,20 +46,32 @@ export const useManualActions = (
                 actorInventory = gameData.companionInventories[companion.id];
             }
         }
-        
+
         const enemies = gameData.combatState?.enemies || [];
-        const allies = [gameData.playerCharacter, ...gameData.companions.filter(c => c.isInParty !== false)]; 
+        const allies = [gameData.playerCharacter, ...gameData.companions.filter(c => c.isInParty !== false)];
         const allPotentialTargets = [...enemies, ...allies];
         let validTargetIds = targetIds;
-        
+
         const effect = 'effect' in source ? source.effect : undefined;
         const isHealingAction = effect && (effect.type === 'Heal' || !!effect.healDice);
 
         if (!isHealingAction) {
             validTargetIds = targetIds.filter(id => {
                 const target = allPotentialTargets.find(t => t.id === id);
+                // Exclude allies/neutrals from being valid attack targets by default unless they were explicitly passed
+                // But if they ARE targeted, we will flip them to enemy below.
+                // For now, just ensure they are alive.
                 return target && (target.currentHitPoints || 0) > 0;
             });
+
+            // AUTO-HOSTILITY: If player attacks an ally or neutral, they become an enemy.
+            validTargetIds.forEach(id => {
+                const target = allPotentialTargets.find(t => t.id === id);
+                if (target && 'alignment' in target && (target.alignment === 'ally' || target.alignment === 'neutral')) {
+                    dispatch({ type: 'UPDATE_COMBAT_ENEMY', payload: { ...target, alignment: 'enemy', isAlly: false } });
+                }
+            });
+
             if (validTargetIds.length === 0 && targetIds.length > 0) {
                 dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-invalid-${Date.now()}`, sender: 'system', content: "Target(s) are already defeated.", type: 'neutral' } });
                 return;
@@ -68,30 +80,30 @@ export const useManualActions = (
 
         const requests: DiceRollRequest[] = [];
         const isWeaponAttack = 'tags' in source && source.tags?.some(t => t.toLowerCase().includes('weapon'));
-        
+
         // General Multi-Target Detection (AoE/Chain/Burst)
         const isMultiTargetAction = effect?.targetType === 'Multiple';
 
         if (isMultiTargetAction) {
             // Logic Gate: Single request for Area Effect. 
             // The dice engine (calculateDiceRolls) detects 'Multiple' and automatically expands one request to every valid target in the pool.
-            requests.push({ 
-                rollerName: actorInstance.name, 
-                rollType: isHealingAction ? 'Healing Roll' : 'Attack Roll', 
-                checkName: source.name, 
+            requests.push({
+                rollerName: actorInstance.name,
+                rollType: isHealingAction ? 'Healing Roll' : 'Attack Roll',
+                checkName: source.name,
                 targetName: actorInstance.name, // Placeholder, engine overrides based on pool
-                mode, 
+                mode,
                 abilityName: source.name,
-                isHeroic: wasHeroic 
+                isHeroic: wasHeroic
             });
         } else if (isWeaponAttack) {
             const target = allPotentialTargets.find(e => e.id === validTargetIds[0]);
             if (target) {
-                requests.push({ 
-                    rollerName: actorInstance.name, 
-                    rollType: 'Attack Roll', 
-                    checkName: source.name, 
-                    targetName: target.name, 
+                requests.push({
+                    rollerName: actorInstance.name,
+                    rollType: 'Attack Roll',
+                    checkName: source.name,
+                    targetName: target.name,
                     mode,
                     isHeroic: wasHeroic
                 });
@@ -101,11 +113,11 @@ export const useManualActions = (
             for (const targetId of validTargetIds) {
                 const target = allPotentialTargets.find(e => e.id === targetId);
                 if (!target) continue;
-                const request: DiceRollRequest = { 
-                    rollerName: actorInstance.name, 
-                    rollType: isHealingAction ? 'Healing Roll' : 'Attack Roll', 
-                    checkName: source.name, 
-                    targetName: target.name, 
+                const request: DiceRollRequest = {
+                    rollerName: actorInstance.name,
+                    rollType: isHealingAction ? 'Healing Roll' : 'Attack Roll',
+                    checkName: source.name,
+                    targetName: target.name,
                     mode,
                     isHeroic: wasHeroic
                 };
@@ -115,10 +127,10 @@ export const useManualActions = (
         }
 
         if (requests.length === 0) return;
-        
+
         // Pass Heroic state to the processor for mechanical doubling
         const { rolls, summary } = processDiceRolls(requests, { isHeroic: wasHeroic });
-        
+
         if ('id' in source && (source as Ability).usage && (source as Ability).usage?.type !== 'passive') {
             dispatch({ type: 'USE_ABILITY', payload: { abilityId: source.id, ownerId } });
         } else if ('tags' in source && source.tags?.some(t => t.toLowerCase().includes('consumable'))) {
@@ -136,10 +148,10 @@ export const useManualActions = (
             try {
                 // Phase 4 Update: Pass pre-rolled summary and wasHeroic flag for correct narrative weighting
                 const aiRes = await generateResponse(
-                    narrativeRequest, 
-                    { ...gameData, messages: [...gameData.messages, narrativeRequest] }, 
-                    undefined, 
-                    undefined, 
+                    narrativeRequest,
+                    { ...gameData, messages: [...gameData.messages, narrativeRequest] },
+                    undefined,
+                    undefined,
                     'gemini-3-flash-preview',
                     summary,
                     wasHeroic

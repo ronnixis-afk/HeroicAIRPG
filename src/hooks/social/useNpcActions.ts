@@ -116,7 +116,7 @@ export const useNpcActions = (
             }
         } else if (failureMargin >= 10) {
             // Logic Gate A: Caught Red-Handed (Failure by 10 or more)
-            dispatch({ type: 'UPDATE_NPC', payload: { ...npc, relationship: -50 } });
+            dispatch({ type: 'UPDATE_NPC', payload: { ...npc, relationship: -50, alignment: 'enemy' } });
 
             // Phase 3 Update: Refined "Caught" narrative emphasizing clumsiness
             const caughtNarrative = `Caught red-handed! Your fingers fumble with the clasp, snagging on the fabric. ${npc.name} catches your wrist in a crushing grip, eyes flashing with immediate hostility.`;

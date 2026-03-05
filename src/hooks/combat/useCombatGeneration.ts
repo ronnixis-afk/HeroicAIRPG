@@ -187,6 +187,11 @@ export const useCombatGeneration = (
                     const actor = currentEnemies.find(e => e.id === id);
                     if (actor) {
                         dispatch({ type: 'UPDATE_COMBAT_ENEMY', payload: { ...actor, alignment, isAlly: alignment === 'ally' } });
+
+                        // If resolved to neutral, remove from combat initiative
+                        if (alignment === 'neutral') {
+                            dispatch({ type: 'DELETE_COMBAT_ENEMY', payload: id });
+                        }
                     }
                 });
             } catch (e) {

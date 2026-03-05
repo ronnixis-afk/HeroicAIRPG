@@ -9,121 +9,122 @@ import { Icon } from '../Icon';
 import { getTempHpLabel } from '../../utils/itemModifiers';
 
 interface CombatAvatarProps {
-  name: string;
-  hp: number;
-  maxHp: number;
-  tempHp: number;
-  maxTempHp: number;
-  isAlly: boolean;
-  isCurrentTurn: boolean;
-  statusEffects: StatusEffect[];
-  imageUrl?: string;
+    name: string;
+    hp: number;
+    maxHp: number;
+    tempHp: number;
+    maxTempHp: number;
+    isAlly: boolean;
+    alignment: string;
+    isCurrentTurn: boolean;
+    statusEffects: StatusEffect[];
+    imageUrl?: string;
 }
 
-const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, maxTempHp, isAlly, isCurrentTurn, statusEffects, imageUrl }) => {
-  const hpRatio = maxHp > 0 ? Math.max(0, Math.min(1, hp / maxHp)) : 0;
-  const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
-  
-  const visualSize = isCurrentTurn ? 50 : 40;
-  const strokeWidth = 3;
-  const containerSize = visualSize + 12; // Increased to fit outer shield ring
-  
-  const center = containerSize / 2;
-  const radius = (visualSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference * (1 - hpRatio);
+const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, maxTempHp, isAlly, alignment, isCurrentTurn, statusEffects, imageUrl }) => {
+    const hpRatio = maxHp > 0 ? Math.max(0, Math.min(1, hp / maxHp)) : 0;
+    const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
 
-  const tempRadius = radius + 4;
-  const tempCircumference = 2 * Math.PI * tempRadius;
-  const tempDashoffset = tempCircumference * (1 - tempHpRatio);
+    const visualSize = isCurrentTurn ? 50 : 40;
+    const strokeWidth = 3;
+    const containerSize = visualSize + 12; // Increased to fit outer shield ring
 
-  const ringColor = isAlly ? '#3ecf8e' : '#ef4444';
-  const tempColor = '#38bdf8'; // Brand Light Blue
-  const initials = name.slice(0, 2);
+    const center = containerSize / 2;
+    const radius = (visualSize - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference * (1 - hpRatio);
 
-  const hasStatus = statusEffects && statusEffects.length > 0;
-  const isDead = hp <= 0;
-  const isLowHp = !isDead && hpRatio <= 0.25;
+    const tempRadius = radius + 4;
+    const tempCircumference = 2 * Math.PI * tempRadius;
+    const tempDashoffset = tempCircumference * (1 - tempHpRatio);
 
-  return (
-    <div 
-        className={`flex flex-col items-center justify-center transition-all duration-300 ${isCurrentTurn ? 'opacity-100 scale-100' : 'opacity-40 scale-100'}`}
-        title={`${name} (${hp}/${maxHp} Hit Points)${tempHp > 0 ? ` + ${tempHp} Shield` : ''}`}
-    >
-        <div className="relative" style={{ width: containerSize, height: containerSize, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {isCurrentTurn && (
-                <div className="absolute inset-0 rounded-full bg-brand-accent/20 blur-md scale-110" />
-            )}
+    const ringColor = alignment === 'ally' ? '#3ecf8e' : (alignment === 'neutral' ? '#facc15' : '#ef4444');
+    const tempColor = '#38bdf8'; // Brand Light Blue
+    const initials = name.slice(0, 2);
 
-            <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none" viewBox={`0 0 ${containerSize} ${containerSize}`}>
-                {/* Health Ring */}
-                <circle
-                    cx={center}
-                    cy={center}
-                    r={radius}
-                    fill="transparent"
-                    stroke="#242424"
-                    strokeWidth={strokeWidth}
-                />
-                <circle
-                    cx={center}
-                    cy={center}
-                    r={radius}
-                    fill="transparent"
-                    stroke={ringColor}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    className="transition-all duration-500 ease-out"
-                />
+    const hasStatus = statusEffects && statusEffects.length > 0;
+    const isDead = hp <= 0;
+    const isLowHp = !isDead && hpRatio <= 0.25;
 
-                {/* Outer Shield/Temp HP Ring */}
-                {maxTempHp > 0 && (
+    return (
+        <div
+            className={`flex flex-col items-center justify-center transition-all duration-300 ${isCurrentTurn ? 'opacity-100 scale-100' : 'opacity-40 scale-100'}`}
+            title={`${name} (${hp}/${maxHp} Hit Points)${tempHp > 0 ? ` + ${tempHp} Shield` : ''}`}
+        >
+            <div className="relative" style={{ width: containerSize, height: containerSize, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isCurrentTurn && (
+                    <div className="absolute inset-0 rounded-full bg-brand-accent/20 blur-md scale-110" />
+                )}
+
+                <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none" viewBox={`0 0 ${containerSize} ${containerSize}`}>
+                    {/* Health Ring */}
                     <circle
                         cx={center}
                         cy={center}
-                        r={tempRadius}
+                        r={radius}
                         fill="transparent"
-                        stroke={tempColor}
-                        strokeWidth={2}
-                        strokeDasharray={tempCircumference}
-                        strokeDashoffset={tempDashoffset}
+                        stroke="#242424"
+                        strokeWidth={strokeWidth}
+                    />
+                    <circle
+                        cx={center}
+                        cy={center}
+                        r={radius}
+                        fill="transparent"
+                        stroke={ringColor}
+                        strokeWidth={strokeWidth}
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
                         strokeLinecap="round"
-                        className="transition-all duration-700 ease-out opacity-80"
+                        className="transition-all duration-500 ease-out"
+                    />
+
+                    {/* Outer Shield/Temp HP Ring */}
+                    {maxTempHp > 0 && (
+                        <circle
+                            cx={center}
+                            cy={center}
+                            r={tempRadius}
+                            fill="transparent"
+                            stroke={tempColor}
+                            strokeWidth={2}
+                            strokeDasharray={tempCircumference}
+                            strokeDashoffset={tempDashoffset}
+                            strokeLinecap="round"
+                            className="transition-all duration-700 ease-out opacity-80"
+                        />
+                    )}
+                </svg>
+
+                <div
+                    className={`absolute rounded-full overflow-hidden flex items-center justify-center bg-brand-surface z-0 border border-brand-primary transition-all ${isDead ? 'grayscale brightness-50' : ''}`}
+                    style={{
+                        width: radius * 2,
+                        height: radius * 2
+                    }}
+                >
+                    {imageUrl ? (
+                        <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+                    ) : (
+                        <span className={`font-bold ${alignment === 'ally' ? 'text-brand-accent' : (alignment === 'neutral' ? 'text-yellow-400' : 'text-brand-danger')}`} style={{ fontSize: isCurrentTurn ? '14px' : '12px' }}>
+                            {initials}
+                        </span>
+                    )}
+
+                    {isLowHp && (
+                        <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
+                    )}
+                </div>
+
+                {hasStatus && (
+                    <div
+                        className="absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-500 rounded-full border border-brand-bg z-20 shadow-sm"
+                        title={statusEffects.map(e => e.name).join(', ')}
                     />
                 )}
-            </svg>
-
-            <div 
-                className={`absolute rounded-full overflow-hidden flex items-center justify-center bg-brand-surface z-0 border border-brand-primary transition-all ${isDead ? 'grayscale brightness-50' : ''}`}
-                style={{ 
-                    width: radius * 2, 
-                    height: radius * 2 
-                }}
-            >
-                {imageUrl ? (
-                    <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-                ) : (
-                    <span className={`font-bold ${isAlly ? 'text-brand-accent' : 'text-brand-danger'}`} style={{ fontSize: isCurrentTurn ? '14px' : '12px' }}>
-                        {initials}
-                    </span>
-                )}
-                
-                {isLowHp && (
-                    <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
-                )}
             </div>
-
-            {hasStatus && (
-                <div 
-                    className="absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-500 rounded-full border border-brand-bg z-20 shadow-sm" 
-                    title={statusEffects.map(e => e.name).join(', ')}
-                />
-            )}
         </div>
-    </div>
-  );
+    );
 };
 
 
@@ -142,23 +143,23 @@ const CombatStatusDisplay: React.FC = () => {
 
     // Build normalized actor objects for display logic
     const allActors = [
-        { 
-            ...playerCharacter, 
-            isAlly: true, 
-            imageUrl: playerCharacter.imageUrl, 
+        {
+            ...playerCharacter,
+            isAlly: true,
+            imageUrl: playerCharacter.imageUrl,
             rank: 'player',
             temporaryHitPoints: playerCharacter.temporaryHitPoints,
             maxTemporaryHitPoints: playerCharacter.getMaxTemporaryHitPoints(playerInventory || { equipped: [], carried: [], storage: [], assets: [] })
         },
-        ...(companions || []).map(c => ({ 
-            ...c, 
-            isAlly: true, 
-            imageUrl: c.imageUrl, 
+        ...(companions || []).map(c => ({
+            ...c,
+            isAlly: true,
+            imageUrl: c.imageUrl,
             rank: 'companion',
             temporaryHitPoints: c.temporaryHitPoints,
             maxTemporaryHitPoints: c.getMaxTemporaryHitPoints(companionInventories?.[c.id] || { equipped: [], carried: [], storage: [], assets: [] })
         })),
-        ...combatState.enemies.map(e => ({ ...e, isAlly: !!e.isAlly, imageUrl: undefined })),
+        ...combatState.enemies.map(e => ({ ...e, isAlly: e.alignment === 'ally', imageUrl: undefined })),
     ];
 
     const combatantsInOrder = (combatState.turnOrder || [])
@@ -170,7 +171,7 @@ const CombatStatusDisplay: React.FC = () => {
             return undefined;
         })
         .filter((c): c is NonNullable<typeof c> => c !== undefined);
-        
+
     const currentTurnIdentifier = (combatState.turnOrder || [])[combatState.currentTurnIndex];
     let currentTurnDisplayId: string | null = null;
     const currentActor = allActors.find(a => a.id === currentTurnIdentifier || a.name === currentTurnIdentifier);
@@ -188,19 +189,20 @@ const CombatStatusDisplay: React.FC = () => {
     }, [combatState, currentTurnDisplayId, isExpanded]);
 
     const getActorNameColor = (actor: any) => {
-        if (actor.isAlly) return 'text-brand-accent';
+        if (actor.alignment === 'ally') return 'text-brand-accent';
+        if (actor.alignment === 'neutral') return 'text-yellow-400';
         if (actor.rank === 'boss') return 'text-brand-danger font-bold';
         if (actor.rank === 'elite') return 'text-blue-400';
         return 'text-brand-danger';
     };
 
     return (
-        <div 
+        <div
             className={`w-full z-30 bg-brand-bg/95 backdrop-blur-sm border-b border-brand-primary/50 shadow-lg transition-all duration-300 ease-in-out flex flex-col flex-shrink-0 ${isExpanded ? 'h-[60vh]' : 'h-24 cursor-pointer'}`}
             onClick={() => !isExpanded && setIsExpanded(true)}
         >
             {!isExpanded && (
-                <div 
+                <div
                     ref={scrollContainerRef}
                     className="w-full flex items-center gap-2 px-4 pt-1 pb-2 overflow-x-auto overflow-y-hidden custom-scroll scroll-smooth flex-grow"
                 >
@@ -216,6 +218,7 @@ const CombatStatusDisplay: React.FC = () => {
                                     tempHp={(combatant as any).temporaryHitPoints ?? 0}
                                     maxTempHp={(combatant as any).maxTemporaryHitPoints ?? 0}
                                     isAlly={combatant.isAlly}
+                                    alignment={(combatant.alignment as string) || (combatant.isAlly ? 'ally' : 'enemy')}
                                     isCurrentTurn={combatant.id === currentTurnDisplayId}
                                     statusEffects={combatant.statusEffects}
                                     imageUrl={(combatant as any).imageUrl}
@@ -236,18 +239,18 @@ const CombatStatusDisplay: React.FC = () => {
                     <div className="flex-1 overflow-y-auto custom-scroll p-4 py-2 space-y-2">
                         {combatantsInOrder.map((actor, index) => {
                             const isFullCharacter = actor.rank === 'player' || actor.rank === 'companion';
-                            
+
                             return (
-                                <div 
-                                    key={`${actor.id}-${index}`} 
+                                <div
+                                    key={`${actor.id}-${index}`}
                                     className={`flex items-center bg-brand-primary p-3 rounded-xl border transition-all ${actor.id === currentTurnIdentifier ? 'border-brand-accent shadow-lg shadow-brand-accent/5' : 'border-brand-surface'}`}
                                 >
                                     <span className="font-bold text-brand-text-muted text-body-sm w-6 text-center tabular-nums">{index + 1}</span>
-                                    
+
                                     {isFullCharacter ? (
-                                        <button 
-                                            onClick={(e) => { 
-                                                e.stopPropagation(); 
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                                 navigateToCharacter(actor.rank === 'player' ? 'player' : actor.id);
                                             }}
                                             className="flex-grow px-3 py-1 overflow-hidden text-left hover:bg-brand-bg/40 rounded-lg transition-all group/row border border-transparent hover:border-brand-accent/20"
@@ -302,7 +305,7 @@ const CombatStatusDisplay: React.FC = () => {
                                             </div>
                                         </div>
                                     )}
-                                    
+
                                     <div className="flex items-center gap-1">
                                         <button onClick={(e) => { e.stopPropagation(); moveInTurnOrder(actor.id, 'up'); }} disabled={index === 0} className="btn-icon p-1.5 text-brand-text-muted hover:text-brand-text disabled:opacity-20 transition-all active:scale-90"><Icon name="chevronUp" className="w-4 h-4" /></button>
                                         <button onClick={(e) => { e.stopPropagation(); moveInTurnOrder(actor.id, 'down'); }} disabled={index === combatantsInOrder.length - 1} className="btn-icon p-1.5 text-brand-text-muted hover:text-brand-text disabled:opacity-20 transition-all active:scale-90"><Icon name="chevronDown" className="w-4 h-4" /></button>
@@ -312,23 +315,23 @@ const CombatStatusDisplay: React.FC = () => {
                             );
                         })}
                     </div>
-                    
+
                     <div className="p-4 pt-2 flex justify-center gap-4 border-t border-brand-primary/20 bg-brand-bg">
-                        <button 
-                            onClick={(e) => { 
-                                e.stopPropagation(); 
-                                setActiveView('temp-stats'); 
-                                setIsExpanded(false); 
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveView('temp-stats');
+                                setIsExpanded(false);
                             }}
                             className="btn-primary btn-md flex-1 rounded-xl gap-2 shadow-lg shadow-brand-accent/20"
                         >
                             <Icon name="skull" className="w-4 h-4" />
                             <span>Scene Manager</span>
                         </button>
-                        <button 
-                            onClick={(e) => { 
-                                e.stopPropagation(); 
-                                setIsExpanded(false); 
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsExpanded(false);
                             }}
                             className="btn-secondary btn-md flex-1 rounded-xl gap-2"
                         >
