@@ -25,7 +25,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
     const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
 
     const targetable = canBeTargeted(actor);
-    
+
     // SVG Calc
     const radius = 36;
     const circumference = 2 * Math.PI * radius;
@@ -35,8 +35,8 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
     const tempRadius = radius + 3;
     const tempCircumference = 2 * Math.PI * tempRadius;
     const tempDashoffset = tempCircumference * (1 - tempHpRatio);
-    
-    const ringColor = actor.isAlly ? '#3ecf8e' : '#ef4444'; 
+
+    const ringColor = actor.alignment === 'ally' || actor.isAlly ? '#3ecf8e' : (actor.alignment === 'neutral' ? '#facc15' : '#ef4444');
     const tempColor = '#38bdf8'; // Brand Light Blue
     const initials = actor.name.slice(0, 2);
 
@@ -98,15 +98,15 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                     ${isActive ? 'border-brand-text' : 'border-brand-primary'}
                     bg-brand-surface ${isDefeated ? 'grayscale brightness-50' : ''}
                 `}>
-                    <div className={`text-xl font-black ${actor.isAlly ? 'text-brand-accent' : 'text-brand-danger'}`}>
+                    <div className={`text-xl font-black ${actor.alignment === 'ally' || actor.isAlly ? 'text-brand-accent' : (actor.alignment === 'neutral' ? 'text-yellow-400' : 'text-brand-danger')}`}>
                         {initials}
                     </div>
-                    
+
                     {isLowHp && (
                         <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
                     )}
                 </div>
-                
+
                 {hasStatus && (
                     <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-500 rounded-full border-2 border-brand-bg shadow-sm z-20" />
                 )}
@@ -116,14 +116,14 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                         <Icon name="eye" className="w-8 h-8 text-brand-accent drop-shadow-lg opacity-80" />
                     </div>
                 )}
-                
+
                 {actor.rank && actor.rank !== 'normal' && (
                     <div className="absolute bottom-0 right-0 z-20">
-                         <div className={`w-3 h-3 rotate-45 border border-brand-bg ${actor.rank === 'boss' ? 'bg-brand-danger' : 'bg-blue-400'}`} />
+                        <div className={`w-3 h-3 rotate-45 border border-brand-bg ${actor.rank === 'boss' ? 'bg-brand-danger' : 'bg-blue-400'}`} />
                     </div>
                 )}
             </div>
-            
+
             <span className={`mt-2 text-body-tiny truncate max-w-[80px] ${isActive ? 'text-brand-text' : 'text-brand-text-muted'} ${!targetable ? 'italic' : ''}`}>
                 {actor.name}
             </span>

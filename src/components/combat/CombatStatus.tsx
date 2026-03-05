@@ -146,6 +146,7 @@ const CombatStatusDisplay: React.FC = () => {
         {
             ...playerCharacter,
             isAlly: true,
+            alignment: 'ally',
             imageUrl: playerCharacter.imageUrl,
             rank: 'player',
             temporaryHitPoints: playerCharacter.temporaryHitPoints,
@@ -154,6 +155,7 @@ const CombatStatusDisplay: React.FC = () => {
         ...(companions || []).map(c => ({
             ...c,
             isAlly: true,
+            alignment: 'ally',
             imageUrl: c.imageUrl,
             rank: 'companion',
             temporaryHitPoints: c.temporaryHitPoints,
