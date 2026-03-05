@@ -30,9 +30,9 @@ interface ItemDetailViewProps {
     onActionCompleted?: () => void;
 }
 
-export const ItemDetailView: React.FC<ItemDetailViewProps> = ({ 
-    item, ownerId, character, fromList, primaryCurrencyItemId, 
-    onEquipRequest, onUnequipRequest, onActionCompleted 
+export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
+    item, ownerId, character, fromList, primaryCurrencyItemId,
+    onEquipRequest, onUnequipRequest, onActionCompleted
 }) => {
     const { gameData, dropItem, splitItem, updateItem, moveItem, useItem, transferItem, consolidateCurrency, performPlayerAttack } = useContext(GameDataContext) as GameDataContextType;
 
@@ -49,7 +49,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     useEffect(() => {
         if (item) setLocalItem(item);
     }, [item]);
-    
+
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -117,7 +117,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         await splitItem(item.id, fromList, ownerId, quantity);
         if (onActionCompleted) onActionCompleted();
     };
-    
+
     const handleMove = (toList: keyof Inventory) => {
         moveItem(item.id, fromList, toList, ownerId);
         if (onActionCompleted) onActionCompleted();
@@ -188,7 +188,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             return newItem;
         });
     };
-    
+
     const handleChange = (field: keyof Omit<Item, 'weaponStats' | 'armorStats'>, value: string | number) => {
         setLocalItem(prev => {
             const newItem = prev.clone();
@@ -202,7 +202,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             const newItem = prev.clone();
             const addedTag = newTags.find(t => !prev.tags.includes(t));
             let finalTags = [...newTags];
-            
+
             // Logic to prevent having multiple weapon/armor types simultaneously
             const weaponTags = ['Light Weapon', 'Medium Weapon', 'Heavy Weapon'];
             const armorTags = ['Light Armor', 'Medium Armor', 'Heavy Armor'];
@@ -215,14 +215,14 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
             }
 
             newItem.tags = finalTags;
-            
+
             // Sync stats type if possible
             if (addedTag) {
                 const lower = addedTag.toLowerCase();
                 if (lower === 'light armor' && newItem.armorStats) newItem.armorStats.armorType = 'light';
                 if (lower === 'medium armor' && newItem.armorStats) newItem.armorStats.armorType = 'medium';
                 if (lower === 'heavy armor' && newItem.armorStats) newItem.armorStats.armorType = 'heavy';
-                
+
                 if (lower === 'light weapon' && newItem.weaponStats) newItem.weaponStats.ability = 'dexterity';
                 if (lower === 'medium weapon' && newItem.weaponStats) newItem.weaponStats.ability = 'strength';
                 if (lower === 'heavy weapon' && newItem.weaponStats) newItem.weaponStats.ability = 'strength';
@@ -258,8 +258,8 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         });
     };
 
-    const ActionButton: React.FC<{onClick: () => void, children: React.ReactNode, className?: string}> = ({ onClick, children, className }) => (
-        <button 
+    const ActionButton: React.FC<{ onClick: () => void, children: React.ReactNode, className?: string }> = ({ onClick, children, className }) => (
+        <button
             onClick={onClick}
             className={`btn-secondary btn-md ${className || ''}`}
         >
@@ -287,7 +287,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         <label className="block text-body-sm font-bold text-brand-text-muted mb-1 ml-1">Lore and Details</label>
                         <AutoResizingTextarea value={localItem.details} onChange={(e) => handleChange('details', e.target.value)} className="w-full bg-brand-primary p-3 rounded-md focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-body-base leading-relaxed" />
                     </div>
-                    
+
                     <div>
                         <label className="block text-body-sm font-bold text-brand-text-muted mb-1 ml-1">Functional Slot (Anatomy Map)</label>
                         <div className="relative">
@@ -312,7 +312,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     <ItemUsageEditor item={localItem} onChange={handleNestedChange} />
 
                     {!localItem.armorStats && (isArmor || isShield) && (
-                        <button 
+                        <button
                             onClick={() => handleInitializeArmorStats(isShield ? 'shield' : 'armor')}
                             className="btn-secondary btn-md w-full gap-2"
                         >
@@ -320,9 +320,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             Add {isShield ? 'Shield' : 'Armor'} Statistics
                         </button>
                     )}
-                    
+
                     {!localItem.weaponStats && isWeapon && (
-                        <button 
+                        <button
                             onClick={handleInitializeWeaponStats}
                             className="btn-secondary btn-md w-full gap-2"
                         >
@@ -335,17 +335,17 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     {(isArmor || isShield) && localItem.armorStats && <ArmorStatsEditor stats={localItem.armorStats} character={character} onChange={handleNestedChange} />}
                     {(isWeapon || isArmor || isShield || isBuff) && <ModifierManager item={localItem} onChange={handleNestedChange} />}
                     {isMechanical && localItem.effect && <EffectBuilder effect={localItem.effect} onChange={(newEffect) => handleNestedChange(['effect'], newEffect)} onRemove={() => handleTagsChange(safeLocalTags.filter(t => t !== 'mechanical'))} />}
-                    
+
                     <div className="flex flex-col items-center gap-4 pt-6 border-t border-brand-primary/20">
-                        <button 
-                            onClick={handleSave} 
-                            disabled={isSaving} 
+                        <button
+                            onClick={handleSave}
+                            disabled={isSaving}
                             className="btn-primary btn-md w-full gap-2"
                         >
                             {isSaving ? <Icon name="spinner" className="w-5 h-5 animate-spin" /> : saveSuccess ? <Icon name="check" className="w-5 h-5" /> : 'Save Changes'}
                         </button>
-                        <button 
-                            onClick={() => setIsEditing(false)} 
+                        <button
+                            onClick={() => setIsEditing(false)}
                             className="btn-tertiary btn-sm"
                         >
                             Cancel Editing
@@ -353,17 +353,57 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     </div>
                 </div>
             ) : (
-                <div className="animate-fade-in p-1">
-                    <div className="flex justify-between items-start gap-4 mb-2">
+                <div className="animate-fade-in">
+                    <div className="flex justify-between items-start gap-4 mb-3 pt-2">
                         <div className="flex-1 min-w-0">
-                            <h5 className="text-brand-text mb-2 font-merriweather text-3xl leading-tight">{item.name}</h5>
-                            {item.bodySlotTag && (
-                                <div className="mb-4">
-                                    <span className="bg-brand-accent/20 text-brand-accent text-[10px] font-bold px-2.5 py-1 rounded border border-brand-accent/30 inline-flex items-center tracking-normal">
-                                        {slotLabel}
-                                    </span>
-                                </div>
-                            )}
+                            <h3 className="text-brand-text mb-2 font-merriweather leading-tight">{item.name}</h3>
+
+                            {/* Property Tag Row */}
+                            {(() => {
+                                const propTags: { label: string; color: string }[] = [];
+
+                                // Weapon / Armor type-tier tags
+                                const typeTagMap: Record<string, string> = {
+                                    'Light Weapon': 'text-green-400 border-green-500/40 bg-green-900/10',
+                                    'Medium Weapon': 'text-yellow-400 border-yellow-500/40 bg-yellow-900/10',
+                                    'Heavy Weapon': 'text-red-400 border-red-500/40 bg-red-900/10',
+                                    'Light Armor': 'text-blue-300 border-blue-400/40 bg-blue-900/10',
+                                    'Medium Armor': 'text-blue-400 border-blue-500/40 bg-blue-900/10',
+                                    'Heavy Armor': 'text-blue-500 border-blue-600/40 bg-blue-900/20',
+                                    'Shield': 'text-cyan-400 border-cyan-500/40 bg-cyan-900/10',
+                                    'ranged': 'text-orange-300 border-orange-400/40 bg-orange-900/10',
+                                    'melee': 'text-brand-text-muted border-brand-primary/50 bg-brand-primary/20',
+                                };
+
+                                const safeItemTags = item.tags || [];
+                                safeItemTags.forEach(tag => {
+                                    const key = Object.keys(typeTagMap).find(k => k.toLowerCase() === tag.toLowerCase());
+                                    if (key) propTags.push({ label: key, color: typeTagMap[key] });
+                                });
+
+                                // Weapon ability (e.g. Dexterity, Strength)
+                                if (item.weaponStats?.ability) {
+                                    const abilityLabel = item.weaponStats.ability.charAt(0).toUpperCase() + item.weaponStats.ability.slice(1);
+                                    propTags.push({ label: abilityLabel, color: 'text-purple-300 border-purple-500/40 bg-purple-900/10' });
+                                }
+
+                                // Equip body slot
+                                if (item.bodySlotTag) {
+                                    propTags.push({ label: slotLabel, color: 'text-brand-accent border-brand-accent/30 bg-brand-accent/5' });
+                                }
+
+                                if (propTags.length === 0) return null;
+
+                                return (
+                                    <div className="flex flex-wrap gap-1.5 mb-3">
+                                        {propTags.map((tag, i) => (
+                                            <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border inline-flex items-center tracking-normal ${tag.color}`}>
+                                                {tag.label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
 
                             {item.description && (
                                 <div className="bg-brand-primary/10 p-5 rounded-2xl border-l-4 border-brand-accent shadow-inner mb-6">
@@ -414,8 +454,8 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             <label className="text-[10px] font-bold text-brand-text-muted block mb-2">Mechanical Bonuses</label>
                             <div className="flex flex-wrap gap-2">
                                 {mechanicalPills.map((pill, idx) => (
-                                    <span 
-                                        key={idx} 
+                                    <span
+                                        key={idx}
                                         className={`text-[10px] font-bold px-3 py-1.5 rounded-full border bg-brand-bg tracking-normal shadow-sm flex items-center gap-1.5 ${pill.colorClass}`}
                                     >
                                         {pill.icon && <Icon name={pill.icon} className="w-3 h-3" />}
@@ -435,9 +475,9 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     <div className="pt-8 border-t border-brand-primary/10 relative z-10">
                         <div className="grid grid-cols-2 gap-3 w-full">
                             {(fromList === 'carried' || fromList === 'equipped') && (
-                                <button 
-                                    onClick={handleUse} 
-                                    disabled={isUsingItem || !localItem?.isUsable()} 
+                                <button
+                                    onClick={handleUse}
+                                    disabled={isUsingItem || !localItem?.isUsable()}
                                     className="btn-primary btn-md"
                                 >
                                     {isUsingItem ? <Icon name="spinner" className="w-4 h-4 animate-spin text-black" /> : 'Use Item'}
@@ -449,7 +489,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             {fromList === 'carried' && ownerId === 'player' && <ActionButton onClick={() => handleMove('storage')}>Store</ActionButton>}
                             {fromList === 'storage' && ownerId === 'player' && <ActionButton onClick={() => handleMove('carried')}>Carry</ActionButton>}
                             {canSplit && <ActionButton onClick={() => setIsSplitModalOpen(true)}>Split</ActionButton>}
-                            
+
                             <div className="relative inline-block" ref={dropdownRef}>
                                 {fromList !== 'assets' && gameData && gameData.companions.length > 0 && (
                                     <button onClick={() => setIsTransferDropdownOpen(prev => !prev)} className="btn-secondary btn-md w-full">Transfer</button>
@@ -464,7 +504,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                             <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <span className="text-xs font-bold text-brand-text-muted flex items-center justify-center h-full">
-                                                                {gameData.playerCharacter.name.slice(0,2).toUpperCase()}
+                                                                {gameData.playerCharacter.name.slice(0, 2).toUpperCase()}
                                                             </span>
                                                         )}
                                                     </div>
@@ -481,7 +521,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                             <img src={companion.imageUrl} className="w-full h-full object-cover" />
                                                         ) : (
                                                             <span className="text-xs font-bold text-brand-text-muted flex items-center justify-center h-full">
-                                                                {companion.name.slice(0,2).toUpperCase()}
+                                                                {companion.name.slice(0, 2).toUpperCase()}
                                                             </span>
                                                         )}
                                                     </div>

@@ -7,7 +7,7 @@ import { Icon } from './Icon';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
   hideHeader?: boolean;
   children: ReactNode;
 }
