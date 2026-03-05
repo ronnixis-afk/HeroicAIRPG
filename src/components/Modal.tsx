@@ -52,7 +52,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, hideHeader, child
         )}
 
         {/* Scrollable Body */}
-        <div className={`flex-1 overflow-y-auto custom-scroll ${hideHeader ? '' : 'px-6 pb-6'}`}>
+        <div className={`flex-1 overflow-y-auto custom-scroll ${hideHeader ? 'px-6 pb-6 pt-14' : 'px-6 pb-6'}`}>
           {children}
         </div>
       </div>

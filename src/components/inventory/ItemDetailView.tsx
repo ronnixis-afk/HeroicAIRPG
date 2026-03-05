@@ -354,76 +354,77 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 </div>
             ) : (
                 <div className="animate-fade-in">
-                    <div className="flex justify-between items-start gap-4 mb-3 pt-2">
-                        <div className="flex-1 min-w-0">
-                            <h3 className="text-brand-text mb-2 font-merriweather leading-tight">{item.name}</h3>
-
-                            {/* Property Tag Row */}
-                            {(() => {
-                                const propTags: { label: string; color: string }[] = [];
-
-                                // Weapon / Armor type-tier tags
-                                const typeTagMap: Record<string, string> = {
-                                    'Light Weapon': 'text-green-400 border-green-500/40 bg-green-900/10',
-                                    'Medium Weapon': 'text-yellow-400 border-yellow-500/40 bg-yellow-900/10',
-                                    'Heavy Weapon': 'text-red-400 border-red-500/40 bg-red-900/10',
-                                    'Light Armor': 'text-blue-300 border-blue-400/40 bg-blue-900/10',
-                                    'Medium Armor': 'text-blue-400 border-blue-500/40 bg-blue-900/10',
-                                    'Heavy Armor': 'text-blue-500 border-blue-600/40 bg-blue-900/20',
-                                    'Shield': 'text-cyan-400 border-cyan-500/40 bg-cyan-900/10',
-                                    'ranged': 'text-orange-300 border-orange-400/40 bg-orange-900/10',
-                                    'melee': 'text-brand-text-muted border-brand-primary/50 bg-brand-primary/20',
-                                };
-
-                                const safeItemTags = item.tags || [];
-                                safeItemTags.forEach(tag => {
-                                    const key = Object.keys(typeTagMap).find(k => k.toLowerCase() === tag.toLowerCase());
-                                    if (key) propTags.push({ label: key, color: typeTagMap[key] });
-                                });
-
-                                // Weapon ability (e.g. Dexterity, Strength)
-                                if (item.weaponStats?.ability) {
-                                    const abilityLabel = item.weaponStats.ability.charAt(0).toUpperCase() + item.weaponStats.ability.slice(1);
-                                    propTags.push({ label: abilityLabel, color: 'text-purple-300 border-purple-500/40 bg-purple-900/10' });
-                                }
-
-                                // Equip body slot
-                                if (item.bodySlotTag) {
-                                    propTags.push({ label: slotLabel, color: 'text-brand-accent border-brand-accent/30 bg-brand-accent/5' });
-                                }
-
-                                if (propTags.length === 0) return null;
-
-                                return (
-                                    <div className="flex flex-wrap gap-1.5 mb-3">
-                                        {propTags.map((tag, i) => (
-                                            <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border inline-flex items-center tracking-normal ${tag.color}`}>
-                                                {tag.label}
-                                            </span>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
-
-                            {item.description && (
-                                <div className="bg-brand-primary/10 p-5 rounded-2xl border-l-4 border-brand-accent shadow-inner mb-6">
-                                    <p className="text-body-base text-brand-text leading-relaxed font-bold italic opacity-90">
-                                        {item.description}
-                                    </p>
-                                </div>
-                            )}
-
-                            {item.details && (
-                                <div className="mb-6 px-1">
-                                    <p className="text-body-sm text-brand-text-muted leading-relaxed whitespace-pre-wrap font-medium">
-                                        {item.details}
-                                    </p>
-                                </div>
-                            )}
+                    <div className="mb-3">
+                        {/* Name + inline edit */}
+                        <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-brand-text font-merriweather leading-tight flex-1 min-w-0">{item.name}</h3>
+                            <button onClick={() => setIsEditing(true)} className="btn-icon bg-brand-primary/30 border border-brand-surface text-brand-text-muted hover:text-brand-accent shrink-0">
+                                <Icon name="edit" className="w-4 h-4" />
+                            </button>
                         </div>
-                        <button onClick={() => setIsEditing(true)} className="btn-icon bg-brand-primary/30 border border-brand-surface text-brand-text-muted hover:text-brand-accent shrink-0 relative z-10">
-                            <Icon name="edit" className="w-4 h-4" />
-                        </button>
+
+                        {/* Property Tag Row */}
+                        {(() => {
+                            const propTags: { label: string; color: string }[] = [];
+
+                            // Weapon / Armor type-tier tags
+                            const typeTagMap: Record<string, string> = {
+                                'Light Weapon': 'text-green-400 border-green-500/40 bg-green-900/10',
+                                'Medium Weapon': 'text-yellow-400 border-yellow-500/40 bg-yellow-900/10',
+                                'Heavy Weapon': 'text-red-400 border-red-500/40 bg-red-900/10',
+                                'Light Armor': 'text-blue-300 border-blue-400/40 bg-blue-900/10',
+                                'Medium Armor': 'text-blue-400 border-blue-500/40 bg-blue-900/10',
+                                'Heavy Armor': 'text-blue-500 border-blue-600/40 bg-blue-900/20',
+                                'Shield': 'text-cyan-400 border-cyan-500/40 bg-cyan-900/10',
+                                'ranged': 'text-orange-300 border-orange-400/40 bg-orange-900/10',
+                                'melee': 'text-brand-text-muted border-brand-primary/50 bg-brand-primary/20',
+                            };
+
+                            const safeItemTags = item.tags || [];
+                            safeItemTags.forEach(tag => {
+                                const key = Object.keys(typeTagMap).find(k => k.toLowerCase() === tag.toLowerCase());
+                                if (key) propTags.push({ label: key, color: typeTagMap[key] });
+                            });
+
+                            // Weapon ability (e.g. Dexterity, Strength)
+                            if (item.weaponStats?.ability) {
+                                const abilityLabel = item.weaponStats.ability.charAt(0).toUpperCase() + item.weaponStats.ability.slice(1);
+                                propTags.push({ label: abilityLabel, color: 'text-purple-300 border-purple-500/40 bg-purple-900/10' });
+                            }
+
+                            // Equip body slot
+                            if (item.bodySlotTag) {
+                                propTags.push({ label: slotLabel, color: 'text-brand-accent border-brand-accent/30 bg-brand-accent/5' });
+                            }
+
+                            if (propTags.length === 0) return null;
+
+                            return (
+                                <div className="flex flex-wrap gap-1.5 mb-3">
+                                    {propTags.map((tag, i) => (
+                                        <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border inline-flex items-center tracking-normal ${tag.color}`}>
+                                            {tag.label}
+                                        </span>
+                                    ))}
+                                </div>
+                            );
+                        })()}
+
+                        {item.description && (
+                            <div className="bg-brand-primary/10 p-5 rounded-2xl border-l-4 border-brand-accent shadow-inner mb-6">
+                                <p className="text-body-base text-brand-text leading-relaxed font-bold italic opacity-90">
+                                    {item.description}
+                                </p>
+                            </div>
+                        )}
+
+                        {item.details && (
+                            <div className="mb-6 px-1">
+                                <p className="text-body-sm text-brand-text-muted leading-relaxed whitespace-pre-wrap font-medium">
+                                    {item.details}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {(item.weaponStats || item.armorStats) && (
@@ -544,10 +545,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         </button>
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {isDropModalOpen && <QuantityModal isOpen={isDropModalOpen} onClose={() => setIsDropModalOpen(false)} item={item} action="Drop" maxQuantity={item?.quantity || 1} onConfirm={handleConfirmDrop} />}
             {isSplitModalOpen && <QuantityModal isOpen={isSplitModalOpen} onClose={() => setIsSplitModalOpen(false)} item={item} action="Split" maxQuantity={(item?.quantity || 2) - 1} onConfirm={handleConfirmSplit} />}
-        </div>
+        </div >
     );
 };
