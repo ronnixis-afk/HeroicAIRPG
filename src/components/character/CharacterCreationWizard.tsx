@@ -303,7 +303,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
     return (
         <Modal isOpen={isOpen} onClose={() => !isWeaving && onClose()} title="" hideHeader={true}>
-            <div className="flex flex-col h-[85vh] bg-brand-bg p-6 pt-10 overflow-hidden">
+            <div className="flex flex-col h-[85vh] overflow-hidden">
                 {isWeaving ? renderWeaving() : (
                     <>
                         {creationMethod === null && <WizardMethodSelection onSelect={(method) => {
@@ -324,7 +324,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                             <>
                                 <WizardProgress steps={activeSteps} currentStep={step} />
                                 {(backgroundTraits.length > 0 || generalTraits.length > 0 || acquiredSkills.length > 0 || acquiredOtherBonuses.length > 0) && (
-                                    <div className="mb-8 px-2 animate-fade-in grid grid-cols-2 gap-8 border-b border-brand-primary/20 pb-6">
+                                    <div className="mb-6 px-1 animate-fade-in grid grid-cols-2 gap-4 border-b border-brand-primary/20 pb-4">
                                         <div className="space-y-6">
                                             <div className="space-y-3">
                                                 <label className="text-body-sm font-bold text-brand-text-muted opacity-60 block">
@@ -357,8 +357,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                         </div>
                                     </div>
                                 )}
-                                <div className="flex-1 overflow-y-auto custom-scroll px-1">
-                                    <div className="animate-page px-2 py-2">
+                                <div className="flex-1 overflow-y-auto custom-scroll">
+                                    <div className="animate-page py-2">
                                         {isShip ? (
                                             <>
                                                 {step === 1 && (

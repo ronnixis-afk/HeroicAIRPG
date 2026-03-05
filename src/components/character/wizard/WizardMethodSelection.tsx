@@ -10,14 +10,14 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
 
     if (view === 'ally') {
         return (
-            <div className="flex-1 flex flex-col items-center justify-start py-8 space-y-10 animate-fade-in overflow-y-auto custom-scroll px-1">
+            <div className="flex-1 flex flex-col items-center justify-start py-4 space-y-10 animate-fade-in px-1">
                 <div className="text-center space-y-2">
                     <h2 className="text-3xl font-bold text-brand-text">Enlist an Ally</h2>
                     <p className="text-sm text-brand-text-muted italic px-4">Choose how you wish to welcome a new companion to the party.</p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 gap-4 w-full max-w-md">
-                    <button 
+                    <button
                         onClick={() => onSelect('recruitment')}
                         className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
@@ -30,7 +30,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                         </div>
                     </button>
 
-                    <button 
+                    <button
                         onClick={() => onSelect('manual')}
                         className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
@@ -44,7 +44,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                     </button>
                 </div>
 
-                <button 
+                <button
                     onClick={() => setView('root')}
                     className="btn-tertiary btn-sm mt-4 opacity-60 hover:opacity-100"
                 >
@@ -55,14 +55,14 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
     }
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-start py-8 space-y-10 animate-fade-in overflow-y-auto custom-scroll px-1">
+        <div className="flex-1 flex flex-col items-center justify-start py-4 space-y-10 animate-fade-in px-1">
             <div className="text-center space-y-2">
                 <h2 className="text-3xl font-bold text-brand-text">Welcome a Companion</h2>
                 <p className="text-sm text-brand-text-muted italic px-4">Begin the process of expanding your party's capabilities.</p>
             </div>
-            
+
             <div className="grid grid-cols-1 gap-4 w-full max-w-md">
-                <button 
+                <button
                     onClick={() => setView('ally')}
                     className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                 >
@@ -75,7 +75,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                     </div>
                 </button>
 
-                <button 
+                <button
                     onClick={() => onSelect('shipyard')}
                     className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                 >
