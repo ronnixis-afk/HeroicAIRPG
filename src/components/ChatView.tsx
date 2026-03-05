@@ -309,7 +309,7 @@ const ChatView: React.FC = () => {
                                 }
                             }
 
-                            if (currentLocName && currentLocName !== prevLocName) {
+                            if (currentLocName && !isLocaleMatch(currentLocName, prevLocName || '')) {
                                 // Time Formatting
                                 const rawTime = msg.timestamp || gameData?.currentTime || new Date().toISOString();
                                 const dateObj = new Date(rawTime);
