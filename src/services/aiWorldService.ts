@@ -257,8 +257,12 @@ export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: Map
  */
 export const generatePoisForZone = async (zone: MapZone, worldSummary: string, mapSettings?: MapSettings): Promise<any[]> => {
     const ai = getAi();
+    const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
+    const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
     const input = `Generate 3 specific POIs for the zone "${zone.name}" (${zone.description}).
     World: ${worldSummary}
+    ${hostilityDesc}
+    ${keywordsDesc}
     [STRICT CONSTRAINTS]
     - title: MAX 3 WORDS.
     - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.

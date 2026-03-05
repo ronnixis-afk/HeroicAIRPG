@@ -55,7 +55,7 @@ export const resolveCombatAlignments = async (
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 0 }
             }
@@ -74,16 +74,16 @@ export const generateCombatEncounterSuggestions = async (
     existingActors: any[],
     gameData: GameData,
     enemySlots?: { difficulty: string }[],
-    excludeList: string[] = [] 
+    excludeList: string[] = []
 ): Promise<ActorSuggestion[]> => {
-    
-    const slotsInstruction = enemySlots 
+
+    const slotsInstruction = enemySlots
         ? `**SYSTEM OVERRIDE - MANDATORY ENEMY SPECS**:
            You MUST generate EXACTLY ${enemySlots.length} enemies matching these slots sequentially:
-           ${enemySlots.map((s, i) => `${i+1}. Difficulty Preset: ${s.difficulty}`).join('\n')}`
+           ${enemySlots.map((s, i) => `${i + 1}. Difficulty Preset: ${s.difficulty}`).join('\n')}`
         : 'Generate a reasonable number of enemies for a balanced fight.';
 
-    const shipMandate = hasShip 
+    const shipMandate = hasShip
         ? `\n**MANDATORY SHIP RULE**: The player party currently utilizes a VEHICLE/SHIP. You MUST set 'isShip': true for at least ONE of the generated enemies (usually the highest difficulty one) to provide a fair engagement scale.`
         : '';
 
@@ -140,14 +140,19 @@ export const generateCombatEncounterSuggestions = async (
  * Enriches generic combatant details with names and affinities fitting the scene.
  */
 export const enrichCombatantDetails = async (
-    enemies: { name: string, description?: string }[],
+    enemies: { name: string, description?: string, attacks?: any[], specialAbilities?: any[] }[],
     context: ChatMessage[],
     availableAffinities: Record<string, AffinityDefinition>,
     worldSummary: string = ''
-): Promise<Record<string, { name: string, affinity: string, description: string, alignment: string }>> => {
-    const enemyList = enemies.map((e, i) => `${i}: "${e.name}"`).join('\n');
-    
+): Promise<Record<string, { name: string, affinity: string, description: string, alignment: string, attacks: any[], specialAbilities: any[] }>> => {
+    const enemyList = enemies.map((e, i) => {
+        const attackDetails = (e.attacks || []).map(a => `${a.name} (${a.damageDice} ${a.damageType})`).join(', ');
+        const abilityDetails = (e.specialAbilities || []).map(a => `${a.name} (${a.type} - ${a.description})`).join(', ');
+        return `${i}: "${e.name}" [Attacks: ${attackDetails || 'Melee Strike'}] [Abilities: ${abilityDetails || 'None'}]`;
+    }).join('\n');
+
     const prompt = `Review the recent chat context and world lore to provide unique, evocative, and setting-appropriate names for these ${enemies.length} combatants.
+    ALSO skin their primary attacks and special abilities to fit their name and the world setting, ensuring the mechanical flavor (like Fire damage) is kept consistent.
     
     [WORLD LORE]
     ${worldSummary}
@@ -163,10 +168,18 @@ export const enrichCombatantDetails = async (
     
     **MANDATORY ENRICHMENT RULES**:
     1. **ALIGNMENT**: DEFAULT TO 'enemy' unless the narrative context clearly identifies them as allies.
+    2. **SKINNING ABILITIES**: Rewrite the names and descriptions of 'attacks' and 'specialAbilities' to match the World Setting (Sci-Fi, Modern, Fantasy, Magitech) while keeping the effect clear. (e.g. A generic 'Melee Strike' with Fire damage becomes 'Plasma Sword').
     
     Return JSON mapping the INDEX to the new data: 
     { 
-      "0": { "name": "Unique Name", "affinity": "AffinityName", "description": "Short description", "alignment": "enemy" }
+      "0": { 
+        "name": "Unique Name", 
+        "affinity": "AffinityName", 
+        "description": "Short description", 
+        "alignment": "enemy",
+        "attacks": [{ "name": "Skinned Attack Name" }],
+        "specialAbilities": [{ "name": "Skinned Ability Name", "description": "Skinned description." }]
+      }
     }`;
 
     try {
@@ -174,7 +187,7 @@ export const enrichCombatantDetails = async (
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 0 }
             }
@@ -238,7 +251,7 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
       "location": "string", 
       "turnSummary": "string (STRICT MAX 10 WORDS concise but detailed memory for the log)" 
     }`;
-    
+
     const ai = getAi();
     const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
@@ -256,7 +269,7 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
     const slotsInfo = lootPlan.slots.map((s, i) => {
         const bp = s.blueprint;
         const mods = bp.details || 'None';
-        return `Slot ${i+1}: 
+        return `Slot ${i + 1}: 
         - Mechanical Blueprint: ${mods}
         - Rarity: ${s.rarity}
         - Dropped By: ${s.enemySource}
@@ -283,7 +296,7 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
     
     Return JSON array: [{ name, description, rarity, tags, price, quantity, weaponStats, armorStats, buffs, effect, usage }]
     **IMPORTANT**: You MUST include ALL mechanical fields provided in the blueprint (weaponStats, buffs, etc.) in your JSON for each item.`;
-    
+
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
@@ -292,7 +305,7 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
             config: { responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(extractJson(response.text || '[]'));
-        
+
         if (Array.isArray(parsed)) {
             return parsed.map((aiItem, index) => {
                 if (aiItem.tags?.includes('currency')) return aiItem;
@@ -300,7 +313,7 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
                 if (!blueprint) return aiItem;
 
                 return {
-                    ...blueprint, 
+                    ...blueprint,
                     name: aiItem.name || blueprint.name,
                     description: aiItem.description || blueprint.description,
                     isNew: true
@@ -368,7 +381,7 @@ export const reassessCombatEnemies = async (
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 0 }
             }

@@ -5,6 +5,7 @@ import { GameData, GameAction, CombatActorSize, ActorSuggestion, ChatMessage, Co
 import { useUI, CombatTriggerSource } from '../../context/UIContext';
 import { generateEnemyFromTemplate, DEFAULT_TEMPLATES, DEFAULT_SIZE_MODIFIERS, DEFAULT_ARCHETYPE_DEFINITIONS, getDifficultyParams, DEFAULT_AFFINITIES, recalculateCombatActorStats } from '../../utils/mechanics';
 import { generateCombatStartNarrative, generateCombatEncounterSuggestions, resolveCombatAlignments, reassessCombatEnemies } from '../../services/geminiService';
+import { enrichCombatantDetails } from '../../services/aiCombatService';
 import { combatActorToNPC } from '../../utils/npcUtils';
 
 type UIActions = ReturnType<typeof useUI>;
@@ -26,7 +27,7 @@ export const useCombatGeneration = (
         const actor = generateEnemyFromTemplate(
             templateName, cr, rank, size, nameOverride, templates, sizeModifiers, baseScore, undefined, archetypes
         );
-        
+
         // Use 'enemy' as the default for manual spawns
         actor.alignment = 'enemy';
         actor.isAlly = false;
@@ -35,23 +36,24 @@ export const useCombatGeneration = (
         dispatch({ type: 'ADD_NPC', payload: combatActorToNPC(actor, currentLocale) });
     }, [gameData, dispatch]);
 
-    const stageActors = useCallback((suggestions: ActorSuggestion[]) => {
+    const stageActors = useCallback((suggestions: ActorSuggestion[], suppressDispatch: boolean = false) => {
         const templates = gameData?.templates || DEFAULT_TEMPLATES;
         const sizeModifiers = gameData?.sizeModifiers || DEFAULT_SIZE_MODIFIERS;
         const baseScore = gameData?.combatBaseScore ?? 8;
-        const affinities = gameData?.affinities || DEFAULT_AFFINITIES; 
+        const affinities = gameData?.affinities || DEFAULT_AFFINITIES;
         const archetypes = gameData?.archetypes || DEFAULT_ARCHETYPE_DEFINITIONS;
         const playerLevel = gameData?.playerCharacter.level || 1;
         const currentLocale = gameData?.currentLocale;
-        
+
         const currentEnemies = gameData?.combatState?.enemies || [];
         const currentEnemyIds = new Set(currentEnemies.map(e => e.id));
 
         const nameCount: Record<string, number> = {};
+        const stagedResults: { actor: CombatActor, npc: any }[] = [];
 
         suggestions.forEach(suggestion => {
             const resolvedId = suggestion.id || (suggestion.name?.toLowerCase().includes('npc-') ? suggestion.name : null);
-            
+
             // PREVENT RE-STAGING OF ALREADY STAGED OR DEAD ACTORS
             if (resolvedId) {
                 if (currentEnemyIds.has(resolvedId)) return;
@@ -79,7 +81,7 @@ export const useCombatGeneration = (
             let finalName = suggestion.name || '';
             const lowerName = finalName.toLowerCase();
             if (lowerName.includes('replace') || lowerName.includes('unknown') || lowerName.includes('[') || lowerName.trim() === '') {
-                finalName = ''; 
+                finalName = '';
             }
 
             if (finalName.toLowerCase().includes('npc-')) {
@@ -103,9 +105,9 @@ export const useCombatGeneration = (
             const actor = generateEnemyFromTemplate(
                 safeTemplateKey, params.cr, params.rank, safeSize, finalName || undefined, templates, sizeModifiers, baseScore, suggestion.archetype, archetypes
             );
-            
+
             actor.id = resolvedId || `enemy-${safeTemplateKey.toLowerCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-            
+
             if (suggestion.alignment) {
                 actor.alignment = suggestion.alignment;
                 actor.isAlly = suggestion.alignment === 'ally';
@@ -113,7 +115,7 @@ export const useCombatGeneration = (
                 actor.isAlly = !!suggestion.isAlly;
                 actor.alignment = suggestion.isAlly ? 'ally' : 'enemy';
             }
-            
+
             if (suggestion.isShip) {
                 actor.isShip = true;
                 actor.maxHitPoints = (actor.maxHitPoints || 10) * 2;
@@ -131,13 +133,20 @@ export const useCombatGeneration = (
             }
 
             if (suggestion.description) actor.description = suggestion.description;
-            
-            dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
-            
-            if (actor.alignment === 'enemy' && !actor.id.startsWith('npc-')) {
-                dispatch({ type: 'ADD_NPC', payload: combatActorToNPC(actor, currentLocale) });
+
+            const npc = actor.alignment === 'enemy' && !actor.id.startsWith('npc-') ? combatActorToNPC(actor, currentLocale) : null;
+
+            if (!suppressDispatch) {
+                dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
+                if (npc) {
+                    dispatch({ type: 'ADD_NPC', payload: npc });
+                }
             }
+
+            stagedResults.push({ actor, npc });
         });
+
+        return stagedResults;
     }, [gameData, dispatch]);
 
     const initiateCombatSequence = useCallback(async (narrative: string, suggestions: ActorSuggestion[], source: CombatTriggerSource = 'Narrative') => {
@@ -147,8 +156,8 @@ export const useCombatGeneration = (
     const executeInitiationPipeline = useCallback(async (narrative: string, suggestions: ActorSuggestion[]) => {
         if (!gameData) return;
 
-        setIsAiGenerating(true); 
-        
+        setIsAiGenerating(true);
+
         let finalNarrative = narrative;
         const isManualStart = narrative === "Combat Sequence Initiated!";
         const worldSummary = gameData.worldSummary || '';
@@ -202,7 +211,7 @@ export const useCombatGeneration = (
         }
 
         const hasAnonymousSlots = finalSuggestions.some(s => !s.name);
-        
+
         if (hasAnonymousSlots) {
             setCombatInitiationStatus(prev => ({ ...prev, step: 'Naming Reinforcements...', progress: 50 }));
             try {
@@ -219,9 +228,61 @@ export const useCombatGeneration = (
         }
 
         setCombatInitiationStatus(prev => ({ ...prev, step: 'Initializing Fray...', progress: 70 }));
-        
+
         if (finalSuggestions.length > 0) {
-            stageActors(finalSuggestions);
+            const stagedProps = stageActors(finalSuggestions, true);
+            const generatedActors = stagedProps.map(p => p.actor);
+
+            setCombatInitiationStatus(prev => ({ ...prev, step: 'Skinning Abilities...', progress: 80 }));
+            try {
+                const enrichedData = await enrichCombatantDetails(
+                    generatedActors,
+                    context,
+                    gameData.affinities || DEFAULT_AFFINITIES,
+                    worldSummary
+                );
+
+                generatedActors.forEach((actor, index) => {
+                    const skinData = enrichedData[index.toString()];
+                    if (skinData) {
+                        if (skinData.name && skinData.name !== "Unique Name") actor.name = skinData.name;
+                        if (skinData.description && skinData.description !== "Short description") actor.description = skinData.description;
+                        if (skinData.affinity && skinData.affinity !== "AffinityName" && (gameData.affinities || DEFAULT_AFFINITIES)[skinData.affinity]) {
+                            actor.affinity = skinData.affinity;
+                            const aff = (gameData.affinities || DEFAULT_AFFINITIES)[skinData.affinity];
+                            actor.resistances = [...aff.resistances];
+                            actor.immunities = [...aff.immunities];
+                            actor.vulnerabilities = [...aff.vulnerabilities];
+                        }
+                        if (skinData.attacks && skinData.attacks.length > 0) {
+                            skinData.attacks.forEach((skinnedAtk: any, j: number) => {
+                                if (actor.attacks && actor.attacks[j]) {
+                                    actor.attacks[j].name = skinnedAtk.name;
+                                }
+                            });
+                        }
+                        if (skinData.specialAbilities && skinData.specialAbilities.length > 0) {
+                            skinData.specialAbilities.forEach((skinnedAb: any, j: number) => {
+                                if (actor.specialAbilities && actor.specialAbilities[j]) {
+                                    actor.specialAbilities[j].name = skinnedAb.name;
+                                    actor.specialAbilities[j].description = skinnedAb.description || actor.specialAbilities[j].description;
+                                }
+                            });
+                        }
+                    }
+                });
+            } catch (e) {
+                console.warn("Skinning failed", e);
+            }
+
+            stagedProps.forEach(({ actor, npc }) => {
+                dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
+                if (npc) {
+                    npc.name = actor.name;
+                    npc.description = actor.description || '';
+                    dispatch({ type: 'ADD_NPC', payload: npc });
+                }
+            });
         }
 
         // Step 3: Final Narrative Bridge
@@ -232,14 +293,16 @@ export const useCombatGeneration = (
                     ...existingEnemies.map(e => e.name),
                     ...finalSuggestions.map(s => s.name || 'Reinforcement')
                 ];
-                
+
                 const transitionRes = await generateCombatStartNarrative(allNames, context, worldSummary);
                 finalNarrative = transitionRes.narrative;
                 setCombatInitiationStatus(prev => ({ ...prev, narrative: finalNarrative }));
-                
-                dispatch({ type: 'ADD_MESSAGE', payload: {
-                    id: `ai-start-narr-${Date.now()}`, sender: 'ai', content: finalNarrative, location: gameData.currentLocale || 'Current Scene'
-                }});
+
+                dispatch({
+                    type: 'ADD_MESSAGE', payload: {
+                        id: `ai-start-narr-${Date.now()}`, sender: 'ai', content: finalNarrative, location: gameData.currentLocale || 'Current Scene'
+                    }
+                });
             } catch (e) { console.warn("Manual start narrative failed", e); }
         }
 
@@ -247,7 +310,7 @@ export const useCombatGeneration = (
         setCombatInitiationStatus(prev => ({ ...prev, step: 'Rolling Initiative...', progress: 90 }));
         dispatch({ type: 'START_COMBAT' });
         await new Promise(resolve => setTimeout(resolve, 600));
-        
+
         setCombatInitiationStatus(prev => ({ ...prev, step: 'Engage!', progress: 100 }));
         await new Promise(resolve => setTimeout(resolve, 300));
         setCombatInitiationStatus(prev => ({ ...prev, isActive: false }));
@@ -257,24 +320,24 @@ export const useCombatGeneration = (
 
     const processUserInitiatedCombat = useCallback(async (userContent: string) => {
         if (!gameData) return;
-        
+
         const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: 'user', mode: 'CHAR', content: userContent };
         dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-        
+
         setIsAiGenerating(true);
 
         try {
             const aiResponse = await (window as any).getGeminiResponse?.(userMessage, gameData) || { narrative: "Conflict erupts!", suggestedActors: [] };
-            
+
             const aiMessage: ChatMessage = { id: `ai-${Date.now()}`, sender: 'ai', content: aiResponse.narrative, location: aiResponse.location };
             dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
 
             if (aiResponse.updates) dispatch({ type: 'AI_UPDATE', payload: aiResponse.updates });
 
-            setPendingCombat({ 
-                narrative: aiResponse.narrative, 
-                suggestions: aiResponse.suggestedActors || [], 
-                source: 'Narrative' 
+            setPendingCombat({
+                narrative: aiResponse.narrative,
+                suggestions: aiResponse.suggestedActors || [],
+                source: 'Narrative'
             });
 
         } catch (e) {

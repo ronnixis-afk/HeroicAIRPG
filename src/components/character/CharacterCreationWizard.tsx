@@ -37,7 +37,7 @@ const GENDER_OPTIONS = ['Male', 'Female', 'Unspecified'];
 export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = ({ isOpen, onClose, type, existingId }) => {
     const { gameData, integrateCharacter } = useContext(GameDataContext);
     const { setCreationProgress, creationProgress } = useUI();
-    
+
     // Core State
     const [creationMethod, setCreationMethod] = useState<'manual' | 'recruitment' | 'shipyard' | null>(null);
     const [step, setStep] = useState(1);
@@ -69,7 +69,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             .filter(l => l.tags?.includes('race'))
             .map(l => ({ name: l.title, description: l.content }))
             .sort((a, b) => a.name.localeCompare(b.name));
-        
+
         return racesFromLore.length > 0 ? racesFromLore : [
             { name: 'Human', description: 'Ambitious and versatile.' },
             { name: 'Elf', description: 'Graceful and long-lived.' },
@@ -88,7 +88,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         if (isOpen) {
             if (type === 'player') setCreationMethod('manual');
             else setCreationMethod(null);
-            
+
             setStep(1);
             setRecruits([]);
             setName('');
@@ -105,14 +105,14 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     }, [isOpen, type, playerLevel]);
 
     const libraryTraits = useMemo(() => TRAIT_LIBRARY.filter(t => !t.requiredConfig || t.requiredConfig === skillConfig), [skillConfig]);
-    
+
     const backgrounds = useMemo(() => {
         if (isShip) return libraryTraits.filter(t => t.category === 'ship_hull' || t.category === 'ship_module');
         return libraryTraits.filter(t => t.category === 'background');
     }, [libraryTraits, isShip]);
 
     const generals = useMemo(() => {
-        if (isShip) return []; 
+        if (isShip) return [];
         return libraryTraits.filter(t => t.category === 'general');
     }, [libraryTraits, isShip]);
 
@@ -145,7 +145,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
     const canGoNext = useMemo(() => {
         if (isShip) {
-            if (step === 1) return true; 
+            if (step === 1) return true;
             if (step === 2) return backgroundTraits.length > 0 && backgroundTraits.length <= 3;
             if (step === 3) return combatAbility !== null;
             if (step === 4) return name.trim().length > 0;
@@ -153,7 +153,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         }
 
         if (step === 1) return race.length > 0;
-        if (step === 2) return true; 
+        if (step === 2) return true;
         if (step === 3) return backgroundTraits.length === 2;
         if (step === 4) return generalTraits.length === 2;
         if (step === 5) return combatAbility !== null;
@@ -169,11 +169,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setBackgroundTraits(bg);
         setGeneralTraits(gen);
         setCombatAbility(com);
-        
+
         // Prefill background context with all template traits
         const traitSummary = [...bg, ...gen].map(t => t.name).join(', ');
         setCustomBackground(traitSummary);
-        
+
         setStep(isShip ? 4 : 6);
     };
 
@@ -191,7 +191,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setIsGeneratingRecruits(true);
         setIsShip(false); // Reset isShip to ensure proper ally trait lists
         setCreationMethod('recruitment');
-        
+
         try {
             // Get fresh lists specifically for recruitment (isShip must be false)
             const recruitmentCombats = libraryTraits.filter(t => t.category === 'combat');
@@ -208,27 +208,27 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 const raceObj = availableRaces[Math.floor(Math.random() * availableRaces.length)];
                 const randomRace = raceObj?.name || "Human";
                 const randomGender = GENDER_OPTIONS[Math.floor(Math.random() * GENDER_OPTIONS.length)];
-                
+
                 const bgSeeds = [...recruitmentBackgrounds].sort(() => 0.5 - Math.random()).slice(0, 2);
                 const genSeeds = [...recruitmentGenerals].sort(() => 0.5 - Math.random()).slice(0, 2);
                 const comSeed = shuffledCombats[i % shuffledCombats.length];
-                
-                seeds.push({ 
-                    race: randomRace, 
-                    gender: randomGender, 
-                    traits: [...bgSeeds.map(t => t.name), ...genSeeds.map(t => t.name), comSeed.name], 
-                    bgSeeds, 
-                    genSeeds, 
-                    comSeed 
+
+                seeds.push({
+                    race: randomRace,
+                    gender: randomGender,
+                    traits: [...bgSeeds.map(t => t.name), ...genSeeds.map(t => t.name), comSeed.name],
+                    bgSeeds,
+                    genSeeds,
+                    comSeed
                 });
             }
             const skins = await generateRecruitSkins(gameData, seeds);
             setRecruits(seeds.map((s, i) => ({ ...s, name: skins[i]?.name || `${s.race} Adventurer`, description: skins[i]?.description || "A wanderer looking for coin and glory.", personality: skins[i]?.personality || "Quirky and reliable." })));
-        } catch (e) { 
-            console.error("Recruitment generation failed", e); 
-            setCreationMethod(null); 
-        } finally { 
-            setIsGeneratingRecruits(false); 
+        } catch (e) {
+            console.error("Recruitment generation failed", e);
+            setCreationMethod(null);
+        } finally {
+            setIsGeneratingRecruits(false);
         }
     };
 
@@ -239,7 +239,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setCreationProgress({ isActive: true, step: "Enrolling candidate...", progress: 10 });
         try {
             const wovenData = await weaveHero(gameData, { name: recruit.name, gender: recruit.gender, race: recruit.race, backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), generalTraits: recruit.genSeeds.map((t: any) => t.name), combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability }, true);
-            const allAbilities: Ability[] = [ ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` } ];
+            const allAbilities: Ability[] = [...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
             const baseCharData = { id: `comp-${Date.now()}`, name: recruit.name, gender: recruit.gender, race: recruit.race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: recruit.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level: playerLevel, experiencePoints: getXpForLevel(playerLevel) };
@@ -255,24 +255,24 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setWeavingMessage(loadingMsg);
         setCreationProgress({ isActive: true, step: loadingMsg, progress: 10 });
         try {
-            const wovenData = await weaveHero(gameData, { 
-                name, 
-                gender: isShip ? 'Unspecified' : gender, 
-                race: isShip ? 'Vessel' : race, 
-                backgroundTraits: backgroundTraits.map(t => t.name), 
-                generalTraits: generalTraits.map(t => t.name), 
+            const wovenData = await weaveHero(gameData, {
+                name,
+                gender: isShip ? 'Unspecified' : gender,
+                race: isShip ? 'Vessel' : race,
+                backgroundTraits: backgroundTraits.map(t => t.name),
+                generalTraits: generalTraits.map(t => t.name),
                 combatAbility: { ...combatAbility, id: 'blueprint' } as Ability,
                 customBackground: customBackground // Pass custom background to AI
             }, isCompanion);
 
-            const allAbilities: Ability[] = [ ...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` } ];
+            const allAbilities: Ability[] = [...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
 
             const baseCharData = { id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), name, gender: isShip ? 'Unspecified' : gender, race: isShip ? 'Vessel' : race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: isShip ? '' : wovenData.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level, experiencePoints: getXpForLevel(level), isShip, isSentient: !isShip };
             const finalChar = type === 'player' ? new PlayerCharacter(baseCharData) : new Companion(baseCharData);
             await integrateCharacter(finalChar, isCompanion);
-            onClose(); 
+            onClose();
         } catch (e) { console.error("Hero creation failed", e); setIsWeaving(false); setCreationProgress({ isActive: false, step: '', progress: 0 }); }
     };
 
@@ -302,8 +302,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     );
 
     return (
-        <Modal isOpen={isOpen} onClose={() => !isWeaving && onClose()} title="">
-            <div className="flex flex-col h-[85vh] bg-brand-bg -m-6 p-6 pt-10 overflow-hidden">
+        <Modal isOpen={isOpen} onClose={() => !isWeaving && onClose()} title="" hideHeader={true}>
+            <div className="flex flex-col h-[85vh] bg-brand-bg p-6 pt-10 overflow-hidden">
                 {isWeaving ? renderWeaving() : (
                     <>
                         {creationMethod === null && <WizardMethodSelection onSelect={(method) => {
@@ -362,10 +362,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                         {isShip ? (
                                             <>
                                                 {step === 1 && (
-                                                    <WizardStepMethod 
-                                                        skillConfig={skillConfig} 
-                                                        selectedTemplateId={selectedTemplateId} 
-                                                        onSelectCustom={handleSelectCustom} 
+                                                    <WizardStepMethod
+                                                        skillConfig={skillConfig}
+                                                        selectedTemplateId={selectedTemplateId}
+                                                        onSelectCustom={handleSelectCustom}
                                                         onSelectTemplate={handleSelectTemplate}
                                                         libraryTraits={libraryTraits}
                                                         isShip={true}
@@ -374,16 +374,16 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 {step === 2 && <WizardStepTraits title="Systems & Modules" subtitle="Select up to 3 characteristic hull and module components." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 3)} limit={3} />}
                                                 {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} />}
                                                 {step === 4 && (
-                                                    <WizardStepIdentity 
-                                                        isCompanion={isCompanion} 
-                                                        name={name} 
-                                                        onNameChange={setName} 
-                                                        gender='Unspecified' 
-                                                        onGenderChange={setGender} 
-                                                        level={level} 
-                                                        onLevelChange={setLevel} 
-                                                        genderOptions={GENDER_OPTIONS} 
-                                                        isShip={true} 
+                                                    <WizardStepIdentity
+                                                        isCompanion={isCompanion}
+                                                        name={name}
+                                                        onNameChange={setName}
+                                                        gender='Unspecified'
+                                                        onGenderChange={setGender}
+                                                        level={level}
+                                                        onLevelChange={setLevel}
+                                                        genderOptions={GENDER_OPTIONS}
+                                                        isShip={true}
                                                         customBackground={customBackground}
                                                         onCustomBackgroundChange={setCustomBackground}
                                                     />
@@ -393,10 +393,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             <>
                                                 {step === 1 && <WizardStepAncestry races={availableRaces} selectedRace={race} onSelect={(r) => { setRace(r); setStep(2); }} isCompanion={isCompanion} />}
                                                 {step === 2 && (
-                                                    <WizardStepMethod 
-                                                        skillConfig={skillConfig} 
-                                                        selectedTemplateId={selectedTemplateId} 
-                                                        onSelectCustom={handleSelectCustom} 
+                                                    <WizardStepMethod
+                                                        skillConfig={skillConfig}
+                                                        selectedTemplateId={selectedTemplateId}
+                                                        onSelectCustom={handleSelectCustom}
                                                         onSelectTemplate={handleSelectTemplate}
                                                         libraryTraits={libraryTraits}
                                                     />
@@ -405,15 +405,15 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} />}
                                                 {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} />}
                                                 {step === 6 && (
-                                                    <WizardStepIdentity 
-                                                        isCompanion={isCompanion} 
-                                                        name={name} 
-                                                        onNameChange={setName} 
-                                                        gender={gender} 
-                                                        onGenderChange={setGender} 
-                                                        level={level} 
-                                                        onLevelChange={setLevel} 
-                                                        genderOptions={GENDER_OPTIONS} 
+                                                    <WizardStepIdentity
+                                                        isCompanion={isCompanion}
+                                                        name={name}
+                                                        onNameChange={setName}
+                                                        gender={gender}
+                                                        onGenderChange={setGender}
+                                                        level={level}
+                                                        onLevelChange={setLevel}
+                                                        genderOptions={GENDER_OPTIONS}
                                                         customBackground={customBackground}
                                                         onCustomBackgroundChange={setCustomBackground}
                                                     />
@@ -422,7 +422,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                         )}
                                     </div>
                                 </div>
-                                <WizardNavigation 
+                                <WizardNavigation
                                     onBack={() => {
                                         if (isShip) {
                                             if (step === 4 && selectedTemplateId) setStep(1);
@@ -433,7 +433,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             else if (step > 1) setStep(s => s - 1);
                                             else { setCreationMethod(null); setIsShip(false); }
                                         }
-                                    }} 
+                                    }}
                                     onNext={() => {
                                         if (isShip) {
                                             // Prefill background context when moving to the final step
@@ -454,10 +454,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             if (step === 6) handleConfirmManual();
                                             else setStep(s => s + 1);
                                         }
-                                    }} 
-                                    nextLabel={(isShip ? step === 4 : step === 6) ? (isShip ? "Commission Vessel" : (isCompanion ? "Recruit Ally" : "Begin Journey")) : "Next Step"} 
-                                    isNextDisabled={!canGoNext} 
-                                    showBack={true} 
+                                    }}
+                                    nextLabel={(isShip ? step === 4 : step === 6) ? (isShip ? "Commission Vessel" : (isCompanion ? "Recruit Ally" : "Begin Journey")) : "Next Step"}
+                                    isNextDisabled={!canGoNext}
+                                    showBack={true}
                                 />
                             </>
                         )}
