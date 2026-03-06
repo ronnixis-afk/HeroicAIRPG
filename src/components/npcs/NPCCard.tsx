@@ -3,6 +3,7 @@ import React from 'react';
 import { NPC } from '../../types';
 import RelationshipBar from './RelationshipBar';
 import { Icon } from '../Icon';
+import { toTitleCase, getRaceColor, getGenderColor } from '../../utils/npcUtils';
 
 interface NPCCardProps {
     npc: NPC;
@@ -34,7 +35,7 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
             <div className="flex-grow flex flex-col justify-center min-w-0 h-full py-3 relative z-10">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                     <h5 className={`mb-0 truncate tracking-tight transition-colors ${isDead ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
-                        {npc.name}
+                        {toTitleCase(npc.name)}
                     </h5>
 
                     {npc.isNew && (
@@ -59,13 +60,13 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                 {/* Gender and Race Tags */}
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                     {npc.gender && (
-                        <span className="text-body-micro bg-brand-primary/10 text-brand-text-muted px-2 py-0.5 rounded-md border border-brand-primary/20 tracking-normal uppercase">
-                            {npc.gender.charAt(0).toUpperCase() + npc.gender.slice(1).toLowerCase()}
+                        <span className={`text-body-micro px-2 py-0.5 rounded-md border tracking-normal font-bold ${getGenderColor(npc.gender)}`}>
+                            {toTitleCase(npc.gender)}
                         </span>
                     )}
                     {npc.race && (
-                        <span className="text-body-micro bg-brand-primary/10 text-brand-text-muted px-2 py-0.5 rounded-md border border-brand-primary/20 tracking-normal uppercase">
-                            {npc.race.charAt(0).toUpperCase() + npc.race.slice(1).toLowerCase()}
+                        <span className={`text-body-micro px-2 py-0.5 rounded-md border tracking-normal font-bold ${getRaceColor(npc.race)}`}>
+                            {toTitleCase(npc.race)}
                         </span>
                     )}
                 </div>

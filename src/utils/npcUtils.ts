@@ -14,6 +14,44 @@ export const getRelationshipLabel = (score: number): { label: string, color: str
 };
 
 /**
+ * Converts a string to Title Case.
+ */
+export const toTitleCase = (str: string | undefined): string => {
+    if (!str) return '';
+    return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+};
+
+/**
+ * Returns a Tailwind color class based on the race.
+ */
+export const getRaceColor = (race: string | undefined): string => {
+    const r = (race || '').toLowerCase().trim();
+    if (r.includes('human')) return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
+    if (r.includes('elf')) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    if (r.includes('dwarf')) return 'text-orange-400 bg-orange-400/10 border-orange-400/20';
+    if (r.includes('orc') || r.includes('half-orc')) return 'text-red-400 bg-red-400/10 border-red-400/20';
+    if (r.includes('gnome') || r.includes('halfling')) return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    if (r.includes('dragonborn')) return 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+    if (r.includes('tiefling')) return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
+    return 'text-brand-text-muted bg-brand-primary/10 border-brand-primary/20';
+};
+
+/**
+ * Returns a Tailwind color class based on gender.
+ */
+export const getGenderColor = (gender: string | undefined): string => {
+    const g = (gender || '').toLowerCase().trim();
+    if (g === 'male') return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
+    if (g === 'female') return 'text-pink-400 bg-pink-400/10 border-pink-400/20';
+    if (g === 'non-binary' || g === 'other') return 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20';
+    return 'text-brand-text-muted bg-brand-primary/10 border-brand-primary/20';
+};
+
+/**
  * Formats a relationship change into a narrative string.
  */
 export const formatRelationshipChange = (npcName: string, change: number): string => {

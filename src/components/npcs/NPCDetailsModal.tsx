@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import Modal from '../Modal';
 import { type NPC, type CombatActorSize, type ArchetypeName, ARCHETYPE_NAMES, type NPCMemory } from '../../types';
-import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../../utils/npcUtils';
+import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES, toTitleCase, getRaceColor, getGenderColor } from '../../utils/npcUtils';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { Icon } from '../../components/Icon';
 import { DEFAULT_TEMPLATES, DEFAULT_AFFINITIES, getDifficultyParams, DifficultyPreset } from '../../utils/mechanics';
@@ -38,7 +38,7 @@ const RefinementShimmer: React.FC = () => (
 
 const StyledInputGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
     <div className="flex flex-col">
-        <label className="text-body-sm font-bold text-brand-text-muted mb-2 ml-1">{label}</label>
+        <label className="text-body-sm font-bold text-brand-text-muted mb-2 ml-1">{toTitleCase(label)}</label>
         {children}
     </div>
 );
@@ -56,9 +56,9 @@ const PillSelect: React.FC<{
             onChange={(e) => onChange(e.target.value)}
             className="appearance-none bg-transparent border-none text-xs font-bold focus:outline-none cursor-pointer pr-5 w-full tracking-normal"
         >
-            <option value="" className="text-black">Select {label}</option>
+            <option value="" className="text-black">Select {label ? toTitleCase(label) : ''}</option>
             {options.map(opt => (
-                <option key={opt} value={opt} className="text-black">{opt}</option>
+                <option key={opt} value={opt} className="text-black">{toTitleCase(opt)}</option>
             ))}
         </select>
         <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-60">
@@ -76,15 +76,17 @@ const NPCViewContent: React.FC<{
 }> = ({ npc, onEdit, onManualRefine, onInvite, isRefining }) => {
     const relInfo = getRelationshipLabel(npc.relationship);
 
-    const DataRow = ({ label, value, icon }: { label: string, value?: string, icon?: string }) => {
+    const DataRow = ({ label, value, icon, noTitle }: { label: string, value?: string, icon?: string, noTitle?: boolean }) => {
         if (!value) return null;
         return (
             <div className="space-y-1.5">
                 <label className="text-xs font-bold text-brand-text-muted opacity-60 flex items-center gap-2 tracking-normal">
                     {icon && <Icon name={icon} className="w-3.5 h-3.5" />}
-                    {label}
+                    {toTitleCase(label)}
                 </label>
-                <p className="text-body-base text-brand-text leading-relaxed font-medium">{value}</p>
+                <p className="text-body-base text-brand-text leading-relaxed font-medium">
+                    {noTitle ? value : toTitleCase(value)}
+                </p>
             </div>
         );
     };
@@ -93,8 +95,8 @@ const NPCViewContent: React.FC<{
         if (!value) return null;
         return (
             <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] font-bold text-brand-text-muted opacity-50 tracking-normal">{label}</span>
-                <span className="text-body-sm font-bold text-brand-text">{value}</span>
+                <span className="text-[10px] font-bold text-brand-text-muted opacity-50 tracking-normal">{toTitleCase(label)}</span>
+                <span className="text-body-sm font-bold text-brand-text">{toTitleCase(value)}</span>
             </div>
         );
     };
@@ -108,15 +110,19 @@ const NPCViewContent: React.FC<{
             <div className="space-y-5">
                 <div className="flex justify-between items-center gap-4">
                     <div className="flex flex-wrap gap-2">
-                        <span className="text-xs font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-lg border border-brand-accent/20 tracking-normal">
-                            {npc.race}
-                        </span>
-                        <span className="text-xs font-bold text-brand-text-muted bg-brand-primary/30 px-3 py-1 rounded-lg border border-brand-surface tracking-normal">
-                            {npc.gender}
-                        </span>
+                        {npc.race && (
+                            <span className={`text-xs font-bold px-3 py-1 rounded-lg border tracking-normal ${getRaceColor(npc.race)}`}>
+                                {toTitleCase(npc.race)}
+                            </span>
+                        )}
+                        {npc.gender && (
+                            <span className={`text-xs font-bold px-3 py-1 rounded-lg border tracking-normal ${getGenderColor(npc.gender)}`}>
+                                {toTitleCase(npc.gender)}
+                            </span>
+                        )}
                         {npc.status !== 'Alive' && (
                             <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1 rounded-lg border border-brand-danger/20 tracking-normal">
-                                {npc.status}
+                                {toTitleCase(npc.status)}
                             </span>
                         )}
                         {npc.is_essential && (
@@ -139,7 +145,7 @@ const NPCViewContent: React.FC<{
                     <div className="flex justify-between items-center mb-3">
                         <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">Current Standing</label>
                         <span className={`text-xs font-bold tracking-normal ${relInfo.color.replace('bg-', 'text-')}`}>
-                            {relInfo.label} ({npc.relationship > 0 ? '+' : ''}{npc.relationship})
+                            {toTitleCase(relInfo.label)} ({npc.relationship > 0 ? '+' : ''}{npc.relationship})
                         </span>
                     </div>
                     <RelationshipBar value={npc.relationship} />
@@ -147,13 +153,13 @@ const NPCViewContent: React.FC<{
             </div>
 
             <div className="space-y-8">
-                <DataRow label="Appearance" value={npc.appearance} />
-                <DataRow label="History and Background" value={npc.description} />
+                <DataRow label="Appearance" value={npc.appearance} noTitle />
+                <DataRow label="History and Background" value={npc.description} noTitle />
             </div>
 
             {(npc.location || npc.currentPOI) && (
                 <div className="p-5 rounded-2xl border border-dashed border-brand-primary/40 bg-brand-primary/5">
-                    <h5 className="text-xs font-bold text-brand-text-muted opacity-60 mb-3 tracking-normal">Last Sighted</h5>
+                    <h5 className="text-xs font-bold text-brand-text-muted opacity-60 mb-3 tracking-normal">{toTitleCase("Last Sighted")}</h5>
                     <div className="flex items-start gap-4">
                         <Icon name="location" className="w-6 h-6 text-brand-accent shrink-0" />
                         <div className="text-body-base font-bold leading-tight pt-0.5">
@@ -172,8 +178,8 @@ const NPCViewContent: React.FC<{
 
             <div className="space-y-4">
                 <div className="flex justify-between items-center px-1">
-                    <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">Chronicle of Interactions</label>
-                    <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">Digital Memory Active</span>
+                    <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">{toTitleCase("Chronicle of Interactions")}</label>
+                    <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">{toTitleCase("Digital Memory Active")}</span>
                 </div>
                 <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
                     {sortedMemories.length > 0 ? (
@@ -197,12 +203,12 @@ const NPCViewContent: React.FC<{
 
             {!npc.companionId && (npc.template || npc.affinity || npc.archetype) && (
                 <div className="space-y-3 pt-2">
-                    <label className="text-xs font-bold text-brand-text-muted opacity-60 px-1 tracking-normal">Combat Classification</label>
+                    <label className="text-xs font-bold text-brand-text-muted opacity-60 px-1 tracking-normal">{toTitleCase("Combat Classification")}</label>
                     <div className="flex flex-wrap gap-2">
-                        {npc.difficulty && <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1.5 rounded-full border border-brand-danger/20 tracking-normal">{npc.difficulty} Threat</span>}
-                        {npc.template && <span className="text-xs font-bold text-purple-400 bg-purple-900/10 px-3 py-1.5 rounded-full border border-purple-500/20 tracking-normal">{npc.template}</span>}
-                        {npc.affinity && npc.affinity !== 'None' && <span className="text-xs font-bold text-orange-400 bg-orange-900/10 px-3 py-1.5 rounded-full border border-orange-500/20 tracking-normal">{npc.affinity} Affinity</span>}
-                        {npc.archetype && <span className="text-xs font-bold text-teal-400 bg-teal-900/10 px-3 py-1.5 rounded-full border border-teal-500/20 tracking-normal">{npc.archetype}</span>}
+                        {npc.difficulty && <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1.5 rounded-full border border-brand-danger/20 tracking-normal">{toTitleCase(npc.difficulty)} {toTitleCase("Threat")}</span>}
+                        {npc.template && <span className="text-xs font-bold text-purple-400 bg-purple-900/10 px-3 py-1.5 rounded-full border border-purple-500/20 tracking-normal">{toTitleCase(npc.template)}</span>}
+                        {npc.affinity && npc.affinity !== 'None' && <span className="text-xs font-bold text-orange-400 bg-orange-900/10 px-3 py-1.5 rounded-full border border-orange-500/20 tracking-normal">{toTitleCase(npc.affinity)} {toTitleCase("Affinity")}</span>}
+                        {npc.archetype && <span className="text-xs font-bold text-teal-400 bg-teal-900/10 px-3 py-1.5 rounded-full border border-teal-500/20 tracking-normal">{toTitleCase(npc.archetype)}</span>}
                     </div>
                 </div>
             )}
@@ -215,7 +221,7 @@ const NPCViewContent: React.FC<{
                         className="btn-primary btn-lg rounded-2xl w-full shadow-brand-accent/20"
                     >
                         <Icon name="character" className="w-5 h-5 mr-3" />
-                        Invite to Party
+                        {toTitleCase("Invite to Party")}
                     </button>
 
                     <div className="flex flex-col items-center gap-4">
@@ -228,7 +234,7 @@ const NPCViewContent: React.FC<{
                             className="btn-secondary btn-md rounded-xl w-full max-w-xs text-xs"
                         >
                             {isRefining ? <Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> : <Icon name="sparkles" className="w-4 h-4 mr-2" />}
-                            Weave Missing Details
+                            {toTitleCase("Weave Missing Details")}
                         </button>
                     </div>
                 </div>
@@ -349,7 +355,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
     const difficultyPresets: DifficultyPreset[] = ['Weak', 'Normal', 'Elite', 'Boss'];
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? "Edit Record" : editedNPC.name}>
+        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? toTitleCase("Edit Record") : toTitleCase(editedNPC.name)}>
             {isRefining ? (
                 <RefinementShimmer />
             ) : !isEditing ? (
@@ -380,7 +386,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     <div className="space-y-6">
                         <div className="flex items-center justify-between p-4 bg-brand-primary/30 rounded-2xl border border-brand-surface shadow-inner">
                             <div className="flex flex-col">
-                                <span className="text-body-base font-bold text-brand-text">Essential Status</span>
+                                <span className="text-body-base font-bold text-brand-text">{toTitleCase("Essential Status")}</span>
                                 <span className="text-[10px] text-brand-text-muted italic">Essential NPCs are prioritized in the social ledger.</span>
                             </div>
                             <input
@@ -449,7 +455,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                         </StyledInputGroup>
 
                         <div className="bg-brand-primary/5 p-5 rounded-2xl border border-brand-primary/20 space-y-5">
-                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">Alignment Disposition</h5>
+                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">{toTitleCase("Alignment Disposition")}</h5>
                             <div className="grid grid-cols-2 gap-4">
                                 <StyledInputGroup label="Moral Alignment (Good/Evil)">
                                     <div className="relative">
@@ -461,7 +467,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                                             }}
                                             className={`${selectClass} h-10 text-sm`}
                                         >
-                                            {GOOD_EVIL_ALIASES.map(a => <option key={a.value} value={a.label}>{a.label}</option>)}
+                                            {GOOD_EVIL_ALIASES.map(a => <option key={a.value} value={a.label}>{toTitleCase(a.label)}</option>)}
                                         </select>
                                         <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"><Icon name="chevronDown" className="w-3.5 h-3.5" /></div>
                                     </div>
@@ -476,7 +482,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                                             }}
                                             className={`${selectClass} h-10 text-sm`}
                                         >
-                                            {LAW_CHAOS_ALIASES.map(a => <option key={a.value} value={a.label}>{a.label}</option>)}
+                                            {LAW_CHAOS_ALIASES.map(a => <option key={a.value} value={a.label}>{toTitleCase(a.label)}</option>)}
                                         </select>
                                         <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"><Icon name="chevronDown" className="w-3.5 h-3.5" /></div>
                                     </div>
@@ -486,7 +492,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     </div>
 
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                        <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">Spatial Registry</h5>
+                        <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">{toTitleCase("Spatial Registry")}</h5>
                         <div className="grid grid-cols-2 gap-4">
                             <StyledInputGroup label="Last Visited Zone">
                                 <div className="relative">
@@ -520,7 +526,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
 
                     {!editedNPC.companionId && (
                         <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">Mechanical Blueprints</h5>
+                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">{toTitleCase("Mechanical Blueprints")}</h5>
                             <div className="flex flex-wrap gap-3">
                                 <PillSelect label="Difficulty" value={currentDifficultyTag} onChange={handleDifficultyPresetChange} options={difficultyPresets} colorClass="bg-brand-danger/10 text-brand-danger border-brand-danger/20" />
                                 <PillSelect label="Size" value={editedNPC.size || 'Medium'} onChange={(val) => handleChange('size', val)} options={sizes} colorClass="bg-blue-400/10 text-blue-400 border-blue-400/20" />
@@ -536,21 +542,21 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             onClick={handleDelete}
                             className="btn-icon-delete px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2"
                         >
-                            <Icon name="trash" className="w-4 h-4" /> Purge
+                            <Icon name="trash" className="w-4 h-4" /> {toTitleCase("Purge")}
                         </button>
                         <div className="flex gap-3 flex-1">
                             <button
                                 onClick={() => setIsEditing(false)}
                                 className="btn-tertiary btn-md flex-1 rounded-xl"
                             >
-                                Cancel
+                                {toTitleCase("Cancel")}
                             </button>
                             <button
                                 onClick={handleSave}
                                 disabled={!isDirty}
                                 className="btn-primary btn-md flex-1 rounded-xl shadow-brand-accent/20"
                             >
-                                Commit Changes
+                                {toTitleCase("Commit Changes")}
                             </button>
                         </div>
                     </div>
