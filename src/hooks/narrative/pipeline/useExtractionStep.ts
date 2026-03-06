@@ -234,17 +234,77 @@ export const useExtractionStep = (
             });
         }
 
-        // 3. Resolve Relationships mathematically & Add Memories
+        // 3. Resolve Social Updates (NPCs)
+        const updatedNpcIds = new Set<string>();
+        const mergedNpcUpdates: (Partial<NPC> & { id: string })[] = [];
+
+        // A. Auditor Updates (Status, POI)
+        if (auditResult.npcUpdates?.length > 0) {
+            auditResult.npcUpdates.forEach((upd: any) => {
+                if (!upd.id) return;
+                let finalUpd = { ...upd };
+                if (finalUpd.status === 'Dead') {
+                    finalUpd.isFollowing = false;
+                    finalUpd.deathTimestamp = gameData.currentTime;
+                }
+                mergedNpcUpdates.push(finalUpd);
+                updatedNpcIds.add(upd.id);
+            });
+        }
+
+        // B. AI Resolution Updates (Following, Leaves)
+        if (aiResponse.npc_resolution?.length > 0) {
+            aiResponse.npc_resolution.forEach(res => {
+                const npc = gameData.npcs?.find(n => n.name && String(n.name).toLowerCase().trim() === String(res.name).toLowerCase().trim());
+                if (npc) {
+                    let finalUpd: Partial<NPC> & { id: string } = { id: npc.id };
+                    if (res.isFollowing !== undefined) finalUpd.isFollowing = res.isFollowing;
+                    if (res.action === 'leaves') {
+                        finalUpd.isFollowing = false;
+                        finalUpd.currentPOI = 'Departed';
+                    }
+
+                    // Enforce following rule again just in case
+                    const currentStatus = (mergedNpcUpdates.find(u => u.id === npc.id)?.status) || npc.status;
+                    if (currentStatus === 'Dead') finalUpd.isFollowing = false;
+
+                    const existingIdx = mergedNpcUpdates.findIndex(u => u.id === npc.id);
+                    if (existingIdx > -1) {
+                        mergedNpcUpdates[existingIdx] = { ...mergedNpcUpdates[existingIdx], ...finalUpd };
+                    } else {
+                        mergedNpcUpdates.push(finalUpd);
+                        updatedNpcIds.add(npc.id);
+                    }
+                }
+            });
+        }
+
+        // C. New NPCs discovery
+        if (auditResult.newNPCs?.length > 0) {
+            auditResult.newNPCs.forEach((newNpc: any) => {
+                const id = `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                dispatch({ type: 'ADD_NPC', payload: { ...newNpc, id, isNew: true, status: 'Alive', relationship: 0, currentPOI: resolvedLocale || 'Current' } });
+            });
+        }
+
+        if (mergedNpcUpdates.length > 0) {
+            finalUpdates.npcUpdates = mergedNpcUpdates;
+        }
+
+        // 4. Resolve Relationships mathematically & Add Memories
         const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
         const currentLocale = resolvedLocale || gameData.currentLocale || "";
 
         let relChangeDisplay: string[] = [];
 
         (gameData.npcs || []).forEach(n => {
-            const npcPOI = n.currentPOI || "";
+            const npcUpdates = mergedNpcUpdates.find(u => u.id === n.id);
+            const status = npcUpdates?.status || n.status;
+            const npcPOI = npcUpdates?.currentPOI || n.currentPOI || "";
+
             const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npcPOI === 'Current' || npcPOI === 'With Party';
             const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
-            const isAlive = n.status !== 'Dead';
+            const isAlive = status !== 'Dead';
             const isSentient = n.isSentient !== false && !n.isShip;
 
             if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
