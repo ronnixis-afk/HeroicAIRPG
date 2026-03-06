@@ -8,14 +8,28 @@ import { MapZone, LoreEntry, StoryLog } from '../../types';
 import { KeywordEditor } from '../KeywordEditor';
 import AutoResizingTextarea from '../../components/AutoResizingTextarea';
 import Accordion from '../Accordion';
-import { isLocaleMatch } from '../../utils/mapUtils';
+import { isLocaleMatch, parseHostility } from '../../utils/mapUtils';
+import { toTitleCase } from '../../utils/npcUtils';
 
-const getHostilityLabel = (value: number): { label: string, color: string } => {
-    if (value <= -16) return { label: 'Sanctuary', color: 'text-emerald-400' };
-    if (value <= -6) return { label: 'Safe', color: 'text-teal-400' };
-    if (value <= 5) return { label: 'Neutral', color: 'text-yellow-400' };
-    if (value <= 15) return { label: 'Hostile', color: 'text-orange-400' };
-    return { label: 'Deadly', color: 'text-red-500' };
+const getHostilityLabel = (value: number): { label: string, color: string, bg: string, border: string } => {
+    if (value <= -16) return { label: 'Sanctuary', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20' };
+    if (value <= -6) return { label: 'Safe', color: 'text-teal-400', bg: 'bg-teal-400/10', border: 'border-teal-400/20' };
+    if (value <= 5) return { label: 'Neutral', color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-400/20' };
+    if (value <= 15) return { label: 'Hostile', color: 'text-orange-400', bg: 'bg-orange-400/10', border: 'border-orange-400/20' };
+    return { label: 'Deadly', color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20' };
+};
+
+const getPropertyColor = (prop: string): string => {
+    const p = prop.toLowerCase();
+    if (p.includes('mana') || p.includes('magic') || p.includes('aether')) return 'text-purple-400 bg-purple-400/10 border-purple-400/20';
+    if (p.includes('threat') || p.includes('hazard') || p.includes('danger')) return 'text-red-400 bg-red-400/10 border-red-400/20';
+    if (p.includes('terrain') || p.includes('biome') || p.includes('urban')) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    if (p.includes('social') || p.includes('politi') || p.includes('authority')) return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
+    if (p.includes('resource') || p.includes('output') || p.includes('trade')) return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+    if (p.includes('ruin') || p.includes('relic') || p.includes('ancient')) return 'text-orange-400 bg-orange-400/10 border-orange-400/20';
+    if (p.includes('tech') || p.includes('synthetic') || p.includes('ai')) return 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20';
+    if (p.includes('stellar') || p.includes('cosmic') || p.includes('astral')) return 'text-indigo-400 bg-indigo-400/10 border-indigo-400/20';
+    return 'text-brand-accent bg-brand-accent/10 border-brand-accent/20';
 };
 
 const POIShimmer: React.FC<{ label?: string }> = ({ label }) => (
@@ -61,7 +75,7 @@ const POIListItem: React.FC<{
 
     const getTimeOnly = (timestamp: string) => {
         const date = new Date(timestamp);
-        return !isNaN(date.getTime()) 
+        return !isNaN(date.getTime())
             ? date.toLocaleDateString([], { month: 'short', day: 'numeric' })
             : timestamp.split(',')[0].trim();
     };
@@ -83,9 +97,9 @@ const POIListItem: React.FC<{
     );
 
     return (
-        <Accordion 
-            title={title} 
-            isOpen={isOpen} 
+        <Accordion
+            title={title}
+            isOpen={isOpen}
             onToggle={() => setIsOpen(!isOpen)}
         >
             <div className="pt-2 pb-4">
@@ -108,20 +122,19 @@ const POIListItem: React.FC<{
                 )}
 
                 <div className="flex justify-between items-center pt-3 border-t border-brand-primary/10">
-                    <button 
+                    <button
                         onClick={handleDelete}
                         className="text-brand-danger hover:opacity-80 text-xs font-bold flex items-center gap-1.5 px-2 py-1 transition-all"
                     >
                         <Icon name="trash" className="w-4 h-4" />
                         Delete
                     </button>
-                    <button 
-                        onClick={() => onInvestigate(entry)} 
-                        className={`btn-sm rounded-lg flex items-center gap-2 ${
-                            entry.visited 
-                                ? 'btn-secondary' 
+                    <button
+                        onClick={() => onInvestigate(entry)}
+                        className={`btn-sm rounded-lg flex items-center gap-2 ${entry.visited
+                                ? 'btn-secondary'
                                 : 'btn-primary'
-                        }`}
+                            }`}
                     >
                         <Icon name={entry.visited ? "refresh" : "play"} className="w-3.5 h-3.5" />
                         {entry.visited ? "Enter Locale" : "Investigate Site"}
@@ -139,11 +152,11 @@ interface ZoneDetailsPanelProps {
 }
 
 const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, coordinates }) => {
-    const { 
-        gameData, 
-        updateMapZone, 
-        deleteKnowledge, 
-        initiateTravel, 
+    const {
+        gameData,
+        updateMapZone,
+        deleteKnowledge,
+        initiateTravel,
         investigateDiscovery,
         lazyLoadPois,
         syncCurrentLocaleToPoi
@@ -164,11 +177,11 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
 
     const { mapZones = [], mapSectors = [], knowledge = [], mapSettings, playerCoordinates, playerInventory, companions, combatState, story = [], currentLocale } = gameData;
     const isCombatActive = combatState?.isActive || false;
-    
+
     const zone = useMemo(() => mapZones.find(z => z.coordinates === coordinates) || null, [mapZones, coordinates]);
     const currentSector = useMemo(() => mapSectors.find(s => s.coordinates.includes(coordinates)), [mapSectors, coordinates]);
     const entries = useMemo(() => knowledge.filter(k => k.coordinates === coordinates && k.tags?.includes('location')), [knowledge, coordinates]);
-    
+
     const isPlayerHere = coordinates === playerCoordinates;
     const isVisited = zone?.visited ?? false;
 
@@ -177,7 +190,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
             const localeExists = entries.some(e => e.title.toLowerCase().trim() === currentLocale.toLowerCase().trim());
             const isDefaultLocale = currentLocale === "Open Area" || currentLocale === "The Wilds";
             const isShipLocale = companions.some(c => c.isShip && c.name.toLowerCase().trim() === currentLocale.toLowerCase().trim());
-            
+
             if (!localeExists && !isDefaultLocale && !isShipLocale && !isDiscoveringLocale) {
                 setIsDiscoveringLocale(true);
                 syncCurrentLocaleToPoi(zone, currentLocale).finally(() => setIsDiscoveringLocale(false));
@@ -198,7 +211,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
             setHostility(zone?.hostility || 0);
             setDescription(zone?.description || '');
             setKeywords(zone?.keywords || []);
-            setIsEditing(false); 
+            setIsEditing(false);
             setTravelMethod('');
         }
     }, [coordinates, zone, isOpen]);
@@ -249,7 +262,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
 
     return (
         <>
-            <div 
+            <div
                 className={`fixed inset-0 bg-black/60 z-[60] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} backdrop-blur-sm`}
                 onClick={onClose}
             />
@@ -266,7 +279,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-6">
                                 <div>
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Zone Name</label>
-                                    <input 
+                                    <input
                                         value={name}
                                         onChange={e => setName(e.target.value)}
                                         className="w-full bg-brand-primary h-12 px-4 rounded-xl border border-brand-surface focus:border-brand-accent focus:outline-none"
@@ -275,7 +288,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                 </div>
                                 <div>
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Threat Level ({hostility})</label>
-                                    <input 
+                                    <input
                                         type="range" min="-25" max="25"
                                         value={hostility}
                                         onChange={e => setHostility(parseInt(e.target.value))}
@@ -289,7 +302,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                 </div>
                                 <div>
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Description</label>
-                                    <AutoResizingTextarea 
+                                    <AutoResizingTextarea
                                         value={description}
                                         onChange={e => setDescription(e.target.value)}
                                         className="w-full bg-brand-primary p-4 rounded-xl border border-brand-surface focus:border-brand-accent focus:outline-none min-h-[100px]"
@@ -305,24 +318,29 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-8">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="mb-2 truncate">{name || 'Uncharted Territory'}</h3>
-                                        <div className="flex flex-wrap items-center gap-3">
+                                        <h3 className="mb-3 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
+                                        <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">
                                                 {coordinates}
                                             </span>
+                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded border tracking-normal ${hInfo.bg} ${hInfo.color} ${hInfo.border}`}>
+                                                {toTitleCase(hInfo.label)}
+                                            </span>
+                                            {keywords.map((kw, i) => (
+                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border tracking-normal ${getPropertyColor(kw)} whitespace-nowrap`}>
+                                                    {toTitleCase(kw.split(':')[0].trim())}
+                                                </span>
+                                            ))}
                                             {currentSector && (
-                                                <span className="text-body-sm font-bold text-brand-text-muted">
+                                                <span className="text-body-sm font-bold text-brand-text-muted ml-1">
                                                     Sector: <span style={{ color: currentSector.color }}>{currentSector.name}</span>
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className={`text-body-sm font-bold ${hInfo.color} mr-1`}>{hInfo.label}</span>
-                                        <button onClick={() => setIsEditing(true)} className="btn-icon text-brand-text-muted hover:text-brand-accent">
-                                            <Icon name="edit" className="w-5 h-5" />
-                                        </button>
-                                    </div>
+                                    <button onClick={() => setIsEditing(true)} className="btn-icon text-brand-text-muted hover:text-brand-accent shrink-0 ml-4">
+                                        <Icon name="edit" className="w-5 h-5" />
+                                    </button>
                                 </div>
 
                                 <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">
@@ -336,10 +354,10 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                             <POIShimmer label={isDiscoveringLocale ? "Synthesizing site data..." : "Identifying landmarks..."} />
                                         ) : entries.length > 0 ? (
                                             entries.map(entry => (
-                                                <POIListItem 
-                                                    key={entry.id} 
-                                                    entry={entry} 
-                                                    zoneName={name} 
+                                                <POIListItem
+                                                    key={entry.id}
+                                                    entry={entry}
+                                                    zoneName={name}
                                                     allLogs={story}
                                                     onDelete={deleteKnowledge}
                                                     onInvestigate={handleInvestigate}
@@ -357,7 +375,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                         <div className="space-y-3">
                                             <label className="text-body-sm font-bold text-brand-text-muted ml-1">Travel Method</label>
                                             <div className="relative">
-                                                <select 
+                                                <select
                                                     value={travelMethod}
                                                     onChange={e => setTravelMethod(e.target.value)}
                                                     className="w-full bg-brand-primary h-12 px-4 rounded-xl border border-brand-surface focus:border-brand-accent appearance-none text-sm font-bold"
@@ -370,7 +388,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                 </div>
                                             </div>
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={handleTravel}
                                             disabled={!travelMethod || isCombatActive}
                                             className="btn-primary btn-lg w-full gap-3 shadow-brand-accent/20 rounded-2xl"
@@ -386,7 +404,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                 </div>
 
                 <div className="p-6 pt-2 bg-brand-bg border-t border-brand-primary/10 flex-shrink-0">
-                    <button 
+                    <button
                         onClick={() => { setActiveView('knowledge'); onClose(); }}
                         className="btn-primary btn-md w-full rounded-xl gap-2 shadow-lg shadow-brand-accent/20"
                     >
