@@ -11,11 +11,11 @@ interface WizardNavigationProps {
 
 export const WizardNavigation: React.FC<WizardNavigationProps> = ({ onBack, onNext, nextLabel, isNextDisabled, showBack }) => {
     return (
-        <div className="pt-8 flex items-center justify-center gap-4 flex-shrink-0 bg-brand-bg">
+        <div className="pt-8 flex items-center justify-center gap-4 flex-shrink-0">
             <button onClick={onBack} className={`btn-secondary btn-md rounded-full px-8 ${!showBack ? 'invisible' : ''}`}>
                 Back
             </button>
-            <button 
+            <button
                 onClick={onNext}
                 disabled={isNextDisabled}
                 className="btn-primary btn-md flex-1 rounded-full shadow-xl shadow-brand-accent/20 flex items-center justify-center gap-3"
