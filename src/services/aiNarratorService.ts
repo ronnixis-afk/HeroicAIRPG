@@ -115,7 +115,10 @@ export const generateNarrativeResponse = async (
                     required: ["name", "action", "summary"]
                 }
             },
-            narration: { type: Type.STRING },
+            narration: {
+                type: Type.STRING,
+                description: "Vivid 2-paragraph second-person 'You' narration. Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood). Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)."
+            },
             turnSummary: { type: Type.STRING },
             adventure_brief: { type: Type.STRING },
             active_engagement: { type: Type.BOOLEAN, description: "Set to TRUE only if an attack actually happens in this turn." },
@@ -252,6 +255,11 @@ The player has expended a HEROIC POINT this round.
     [GM Directives]: ${gmDirectives}
     ${heroicDirective}
     **STRICT FORMATTING RULE**: Plain text only. NO bolding or italics.
+    **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
+    - Paragraph 1: Resolve the combat actions with visceral sensory impact and mood.
+    - Paragraph 2: Describe the resulting environmental state and the immediate tactical hook for the player.
+    - PERSPECTIVE: Always address the player in the second person ('You').
+
     ${previously}
     [Actor Logic]: ${partyOverview || 'Standard party.'}
     [Rules]:
