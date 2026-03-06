@@ -268,6 +268,8 @@ const ChatView: React.FC = () => {
     }, [isAssessing, isAiGenerating, isAuditing, isHousekeeping]);
 
     const latestAiMessageWithAlignment = useMemo(() => {
+        if (gameData?.combatState?.isActive) return null;
+
         for (let i = processedMessages.length - 1; i >= 0; i--) {
             const msg = processedMessages[i];
             if (msg && msg.sender === 'user') {
@@ -281,7 +283,7 @@ const ChatView: React.FC = () => {
             }
         }
         return null;
-    }, [processedMessages]);
+    }, [processedMessages, gameData?.combatState?.isActive]);
 
     return (
         <div className="h-full flex flex-col overflow-hidden relative">
