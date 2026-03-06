@@ -50,14 +50,28 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                     )}
 
                     {npc.companionId && !isDead && (
-                        <span className="text-body-tiny bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-lg border border-brand-danger/20 tracking-normal">
-                            Party Member
+                        <span className="text-body-tiny bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-lg border border-brand-accent/20 tracking-normal">
+                            Companion
+                        </span>
+                    )}
+                </div>
+
+                {/* Gender and Race Tags */}
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {npc.gender && (
+                        <span className="text-body-micro bg-brand-primary/10 text-brand-text-muted px-2 py-0.5 rounded-md border border-brand-primary/20 tracking-normal uppercase">
+                            {npc.gender.charAt(0).toUpperCase() + npc.gender.slice(1).toLowerCase()}
+                        </span>
+                    )}
+                    {npc.race && (
+                        <span className="text-body-micro bg-brand-primary/10 text-brand-text-muted px-2 py-0.5 rounded-md border border-brand-primary/20 tracking-normal uppercase">
+                            {npc.race.charAt(0).toUpperCase() + npc.race.slice(1).toLowerCase()}
                         </span>
                     )}
                 </div>
 
                 {/* Relationship Bar instead of Description */}
-                <div className={`w-full max-w-[240px] mt-1 transition-opacity duration-300 ${isDead ? 'opacity-40' : 'opacity-100'}`}>
+                <div className={`w-full mt-1 transition-opacity duration-300 ${isDead ? 'opacity-40' : 'opacity-100'}`}>
                     <RelationshipBar value={npc.relationship} />
                 </div>
             </div>
