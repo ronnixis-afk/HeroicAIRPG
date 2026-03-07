@@ -24,9 +24,10 @@ interface HeaderMenuPanelProps {
   badges?: Record<string, number>;
 }
 
-const MenuItem = ({ label, iconName, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
+const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
   label: string;
-  iconName: string;
+  iconName?: string;
+  imageUrl?: string;
   onClick: () => void;
   disabled?: boolean;
   warning?: string;
@@ -36,21 +37,25 @@ const MenuItem = ({ label, iconName, onClick, disabled = false, warning, isHighl
 }) => (
   <button
     onClick={disabled ? undefined : onClick}
-    className={`flex flex-col items-center justify-center transition-colors duration-200 group p-1 relative ${disabled ? 'opacity-30 cursor-not-allowed text-brand-text-muted' :
+    className={`flex flex-col items-center justify-center transition-all duration-200 group p-1 relative ${disabled ? 'opacity-20 cursor-not-allowed text-brand-text-muted' :
       isHighlighted ? (highlightColor || 'text-brand-accent') :
         'text-brand-text-muted hover:text-brand-text'
       }`}
     title={disabled ? warning : label}
   >
     <div className="relative">
-      <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
+      {imageUrl ? (
+        <img src={imageUrl} alt={label} className={`w-8 h-8 mb-1 object-contain ${isHighlighted ? 'animate-pulse' : ''} ${disabled ? 'grayscale opacity-50' : ''}`} />
+      ) : iconName ? (
+        <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
+      ) : null}
       {badgeCount !== undefined && badgeCount > 0 && (
         <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-surface z-10 shadow-sm animate-fade-in">
           {badgeCount > 9 ? '9+' : badgeCount}
         </span>
       )}
     </div>
-    <span className={`text-[9px] font-normal tracking-tight text-center leading-tight ${isHighlighted ? 'opacity-100' : ''}`}>{label}</span>
+    <span className={`text-[9px] font-bold tracking-tight text-center leading-tight ${isHighlighted ? 'opacity-100' : ''}`}>{label}</span>
   </button>
 );
 
@@ -131,31 +136,31 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               <div className="space-y-4 pt-4 border-t border-brand-primary/10">
                 <label className="text-body-sm font-bold text-brand-text-muted opacity-60">Menu</label>
                 <div className="grid grid-cols-3 gap-y-8 gap-x-2">
-                  <MenuItem label="Heroes" iconName="character" onClick={() => handleAction('character')} />
-                  <MenuItem label="Backpack" iconName="inventory" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
-                  <MenuItem label="Chronicle" iconName="story" onClick={() => handleAction('story')} badgeCount={badges.story} />
-                  <MenuItem label="Quests" iconName="clipboardList" onClick={() => handleAction('objectives')} badgeCount={badges.quests} />
+                  <MenuItem label="Heroes" imageUrl="/icons/heroes.png" onClick={() => handleAction('character')} />
+                  <MenuItem label="Backpack" imageUrl="/icons/backpack.png" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
+                  <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} />
+                  <MenuItem label="Quests" imageUrl="/icons/quests.png" onClick={() => handleAction('objectives')} badgeCount={badges.quests} />
 
-                  <MenuItem label="Lore" iconName="world" onClick={() => handleAction('world')} badgeCount={badges.world} />
-                  <MenuItem label="People" iconName="users" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} />
-                  <MenuItem label="Map" iconName="map" onClick={() => handleAction('knowledge')} badgeCount={badges.map} />
+                  <MenuItem label="Lore" imageUrl="/icons/lore.png" onClick={() => handleAction('world')} badgeCount={badges.world} />
+                  <MenuItem label="People" imageUrl="/icons/people.png" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} />
+                  <MenuItem label="Map" imageUrl="/icons/map.png" onClick={() => handleAction('knowledge')} badgeCount={badges.map} />
                   <MenuItem
                     label="Merchant"
-                    iconName="shoppingBag"
+                    imageUrl="/icons/merchant.png"
                     onClick={() => handleAction('store')}
                     disabled={isCombatActive}
-                    warning="The merchant is hiding during combat."
+                    warning="The Merchant is hiding during combat."
                   />
 
-                  <MenuItem label="GM Notes" iconName="rocket" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
-                  <MenuItem label="The Forge" iconName="hammer" onClick={() => handleAction('item-forge')} />
-                  <MenuItem label="Scene" iconName="drama" onClick={() => handleAction('temp-stats')} />
-                  <MenuItem label="Gallery" iconName="photo" onClick={() => handleAction('gallery')} />
+                  <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
+                  <MenuItem label="Forge" imageUrl="/icons/forge.png" onClick={() => handleAction('item-forge')} />
+                  <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} />
+                  <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} />
 
-                  <MenuItem label="Rivals" iconName="danger" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
+                  <MenuItem label="Rivals" imageUrl="/icons/rivals.png" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
                   <MenuItem
                     label="Rest & Camp"
-                    iconName="clock"
+                    imageUrl="/icons/rest-camp.png"
                     onClick={handleTimeClick}
                     disabled={isCombatActive}
                     warning="Cannot rest while in danger."
