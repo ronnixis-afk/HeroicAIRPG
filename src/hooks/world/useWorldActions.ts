@@ -62,8 +62,15 @@ export const useWorldActions = (
         if (!gameData) return;
         try {
             const pois = await generatePoisForZone(zone, gameData.worldSummary || '', gameData.mapSettings);
-            const slicedPois = Array.isArray(pois) ? pois.slice(0, 3) : [];
-            const newKnowledge: Omit<LoreEntry, 'id'>[] = slicedPois.map(p => ({ title: p.title, content: p.content, coordinates: zone.coordinates, tags: ['location'], isNew: true, visited: false }));
+            const slicedPois = Array.isArray(pois) ? pois.slice(0, 4) : [];
+            const newKnowledge: Omit<LoreEntry, 'id'>[] = slicedPois.map(p => ({
+                title: p.title,
+                content: p.content,
+                coordinates: zone.coordinates,
+                tags: ['location'],
+                isNew: true,
+                visited: p.title.toLowerCase().includes('open area')
+            }));
             dispatch({ type: 'ADD_KNOWLEDGE', payload: newKnowledge });
         } catch (e) { console.error(e); }
     }, [gameData, dispatch]);

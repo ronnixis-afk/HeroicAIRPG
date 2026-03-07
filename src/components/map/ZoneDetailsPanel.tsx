@@ -132,8 +132,8 @@ const POIListItem: React.FC<{
                     <button
                         onClick={() => onInvestigate(entry)}
                         className={`btn-sm rounded-lg flex items-center gap-2 ${entry.visited
-                                ? 'btn-secondary'
-                                : 'btn-primary'
+                            ? 'btn-secondary'
+                            : 'btn-primary'
                             }`}
                     >
                         <Icon name={entry.visited ? "refresh" : "play"} className="w-3.5 h-3.5" />
@@ -187,9 +187,9 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
 
     useEffect(() => {
         if (isOpen && isPlayerHere && currentLocale && zone) {
-            const localeExists = entries.some(e => e.title.toLowerCase().trim() === currentLocale.toLowerCase().trim());
+            const localeExists = entries.some(e => isLocaleMatch(e.title, currentLocale));
             const isDefaultLocale = currentLocale === "Open Area" || currentLocale === "The Wilds";
-            const isShipLocale = companions.some(c => c.isShip && c.name.toLowerCase().trim() === currentLocale.toLowerCase().trim());
+            const isShipLocale = companions.some(c => c.isShip && isLocaleMatch(c.name, currentLocale));
 
             if (!localeExists && !isDefaultLocale && !isShipLocale && !isDiscoveringLocale) {
                 setIsDiscoveringLocale(true);

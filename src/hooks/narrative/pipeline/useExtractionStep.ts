@@ -112,7 +112,7 @@ export const useExtractionStep = (
                         };
                     }
                 }
-                resolvedLocale = finalUpdates.location_update.site_name || destHint;
+                resolvedLocale = finalUpdates.location_update.site_name || 'Open Area';
             } else if (narratorLoc.transition_type === 'staying' || isEventName) {
                 // Snap back to current location — no physical movement occurred.
                 finalUpdates.location_update = {

@@ -10,12 +10,14 @@ import { parseCoords } from '../utils/mapUtils';
  * THE PLOT EXPANDER (Tactical Specialist)
  * Uses Gemini 3 Flash to expand raw system matrix rolls into 3 concise tactical sentences.
  */
-export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSummary: string): Promise<string> => {
+export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSummary: string, availablePoisText?: string): Promise<string> => {
+    const poiSection = availablePoisText ? `\n[AVAILABLE LANDMARKS]\n${availablePoisText}\nWEAVE these landmarks into the tactical brief if appropriate.` : '';
     const prompt = `
     You are the "Tactical Plot Architect". Expand the following raw RPG encounter matrix results into a concise encounter brief.
     
     [WORLD SUMMARY]
     ${worldSummary}
+    ${poiSection}
 
     [RAW MATRIX RESULTS]
     - ENCOUNTER TYPE: ${matrix.encounterType}
@@ -259,14 +261,16 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     const ai = getAi();
     const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
     const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
-    const input = `Generate 3 specific POIs for the zone "${zone.name}" (${zone.description}).
+    const input = `Generate 4 specific POIs for the zone "${zone.name}" (${zone.description}).
     World: ${worldSummary}
     ${hostilityDesc}
     ${keywordsDesc}
     [STRICT CONSTRAINTS]
     - title: MAX 3 WORDS.
     - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
+    - One POI MUST be titled "Open Area", which serves as the generic entry point for visitors.
     - content: MAX 30 WORDS.
+    - Generate EXACTLY 4 POIs.
     Return JSON array: [{ "title": "string", "content": "string" }]`;
 
     const response = await ai.models.generateContent({
@@ -373,7 +377,8 @@ export const preloadAdjacentZones = async (
     currentCoords: string,
     existingZones: MapZone[],
     gameData: GameData,
-    dispatchZoneUpdate: (zone: MapZone) => void
+    dispatchZoneUpdate: (zone: MapZone) => void,
+    dispatchKnowledgeUpdate?: (knowledge: Omit<LoreEntry, 'id'>[]) => void
 ): Promise<void> => {
     const p = parseCoords(currentCoords);
     if (!p) return;
@@ -469,6 +474,24 @@ export const preloadAdjacentZones = async (
 
                 // Dispatch resolved zone
                 dispatchZoneUpdate(newZone);
+
+                // Generate and dispatch POIs for the preloaded zone
+                if (dispatchKnowledgeUpdate) {
+                    try {
+                        const pois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings);
+                        const knowledgeEntries: Omit<LoreEntry, 'id'>[] = pois.map(p => ({
+                            title: p.title,
+                            content: p.content,
+                            coordinates: newZone.coordinates,
+                            tags: ['location'],
+                            isNew: true,
+                            visited: p.title.toLowerCase().includes('open area')
+                        }));
+                        dispatchKnowledgeUpdate(knowledgeEntries);
+                    } catch (poiError) {
+                        console.error("POI preloading failed for:", targetCoords, poiError);
+                    }
+                }
             } catch (e) {
                 console.error("Silent sequential preload failed for:", targetCoords, e);
                 // Optionally remove the shimmer if it fails, or leave it to be retried by the redundancy check

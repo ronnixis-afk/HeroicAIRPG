@@ -2,8 +2,8 @@
 // hooks/world/useTravel.ts
 
 import React, { useCallback } from 'react';
-import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, InventoryUpdatePayload } from '../../types';
-import { generateZoneDetails, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
+import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, LoreEntry, InventoryUpdatePayload } from '../../types';
+import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
 import { getTravelSpeed, parseCoords, parseHostility } from '../../utils/mapUtils';
@@ -34,6 +34,7 @@ export const useTravel = (
 
         let isDiscovery = false;
         let generatedDescription = "";
+        let currentPois: any[] = [];
 
         setIsAiGenerating(true);
 
@@ -61,6 +62,26 @@ export const useTravel = (
                 };
                 zone = newZone;
                 dispatch({ type: 'UPDATE_MAP_ZONE', payload: newZone });
+
+                // Generate POIs on-the-fly for the newly discovered zone
+                currentPois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings);
+                const knowledgeEntries: Omit<LoreEntry, 'id'>[] = currentPois.map(p => ({
+                    title: p.title,
+                    content: p.content,
+                    coordinates: newZone.coordinates,
+                    tags: ['location'],
+                    isNew: true,
+                    visited: p.title.toLowerCase().includes('open area')
+                }));
+                dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledgeEntries });
+
+                // If no target locale was specified, land in the newly created "Open Area"
+                if (!targetLocale) {
+                    const openArea = knowledgeEntries.find(k => k.title.toLowerCase().includes('open area'));
+                    if (openArea) {
+                        localeEntry = openArea as LoreEntry;
+                    }
+                }
             } else if (!zone.visited) {
                 isDiscovery = true;
                 generatedDescription = zone.description || "";
@@ -70,7 +91,21 @@ export const useTravel = (
             if (localeEntry && !localeEntry.visited) {
                 isDiscovery = true;
                 dispatch({ type: 'UPDATE_KNOWLEDGE', payload: { ...localeEntry, visited: true } });
+            } else if (!localeEntry && zone.visited) {
+                // Case: returning to a visited zone but no specific locale target
+                // Attempt to snap to existing "Open Area" if it exists
+                const existingOpenArea = gameData.knowledge?.find(k => k.coordinates === coordinates && k.title.toLowerCase().includes('open area'));
+                if (existingOpenArea) {
+                    localeEntry = existingOpenArea;
+                }
             }
+
+            if (!isDiscovery) {
+                // Fetch existing POIs for return visits
+                currentPois = gameData.knowledge?.filter(k => k.coordinates === coordinates && k.tags?.includes('location')) || [];
+            }
+
+            const poisText = currentPois.map(p => `- ${p.title}: ${p.content}`).join('\n');
 
             // 2. Resolve Mechanics (Truth)
             const rawHostility = zone ? parseHostility(zone.hostility) : 0;
@@ -100,7 +135,7 @@ export const useTravel = (
                     const verifier = await verifyCombatRelevance(skillToUse, locationName, "Arriving at a location.", gameData.worldSummary || "");
                     if (verifier.shouldTriggerCombat) {
                         isHostileIntent = true;
-                        newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "");
+                        newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "", poisText);
                         generativeCombatInstruction = getUnifiedProceduralPrompt(matrix, isDiscovery);
                     } else {
                         generativeCombatInstruction = getSkillFailurePrompt(skillToUse, verifier.reason);
@@ -135,7 +170,11 @@ export const useTravel = (
             const systemContext = `[SYSTEM] Player arrived at: ${zone?.name || locationName} ${travelMethod ? `via ${travelMethod}` : ''}.
             ${isDiscovery ? 'STATUS: Discovery / First-time arrival.' : 'STATUS: Return visit.'}
             Visual Base: "${generatedDescription || zone?.description || 'A mysterious location.'}"
-            ${localeEntry ? `Focal Point Lore: ${localeEntry.content}` : ''}`;
+            [AVAILABLE POINTS OF INTEREST]:
+            ${poisText || 'Generic wilderness.'}
+            ${newGmNotes ? `[ENCOUNTER PLOT]: ${newGmNotes}` : ''}
+            ${localeEntry ? `Focal Point Lore: ${localeEntry.content}` : ''}
+            NARRATIVE DIRECTIVE: Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" as your immediate landing locale while framing other landmarks as distant features or nearby points of interest.`;
 
             await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
 
@@ -144,7 +183,11 @@ export const useTravel = (
                 dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
             };
 
-            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate)
+            const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => {
+                dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
+            };
+
+            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate)
                 .catch(e => console.error("Silent preloading failed at top-level:", e));
 
         } catch (e) {
