@@ -26,7 +26,7 @@ export const resolveLocaleCreation = async (
     const currentZone = gameData.mapZones?.find(z => z.coordinates === currentCoords);
     const currentSector = gameData.mapSectors?.find(s => s.coordinates.includes(currentCoords));
     const currentZoneName = currentZone?.name || 'Unknown';
-    
+
     const localPOIs = gameData.knowledge
         ?.filter(k => k.coordinates === currentCoords && k.tags?.includes('location'))
         .map(k => ({ title: k.title, content: k.content })) || [];
@@ -38,7 +38,6 @@ export const resolveLocaleCreation = async (
     [REQUESTED DESTINATION]: "${requestedName}"
     [CURRENT ZONE]: "${currentZoneName}"
     [CURRENT SITE]: "${gameData.current_site_name || "Open Area"}"
-    [CURRENT SPOT]: "${gameData.current_site_detail || "None"}"
 
     [VALIDATION RULES]
     1. MOVE FEASIBILITY: Is the [REQUESTED DESTINATION] physically reachable?
@@ -68,12 +67,12 @@ export const resolveLocaleCreation = async (
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
-            config: { 
+            config: {
                 responseMimeType: "application/json",
                 thinkingConfig: { thinkingBudget: 0 }
             }
         });
-        
+
         const result = JSON.parse(cleanJson(response.text || "{}"));
         return {
             name: result.name || requestedName,
@@ -86,10 +85,10 @@ export const resolveLocaleCreation = async (
         };
     } catch (e) {
         console.error("Location Specialist failed:", e);
-        return { 
-            name: requestedName, 
+        return {
+            name: requestedName,
             sub_location: "Open Area",
-            content: "A newly discovered site in the region.", 
+            content: "A newly discovered site in the region.",
             isNew: true,
             isLiteralTransition: true,
             validation_passed: true,

@@ -129,7 +129,6 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                             ...updatedNpcs[index],
                             currentPOI: 'Unknown',
                             site_id: undefined,
-                            narrative_detail: res.summary,
                             isFollowing: false
                         };
                     }
@@ -139,7 +138,6 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                         name: res.name,
                         currentPOI: location_update?.site_name || 'Current',
                         site_id: location_update?.site_id,
-                        narrative_detail: res.summary,
                         isFollowing: res.isFollowing
                     };
 

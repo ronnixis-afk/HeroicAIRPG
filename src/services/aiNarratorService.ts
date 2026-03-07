@@ -99,7 +99,7 @@ export const generateNarrativeResponse = async (
                     transition_type: { type: Type.STRING, description: "staying | returning | exploring_new | zone_change. 'staying' if no movement occurred. 'returning' if visiting a previously established POI. 'exploring_new' if moving to an entirely unestablished area in the current zone. 'zone_change' if moving across the world map to a new region/zone." },
                     destination_zone_hint: { type: Type.STRING, description: "Required ONLY if transition_type is 'zone_change'. Provide the name or a short description of the new zone being traveled to." }
                 },
-                required: ["sector", "zone", "site_name", "site_id", "narrative_detail", "is_new_site", "transition_type"]
+                required: ["sector", "zone", "site_name", "site_id", "is_new_site", "transition_type"]
             },
             npc_resolution: {
                 type: Type.ARRAY,
