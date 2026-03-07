@@ -42,8 +42,7 @@ export const useResolutionStep = (
                 diceRolls.push(roll);
 
                 if (roll.outcome === 'Encounter' && matrix) {
-                    // AMBUSH TRIGGERED: Something WAS lurking. Expand the plot.
-                    newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "");
+                    // AMBUSH TRIGGERED: Something WAS lurking.
                     combatInstruction = `\n[MANDATORY SYSTEM DIRECTIVE: PROCEDURAL AMBUSH]\nThe user attempted to initiate combat in a dangerous area. The audit has triggered a legitimate encounter.\n1. NARRATE the hostiles emerging or initiating a counter-attack.\n2. POPULATE 'suggestedActors' in your response.`;
                 } else {
                     // NO FOES: The audit confirms the area is clear. 
@@ -89,11 +88,6 @@ export const useResolutionStep = (
 
                 if (verifier.shouldTriggerCombat) {
                     isHostileIntent = true;
-                    const matrix = generateEncounterMatrix();
-
-                    // NEW: Explicit Plot Expansion Step (Phase 1.5)
-                    newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "");
-
                     combatInstruction = `\n[MANDATORY SYSTEM DIRECTIVE: COMBAT ENCOUNTER]\nThe failed check has triggered hostiles: ${verifier.reason}\n1. YOU MUST narrate the transition to combat.\n2. POPULATE 'suggestedActors' in your response.`;
                 } else {
                     combatInstruction = getSkillFailurePrompt(failedCheck.checkName, verifier.reason);
