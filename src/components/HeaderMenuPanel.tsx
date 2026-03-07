@@ -45,7 +45,7 @@ const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warnin
   >
     <div className="relative">
       {imageUrl ? (
-        <img src={imageUrl} alt={label} className={`w-8 h-8 mb-1 object-contain ${isHighlighted ? 'animate-pulse' : ''} ${disabled ? 'grayscale opacity-50' : ''}`} />
+        <img src={imageUrl} alt={label} className={`w-10 h-10 mb-1 object-contain ${isHighlighted ? 'animate-pulse' : ''} ${disabled ? 'grayscale opacity-50' : ''}`} />
       ) : iconName ? (
         <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
       ) : null}
