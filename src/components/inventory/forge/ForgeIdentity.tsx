@@ -26,8 +26,8 @@ export const ForgeIdentity: React.FC<ForgeIdentityProps> = ({
     activeSlot
 }) => {
     return (
-        <div className="bg-brand-surface p-6 rounded-2xl border border-brand-primary shadow-lg mb-6">
-            <div className="flex items-center justify-between mb-6">
+        <div className="bg-brand-surface p-5 rounded-2xl border border-brand-primary shadow-lg mb-4">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
                         <span className={`text-body-sm font-bold ${getItemRarityColor(selectedRarity)}`}>{selectedRarity}</span>
@@ -46,24 +46,24 @@ export const ForgeIdentity: React.FC<ForgeIdentityProps> = ({
                     </span>
                 )}
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4">
                 <div>
-                    <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Item Name (Optional)</label>
-                    <input 
-                        type="text" 
-                        placeholder="Leave blank for Ai generation..." 
-                        value={itemName} 
-                        onChange={e => setItemName(e.target.value)} 
-                        className="w-full input-md" 
+                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Item Name (Optional)</label>
+                    <input
+                        type="text"
+                        placeholder="Leave blank for Ai generation..."
+                        value={itemName}
+                        onChange={e => setItemName(e.target.value)}
+                        className="w-full input-md"
                     />
                 </div>
                 <div>
-                    <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Lore & Details (Optional)</label>
-                    <AutoResizingTextarea 
-                        value={lorePrompt} 
-                        onChange={e => setLorePrompt(e.target.value)} 
-                        placeholder="Describe appearance, history, or unique traits..." 
-                        className="w-full input-md min-h-[44px] leading-relaxed" 
+                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Lore & Details (Optional)</label>
+                    <AutoResizingTextarea
+                        value={lorePrompt}
+                        onChange={e => setLorePrompt(e.target.value)}
+                        placeholder="Describe appearance, history, or unique traits..."
+                        className="w-full input-md min-h-[44px] leading-relaxed"
                     />
                 </div>
             </div>
