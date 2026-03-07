@@ -7,7 +7,8 @@ import {
     generateStartingScenario,
     auditSystemState,
     performHousekeeping,
-    skinItemsForCharacter
+    skinItemsForCharacter,
+    preloadAdjacentZones
 } from '../services/geminiService';
 import { forgeSkins } from '../utils/itemMechanics';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
@@ -315,6 +316,17 @@ export const useCharacterActions = (
 
                 setTimeout(() => {
                     weaveGrandDesign();
+
+                    // Trigger initial preloading for the starting area neighborhood
+                    const dispatchZoneUpdate = (zone: MapZone) => {
+                        dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
+                    };
+                    const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => {
+                        dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
+                    };
+
+                    preloadAdjacentZones(coords, mapZonesUpdate, gameData!, dispatchZoneUpdate, dispatchKnowledgeUpdate)
+                        .catch(e => console.error("Initial preloading failed:", e));
                 }, 150);
             }
 
