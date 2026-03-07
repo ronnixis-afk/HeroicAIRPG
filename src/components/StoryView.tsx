@@ -229,7 +229,7 @@ const StoryView: React.FC = () => {
                                                         <span className="text-body-sm font-black text-brand-accent">{getTimeOnly(log.timestamp)}</span>
                                                         <span className="text-[10px] font-bold text-brand-text-muted opacity-60 flex items-center gap-1.5">
                                                             <Icon name="location" className="w-3 h-3" />
-                                                            {toTitleCase(log.location)} {log.locale ? `• ${toTitleCase(log.locale)}` : ''}
+                                                            {toTitleCase(log.location)}
                                                         </span>
                                                         {log.isNew && <NewTag />}
                                                     </div>

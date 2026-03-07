@@ -9,7 +9,6 @@ export interface LocationUpdate {
   zone: string;
   site_name: string;
   site_id: string;
-  narrative_detail: string;
   is_new_site: boolean;
   transition_type?: 'staying' | 'returning' | 'exploring_new' | 'zone_change';
   destination_zone_hint?: string;
@@ -77,7 +76,6 @@ export interface StoryLog {
   id: string;
   timestamp: string;
   location: string;
-  locale?: string; // New field for immediate sub-location
   content: string;
   summary?: string;
   originatingMessageId?: string;
@@ -97,8 +95,6 @@ export interface NPC {
   currentPOI?: string; // The specific site/locale name (replaces 'sector')
   // Fix: Added site_id to NPC interface to support machine-readable spatial anchoring
   site_id?: string;
-  // Fix: Added narrative_detail property to NPC interface to support social state reconciliation.
-  narrative_detail?: string;
   gender?: string;
   race?: string;
   appearance?: string;

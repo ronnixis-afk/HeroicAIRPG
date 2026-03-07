@@ -95,7 +95,6 @@ export const generateNarrativeResponse = async (
                     zone: { type: Type.STRING },
                     site_name: { type: Type.STRING, description: "Physical location name ONLY (e.g. 'The Iron Forge'). NEVER use event names like 'Death of X' or 'Aftermath of Y'. If no move occurred, return the current site_name unchanged." },
                     site_id: { type: Type.STRING },
-                    narrative_detail: { type: Type.STRING },
                     is_new_site: { type: Type.BOOLEAN, description: "TRUE only if transition_type is 'exploring_new' or 'zone_change'. FALSE otherwise." },
                     transition_type: { type: Type.STRING, description: "staying | returning | exploring_new | zone_change. 'staying' if no movement occurred. 'returning' if visiting a previously established POI. 'exploring_new' if moving to an entirely unestablished area in the current zone. 'zone_change' if moving across the world map to a new region/zone." },
                     destination_zone_hint: { type: Type.STRING, description: "Required ONLY if transition_type is 'zone_change'. Provide the name or a short description of the new zone being traveled to." }
@@ -214,7 +213,6 @@ export const generateNarrativeResponse = async (
                 zone: gameData.currentLocale || "The Wilds",
                 site_name: gameData.current_site_name || "The Wilds",
                 site_id: gameData.current_site_id || "the-wilds",
-                narrative_detail: "In a state of flux",
                 is_new_site: false
             },
             npc_resolution: [],
@@ -275,7 +273,7 @@ The player has expended a HEROIC POINT this round.
       "adventure_brief": "string",
       "active_engagement": true,
       "location_update": { 
-          "sector": "string", "zone": "string", "site_name": "string", "site_id": "string", "narrative_detail": "string", "is_new_site": false 
+          "sector": "string", "zone": "string", "site_name": "string", "site_id": "string", "is_new_site": false 
       },
       "npc_resolution": []
     }
@@ -304,7 +302,7 @@ The player has expended a HEROIC POINT this round.
             location_update: {
                 sector: gameData.playerCoordinates || "Unknown", zone: gameData.currentLocale || "Unknown",
                 site_name: gameData.current_site_name || "Unknown", site_id: gameData.current_site_id || "unknown",
-                narrative_detail: "In the thick of battle", is_new_site: false
+                is_new_site: false
             },
             npc_resolution: []
         };

@@ -59,7 +59,6 @@ export interface GameData {
   currentLocale?: string;
   current_site_id?: string; // NEW: Machine-readable spatial anchor
   current_site_name?: string; // NEW: Canonical site name
-  current_site_detail?: string; // NEW: Narrative context of the immediate site
   mapZones?: MapZone[];
   mapSectors?: MapSector[];
   mapSettings?: MapSettings;
@@ -100,7 +99,6 @@ export interface AIUpdatePayload {
   currentLocale?: string;
   current_site_id?: string;
   current_site_name?: string;
-  current_site_detail?: string; // NEW: Narrative context of the immediate site
   mapZones?: Partial<MapZone>[];
   location_update?: LocationUpdate; // NEW: Structured spatial snapping data
   npc_resolution?: NPCResolution[]; // NEW: Structured social resolution data

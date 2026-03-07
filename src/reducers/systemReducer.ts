@@ -202,7 +202,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: "",
                 current_site_id: "",
                 current_site_name: "",
-                current_site_detail: "",
                 currentTime: "Day 1, 08:00",
                 skillConfiguration: state.skillConfiguration || 'Fantasy',
                 isPartyHidden: false,
@@ -231,7 +230,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: "",
                 current_site_id: "",
                 current_site_name: "",
-                current_site_detail: "",
                 globalStoreInventory: {},
                 isPartyHidden: false,
                 partyStealthScore: 10
@@ -272,7 +270,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: restartPayload.currentLocale || "",
                 current_site_id: restartPayload.current_site_id || "",
                 current_site_name: restartPayload.current_site_name || "",
-                current_site_detail: restartPayload.current_site_detail || "",
                 currentTime: restartPayload.currentTime || state.currentTime,
                 npcs: restartPayload.npcs || [],
                 nemeses: [],
@@ -329,7 +326,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 // Update identity anchors
                 newState.current_site_id = loc.site_id;
                 newState.current_site_name = loc.site_name;
-                newState.current_site_detail = loc.narrative_detail;
                 newState.currentLocale = loc.site_name; // Legacy compatibility
 
                 // Update coordinates if pattern matches
@@ -600,7 +596,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                         content: su.content,
                         summary: su.summary,
                         location: newState.current_site_name || newState.currentLocale || 'Unknown',
-                        locale: newState.current_site_detail || 'No detail available',
                         timestamp: newState.currentTime || nowStamp,
                         embedding: su.embedding,
                         isNew: su.isNew,
