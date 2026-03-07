@@ -100,42 +100,36 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
       <div className={`fixed top-0 right-0 h-full w-[90%] sm:w-[400px] bg-brand-surface z-[70] transform transition-transform duration-300 ease-in-out border-l border-brand-primary shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="px-6 pt-3 pb-5 border-b border-brand-primary/10">
-            <div className="flex justify-end">
-              <button onClick={onClose} className="btn-icon text-brand-text-muted hover:text-brand-text transition-colors">
-                <Icon name="close" className="w-6 h-6" />
-              </button>
-            </div>
-            <h3 className="text-brand-text line-clamp-2 pr-4 overflow-hidden mb-0 mt-2">{formattedWorldName}</h3>
+          <div className="px-6 py-4 border-b border-brand-primary/10 flex items-center justify-between gap-4">
+            <h3 className="text-brand-text line-clamp-1 overflow-hidden m-0 flex-1">{formattedWorldName}</h3>
+            <button onClick={onClose} className="btn-icon text-brand-text-muted hover:text-brand-text transition-colors shrink-0">
+              <Icon name="close" className="w-6 h-6" />
+            </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scroll px-6 pb-6 pt-3">
-            <div className="space-y-5">
+          <div className="flex-1 flex flex-col px-6 pb-6 pt-4 min-h-0">
+            <div className="flex-1 flex flex-col justify-between">
               {/* Context Section */}
-              <div className="space-y-6">
-                {/* Location */}
-                <div className="space-y-2">
-                  <label className="text-body-sm font-bold text-brand-text-muted opacity-60">Current Location</label>
-                  <button
-                    onClick={() => { onLocationClick(); onClose(); }}
-                    className="w-full text-left transition-all group flex flex-row items-start gap-3 p-3 bg-transparent rounded-xl hover:bg-brand-primary/10"
-                  >
-                    <Icon name="location" className="w-5 h-5 text-brand-accent shrink-0 group-hover:scale-110 transition-transform" />
-                    <div className="flex flex-col gap-1">
-                      <div className="text-body-sm font-normal leading-tight text-brand-text">
-                        {/* Proper formatting for Narrative Detail, Zone, and Sector in white */}
-                        {[siteDetail || locale, location, sector].filter(Boolean).join(', ') || 'The Wilds'}
-                      </div>
-                      <span className="text-[9px] text-brand-text-muted font-normal opacity-60">Tap to open details</span>
+              <div className="space-y-1">
+                <label className="text-body-tiny font-bold text-brand-text-muted opacity-60">Current Location</label>
+                <button
+                  onClick={() => { onLocationClick(); onClose(); }}
+                  className="w-full text-left transition-all group flex flex-row items-center gap-3 p-2 bg-transparent rounded-xl hover:bg-brand-primary/10"
+                >
+                  <Icon name="location" className="w-5 h-5 text-brand-accent shrink-0 group-hover:scale-110 transition-transform" />
+                  <div className="flex flex-col gap-0">
+                    <div className="text-body-sm font-normal leading-tight text-brand-text">
+                      {[siteDetail || locale, location, sector].filter(Boolean).join(', ') || 'The Wilds'}
                     </div>
-                  </button>
-                </div>
+                    <span className="text-[8px] text-brand-text-muted font-normal opacity-60">Tap to open details</span>
+                  </div>
+                </button>
               </div>
 
               {/* Action Grid - 3 Columns */}
-              <div className="space-y-4 pt-4 border-t border-brand-primary/10">
-                <label className="text-body-sm font-bold text-brand-text-muted opacity-60">Menu</label>
-                <div className="grid grid-cols-3 gap-y-8 gap-x-2">
+              <div className="flex-1 flex flex-col justify-center gap-4 py-4 min-min-h-0">
+                <label className="text-body-tiny font-bold text-brand-text-muted opacity-60 block mb-1">Menu</label>
+                <div className="grid grid-cols-3 gap-y-4 sm:gap-y-6 md:gap-y-8 gap-x-2 pb-2">
                   <MenuItem label="Heroes" imageUrl="/icons/heroes.png" onClick={() => handleAction('character')} />
                   <MenuItem label="Backpack" imageUrl="/icons/backpack.png" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
                   <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} />
