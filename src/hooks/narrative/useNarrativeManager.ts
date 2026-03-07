@@ -77,9 +77,9 @@ export const useNarrativeManager = (
      * Standardizes the execution of AI Agents: P1 (Librarian) -> P2 (Mechanics) -> P3 (Narrator) -> P4 (Auditor)
      */
     const executePipeline = useCallback(async (
-        input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean }
+        input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean }
     ) => {
-        if (!gameData || isPipelineActiveRef.current) return;
+        if (!gameData || (isPipelineActiveRef.current && !input.bypassLock)) return;
         isPipelineActiveRef.current = true;
         const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false } = input;
 
@@ -207,7 +207,7 @@ export const useNarrativeManager = (
     ) => {
         if (!gameData) return;
         const msg: ChatMessage = { id: `auto-${Date.now()}`, sender: 'user', mode: 'CHAR', content: intentText };
-        await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction });
+        await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true });
     }, [gameData, executePipeline]);
 
     const summarizeDayLog = useCallback(async (day: string, dayEntries: StoryLog[], previousDayEntries: StoryLog[]) => {
