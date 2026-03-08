@@ -1,11 +1,13 @@
 // components/chat/ChatInputBar.tsx
 
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import { Icon } from '../Icon';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import SpeechToTextButton from '../SpeechToTextButton';
 import { useUI } from '../../context/UIContext';
 import { GameDataContext } from '../../context/GameDataContext';
+import { useEntityDictionary, DictionaryEntry } from '../../hooks/useEntityDictionary';
+import MentionList from './MentionList';
 
 interface ChatInputBarProps {
     value: string;
@@ -31,6 +33,23 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
     const [isFocused, setIsFocused] = useState(false);
     const { isHeroicModeActive, setIsHeroicModeActive } = useUI();
     const { gameData } = useContext(GameDataContext);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const dictionary = useEntityDictionary();
+
+    // Mention State
+    const [mentionState, setMentionState] = useState<{
+        items: DictionaryEntry[];
+        activeIndex: number;
+        show: boolean;
+        query: string;
+        startIndex: number;
+    }>({
+        items: [],
+        activeIndex: 0,
+        show: false,
+        query: '',
+        startIndex: 0
+    });
 
     const heroicPoints = gameData?.playerCharacter?.heroicPoints ?? 0;
     const maxHeroicPoints = gameData?.playerCharacter?.maxHeroicPoints ?? 1;
@@ -43,6 +62,100 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
     const handleHeroicToggle = () => {
         if (!canActivateHeroic) return;
         setIsHeroicModeActive(!isHeroicModeActive);
+    };
+
+    // Mention Detection Logic
+    useEffect(() => {
+        if (!isFocused) {
+            setMentionState(prev => ({ ...prev, show: false }));
+            return;
+        }
+
+        const cursorPosition = textareaRef.current?.selectionStart ?? 0;
+        const textBeforeCursor = props.value.substring(0, cursorPosition);
+
+        // Find the current "word" being typed
+        // We trigger on any word that is at least 3 characters long and matches an entity
+        const words = textBeforeCursor.split(/\s/);
+        const currentWord = words[words.length - 1];
+
+        if (currentWord.length >= 3) {
+            const filtered = dictionary.filter(entry =>
+                entry.name.toLowerCase().startsWith(currentWord.toLowerCase())
+            ).slice(0, 8); // Limit to 8 suggestions for performance and UI
+
+            if (filtered.length > 0) {
+                setMentionState({
+                    items: filtered,
+                    activeIndex: 0,
+                    show: true,
+                    query: currentWord,
+                    startIndex: cursorPosition - currentWord.length
+                });
+            } else {
+                setMentionState(prev => ({ ...prev, show: false }));
+            }
+        } else {
+            setMentionState(prev => ({ ...prev, show: false }));
+        }
+    }, [props.value, isFocused, dictionary]);
+
+    const handleSelectMention = (entry: DictionaryEntry) => {
+        const textBefore = props.value.substring(0, mentionState.startIndex);
+        const textAfter = props.value.substring(mentionState.startIndex + mentionState.query.length);
+
+        // Add a space after the mention for better UX
+        const newValue = `${textBefore}${entry.name}${textAfter}`;
+        props.onChange(newValue);
+
+        // Move cursor to after the inserted mention
+        setTimeout(() => {
+            if (textareaRef.current) {
+                const newPos = mentionState.startIndex + entry.name.length;
+                textareaRef.current.setSelectionRange(newPos, newPos);
+                textareaRef.current.focus();
+            }
+        }, 0);
+
+        setMentionState(prev => ({ ...prev, show: false }));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (mentionState.show) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setMentionState(prev => ({
+                    ...prev,
+                    activeIndex: (prev.activeIndex + 1) % prev.items.length
+                }));
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setMentionState(prev => ({
+                    ...prev,
+                    activeIndex: (prev.activeIndex - 1 + prev.items.length) % prev.items.length
+                }));
+                return;
+            }
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                handleSelectMention(mentionState.items[mentionState.activeIndex]);
+                return;
+            }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                setMentionState(prev => ({ ...prev, show: false }));
+                return;
+            }
+        }
+
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (props.value.trim() && !props.isLocked) {
+                props.onSubmit();
+            }
+        }
     };
 
     const NavigationOverlay = () => {
@@ -96,6 +209,14 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     : 'border-brand-primary/20'}
                 ${!props.isChatViewActive ? 'hover:scale-[1.01] active:scale-[0.99]' : ''}`}
         >
+            {mentionState.show && (
+                <MentionList
+                    suggestions={mentionState.items}
+                    activeIndex={mentionState.activeIndex}
+                    onSelect={handleSelectMention}
+                />
+            )}
+
             <div className={`flex items-center gap-2 transition-all duration-500 ease-in-out overflow-visible whitespace-nowrap ${isFocused ? 'max-w-0 opacity-0 -translate-x-10 pointer-events-none' : 'max-w-[150px] opacity-100 translate-x-0'}`}>
                 <button
                     onClick={handleHeroicToggle}
@@ -127,21 +248,18 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
             </div>
 
             <AutoResizingTextarea
+                ref={textareaRef}
                 value={props.value}
                 onChange={(e) => props.onChange(e.target.value)}
                 onFocus={() => {
                     setIsFocused(true);
                     handleInteraction();
                 }}
-                onBlur={() => setIsFocused(false)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (props.value.trim() && !props.isLocked) {
-                            props.onSubmit();
-                        }
-                    }
+                onBlur={() => {
+                    // Small timeout to allow MentionList clicks to register
+                    setTimeout(() => setIsFocused(false), 200);
                 }}
+                onKeyDown={handleKeyDown}
                 placeholder={isHeroicModeActive ? "Say or Do" : (props.mode === 'CHAR' ? "Say or Do" : "Ask The Game Master")}
                 className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''}`}
                 style={{ maxHeight: '120px' }}

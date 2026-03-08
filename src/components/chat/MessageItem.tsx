@@ -44,9 +44,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                 : "bg-transparent max-w-[83%] font-normal mb-1"
                 } ${msg.mode === 'OOC' ? 'italic text-brand-text-muted/70' : ''}`}>
                 {isUser ? (
-                    <p className={`text-body-base leading-relaxed font-medium py-1 ${msg.mode === 'OOC' ? 'text-brand-text-muted/60' : 'text-brand-text-muted/50'}`}>
-                        {msg.content}
-                    </p>
+                    <div className={`text-body-base leading-relaxed font-medium py-1 ${msg.mode === 'OOC' ? 'text-brand-text-muted/60' : 'text-brand-text-muted/50'}`}>
+                        <EntityLinker text={msg.content || ''} />
+                    </div>
                 ) : (
                     <div className={msg.mode === 'OOC' ? 'text-brand-text-muted/80' : 'text-brand-text'}>
                         <FormattedMessage text={msg.content || ''} />

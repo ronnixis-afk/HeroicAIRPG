@@ -1,9 +1,11 @@
+import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 
-import React, { useRef, useEffect } from 'react';
-
-const AutoResizingTextarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = (props) => {
+const AutoResizingTextarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>((props, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { value } = props;
+
+    // Support both forwarded ref and internal ref
+    useImperativeHandle(ref, () => textareaRef.current!);
 
     useEffect(() => {
         const textarea = textareaRef.current;
@@ -22,6 +24,8 @@ const AutoResizingTextarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaEl
             style={{ ...props.style, overflow: 'hidden' }}
         />
     );
-};
+});
+
+AutoResizingTextarea.displayName = 'AutoResizingTextarea';
 
 export default AutoResizingTextarea;
