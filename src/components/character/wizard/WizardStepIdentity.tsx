@@ -71,24 +71,24 @@ export const WizardStepIdentity: React.FC<WizardStepIdentityProps> = ({
 
             <div className="space-y-10">
                 <div className="w-full text-center">
-                    <input 
-                        value={name} 
+                    <input
+                        value={name}
                         onChange={e => onNameChange(e.target.value)}
                         className="w-full bg-transparent border-b border-brand-primary hover:border-brand-secondary focus:border-brand-accent px-0 py-4 text-center text-3xl font-bold text-brand-text focus:outline-none transition-all"
                         placeholder={isShip ? "Enter vessel name" : (isCompanion ? "Enter companion name" : "Enter hero name")}
                         autoFocus
                     />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-x-12 gap-y-4 pt-4 items-center border-t border-brand-surface/30">
                     <div className="flex flex-col">
                         <label className="text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Gender</label>
-                        <StyledSelect 
-                            label="" 
-                            value={isShip ? 'Unspecified' : gender} 
-                            onChange={onGenderChange} 
-                            options={genderOptions} 
-                            disabled={isShip} 
+                        <StyledSelect
+                            label=""
+                            value={isShip ? 'Unspecified' : gender}
+                            onChange={onGenderChange}
+                            options={genderOptions}
+                            disabled={isShip}
                         />
                     </div>
                     <div className="flex flex-col items-start ml-auto">
@@ -103,13 +103,13 @@ export const WizardStepIdentity: React.FC<WizardStepIdentityProps> = ({
 
                 <div className="pt-4 border-t border-brand-surface/30">
                     <label className="block text-body-sm font-bold text-brand-text-muted mb-3 ml-1">
-                        {isShip ? "Technical Details & Function" : "Background Context & Personal History"}
+                        {isShip ? "Add/Remove Specifications To Customize Vessel" : "Add/Remove Keywords To Customize Background Story"}
                     </label>
-                    <AutoResizingTextarea 
-                        value={customBackground} 
-                        onChange={e => onCustomBackgroundChange(e.target.value)} 
-                        placeholder={isShip ? "Describe the vessel's construction, purpose, or unique quirks..." : "Describe your character's life before this moment, their family, or defining events..."} 
-                        className="w-full bg-brand-primary p-5 rounded-2xl border border-brand-surface focus:border-brand-accent focus:ring-1 focus:ring-brand-accent focus:outline-none text-body-base text-brand-text leading-relaxed shadow-inner transition-all min-h-[120px]" 
+                    <AutoResizingTextarea
+                        value={customBackground}
+                        onChange={e => onCustomBackgroundChange(e.target.value)}
+                        placeholder={isShip ? "Describe the vessel's construction, purpose, or unique quirks..." : "Describe your character's life before this moment, their family, or defining events..."}
+                        className="w-full bg-brand-primary p-5 rounded-2xl border border-brand-surface focus:border-brand-accent focus:ring-1 focus:ring-brand-accent focus:outline-none text-body-base text-brand-text leading-relaxed shadow-inner transition-all min-h-[120px]"
                     />
                     <p className="text-[10px] text-brand-text-muted mt-3 italic px-1 opacity-70">
                         The architect will weave this context into your generated background and appearance.

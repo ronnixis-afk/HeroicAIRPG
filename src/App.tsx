@@ -137,6 +137,7 @@ const GameInterface: React.FC = () => {
 
   const [panelsAreMounted, setPanelsAreMounted] = useState(false);
   const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+  const [chatMode, setChatMode] = useState<'CHAR' | 'OOC'>('CHAR');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [hasSavedGeneratedImage, setHasSavedGeneratedImage] = useState(false);
 
@@ -256,7 +257,7 @@ const GameInterface: React.FC = () => {
       const wasHeroic = isHeroicModeActive;
 
       setChatInput('');
-      const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: 'user', mode: 'CHAR', content };
+      const userMessage: ChatMessage = { id: `user-${Date.now()}`, sender: 'user', mode: chatMode, content };
       await submitUserMessage(userMessage, wasHeroic);
     } finally {
       isSubmittingRef.current = false;
@@ -370,6 +371,8 @@ const GameInterface: React.FC = () => {
             onMenuClick={() => setIsHeaderMenuOpen(true)}
             onInteraction={ensureChatView}
             isChatViewActive={activeView === 'chat'}
+            mode={chatMode}
+            onModeChange={setChatMode}
           />
         </div>
       </div>

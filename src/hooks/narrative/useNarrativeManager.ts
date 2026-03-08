@@ -92,8 +92,18 @@ export const useNarrativeManager = (
             let resolution;
             let assessment: AssessmentResult | null = null;
             let requiredKeys: ContextKey[] = [];
+            const isOoc = userMessage.mode === 'OOC';
 
-            if (mechanicsOverride) {
+            if (isOoc) {
+                // OOC Bypass: Direct to Narrator as a GM
+                resolution = {
+                    mechanicsSummary: "Out-of-Character (OOC) query. No mechanics required.",
+                    combatInstruction: "Respond as a helpful Game Master (OOC). Answer the user's meta-question or provide game guidance directly.",
+                    diceRolls: [],
+                    isHostileIntent: false
+                };
+                requiredKeys = ['core_stats', 'recent_history', 'active_quests', 'social_registry', 'world_lore'];
+            } else if (mechanicsOverride) {
                 resolution = mechanicsOverride;
                 // Default keys for automated events
                 requiredKeys = ['core_stats', 'recent_history', 'active_quests', 'social_registry'];
@@ -143,6 +153,7 @@ export const useNarrativeManager = (
                 location: aiResponse.location_update?.site_name || gameData.currentLocale,
                 rolls: resolution.diceRolls || [],
                 alignmentOptions: Array.isArray(aiResponse.alignmentOptions) ? aiResponse.alignmentOptions : undefined,
+                mode: isOoc ? 'OOC' : 'CHAR',
                 usage: { ...(aiResponse.usage || {}), latencyMs: performance.now() - startTime } as any
             };
             dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
@@ -158,6 +169,8 @@ export const useNarrativeManager = (
                 aiMessage.id,
                 aiResponse
             ).then(extraction => {
+                if (isOoc) return; // Auditor doesn't need to force combat/extraction updates for OOC chatter
+
                 // --- VERIFIED ENGAGEMENT TRIGGER ---
                 // Only trigger consensus panel if the player explicitly chose to fight (Intent)
                 // OR if the AI Auditor confirmed the player is actually being attacked in the narrative.

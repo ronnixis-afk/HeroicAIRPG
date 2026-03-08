@@ -23,10 +23,11 @@ interface ChatInputBarProps {
     onMenuClick: () => void;
     onInteraction?: () => void;
     isChatViewActive: boolean;
+    mode: 'CHAR' | 'OOC';
+    onModeChange: (mode: 'CHAR' | 'OOC') => void;
 }
 
 export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
-    const [mode, setMode] = useState<'Char' | 'Ooc'>('Char');
     const [isFocused, setIsFocused] = useState(false);
     const { isHeroicModeActive, setIsHeroicModeActive } = useUI();
     const { gameData } = useContext(GameDataContext);
@@ -115,13 +116,13 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     </span>
                 </button>
                 <button
-                    onClick={() => setMode(mode === 'Char' ? 'Ooc' : 'Char')}
-                    className={`btn-secondary btn-sm rounded-full transition-all flex-shrink-0 ${mode === 'Char'
-                            ? 'border-brand-accent text-brand-accent bg-brand-accent/5'
-                            : 'border-brand-primary text-brand-text-muted bg-brand-primary/20'
+                    onClick={() => props.onModeChange(props.mode === 'CHAR' ? 'OOC' : 'CHAR')}
+                    className={`btn-secondary btn-sm rounded-full transition-all flex-shrink-0 ${props.mode === 'CHAR'
+                        ? 'border-brand-accent text-brand-accent bg-brand-accent/5'
+                        : 'border-brand-primary text-brand-text-muted bg-brand-primary/20'
                         }`}
                 >
-                    {mode}
+                    {props.mode === 'CHAR' ? 'Char' : 'Ooc'}
                 </button>
             </div>
 
@@ -141,7 +142,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                         }
                     }
                 }}
-                placeholder={isHeroicModeActive ? "Say or Do" : (mode === 'Char' ? "Say or Do" : "Ask The Game Master")}
+                placeholder={isHeroicModeActive ? "Say or Do" : (props.mode === 'CHAR' ? "Say or Do" : "Ask The Game Master")}
                 className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''}`}
                 style={{ maxHeight: '120px' }}
             />

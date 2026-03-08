@@ -16,6 +16,8 @@ import { useUI } from '../context/UIContext';
 import { companionToNPC } from '../utils/npcUtils';
 import { ABILITY_SCORES, type AbilityScoreName, type SkillName } from '../types';
 
+import { getSystemRandom, getFairSystemRandom } from '../utils/systemRandom';
+
 export const useCharacterActions = (
     gameData: GameData | null,
     dispatch: React.Dispatch<GameAction>,
@@ -164,7 +166,7 @@ export const useCharacterActions = (
             if (character.level >= 17) { base = 20000; multiplier = 250; }
             else if (character.level >= 11) { base = 5000; multiplier = 250; }
             else if (character.level >= 5) { base = 500; multiplier = 25; }
-            const roll = Math.floor(Math.random() * 10) + 1;
+            const roll = getSystemRandom(1, 10);
             const total = base + (roll * multiplier);
             const style = gameData.mapSettings?.style || 'fantasy';
             const curName = style.includes('sci-fi') ? 'Credits' : 'Gold Pieces';
@@ -212,7 +214,7 @@ export const useCharacterActions = (
             if (!isCompanion) {
                 setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 75 });
 
-                const hookIndex = Math.floor(Math.random() * 20) + 1;
+                const hookIndex = getFairSystemRandom(1, 20, 'starting_hook', 10);
                 scenario = await generateStartingScenario(character, gameData, hookIndex);
 
                 const sector = gameData.mapSectors?.find(s => s.coordinates.includes(coords));
