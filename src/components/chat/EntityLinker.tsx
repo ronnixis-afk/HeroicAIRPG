@@ -19,9 +19,9 @@ interface DictionaryEntry {
 // Common articles and RPG titles to strip for loose matching
 const IGNORED_PREFIXES = [
     /^the\s+/i, /^a\s+/i, /^an\s+/i,
-    /^captain\s+/i, /^general\s+/i, /^commander\s+/i, /^lord\s+/i, /^lady\s+/i, 
-    /^sir\s+/i, /^madam\s+/i, /^king\s+/i, /^queen\s+/i, /^prince\s+/i, /^princess\s+/i, 
-    /^master\s+/i, /^mistress\s+/i, /^doctor\s+/i, /^prof\.\s+/i, /^professor\s+/i, 
+    /^captain\s+/i, /^general\s+/i, /^commander\s+/i, /^lord\s+/i, /^lady\s+/i,
+    /^sir\s+/i, /^madam\s+/i, /^king\s+/i, /^queen\s+/i, /^prince\s+/i, /^princess\s+/i,
+    /^master\s+/i, /^mistress\s+/i, /^doctor\s+/i, /^prof\.\s+/i, /^professor\s+/i,
     /^saint\s+/i, /^st\.\s+/i, /^baron\s+/i, /^duke\s+/i, /^archmage\s+/i, /^elder\s+/i, /^high\s+/i
 ];
 
@@ -45,21 +45,40 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
                 }
 
                 // 1. Add the full original name
-                dict.push({ name: trimmed, type, data, avatar });
+                // LOGIC CHANGE: If it starts with an article, we prefer the stripped version for the link itself
+                // but we keep the original for full matches if needed. However, the user wants to bypass articles.
 
-                // 2. Add a "Loose" version by stripping titles/articles
                 let stripped = trimmed;
                 let modified = false;
-                for (const prefix of IGNORED_PREFIXES) {
+                for (const prefix of [/^the\s+/i, /^a\s+/i, /^an\s+/i]) {
                     if (prefix.test(stripped)) {
                         stripped = stripped.replace(prefix, '').trim();
                         modified = true;
-                        break; // Only strip the primary leading prefix
+                        break;
                     }
                 }
 
-                if (modified && stripped.length > 2 && stripped.toLowerCase() !== trimmed.toLowerCase()) {
+                if (modified && stripped.length > 2) {
+                    // If we stripped an article, we ONLY add the stripped version for linking
+                    // This ensures "The Elves" matches "Elves" and only "Elves" is linked.
                     dict.push({ name: stripped, type, data, avatar });
+                } else {
+                    dict.push({ name: trimmed, type, data, avatar });
+                }
+
+                // 2. Add other "Loose" versions by stripping titles
+                let looseVersion = stripped;
+                let looseModified = false;
+                for (const prefix of IGNORED_PREFIXES.slice(3)) { // Skip articles which we handled above
+                    if (prefix.test(looseVersion)) {
+                        looseVersion = looseVersion.replace(prefix, '').trim();
+                        looseModified = true;
+                        break;
+                    }
+                }
+
+                if (looseModified && looseVersion.length > 2 && looseVersion.toLowerCase() !== stripped.toLowerCase()) {
+                    dict.push({ name: looseVersion, type, data, avatar });
                 }
             }
         };
@@ -69,10 +88,10 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
 
         // 2. NPCs (Registry)
         (gameData.npcs || []).forEach(n => {
-             // Only add if not already added via companion list to avoid duplicates
-             if (!gameData.companions.some(c => c.name.toLowerCase() === n.name.toLowerCase())) {
-                 addIfValid(n.name, 'npc', n, n.image);
-             }
+            // Only add if not already added via companion list to avoid duplicates
+            if (!gameData.companions.some(c => c.name.toLowerCase() === n.name.toLowerCase())) {
+                addIfValid(n.name, 'npc', n, n.image);
+            }
         });
 
         // 3. Items
@@ -80,7 +99,7 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
             gameData.playerInventory,
             ...Object.values(gameData.companionInventories || {})
         ].filter(Boolean);
-        
+
         allInventories.forEach(inv => {
             if (!inv) return;
             const allItems = [...(inv.equipped || []), ...(inv.carried || []), ...(inv.storage || []), ...(inv.assets || [])];
@@ -98,7 +117,7 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
         // 6. Lore Entries
         (gameData.world || []).forEach(l => addIfValid(l.title, 'lore', l));
         (gameData.knowledge || []).forEach(k => {
-             if (k.visited) addIfValid(k.title, 'lore', k);
+            if (k.visited) addIfValid(k.title, 'lore', k);
         });
 
         // 7. Objectives
@@ -109,7 +128,7 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
         const uniqueDict = Array.from(
             new Map(dict.map(item => [item.name.toLowerCase(), item])).values()
         );
-        
+
         return uniqueDict.sort((a, b) => b.name.length - a.name.length);
     }, [gameData]);
 
@@ -130,7 +149,7 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
 
         return parts.map((part, i) => {
             if (!part) return null;
-            
+
             const match = dictionary.find(entry => entry.name.toLowerCase() === part.toLowerCase());
             if (match) {
                 return (

@@ -91,7 +91,6 @@ export const EntityLightbox: React.FC = () => {
                         <div className="space-y-6 p-2">
                             <div className="flex justify-between items-start">
                                 <div className="flex-1 min-w-0">
-                                    <h2 className="text-brand-text mb-1 truncate">{zone.name}</h2>
                                     <span className="text-body-sm font-mono font-bold text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded border border-brand-accent/20">
                                         {zone.coordinates}
                                     </span>
@@ -110,7 +109,7 @@ export const EntityLightbox: React.FC = () => {
 
                             {zone.keywords && zone.keywords.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
-                                    {zone.keywords.map(k => (
+                                    {zone.keywords?.map(k => (
                                         <span key={k} className="px-2.5 py-1 bg-brand-primary/30 rounded-md text-body-sm font-mono text-brand-accent border border-brand-accent/10 font-bold">
                                             #{k}
                                         </span>
@@ -135,7 +134,6 @@ export const EntityLightbox: React.FC = () => {
                     <div className="space-y-4 p-2">
                         <div className="flex items-center gap-3">
                             <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: sector.color }} />
-                            <h2 className="text-brand-text">{sector.name}</h2>
                         </div>
                         <p className="text-body-sm text-brand-text-muted font-bold opacity-60">
                             Classification: Sector
@@ -147,7 +145,7 @@ export const EntityLightbox: React.FC = () => {
                         </div>
                         {sector.keywords && sector.keywords.length > 0 && (
                             <div className="flex flex-wrap gap-2 pt-2">
-                                {sector.keywords.map(k => (
+                                {sector.keywords?.map(k => (
                                     <span key={k} className="px-2 py-1 bg-brand-primary rounded text-body-sm font-mono text-brand-text-muted">#{k}</span>
                                 ))}
                             </div>
@@ -167,7 +165,6 @@ export const EntityLightbox: React.FC = () => {
                 const entry = data as LoreEntry;
                 return (
                     <div className="space-y-4 p-2">
-                        <h2 className="text-brand-text">{entry.title}</h2>
                         <div className="flex flex-wrap gap-2">
                             {entry.tags?.map(t => (
                                 <span key={t} className="bg-brand-primary text-brand-text-muted text-body-sm font-bold px-2.5 py-0.5 rounded-full border border-brand-surface capitalize">{t}</span>
@@ -205,11 +202,17 @@ export const EntityLightbox: React.FC = () => {
 
     if (type === 'npc') return renderContent();
 
+    const getTitle = () => {
+        if (type === 'location') return (data as any).name || 'Discovery Detail';
+        if (type === 'lore' || type === 'objective') return (data as LoreEntry).title;
+        return 'Information';
+    };
+
     return (
         <Modal
             isOpen={true}
             onClose={onClose}
-            title={type === 'location' ? 'Discovery Detail' : 'Information'}
+            title={getTitle()}
         >
             {renderContent()}
         </Modal>
