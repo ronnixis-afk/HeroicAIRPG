@@ -22,12 +22,12 @@ const MentionList: React.FC<MentionListProps> = ({ suggestions, activeIndex, onS
 
     const getTypeIcon = (type: string) => {
         switch (type) {
-            case 'npc': return 'user';
-            case 'item': return 'chest';
-            case 'location': return 'map';
-            case 'lore': return 'book';
-            case 'objective': return 'check';
-            default: return 'info';
+            case 'npc': return '/icons/people.png';
+            case 'item': return '/icons/backpack.png';
+            case 'location': return '/icons/map.png';
+            case 'lore': return '/icons/lore.png';
+            case 'objective': return '/icons/quests.png';
+            default: return null;
         }
     };
 
@@ -53,15 +53,17 @@ const MentionList: React.FC<MentionListProps> = ({ suggestions, activeIndex, onS
                         key={`${entry.type}-${entry.name}-${index}`}
                         onClick={() => onSelect(entry)}
                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-left group ${index === activeIndex
-                                ? 'bg-brand-primary/20 ring-1 ring-brand-primary/30 shadow-inner'
-                                : 'hover:bg-brand-primary/10 active:scale-[0.98]'
+                            ? 'bg-brand-primary/20 ring-1 ring-brand-primary/30 shadow-inner'
+                            : 'hover:bg-brand-primary/10 active:scale-[0.98]'
                             }`}
                     >
                         <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-brand-surface border border-white/10 flex items-center justify-center overflow-hidden shadow-sm transition-transform group-hover:scale-110 ${getTypeColor(entry.type)}`}>
                             {entry.avatar ? (
                                 <img src={entry.avatar} alt="" className="w-full h-full object-cover" />
+                            ) : getTypeIcon(entry.type) ? (
+                                <img src={getTypeIcon(entry.type)!} alt="" className="w-6 h-6 object-contain" />
                             ) : (
-                                <Icon name={getTypeIcon(entry.type)} className="w-5 h-5" />
+                                <Icon name="info" className="w-5 h-5" />
                             )}
                         </div>
 
@@ -69,7 +71,7 @@ const MentionList: React.FC<MentionListProps> = ({ suggestions, activeIndex, onS
                             <div className="text-body-base font-bold text-brand-text truncate leading-tight">
                                 {entry.name}
                             </div>
-                            <div className={`text-[9px] tracking-[0.1em] font-black opacity-80 mt-0.5 ${getTypeColor(entry.type)}`}>
+                            <div className={`text-[10px] font-black opacity-80 mt-0.5 ${getTypeColor(entry.type)}`}>
                                 {entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
                             </div>
                         </div>
