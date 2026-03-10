@@ -75,15 +75,14 @@ export const generateSystemNarration = (
     const verb = isWeaponAttack ? 'attacks' : 'uses';
     const preposition = isWeaponAttack ? 'with' : 'on';
 
-    // Format: Attacker [verb] [action] [preposition] [targets with effects]
-    let result = `${attackerName} ${verb} ${actionName}`;
-
+    let result = '';
     if (targetNames.length === 1) {
-        result += ` ${preposition} ${targetNames[0]}, ${segments[0]}.`;
+        // Precise format: [Attacker] attacks [Target] with [Attack], [Segment]
+        result = `${attackerName} ${verb} ${targetNames[0]} ${preposition} ${actionName}, ${segments[0]}.`;
     } else {
         // Multi-target formatting
         const lastSegment = segments.pop();
-        result += ` ${preposition} multiple targets: ${segments.join(', ')} and ${lastSegment}.`;
+        result = `${attackerName} ${verb} multiple targets ${preposition} ${actionName}: ${segments.join(', ')} and ${lastSegment}.`;
     }
 
     return result;
