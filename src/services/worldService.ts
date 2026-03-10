@@ -39,12 +39,12 @@ const migrateTags = (tags: any, type: 'item' | 'lore'): string[] => {
     if (!tags || !Array.isArray(tags)) return [];
     const mapping = type === 'item' ? ITEM_TAG_MAPPING : LORE_TAG_MAPPING;
     const allowed = (type === 'item' ? ITEM_TAGS : LORE_TAGS) as readonly string[];
-    
+
     const newTags = new Set<string>();
     tags.forEach((t: any) => {
         if (typeof t !== 'string') return;
         const lower = t.toLowerCase();
-        
+
         // Find match in allowed tags (case insensitive)
         const match = allowed.find(a => a.toLowerCase() === lower);
         if (match) {
@@ -73,7 +73,7 @@ export const deepMerge = (target: any, source: any): any => {
     if (typeof source === 'object' && source !== null) {
         for (const key of Object.keys(source)) {
             if (key in target) {
-                 result[key] = deepMerge(target[key], source[key]);
+                result[key] = deepMerge(target[key], source[key]);
             } else {
                 result[key] = source[key];
             }
@@ -99,7 +99,7 @@ const hydrateWorldData = (savedGameData: any): GameData => {
     mergedData.knowledge = Array.isArray(mergedData.knowledge) ? mergedData.knowledge : [];
     mergedData.objectives = Array.isArray(mergedData.objectives) ? mergedData.objectives : [];
     mergedData.story = Array.isArray(mergedData.story) ? mergedData.story : [];
-    mergedData.gallery = Array.isArray(mergedData.gallery) ? mergedData.gallery : []; 
+    mergedData.gallery = Array.isArray(mergedData.gallery) ? mergedData.gallery : [];
     mergedData.messages = Array.isArray(mergedData.messages) ? mergedData.messages : [];
     mergedData.nemeses = Array.isArray(mergedData.nemeses) ? mergedData.nemeses : [];
 
@@ -134,12 +134,12 @@ const hydrateWorldData = (savedGameData: any): GameData => {
             isNew: !!npc.isNew,
             is_essential: npc.is_essential !== undefined ? npc.is_essential : !isGeneric
         };
-        
+
         // Legacy site_id fallback
         if (!hydratedNpc.site_id && hydratedNpc.currentPOI) {
             hydratedNpc.site_id = slugify(hydratedNpc.currentPOI);
         }
-        
+
         return hydratedNpc;
     });
 
@@ -179,7 +179,7 @@ const hydrateWorldData = (savedGameData: any): GameData => {
 
     mergedData.world = mergedData.world.map(hydrateLore);
     mergedData.knowledge = mergedData.knowledge.map(hydrateLore);
-    
+
     mergedData.objectives = mergedData.objectives.map((obj: any) => {
         const hydratedObj = hydrateLore(obj);
         if (hydratedObj.updates && hydratedObj.updates.length > 0 && typeof (hydratedObj.updates as any)[0] === 'string') {
@@ -199,7 +199,7 @@ const hydrateWorldData = (savedGameData: any): GameData => {
         }
         return log;
     });
-    
+
     mergedData.mapZones = mergedData.mapZones.map((zone: any) => ({
         ...zone,
         tags: migrateTags(zone.tags, 'lore'),
@@ -216,7 +216,7 @@ const hydrateWorldData = (savedGameData: any): GameData => {
     if (!mergedData.archetypes) mergedData.archetypes = DEFAULT_ARCHETYPE_DEFINITIONS;
     if (typeof mergedData.combatBaseScore !== 'number') mergedData.combatBaseScore = 8;
     if (!mergedData.skillConfiguration) mergedData.skillConfiguration = 'Fantasy';
-    
+
     // NEW: Site Tracking Restoration
     if (!mergedData.current_site_id && mergedData.currentLocale) {
         mergedData.current_site_id = slugify(mergedData.currentLocale);
@@ -224,9 +224,8 @@ const hydrateWorldData = (savedGameData: any): GameData => {
     }
 
     if (!mergedData.combatConfiguration) {
-        mergedData.combatConfiguration = { 
-            aiNarratesTurns: true, 
-            manualCompanionControl: false, 
+        mergedData.combatConfiguration = {
+            aiNarratesTurns: true,
             aiGeneratesLoot: true,
             smarterGm: true,
             narrativeCombat: false,
@@ -242,13 +241,13 @@ const hydrateWorldData = (savedGameData: any): GameData => {
         // Clamp existing points to new maximum to prevent over-inflated legacy pools
         pc.heroicPoints = Math.min(pc.heroicPoints, pc.maxHeroicPoints);
     }
-    
+
     return mergedData as GameData;
 };
 
 const getAllWorlds = async (): Promise<World[]> => {
     const worlds = await dbService.getAll<World>();
-    
+
     if (worlds.length === 0) {
         const defaultWorldData = getDefaultGameData();
         const hydratedDefaultData = hydrateWorldData(defaultWorldData);
@@ -284,7 +283,7 @@ const saveGameData = async (worldId: string, gameData: GameData): Promise<void> 
     }
 };
 
-const createNewWorld = async (name: string, loreEntries: Omit<LoreEntry, 'id'|'isNew'>[], startingDateTime: string, customGameData?: Partial<GameData>): Promise<World> => {
+const createNewWorld = async (name: string, loreEntries: Omit<LoreEntry, 'id' | 'isNew'>[], startingDateTime: string, customGameData?: Partial<GameData>): Promise<World> => {
     const newGameData = getNewGameData();
     newGameData.world = loreEntries.map((lore, index) => ({
         ...lore,
@@ -329,7 +328,7 @@ const exportWorldById = async (worldId: string) => {
     const a = document.createElement('a');
     a.href = url;
     const now = new Date();
-    const formattedDateTime = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+    const formattedDateTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
     const sanitizedName = world.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     a.download = `${formattedDateTime}_${sanitizedName}.json`;
     document.body.appendChild(a);

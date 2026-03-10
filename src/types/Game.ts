@@ -8,7 +8,6 @@ import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillC
 
 export interface CombatConfiguration {
   aiNarratesTurns: boolean;
-  manualCompanionControl: boolean;
   aiGeneratesLoot: boolean;
   smarterGm: boolean;
 

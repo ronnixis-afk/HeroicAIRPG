@@ -93,7 +93,6 @@ const defaultGameData: GameData = {
   difficulty: Difficulty.Normal,
   combatConfiguration: {
     aiNarratesTurns: true,
-    manualCompanionControl: false,
     aiGeneratesLoot: true,
     smarterGm: true,
 
@@ -203,7 +202,6 @@ export const getNewGameData = (): GameData => {
     difficulty: Difficulty.Normal,
     combatConfiguration: {
       aiNarratesTurns: true,
-      manualCompanionControl: false,
       aiGeneratesLoot: true,
       smarterGm: true,
 

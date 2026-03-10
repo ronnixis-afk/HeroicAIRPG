@@ -149,7 +149,7 @@ const SettingsView: React.FC = () => {
 
     // Safe Access for Configuration (Defaults if undefined in older saves)
     const combatConfig = useMemo(() => {
-        return gameData?.combatConfiguration || { aiNarratesTurns: true, manualCompanionControl: false, aiGeneratesLoot: true, smarterGm: true, narrativeCombat: false, autoIncludeNearbyNpcs: true };
+        return gameData?.combatConfiguration || { aiNarratesTurns: true, aiGeneratesLoot: true, smarterGm: true, narrativeCombat: false, autoIncludeNearbyNpcs: true };
     }, [gameData]);
 
     useEffect(() => {
@@ -316,12 +316,7 @@ const SettingsView: React.FC = () => {
                                 onChange={(val) => updateCombatConfiguration({ ...combatConfig, aiGeneratesLoot: val })}
                                 description="Skins and names loot immediately after victory. Otherwise, appraisal is required."
                             />
-                            <ToggleSwitch
-                                label="Companion Manual Control"
-                                enabled={combatConfig.manualCompanionControl}
-                                onChange={(val) => updateCombatConfiguration({ ...combatConfig, manualCompanionControl: val })}
-                                description="Enables manual control over your allies' combat turns instead of the AI auto-playing them."
-                            />
+
                             <ToggleSwitch
                                 label="Mature Content"
                                 enabled={gameData.isMature}
