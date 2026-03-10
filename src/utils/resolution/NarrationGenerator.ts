@@ -77,12 +77,21 @@ export const generateSystemNarration = (
 
     let result = '';
     if (targetNames.length === 1) {
-        // Precise format: [Attacker] attacks [Target] with [Attack], [Segment]
-        result = `${attackerName} ${verb} ${targetNames[0]} ${preposition} ${actionName}, ${segments[0]}.`;
+        if (isWeaponAttack) {
+            // [Attacker] attacks [Target] with [Attack]
+            result = `${attackerName} attacks ${targetNames[0]} with ${actionName}, ${segments[0]}.`;
+        } else {
+            // [Attacker] uses [Ability] on [Target]
+            result = `${attackerName} uses ${actionName} on ${targetNames[0]}, ${segments[0]}.`;
+        }
     } else {
-        // Multi-target formatting
-        const lastSegment = segments.pop();
-        result = `${attackerName} ${verb} multiple targets ${preposition} ${actionName}: ${segments.join(', ')} and ${lastSegment}.`;
+        if (isWeaponAttack) {
+            const lastSegment = segments.pop();
+            result = `${attackerName} attacks multiple targets with ${actionName}: ${segments.join(', ')} and ${lastSegment}.`;
+        } else {
+            const lastSegment = segments.pop();
+            result = `${attackerName} uses ${actionName} on multiple targets: ${segments.join(', ')} and ${lastSegment}.`;
+        }
     }
 
     return result;
