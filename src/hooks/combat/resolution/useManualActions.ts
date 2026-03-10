@@ -8,6 +8,7 @@ import { RollMode } from '../../../types/Core';
 import { ChatMessage, DiceRollRequest } from '../../../types/World';
 import { generateResponse } from '../../../services/geminiService';
 import { useUI } from '../../../context/UIContext';
+import { generateSystemNarration } from '../../../utils/resolution/NarrationGenerator';
 
 export const useManualActions = (
     gameData: GameData | null,
@@ -166,8 +167,23 @@ export const useManualActions = (
             }
         } else {
             const uniqueTargetNames = Array.from(new Set(targetIds.map(id => allPotentialTargets.find(t => t.id === id)?.name).filter(Boolean)));
-            const verb = isWeaponAttack ? 'attacks with' : 'uses';
-            const manualMessage: ChatMessage = { id: `ai-atk-manual-${Date.now()}`, sender: 'ai', content: `${actorInstance.name} ${verb} ${source.name} on ${uniqueTargetNames.join(', ')}.${flavorText ? `\n\n"${flavorText}"` : ''}`, rolls: rolls, combatInfo: { attackerName: actorInstance.name, nextCombatantName: 'Next' } };
+
+            // Improve: Use systematic narration for manual turns when AI is off
+            const narrative = generateSystemNarration(
+                actorInstance.name,
+                source.name,
+                !!isWeaponAttack,
+                rolls,
+                allPotentialTargets
+            );
+
+            const manualMessage: ChatMessage = {
+                id: `ai-atk-manual-${Date.now()}`,
+                sender: 'ai',
+                content: `${narrative}${flavorText ? `\n\n"${flavorText}"` : ''}`,
+                rolls: rolls,
+                combatInfo: { attackerName: actorInstance.name, nextCombatantName: 'Next' }
+            };
             dispatch({ type: 'ADD_MESSAGE', payload: manualMessage });
             dispatch({ type: 'ADVANCE_TURN' });
         }
