@@ -57,13 +57,13 @@ const MentionList: React.FC<MentionListProps> = ({ suggestions, activeIndex, onS
                             : 'hover:bg-brand-primary/10 active:scale-[0.98]'
                             }`}
                     >
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-brand-surface border border-white/10 flex items-center justify-center overflow-hidden shadow-sm transition-transform group-hover:scale-110 ${getTypeColor(entry.type)}`}>
+                        <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110 ${getTypeColor(entry.type)}`}>
                             {entry.avatar ? (
-                                <img src={entry.avatar} alt="" className="w-full h-full object-cover" />
+                                <img src={entry.avatar} alt="" className="w-full h-full object-cover rounded-lg" />
                             ) : getTypeIcon(entry.type) ? (
-                                <img src={getTypeIcon(entry.type)!} alt="" className="w-6 h-6 object-contain" />
+                                <img src={getTypeIcon(entry.type)!} alt="" className="w-10 h-10 object-contain" />
                             ) : (
-                                <Icon name="info" className="w-5 h-5" />
+                                <Icon name="info" className="w-8 h-8" />
                             )}
                         </div>
 
