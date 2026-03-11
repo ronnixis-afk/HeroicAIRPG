@@ -71,16 +71,12 @@ const MentionList: React.FC<MentionListProps> = ({ suggestions, activeIndex, onS
                             <div className="text-body-base font-bold text-brand-text truncate leading-tight">
                                 {entry.name}
                             </div>
-                            <div className={`text-[10px] font-black opacity-80 mt-0.5 ${getTypeColor(entry.type)}`}>
+                            <div className={`text-[10px] font-bold opacity-80 mt-0.5 ${getTypeColor(entry.type)}`}>
                                 {entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
                             </div>
                         </div>
 
-                        {index === activeIndex && (
-                            <div className="text-brand-accent animate-pulse flex items-center justify-center w-6 h-6 rounded-full bg-brand-accent/10">
-                                <Icon name="send" className="w-3.5 h-3.5" />
-                            </div>
-                        )}
+
                     </button>
                 ))}
             </div>
