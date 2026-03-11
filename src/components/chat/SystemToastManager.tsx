@@ -16,30 +16,38 @@ export const SystemToastManager: React.FC = () => {
     const { setActiveView } = useUI();
     const [toasts, setToasts] = useState<Toast[]>([]);
     
+    const [lastProcessedMsgId, setLastProcessedMsgId] = useState<string | null>(null);
+
     // We only care about messages changing
     const messages = gameData?.messages || [];
 
     useEffect(() => {
         if (messages.length === 0) return;
 
-        // Get the very last message
-        const lastMessage = messages[messages.length - 1];
+        const startIndex = lastProcessedMsgId 
+            ? messages.findIndex(m => m.id === lastProcessedMsgId) + 1 
+            : Math.max(0, messages.length - 1); // Start from the last message on initial load to avoid flooding
 
-        // Check if it's a system message.
-        // Prevent triggering on historic logs by ensuring it was added recently based on timestamp
-        // or just rely on the fact that this effect runs when messages update and we grab the tip.
-        // We need a ref to track the last processed message ID to prevent infinite loops or duplicates on re-renders.
-        if (lastMessage.sender === 'system') {
-            processSystemMessage(lastMessage);
+        if (startIndex > 0 && startIndex < messages.length) {
+            const newMessages = messages.slice(startIndex);
+            newMessages.forEach(msg => {
+                if (msg.sender === 'system') {
+                    processSystemMessage(msg);
+                }
+            });
+            setLastProcessedMsgId(messages[messages.length - 1].id);
+        } else if (startIndex === 0 && !lastProcessedMsgId) {
+            // Initial load edge case
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg.sender === 'system') {
+                processSystemMessage(lastMsg);
+            }
+            setLastProcessedMsgId(lastMsg.id);
         }
-    }, [messages]);
 
-    // To prevent duplicate toasts across renders if the last message hasn't changed.
-    const [lastProcessedMsgId, setLastProcessedMsgId] = useState<string | null>(null);
+    }, [messages, lastProcessedMsgId]);
 
     const processSystemMessage = (msg: ChatMessage) => {
-        if (msg.id === lastProcessedMsgId) return;
-        setLastProcessedMsgId(msg.id);
 
         const content = msg.content || '';
         let type: Toast['type'] = 'general';
