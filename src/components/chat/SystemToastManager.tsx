@@ -158,14 +158,26 @@ export const SystemToastManager: React.FC = () => {
                     key={toast.id}
                     onClick={() => handleToastClick(toast)}
                     className={`
-                        w-full flex items-center gap-4 px-4 py-3 
+                        relative w-full flex items-center gap-4 px-4 py-3 
                         bg-brand-bg/95 backdrop-blur-xl border border-white/10 rounded-2xl 
-                        shadow-[0_10px_30px_rgba(0,0,0,0.5)] ring-1 ring-white/5 
-                        animate-in slide-in-from-bottom-5 fade-in duration-300
+                        shadow-[0_10px_30px_rgba(0,0,0,0.5)]
+                        animate-toast-container
                         ${toast.type === 'inventory' ? 'cursor-pointer pointer-events-auto hover:bg-brand-primary/10 transition-colors' : 'pointer-events-none'}
                     `}
                 >
-                    <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden">
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl z-0" preserveAspectRatio="none">
+                        <rect 
+                            x="0" y="0" width="100%" height="100%" 
+                            rx="16" ry="16" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            className="text-brand-accent animate-toast-border shadow-sm drop-shadow-[0_0_8px_rgba(62,207,142,0.5)]"
+                            pathLength="100"
+                        />
+                    </svg>
+                    
+                    <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden z-10">
                          {typeof getTypeIcon(toast.type) === 'string' ? (
                             <img src={getTypeIcon(toast.type) as string} alt="" className="w-10 h-10 object-contain" />
                          ) : (
@@ -173,7 +185,7 @@ export const SystemToastManager: React.FC = () => {
                          )}
                     </div>
                     
-                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="flex-1 min-w-0 flex flex-col justify-center z-10">
                         <div className={`text-[11px] font-bold opacity-90 mb-0.5 ${getTypeColor(toast.type)}`}>
                             {toast.title}
                         </div>
@@ -184,7 +196,7 @@ export const SystemToastManager: React.FC = () => {
                     
                     <button 
                         onClick={(e) => removeToast(e, toast.id)}
-                        className="p-1 -mr-2 text-brand-text-muted hover:text-white transition-colors flex-shrink-0 self-start"
+                        className="p-1 -mr-2 text-brand-text-muted hover:text-white transition-colors flex-shrink-0 self-start z-10 pointer-events-auto"
                     >
                         <Icon name="close" className="w-4 h-4" />
                     </button>

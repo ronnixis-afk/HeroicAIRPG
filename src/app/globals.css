@@ -360,3 +360,29 @@
 .animate-exit {
   animation: exit 0.8s ease-in forwards;
 }
+
+@keyframes toast-border-draw {
+  from {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+  }
+}
+
+.animate-toast-border {
+  animation: toast-border-draw 10s linear forwards;
+}
+
+@keyframes toast-zoom-in-out {
+  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+  3% { opacity: 1; transform: scale(1) translateY(0); }
+  97% { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.9) translateY(20px); }
+}
+
+.animate-toast-container {
+  animation: toast-zoom-in-out 10s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
