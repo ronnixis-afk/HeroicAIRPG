@@ -261,7 +261,7 @@ const SettingsView: React.FC = () => {
                             label="Hands-Free Mode"
                             enabled={gameData.isHandsFree || false}
                             onChange={(val) => updateIsHandsFree(val)}
-                            description="Adapts the UI for voice interaction and auto-reads AI responses. In this mode, the Game Master will describe combat turns with brutal, visceral realism."
+                            description="Enables Advanced Voice Mode. Tap the mic to start a real-time voice conversation with the AI Game Master. Speak naturally, interrupt anytime, and all game mechanics run seamlessly in the background."
                         />
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-brand-primary/20">
