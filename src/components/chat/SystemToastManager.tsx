@@ -8,7 +8,7 @@ interface Toast {
     id: string;
     title: string;
     message: string;
-    type: 'inventory' | 'roll' | 'level' | 'xp' | 'general' | 'combat';
+    type: 'inventory' | 'roll' | 'level' | 'xp' | 'general' | 'combat' | 'alignment' | 'relationship';
 }
 
 export const SystemToastManager: React.FC = () => {
@@ -54,6 +54,12 @@ export const SystemToastManager: React.FC = () => {
         } else if (lowerContent.includes('level up') || lowerContent.includes('leveled up')) {
             type = 'level';
             title = 'Level Up';
+        } else if (lowerContent.includes('alignment shift')) {
+            type = 'alignment';
+            title = 'Alignment Update';
+        } else if (lowerContent.includes('reactions:')) {
+            type = 'relationship';
+            title = 'Relationship Update';
         } else if (lowerContent.includes('experience') || lowerContent.includes('xp')) {
             type = 'xp';
             title = 'Experience Gained';
@@ -109,17 +115,21 @@ export const SystemToastManager: React.FC = () => {
     const getTypeIcon = (type: string) => {
         switch (type) {
             case 'inventory': return '/icons/backpack.png';
+            case 'relationship': return '/icons/people.png';
+            case 'alignment': return '/icons/lore.png';
             case 'roll': return <Icon name="dice" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_5px_rgba(62,207,142,0.6)]" />;
-            case 'level': return <Icon name="user" className="w-8 h-8 text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.6)]" />;
+            case 'level': return '/icons/heroes.png';
             case 'xp': return '/icons/quests.png';
-            case 'combat': return '/icons/combat.png';
-            default: return <Icon name="info" className="w-8 h-8 text-blue-400" />;
+            case 'combat': return <Icon name="sword" className="w-8 h-8 text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.6)]" />;
+            default: return '/icons/chronicle.png';
         }
     };
 
     const getTypeColor = (type: string) => {
         switch (type) {
             case 'inventory': return 'text-amber-400';
+            case 'relationship': return 'text-pink-400';
+            case 'alignment': return 'text-purple-400';
             case 'roll': return 'text-brand-accent';
             case 'level': return 'text-amber-300';
             case 'xp': return 'text-emerald-400';
@@ -151,7 +161,7 @@ export const SystemToastManager: React.FC = () => {
                     </div>
                     
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        <div className={`text-[10px] font-bold opacity-80 mb-0.5 tracking-wider uppercase ${getTypeColor(toast.type)}`}>
+                        <div className={`text-[11px] font-bold opacity-90 mb-0.5 ${getTypeColor(toast.type)}`}>
                             {toast.title}
                         </div>
                         <div className="text-body-sm text-brand-text truncate leading-relaxed">
