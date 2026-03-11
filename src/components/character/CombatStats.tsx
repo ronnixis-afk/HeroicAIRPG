@@ -19,8 +19,8 @@ const StatCard: React.FC<{
     tooltip: string;
     isBuffed?: boolean;
 }> = ({ label, children, tooltip, isBuffed }) => (
-    <div 
-        className={`flex flex-col items-center justify-center bg-brand-surface p-4 rounded-xl text-center h-full shadow-lg border min-h-[100px] cursor-help transition-all hover:bg-brand-primary/30 group relative overflow-hidden ${isBuffed ? 'border-brand-accent/40 bg-brand-accent/5' : 'border-brand-primary'}`} 
+    <div
+        className={`flex flex-col items-center justify-center bg-brand-surface p-4 rounded-xl text-center h-full shadow-lg border min-h-[100px] cursor-help transition-all hover:bg-brand-primary/30 group relative overflow-hidden ${isBuffed ? 'border-brand-accent/40 bg-brand-accent/5' : 'border-brand-primary'}`}
         title={tooltip}
     >
         <div className={`text-[8px] font-bold mb-3 transition-colors ${isBuffed ? 'text-brand-accent' : 'text-brand-text-muted group-hover:text-brand-accent'}`}>
@@ -51,12 +51,12 @@ interface CombatStatsProps {
     skillConfig?: SkillConfiguration;
 }
 
-export const CombatStats: React.FC<CombatStatsProps> = ({ 
-    character, 
-    inventory, 
-    onChange, 
+export const CombatStats: React.FC<CombatStatsProps> = ({
+    character,
+    inventory,
+    onChange,
     onLevelChange,
-    isOpen, 
+    isOpen,
     onToggle,
     resistances,
     immunities,
@@ -65,7 +65,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
     hideDefenses = false,
     skillConfig
 }) => {
-    
+
     const stats = useMemo(() => {
         return character.getCombatStats(inventory);
     }, [character, inventory]);
@@ -80,7 +80,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
     // Check for Traits and State for UI Feedback
     const hasUnarmedStyle = useMemo(() => character.abilities.some(a => a.name === "Unarmed Style"), [character.abilities]);
     const hasSneakAttack = useMemo(() => character.abilities.some(a => a.name === "Sneak Attack"), [character.abilities]);
-    const isUnarmed = useMemo(() => !inventory.equipped.some(item => 
+    const isUnarmed = useMemo(() => !inventory.equipped.some(item =>
         (item.weaponStats || item.tags?.some(t => t.toLowerCase().includes('weapon')) || item.tags?.includes('heavy weapon')) &&
         (item.equippedSlot === 'Main Hand' || item.equippedSlot === 'Off Hand')
     ), [inventory.equipped]);
@@ -119,8 +119,8 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
     return (
         <div className="space-y-6 animate-fade-in">
-             {!hideSummary && (
-                 <>
+            {!hideSummary && (
+                <>
                     <div className="grid grid-cols-4 gap-4">
                         <div className="col-span-1">
                             <label htmlFor="level" className="block text-[8px] font-bold text-brand-text-muted mb-1 px-1">Level</label>
@@ -139,14 +139,14 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                 {formatModifier(character.proficiencyBonus)}
                             </div>
                         </div>
-                        
+
                         <div className="col-span-1">
                             <label className="block text-[8px] font-bold text-brand-text-muted mb-1 px-1">Attacks</label>
                             <div className="w-full bg-brand-primary/40 h-11 px-2 rounded-md border border-brand-surface text-center font-black text-lg flex items-center justify-center text-brand-text-muted/80">
                                 {character.numberOfAttacks || 1}
                             </div>
                         </div>
-                        
+
                         <div className="col-span-1">
                             <label htmlFor="size" className="block text-[8px] font-bold text-brand-text-muted mb-1 px-1">Size</label>
                             <div className="relative">
@@ -223,18 +223,18 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                     {thpDisplayLabel}
                                 </label>
                                 <div className="flex items-center gap-2 bg-brand-primary/20 p-2 rounded-xl border border-brand-primary/50">
-                                    <input 
-                                        type="number" 
-                                        value={character.temporaryHitPoints || 0} 
-                                        onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)} 
+                                    <input
+                                        type="number"
+                                        value={character.temporaryHitPoints || 0}
+                                        onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)}
                                         className="w-full input-md text-center font-black text-xl text-emerald-400"
                                         aria-label={thpLabel}
                                     />
                                     <span className="text-brand-text-muted text-xl font-black">/</span>
                                     <div className="relative w-full">
-                                        <input 
-                                            type="number" 
-                                            value={maxTempHP} 
+                                        <input
+                                            type="number"
+                                            value={maxTempHP}
                                             readOnly
                                             className="w-full input-md bg-brand-primary/50 text-center font-black text-xl text-brand-text-muted cursor-not-allowed"
                                             aria-label={`Maximum ${thpLabel}`}
@@ -250,18 +250,18 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         <div className="col-span-4">
                             <label className="block text-[8px] font-bold text-brand-text-muted mb-1 px-1">Hit Points</label>
                             <div className="flex items-center gap-2 bg-brand-primary/20 p-2 rounded-xl border border-brand-primary/50">
-                                <input 
-                                    type="number" 
-                                    value={character.currentHitPoints} 
-                                    onChange={e => onChange(['currentHitPoints'], parseInt(e.target.value) || 0)} 
+                                <input
+                                    type="number"
+                                    value={character.currentHitPoints}
+                                    onChange={e => onChange(['currentHitPoints'], parseInt(e.target.value) || 0)}
                                     className="w-full input-md text-center font-black text-xl text-brand-accent"
                                     aria-label="Current Hit Points"
                                 />
                                 <span className="text-brand-text-muted text-xl font-black">/</span>
                                 <div className="relative w-full">
-                                    <input 
-                                        type="number" 
-                                        value={character.maxHitPoints} 
+                                    <input
+                                        type="number"
+                                        value={character.maxHitPoints}
                                         readOnly
                                         className="w-full input-md bg-brand-primary/50 text-center font-black text-xl text-brand-text-muted cursor-not-allowed"
                                         aria-label="Maximum Hit Points"
@@ -276,13 +276,13 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                     <div className="mt-8">
                         <h3 className="text-brand-text mb-4 px-1">Engagement Summary</h3>
-                        
+
                         {isUnarmed && hasUnarmedStyle && (
                             <p className="text-[10px] text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20 animate-fade-in">
                                 Unarmed Style: Your fists are as deadly as blades (Base 1d6).
                             </p>
                         )}
-                        
+
                         {isFlurryActive && (
                             <p className="text-[10px] text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20 animate-fade-in">
                                 Flurry Of Blows: Your unarmed strikes are a rapid blur. You gain 1 additional strike per round.
@@ -294,22 +294,22 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                 Sneak Attack: Deal an extra {character.getSneakAttackDice()}d6 damage on your first hit each turn when you have advantage.
                             </p>
                         )}
-                        
+
                         {isDualWielding && (
                             <p className="text-[10px] text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20">
-                                {hasTwoWeaponFighting 
+                                {hasTwoWeaponFighting
                                     ? "Two-Weapon Style: You gain 1 additional off-hand strike and no longer take a -2 penalty to attack rolls when dual wielding."
                                     : `Dual Wielding: Split your attacks per round between hands with a -2 penalty.`
                                 }
                             </p>
                         )}
-                        
+
                         {isDueling && hasDuelingStyle && (
                             <p className="text-[10px] text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20">
-                                Dueling Style: You gain a +2 bonus to damage rolls and +1 to Ac for wielding a single weapon.
+                                Dueling Style: You gain a +2 bonus to damage rolls and +1 to AC for wielding a single weapon.
                             </p>
                         )}
-                        
+
                         {isTwoHanding && hasGreatWeaponFighting && (
                             <p className="text-[10px] text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20">
                                 Great Weapon Fighting: Your ability bonus to damage is doubled when wielding a heavy weapon.
@@ -317,14 +317,14 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         )}
 
                         <div className="grid grid-cols-2 gap-4">
-                            <StatCard label="Total Ac" tooltip={acBreakdown} isBuffed={isAcBuffed}>
+                            <StatCard label="Total AC" tooltip={acBreakdown} isBuffed={isAcBuffed}>
                                 <span className="text-3xl font-black">{totalAC}</span>
                             </StatCard>
-                            <StatCard 
-                                label="To Hit Bonus" 
+                            <StatCard
+                                label="To Hit Bonus"
                                 isBuffed={isAttackBuffed || isOffHandAttackBuffed}
-                                tooltip={isDualWielding 
-                                    ? `Main: ${attackBreakdown}\nOff: ${offHandAttackBreakdown}` 
+                                tooltip={isDualWielding
+                                    ? `Main: ${attackBreakdown}\nOff: ${offHandAttackBreakdown}`
                                     : attackBreakdown
                                 }
                             >
@@ -340,16 +340,16 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                             <StatCard label="Attacks/Round" tooltip="Calculated based on level. Dual wielding or flurry of blows increases your total attack count.">
                                 <span className="text-3xl font-black">{numberOfAttacks}</span>
                             </StatCard>
-                            <StatCard 
-                                label="Primary Damage" 
+                            <StatCard
+                                label="Primary Damage"
                                 isBuffed={isDamageBuffed || isOffHandDamageBuffed}
-                                tooltip={isDualWielding 
-                                    ? `Main: ${damageBreakdown}\nOff: ${offHandDamageBreakdown}` 
+                                tooltip={isDualWielding
+                                    ? `Main: ${damageBreakdown}\nOff: ${offHandDamageBreakdown}`
                                     : damageBreakdown
                                 }
                             >
                                 {isDualWielding ? (
-                                     <div className="flex flex-col items-start w-full px-2">
+                                    <div className="flex flex-col items-start w-full px-2">
                                         <div className={`text-[9px] font-black truncate w-full text-left ${isDamageBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
                                             <span className="text-brand-text-muted mr-1.5">M:</span>{damageValue}
                                         </div>
@@ -367,10 +367,10 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         </div>
                     </div>
                 </>
-             )}
+            )}
 
-             {!hideDefenses && (
-                 <div className="space-y-6 pt-2 pb-2">
+            {!hideDefenses && (
+                <div className="space-y-6 pt-2 pb-2">
                     <h3 className="text-brand-text mb-4 px-1">Resistances & Defenses</h3>
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 shadow-inner">
                         <div className="mb-6">
@@ -407,7 +407,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         </div>
                     </div>
                 </div>
-             )}
+            )}
         </div>
     );
 };

@@ -2,36 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { AbilityEffect, ABILITY_SCORES, AbilityScoreName, STATUS_EFFECT_NAMES, DAMAGE_TYPES, AbilityUsage } from '../../../types';
 import { Icon } from '../../Icon';
 
-const InputFieldSlim: React.FC<{label: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, readOnly?: boolean}> = ({ label, value, onChange, type = 'text', placeholder, readOnly }) => (
+const InputFieldSlim: React.FC<{ label: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, readOnly?: boolean }> = ({ label, value, onChange, type = 'text', placeholder, readOnly }) => (
     <div className="flex flex-col col-span-1">
         <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">{label}</label>
-        <input 
-            type={type} 
-            value={value} 
-            onChange={onChange} 
-            placeholder={placeholder} 
+        <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
             readOnly={readOnly}
             className={`w-full input-md text-body-base transition-all ${readOnly ? 'bg-brand-primary/50 text-brand-text-muted cursor-not-allowed select-none' : ''}`}
         />
     </div>
 );
 
-const SelectFieldSlim: React.FC<{label: string, value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: readonly string[], allowCustom?: string}> = ({ label, value, onChange, options, allowCustom }) => (
+const SelectFieldSlim: React.FC<{ label: string, value: string, onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void, options: readonly string[], allowCustom?: string }> = ({ label, value, onChange, options, allowCustom }) => (
     <div className="flex flex-col col-span-1">
         <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">{label}</label>
         <div className="relative">
-             <select value={value} onChange={onChange} className="w-full input-md text-body-base appearance-none transition-all">
+            <select value={value} onChange={onChange} className="w-full input-md text-body-base appearance-none transition-all">
                 {options.map(opt => <option key={opt} value={opt} className="capitalize">{opt.charAt(0).toUpperCase() + opt.slice(1).toLowerCase()}</option>)}
                 {allowCustom && <option value={allowCustom}>{allowCustom}</option>}
-             </select>
-             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text-muted"><Icon name="chevronDown" className="w-4 h-4" /></div>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text-muted"><Icon name="chevronDown" className="w-4 h-4" /></div>
         </div>
     </div>
 );
 
 const formatEffectLabel = (effect: AbilityEffect, standardDC?: number, standardDice?: string) => {
     const target = effect.targetType === 'Multiple' ? 'Mul' : 'Sin';
-    
+
     if (effect.type === 'Damage') {
         const save = effect.saveAbility ? effect.saveAbility.slice(0, 3).charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3) : 'Dex';
         const eff = effect.saveEffect === 'negate' ? 'Neg' : 'Half';
@@ -39,7 +39,7 @@ const formatEffectLabel = (effect: AbilityEffect, standardDC?: number, standardD
         const dice = standardDice !== undefined ? standardDice : (effect.damageDice || '1d6');
         return `${dice} ${effect.damageType} ${target} ${save} ${eff} ${dc}`;
     }
-    
+
     if (effect.type === 'Status') {
         const save = effect.saveAbility ? effect.saveAbility.slice(0, 3).charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3) : 'Con';
         const dc = standardDC !== undefined ? standardDC : (effect.dc || 10);
@@ -50,7 +50,7 @@ const formatEffectLabel = (effect: AbilityEffect, standardDC?: number, standardD
         const dice = standardDice !== undefined ? standardDice : (effect.healDice || '1d8');
         return `${dice} Heal ${target}`;
     }
-    
+
     return `Effect: ${effect.type}`;
 };
 
@@ -65,7 +65,7 @@ export const EffectBuilder: React.FC<{
 
     useEffect(() => {
         let updates: Partial<AbilityEffect> = {};
-        
+
         if (standardDC !== undefined && effect.dc !== standardDC) {
             updates.dc = standardDC;
         }
@@ -98,17 +98,17 @@ export const EffectBuilder: React.FC<{
 
     return (
         <div className="space-y-4 mt-6">
-             <label className="block text-body-sm font-bold text-brand-text-muted ml-1">Mechanical effect</label>
-             <div className="flex flex-wrap gap-2">
-                <div 
+            <label className="block text-body-sm font-bold text-brand-text-muted ml-1">Mechanical effect</label>
+            <div className="flex flex-wrap gap-2">
+                <div
                     onClick={() => setIsExpanded(!isExpanded)}
                     className={`flex items-center gap-2 pl-5 pr-3 py-2 rounded-full border text-xs font-bold cursor-pointer transition-all hover:scale-105 bg-brand-bg border-purple-500/50 text-purple-400 ${isExpanded ? 'ring-2 ring-white/20 shadow-lg' : 'shadow-sm'}`}
                 >
                     <Icon name="sparkles" className="w-4 h-4" />
                     <span>{formatEffectLabel(effect, standardDC, standardDice)}</span>
                     {onRemove && (
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onRemove(); }} 
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onRemove(); }}
                             className="hover:bg-brand-danger hover:text-white rounded-full p-1 ml-2 transition-colors"
                         >
                             <Icon name="close" className="w-4 h-4" />
@@ -123,7 +123,7 @@ export const EffectBuilder: React.FC<{
                         <Icon name="sparkles" className="w-4 h-4" />
                         Effect configuration
                     </h4>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="col-span-1">
                             <label className="text-body-sm font-bold text-brand-text-muted block mb-1.5 ml-1">Type</label>
@@ -166,7 +166,7 @@ export const EffectBuilder: React.FC<{
                         <div className="space-y-6 mt-6">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="col-span-1">
-                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Dc</label>
+                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">DC</label>
                                     {standardDC !== undefined ? (
                                         <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-black text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
                                             {standardDC}
@@ -180,17 +180,17 @@ export const EffectBuilder: React.FC<{
                                 <SelectFieldSlim label="Target" value={effect.targetType || 'Single'} onChange={(e) => updateEffect('targetType', e.target.value as any)} options={['Single', 'Multiple']} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <InputFieldSlim 
-                                    label="Damage" 
-                                    value={standardDice !== undefined ? standardDice : (effect.damageDice || '')} 
-                                    placeholder="e.g. 2d6" 
+                                <InputFieldSlim
+                                    label="Damage"
+                                    value={standardDice !== undefined ? standardDice : (effect.damageDice || '')}
+                                    placeholder="e.g. 2d6"
                                     readOnly={standardDice !== undefined}
-                                    onChange={(e) => updateEffect('damageDice', e.target.value)} 
+                                    onChange={(e) => updateEffect('damageDice', e.target.value)}
                                 />
-                                <SelectFieldSlim 
-                                    label="Type" 
-                                    value={effect.damageType || 'Fire'} 
-                                    onChange={(e) => updateEffect('damageType', e.target.value)} 
+                                <SelectFieldSlim
+                                    label="Type"
+                                    value={effect.damageType || 'Fire'}
+                                    onChange={(e) => updateEffect('damageType', e.target.value)}
                                     options={[...DAMAGE_TYPES]}
                                     allowCustom={!DAMAGE_TYPES.some(t => t.toLowerCase() === (effect.damageType || '').toLowerCase()) ? effect.damageType : undefined}
                                 />
@@ -200,12 +200,12 @@ export const EffectBuilder: React.FC<{
                             )}
                         </div>
                     )}
-                    
+
                     {effect.type === 'Status' && (
                         <div className="space-y-6 mt-6">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="col-span-1">
-                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Dc</label>
+                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">DC</label>
                                     {standardDC !== undefined ? (
                                         <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-black text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
                                             {standardDC}
@@ -221,8 +221,8 @@ export const EffectBuilder: React.FC<{
                             <div className="grid grid-cols-1 gap-4">
                                 <SelectFieldSlim label="Status effect" value={effect.status || 'Prone'} onChange={(e) => updateEffect('status', e.target.value as any)} options={[...STATUS_EFFECT_NAMES]} />
                             </div>
-                            {standardDC !== undefined && (
-                                <p className="text-body-sm text-brand-accent/70 italic px-1">Dc locked to character scaling formula.</p>
+                            {standardDice !== undefined && (
+                                <p className="text-body-sm text-brand-accent/70 italic px-1">DC locked to character scaling formula.</p>
                             )}
                         </div>
                     )}
@@ -230,18 +230,18 @@ export const EffectBuilder: React.FC<{
                     {effect.type === 'Heal' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                             <SelectFieldSlim label="Target" value={effect.targetType || 'Single'} onChange={(e) => updateEffect('targetType', e.target.value as any)} options={['Single', 'Multiple']} />
-                            <InputFieldSlim 
-                                label="Heal amount" 
-                                value={standardDice !== undefined ? standardDice : (effect.healDice || '')} 
-                                placeholder="e.g. 2d4+2" 
+                            <InputFieldSlim
+                                label="Heal amount"
+                                value={standardDice !== undefined ? standardDice : (effect.healDice || '')}
+                                placeholder="e.g. 2d4+2"
                                 readOnly={standardDice !== undefined}
-                                onChange={(e) => updateEffect('healDice', e.target.value)} 
+                                onChange={(e) => updateEffect('healDice', e.target.value)}
                             />
                         </div>
                     )}
 
                     <div className="flex justify-center mt-8 pt-4 border-t border-brand-surface/30">
-                        <button 
+                        <button
                             onClick={() => setIsExpanded(false)}
                             className="btn-primary btn-md w-full max-w-xs"
                         >

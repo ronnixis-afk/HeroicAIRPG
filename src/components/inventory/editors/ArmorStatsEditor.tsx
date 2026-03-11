@@ -3,17 +3,17 @@ import { ArmorStats, PlayerCharacter, Companion } from '../../../types';
 import { Icon } from '../../Icon';
 
 const InputField: React.FC<{
-    label: string, 
-    value: string, 
+    label: string,
+    value: string,
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     type?: string,
     placeholder?: string,
 }> = ({ label, value, onChange, type = 'text', placeholder }) => (
     <div className="flex-1">
         <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">{label}</label>
-        <input 
-            type={type} 
-            value={value} 
+        <input
+            type={type}
+            value={value}
             onChange={onChange}
             placeholder={placeholder}
             className="w-full input-md"
@@ -30,18 +30,18 @@ const SelectField: React.FC<{
     <div className="flex-1">
         <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">{label}</label>
         <div className="relative">
-             <select 
-                value={value} 
+            <select
+                value={value}
                 onChange={onChange}
                 className="w-full input-md appearance-none cursor-pointer"
-             >
+            >
                 {options.map(opt => (
                     <option key={opt} value={opt} className="capitalize">
                         {opt.charAt(0).toUpperCase() + opt.slice(1).toLowerCase()}
                     </option>
                 ))}
-             </select>
-             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-text-muted">
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-text-muted">
                 <Icon name="chevronDown" className="w-4 h-4" />
             </div>
         </div>
@@ -69,11 +69,11 @@ export const ArmorStatsEditor: React.FC<{
                 {isShield ? 'Shield Statistics' : 'Armor Base Stats'}
             </h4>
             <div className="grid grid-cols-2 gap-4">
-                <InputField 
-                    label={isShield ? "Shield Ac (Max 4)" : "Base Ac"} 
-                    type="number" 
-                    value={String(stats.baseAC)} 
-                    onChange={e => handleBaseACChange(e.target.value)} 
+                <InputField
+                    label={isShield ? "Shield AC (Max 4)" : "Base AC"}
+                    type="number"
+                    value={String(stats.baseAC)}
+                    onChange={e => handleBaseACChange(e.target.value)}
                 />
                 <InputField label="Magic Bonus (+)" type="number" value={String(stats.plusAC || 0)} onChange={e => onChange(['armorStats', 'plusAC'], parseInt(e.target.value) || 0)} />
             </div>
@@ -82,7 +82,7 @@ export const ArmorStatsEditor: React.FC<{
                 <InputField label="Str Req." type="number" value={String(stats.strengthRequirement)} onChange={e => onChange(['armorStats', 'strengthRequirement'], parseInt(e.target.value) || 0)} />
             </div>
             {isShield && stats.baseAC > 4 && (
-                <p className="text-[10px] text-amber-500 mt-2 font-bold italic px-1">Shield base Ac is capped at 4 by system rules.</p>
+                <p className="text-[10px] text-amber-500 mt-2 font-bold italic px-1">Shield base AC is capped at 4 by system rules.</p>
             )}
         </div>
     );

@@ -115,12 +115,12 @@ const getGroupHeader = (roll: DiceRoll) => {
 
     if (roll.rollType === 'Skill Check' || roll.rollType === 'Ability Check') {
         let header = `${roller} ${roll.checkName}`;
-        if (roll.dc) header += ` vs Dc ${roll.dc}`;
+        if (roll.dc) header += ` vs DC ${roll.dc}`;
         return header;
     }
     if (roll.rollType === 'Saving Throw') {
         let header = `${roller} ${roll.checkName} Save`;
-        if (roll.dc) header += ` vs Dc ${roll.dc}`;
+        if (roll.dc) header += ` vs DC ${roll.dc}`;
         return header;
     }
 
@@ -129,8 +129,8 @@ const getGroupHeader = (roll: DiceRoll) => {
     const cleanName = roll.checkName.replace(/\s*\([^)]*\)\s*$/, '').trim();
 
     let header = `${roller} ${cleanName} vs ${target}`;
-    if (roll.rollType === 'Attack Roll' && roll.dc) header += ` Ac ${roll.dc}`;
-    else if (roll.dc && !isNaN(Number(roll.dc))) header += ` Dc ${roll.dc}`;
+    if (roll.rollType === 'Attack Roll' && roll.dc) header += ` AC ${roll.dc}`;
+    else if (roll.dc && !isNaN(Number(roll.dc))) header += ` DC ${roll.dc}`;
 
     return header;
 };

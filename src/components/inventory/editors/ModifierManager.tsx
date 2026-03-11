@@ -8,7 +8,7 @@ import { NumberStepper } from '../../NumberStepper';
 import { GameDataContext, GameDataContextType } from '../../../context/GameDataContext';
 
 interface ModifierItem {
-    id: string; 
+    id: string;
     type: ModifierCategory;
     label: string;
     value: string;
@@ -31,7 +31,7 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
     // Extract Modifiers using Registry
     const modifiers = useMemo(() => {
         let list: ModifierItem[] = [];
-        
+
         Object.values(MODIFIER_REGISTRY).forEach(def => {
             const extracted = def.extract(item);
             extracted.forEach(ex => {
@@ -43,12 +43,12 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                 }
                 else if (def.id === 'skill') label = `${ex.subOption} +${ex.value}`;
                 else if (def.id === 'combat') label = `${ex.subOption} +${ex.value}`;
-                else if (def.id === 'defense') label = `Ac +${ex.value}`;
+                else if (def.id === 'defense') label = `AC +${ex.value}`;
                 else if (def.id === 'save') label = `${ex.subOption} Save +${ex.value}`;
                 else if (def.id === 'resist') label = `${ex.value} ${ex.subOption}`;
                 else if (def.id === 'exdam') label = `Exdam ${ex.subOption} ${ex.value}`;
                 else if (def.id === 'temp_hp') label = `${thpLabel} +${ex.value}`;
-                
+
                 list.push({
                     id: ex.id,
                     type: def.id,
@@ -59,7 +59,7 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                 });
             });
         });
-        
+
         return list;
     }, [item, thpLabel]);
 
@@ -77,7 +77,7 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
         else if (cat === 'exdam') setValue('1d6');
         else if (cat === 'temp_hp') setValue('5');
         else setValue('1');
-        
+
         setModDuration('Passive');
     };
 
@@ -99,34 +99,34 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
             const indexStr = mod.id.split('-').pop();
             const index = indexStr ? parseInt(indexStr) : -1;
             if (index > -1 && item.buffs) {
-                 const newBuffs = [...(item.buffs || [])];
-                 let foundIndex = -1;
-                 
-                 if (mod.type === 'ability') foundIndex = newBuffs.findIndex(b => b.type === 'ability' && b.abilityName === mod.subOption && String(b.bonus) === mod.value);
-                 else if (mod.type === 'skill') foundIndex = newBuffs.findIndex(b => b.type === 'skill' && b.skillName === mod.subOption && String(b.bonus) === mod.value);
-                 else if (mod.type === 'combat') foundIndex = newBuffs.findIndex(b => (b.type === 'attack' || b.type === 'damage') && String(b.bonus) === mod.value && (b.type === 'attack' ? 'Attack' : 'Damage') === mod.subOption);
-                 else if (mod.type === 'defense') foundIndex = newBuffs.findIndex(b => b.type === 'ac' && String(b.bonus) === mod.value);
-                 else if (mod.type === 'save') foundIndex = newBuffs.findIndex(b => b.type === 'save' && String(b.bonus) === mod.value && (mod.subOption === 'All' ? !b.abilityName : b.abilityName === mod.subOption));
-                 else if (mod.type === 'resist') foundIndex = newBuffs.findIndex(b => (b.type === 'resistance' || b.type === 'immunity') && b.damageType === mod.subOption);
-                 else if (mod.type === 'temp_hp') foundIndex = newBuffs.findIndex(b => b.type === 'temp_hp' && String(b.bonus) === mod.value);
+                const newBuffs = [...(item.buffs || [])];
+                let foundIndex = -1;
 
-                 if (foundIndex > -1) {
-                     newBuffs.splice(foundIndex, 1);
-                     onChange(['buffs'], newBuffs);
-                 }
+                if (mod.type === 'ability') foundIndex = newBuffs.findIndex(b => b.type === 'ability' && b.abilityName === mod.subOption && String(b.bonus) === mod.value);
+                else if (mod.type === 'skill') foundIndex = newBuffs.findIndex(b => b.type === 'skill' && b.skillName === mod.subOption && String(b.bonus) === mod.value);
+                else if (mod.type === 'combat') foundIndex = newBuffs.findIndex(b => (b.type === 'attack' || b.type === 'damage') && String(b.bonus) === mod.value && (b.type === 'attack' ? 'Attack' : 'Damage') === mod.subOption);
+                else if (mod.type === 'defense') foundIndex = newBuffs.findIndex(b => b.type === 'ac' && String(b.bonus) === mod.value);
+                else if (mod.type === 'save') foundIndex = newBuffs.findIndex(b => b.type === 'save' && String(b.bonus) === mod.value && (mod.subOption === 'All' ? !b.abilityName : b.abilityName === mod.subOption));
+                else if (mod.type === 'resist') foundIndex = newBuffs.findIndex(b => (b.type === 'resistance' || b.type === 'immunity') && b.damageType === mod.subOption);
+                else if (mod.type === 'temp_hp') foundIndex = newBuffs.findIndex(b => b.type === 'temp_hp' && String(b.bonus) === mod.value);
+
+                if (foundIndex > -1) {
+                    newBuffs.splice(foundIndex, 1);
+                    onChange(['buffs'], newBuffs);
+                }
             }
-        } 
+        }
         else if (mod.type === 'enhancement') {
-             if (mod.id === 'mod-enh-wep') onChange(['weaponStats', 'enhancementBonus'], 0);
-             if (mod.id === 'mod-enh-arm') onChange(['armorStats', 'plusAC'], 0);
+            if (mod.id === 'mod-enh-wep') onChange(['weaponStats', 'enhancementBonus'], 0);
+            if (mod.id === 'mod-enh-arm') onChange(['armorStats', 'plusAC'], 0);
         }
         else if (mod.type === 'exdam' && item.weaponStats) {
-             const newDamages = item.weaponStats.damages.filter(d => !(d.dice === mod.value && d.type === mod.subOption));
-             if (newDamages.length === 0 && item.weaponStats.damages.length > 0) {
-                 // Dont delete base damage
-             } else {
-                 onChange(['weaponStats', 'damages'], [item.weaponStats.damages[0], ...newDamages]);
-             }
+            const newDamages = item.weaponStats.damages.filter(d => !(d.dice === mod.value && d.type === mod.subOption));
+            if (newDamages.length === 0 && item.weaponStats.damages.length > 0) {
+                // Dont delete base damage
+            } else {
+                onChange(['weaponStats', 'damages'], [item.weaponStats.damages[0], ...newDamages]);
+            }
         }
 
         if (editModeId === mod.id) handleCancelEdit();
@@ -142,19 +142,19 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
         }
 
         setTimeout(() => {
-             const freshItem = item.clone(); 
-             applyModifierToItem(freshItem, category, value, subOption, modDuration);
-             
-             if(freshItem.buffs !== item.buffs) onChange(['buffs'], freshItem.buffs);
-             if(freshItem.weaponStats !== item.weaponStats) onChange(['weaponStats'], freshItem.weaponStats);
-             if(freshItem.armorStats !== item.armorStats) onChange(['armorStats'], freshItem.armorStats);
+            const freshItem = item.clone();
+            applyModifierToItem(freshItem, category, value, subOption, modDuration);
+
+            if (freshItem.buffs !== item.buffs) onChange(['buffs'], freshItem.buffs);
+            if (freshItem.weaponStats !== item.weaponStats) onChange(['weaponStats'], freshItem.weaponStats);
+            if (freshItem.armorStats !== item.armorStats) onChange(['armorStats'], freshItem.armorStats);
         }, 50);
     };
 
     const renderSubOptionInput = () => {
         const def = MODIFIER_REGISTRY[category];
         if (!def || !def.hasSubOption) return <div className="input-md w-full bg-brand-primary/30 border-brand-surface/30 flex items-center justify-center text-brand-text-muted text-[10px] font-bold italic">N/a</div>;
-        
+
         return (
             <div className="relative">
                 <select value={subOption} onChange={e => setSubOption(e.target.value)} className="w-full input-md appearance-none cursor-pointer">
@@ -168,9 +168,9 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
     const renderValueInput = () => {
         if (category === 'resist') return (
             <div className="relative">
-                <select 
-                    value={value} 
-                    onChange={e => setValue(e.target.value)} 
+                <select
+                    value={value}
+                    onChange={e => setValue(e.target.value)}
                     className="w-full input-md appearance-none cursor-pointer"
                 >
                     <option value="Resist">Resistance</option>
@@ -179,29 +179,29 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-brand-text-muted"><Icon name="chevronDown" className="w-4 h-4" /></div>
             </div>
         );
-        
+
         if (category === 'exdam') return (
-            <input 
-                type="text" 
-                placeholder="e.g. 1d6" 
-                value={value} 
-                onChange={e => setValue(e.target.value)} 
-                className="w-full input-md text-center font-mono" 
+            <input
+                type="text"
+                placeholder="e.g. 1d6"
+                value={value}
+                onChange={e => setValue(e.target.value)}
+                className="w-full input-md text-center font-mono"
             />
         );
-        
+
         const numVal = parseInt(value) || 0;
         let min = 1, max = 5;
         if (category === 'ability') max = 8;
         if (category === 'skill') { min = 1; max = 10; }
         if (category === 'temp_hp') { min = 5; max = 50; }
-        
+
         return (
-            <NumberStepper 
-                value={numVal} 
-                onChange={(val) => setValue(val.toString())} 
-                min={min} 
-                max={max} 
+            <NumberStepper
+                value={numVal}
+                onChange={(val) => setValue(val.toString())}
+                min={min}
+                max={max}
             />
         );
     };
@@ -209,8 +209,8 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
     const getSubLabel = () => {
         const def = MODIFIER_REGISTRY[category];
         if (!def.hasSubOption) return 'Type';
-        
-        switch(def.subOptionType) {
+
+        switch (def.subOptionType) {
             case 'ability': return 'Ability';
             case 'skill': return 'Skill';
             case 'saveType': return 'Target';
@@ -223,19 +223,19 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
     return (
         <div className="space-y-4">
             <label className="block text-body-sm font-bold text-brand-text-muted ml-1">System Modifiers</label>
-            
+
             <div className="flex flex-wrap gap-2 mb-2 min-h-[32px]">
                 {modifiers.length > 0 ? (
                     modifiers.map((mod) => (
-                        <div 
-                            key={mod.id} 
+                        <div
+                            key={mod.id}
                             onClick={() => handleEdit(mod)}
                             className={`flex items-center gap-1.5 pl-4 pr-1 py-1.5 rounded-full border text-[10px] font-bold cursor-pointer transition-all hover:scale-105 bg-brand-bg ${editModeId === mod.id ? 'ring-2 ring-brand-text shadow-lg' : 'shadow-sm'} ${MODIFIER_REGISTRY[mod.type].colorClass}`}
                         >
                             <span>{mod.label}</span>
                             {mod.duration === 'Active' && <span className="text-[8px] opacity-60 ml-0.5">(A)</span>}
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); handleDelete(mod); }} 
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleDelete(mod); }}
                                 className="hover:bg-brand-danger hover:text-white rounded-full p-1 ml-1.5 transition-colors"
                             >
                                 <Icon name="close" className="w-3 h-3" />
@@ -254,8 +254,8 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                         <div className="space-y-1.5">
                             <label className="block text-[10px] font-bold text-brand-text-muted mb-1.5 ml-1">Modifier Category</label>
                             <div className="relative">
-                                <select 
-                                    value={category} 
+                                <select
+                                    value={category}
                                     onChange={e => setDefaultsForCategory(e.target.value as ModifierCategory)}
                                     className="w-full input-md appearance-none cursor-pointer"
                                 >
@@ -300,7 +300,7 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                         </div>
 
                         <div className="flex">
-                            <button 
+                            <button
                                 onClick={handleAddOrUpdate}
                                 className={`w-full btn-md flex items-center justify-center transition-all shadow-md active:scale-95 ${editModeId ? 'btn-secondary' : 'btn-primary'}`}
                             >

@@ -18,17 +18,15 @@ interface ActorIdentityProps {
 }
 
 const AlignmentButton: React.FC<{ label: string, active: boolean, onClick: () => void, colorClass: string }> = ({ label, active, onClick, colorClass }) => (
-    <button 
+    <button
         onClick={onClick}
-        className={`flex-1 flex flex-col items-center justify-center h-16 rounded-2xl border transition-all shadow-md group ${
-            active 
-                ? `bg-brand-primary/40 border-brand-accent ${colorClass}` 
-                : 'bg-brand-primary/40 border-brand-surface text-brand-text-muted hover:border-brand-primary'
-        }`}
+        className={`flex-1 flex flex-col items-center justify-center h-16 rounded-2xl border transition-all shadow-md group ${active
+            ? `bg-brand-primary/40 border-brand-accent ${colorClass}`
+            : 'bg-brand-primary/40 border-brand-surface text-brand-text-muted hover:border-brand-primary'
+            }`}
     >
-        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mb-1 transition-all ${
-            active ? 'bg-brand-accent border-brand-accent' : 'border-brand-text-muted/30'
-        }`}>
+        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mb-1 transition-all ${active ? 'bg-brand-accent border-brand-accent' : 'border-brand-text-muted/30'
+            }`}>
             {active && <Icon name="check" className="w-3 h-3 text-black" />}
         </div>
         <span className={`text-body-sm font-bold ${active ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
@@ -38,7 +36,7 @@ const AlignmentButton: React.FC<{ label: string, active: boolean, onClick: () =>
 );
 
 export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel, onChange, onAffinityChange, onShipToggle, affinities, archetypeDefinitions }) => {
-    
+
     const adjustHp = (amount: number) => {
         const newHp = Math.max(0, Math.min(actor.maxHitPoints || 0, (actor.currentHitPoints || 0) + amount));
         onChange(['currentHitPoints'], newHp);
@@ -87,8 +85,8 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                 <div className="col-span-4">
                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Difficulty Cr</label>
                     <div className="relative">
-                        <select 
-                            value={currentDifficultyTag} 
+                        <select
+                            value={currentDifficultyTag}
                             onChange={e => handleDifficultyPresetChange(e.target.value)}
                             className={selectClass}
                         >
@@ -103,12 +101,12 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                         </div>
                     </div>
                 </div>
-
-                <div className="col-span-2">
-                    <InputField label="Ac" type="number" value={String(actor.armorClass)} onChange={e => onChange(['armorClass'], parseInt(e.target.value) || 10)} />
-                </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <InputField label="AC" type="number" value={String(actor.armorClass)} onChange={e => onChange(['armorClass'], parseInt(e.target.value) || 10)} />
+                <InputField label="Speed" type="number" value={String(actor.speed)} onChange={e => onChange(['speed'], parseInt(e.target.value) || 30)} />
+            </div>
             <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-1">
                     <InputField label="Max Hp" type="number" value={String(actor.maxHitPoints)} onChange={e => onChange(['maxHitPoints'], parseInt(e.target.value) || 10)} />
@@ -117,7 +115,7 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                     <InputField label="Current Hp" type="number" value={String(actor.currentHitPoints)} onChange={e => onChange(['currentHitPoints'], parseInt(e.target.value) || 0)} className="text-brand-accent font-bold" />
                 </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-1 flex items-center justify-between gap-2">
                     <button onClick={() => adjustHp(-5)} className="flex-1 bg-brand-danger/10 hover:bg-brand-danger/20 text-brand-danger border border-brand-danger/20 h-10 rounded-xl font-bold text-xs transition-colors">-5</button>
@@ -134,11 +132,11 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                     <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Max Temp Hp</label>
                     <div className="relative">
                         {/* Fix: Access maxTemporaryHitPoints from updated CombatActor interface */}
-                        <input 
-                            type="number" 
-                            value={actor.maxTemporaryHitPoints || 0} 
+                        <input
+                            type="number"
+                            value={actor.maxTemporaryHitPoints || 0}
                             readOnly
-                            className="w-full bg-brand-primary/50 h-11 px-4 rounded-xl border border-brand-surface text-body-base text-brand-text-muted cursor-not-allowed shadow-inner" 
+                            className="w-full bg-brand-primary/50 h-11 px-4 rounded-xl border border-brand-surface text-body-base text-brand-text-muted cursor-not-allowed shadow-inner"
                             aria-label="Maximum Temporary Hit Points"
                         />
                         <div className="absolute inset-y-0 right-3 flex items-center text-brand-text-muted" title="Calculated from rank and challenge rating.">
@@ -149,11 +147,11 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                 <div className="col-span-1">
                     <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Current Temp Hp</label>
                     {/* Fix: Access temporaryHitPoints from updated CombatActor interface */}
-                    <input 
-                        type="number" 
-                        value={actor.temporaryHitPoints || 0} 
-                        onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)} 
-                        className="w-full bg-brand-primary h-11 px-4 rounded-xl focus:ring-brand-accent focus:ring-1 focus:border-brand-accent focus:outline-none border border-brand-surface focus:border-brand-accent text-body-base text-emerald-400 font-bold transition-all shadow-inner" 
+                    <input
+                        type="number"
+                        value={actor.temporaryHitPoints || 0}
+                        onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)}
+                        className="w-full bg-brand-primary h-11 px-4 rounded-xl focus:ring-brand-accent focus:ring-1 focus:border-brand-accent focus:outline-none border border-brand-surface focus:border-brand-accent text-body-base text-emerald-400 font-bold transition-all shadow-inner"
                         aria-label="Current Temporary Hit Points"
                     />
                 </div>
@@ -163,8 +161,8 @@ export const ActorIdentity: React.FC<ActorIdentityProps> = ({ actor, playerLevel
                 <div className="col-span-2">
                     <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Affinity</label>
                     <div className="relative">
-                        <select 
-                            value={actor.affinity || ''} 
+                        <select
+                            value={actor.affinity || ''}
                             onChange={e => onAffinityChange(e.target.value)}
                             className={selectClass}
                         >

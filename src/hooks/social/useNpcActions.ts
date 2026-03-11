@@ -163,7 +163,7 @@ export const useNpcActions = (
         setIsLoading(true);
         const rel = npc.relationship;
 
-        // Relationship-based Dc
+        // Relationship-based DC
         const dc = rel >= 50 ? 5 : rel >= 30 ? 10 : rel >= 10 ? 12 : rel >= -10 ? 15 : rel >= -30 ? 20 : 25;
 
         const request: DiceRollRequest = {

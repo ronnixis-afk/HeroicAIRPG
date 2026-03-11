@@ -83,7 +83,7 @@ const formatEffectString = (effect: AbilityEffect, actor?: PlayerCharacter | Com
     if (effect.type === 'Damage') {
         parts.push(`Deals ${damage || 'damage'}`);
         if (dc && effect.saveAbility) {
-            parts.push(`(Dc ${dc} ${effect.saveAbility.slice(0, 3)} save)`);
+            parts.push(`(DC ${dc} ${effect.saveAbility.slice(0, 3)} save)`);
         }
     } else if (effect.type === 'Heal') {
         parts.push(`Heals ${heal || 'health'}`);
@@ -437,8 +437,8 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                 onClick={() => { if (heroicPoints > 0) setIsHeroicModeActive(!isHeroicModeActive); }}
                                 disabled={heroicPoints <= 0}
                                 className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${isHeroicModeActive
-                                        ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20'
-                                        : 'border-brand-primary bg-brand-primary/20 hover:border-brand-primary/50'
+                                    ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20'
+                                    : 'border-brand-primary bg-brand-primary/20 hover:border-brand-primary/50'
                                     } ${heroicPoints <= 0 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                             >
                                 <div className="flex items-center gap-3">

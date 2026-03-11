@@ -18,13 +18,13 @@ interface ForgeEffectsProps {
 }
 
 const formatEffectLabel = (effect: AbilityEffect, usage: AbilityUsage | undefined, isSingleUse: boolean) => {
-    const usageLabel = isSingleUse ? '' : (usage?.type === 'per_short_rest' ? 'Short' 
-                        : usage?.type === 'per_long_rest' ? 'Long' 
-                        : usage?.type === 'charges' ? 'Chg' : '');
+    const usageLabel = isSingleUse ? '' : (usage?.type === 'per_short_rest' ? 'Short'
+        : usage?.type === 'per_long_rest' ? 'Long'
+            : usage?.type === 'charges' ? 'Chg' : '');
     const uses = isSingleUse ? '' : (usage?.maxUses || 0);
     const usagePart = isSingleUse ? '' : `${usageLabel} ${uses}`;
     const target = effect.targetType === 'Multiple' ? 'Mul' : 'Sin';
-    
+
     if (effect.type === 'Damage') {
         const save = effect.saveAbility ? effect.saveAbility.slice(0, 3).charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3).toLowerCase() : 'Dex';
         const eff = effect.saveEffect === 'half' ? 'Half' : 'Neg';
@@ -94,31 +94,31 @@ export const ForgeEffects: React.FC<ForgeEffectsProps> = ({
             )}
             {effectType === 'Damage' && (
                 <div className="space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
-                        <div className="col-span-1"><label className={labelClass}>Dc</label><input type="number" value={effectConfig.dc} onChange={e => setEffectConfig({...effectConfig, dc: parseInt(e.target.value)})} className={inputClass} /></div>
-                        <div className="col-span-1">
+                    <div className="grid grid-cols-4 gap-3 mb-3">
+                        <div className="col-span-1"><label className={labelClass}>DC</label><input type="number" value={effectConfig.dc} onChange={e => setEffectConfig({ ...effectConfig, dc: parseInt(e.target.value) })} className={inputClass} /></div>
+                        <div className="col-span-2">
                             <label className={labelClass}>Save</label>
                             <div className="relative">
-                                <select value={effectConfig.saveAbility} onChange={e => setEffectConfig({...effectConfig, saveAbility: e.target.value as any})} className={selectClass + " !px-2 capitalize"}>
-                                    {ABILITY_SCORES.map(s => <option key={s} value={s}>{s.slice(0,3)}</option>)}
+                                <select value={effectConfig.saveAbility} onChange={e => setEffectConfig({ ...effectConfig, saveAbility: e.target.value as any })} className={selectClass + " !px-2 capitalize"}>
+                                    {ABILITY_SCORES.map(s => <option key={s} value={s}>{s.slice(0, 3)}</option>)}
                                 </select>
                             </div>
                         </div>
-                        <div className="col-span-1"><label className={labelClass}>On Save</label><select value={effectConfig.saveEffect} onChange={e => setEffectConfig({...effectConfig, saveEffect: e.target.value as any})} className={selectClass + " !px-2"}>
+                        <div className="col-span-1"><label className={labelClass}>On Save</label><select value={effectConfig.saveEffect} onChange={e => setEffectConfig({ ...effectConfig, saveEffect: e.target.value as any })} className={selectClass + " !px-2"}>
                             <option value="half">Half</option>
                             <option value="negate">Neg</option>
                         </select></div>
-                        <div className="col-span-1"><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({...effectConfig, targetType: e.target.value as any})} className={selectClass + " !px-2"}>
+                        <div className="col-span-1"><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({ ...effectConfig, targetType: e.target.value as any })} className={selectClass + " !px-2"}>
                             <option value="Single">Sin</option>
                             <option value="Multiple">Mul</option>
                         </select></div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <div><label className={labelClass}>Damage</label><input type="text" value={effectConfig.damageDice} onChange={e => setEffectConfig({...effectConfig, damageDice: e.target.value})} className={inputClass} /></div>
+                        <div><label className={labelClass}>Damage</label><input type="text" value={effectConfig.damageDice} onChange={e => setEffectConfig({ ...effectConfig, damageDice: e.target.value })} className={inputClass} /></div>
                         <div>
                             <label className={labelClass}>Type</label>
                             <div className="relative">
-                                <select value={effectConfig.damageType} onChange={e => setEffectConfig({...effectConfig, damageType: e.target.value})} className={selectClass + " capitalize"}>
+                                <select value={effectConfig.damageType} onChange={e => setEffectConfig({ ...effectConfig, damageType: e.target.value })} className={selectClass + " capitalize"}>
                                     {DAMAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                                 </select>
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text-muted"><Icon name="chevronDown" className="w-4 h-4" /></div>
@@ -128,28 +128,29 @@ export const ForgeEffects: React.FC<ForgeEffectsProps> = ({
                 </div>
             )}
             {effectType === 'Status' && (
-                 <div className="space-y-6">
-                    <div className="grid grid-cols-4 gap-4">
-                         <div className="col-span-1"><label className={labelClass}>Dc</label><input type="number" value={effectConfig.dc} onChange={e => setEffectConfig({...effectConfig, dc: parseInt(e.target.value)})} className={inputClass}/></div>
-                         <div className="col-span-1"><label className={labelClass}>Save</label><select value={effectConfig.saveAbility} onChange={e => setEffectConfig({...effectConfig, saveAbility: e.target.value as any})} className={selectClass + " !px-2 capitalize"}>{ABILITY_SCORES.map(s => <option key={s} value={s}>{s.slice(0,3)}</option>)}</select></div>
-                         <div className="col-span-1"><label className={labelClass}>Rnds</label><input type="number" value={effectConfig.duration || 1} onChange={e => setEffectConfig({...effectConfig, duration: parseInt(e.target.value)})} className={inputClass}/></div>
-                         <div className="col-span-1"><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({...effectConfig, targetType: e.target.value as any})} className={selectClass + " !px-2"}><option value="Single">Sin</option><option value="Multiple">Mul</option></select></div>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-4 gap-3 mb-3">
+                        <div className="col-span-1"><label className={labelClass}>DC</label><input type="number" value={effectConfig.dc} onChange={e => setEffectConfig({ ...effectConfig, dc: parseInt(e.target.value) })} className={inputClass} /></div>
+                        <div className="col-span-2">
+                            <label className={labelClass}>Save</label><select value={effectConfig.saveAbility} onChange={e => setEffectConfig({ ...effectConfig, saveAbility: e.target.value as any })} className={selectClass + " !px-2 capitalize"}>{ABILITY_SCORES.map(s => <option key={s} value={s}>{s.slice(0, 3)}</option>)}</select></div>
+                        <div className="col-span-1"><label className={labelClass}>Rnds</label><input type="number" value={effectConfig.duration || 1} onChange={e => setEffectConfig({ ...effectConfig, duration: parseInt(e.target.value) })} className={inputClass} /></div>
+                        <div className="col-span-1"><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({ ...effectConfig, targetType: e.target.value as any })} className={selectClass + " !px-2"}><option value="Single">Sin</option><option value="Multiple">Mul</option></select></div>
                     </div>
                     <div>
                         <label className={labelClass}>Status Effect</label>
                         <div className="relative">
-                            <select value={effectConfig.status} onChange={e => setEffectConfig({...effectConfig, status: e.target.value as any})} className={selectClass}>
+                            <select value={effectConfig.status} onChange={e => setEffectConfig({ ...effectConfig, status: e.target.value as any })} className={selectClass}>
                                 {STATUS_EFFECT_NAMES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text-muted"><Icon name="chevronDown" className="w-4 h-4" /></div>
                         </div>
                     </div>
-                 </div>
+                </div>
             )}
             {effectType === 'Heal' && (
                 <div className="grid grid-cols-2 gap-4">
-                    <div><label className={labelClass}>Heal Dice / Hp</label><input type="text" value={effectConfig.healDice} onChange={e => setEffectConfig({...effectConfig, healDice: e.target.value})} className={inputClass} placeholder="e.g. 2d4+2" /></div>
-                    <div><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({...effectConfig, targetType: e.target.value as any})} className={selectClass}><option value="Single">Single</option><option value="Multiple">Multiple</option></select></div>
+                    <div><label className={labelClass}>Heal Dice / Hp</label><input type="text" value={effectConfig.healDice} onChange={e => setEffectConfig({ ...effectConfig, healDice: e.target.value })} className={inputClass} placeholder="e.g. 2d4+2" /></div>
+                    <div><label className={labelClass}>Target</label><select value={effectConfig.targetType} onChange={e => setEffectConfig({ ...effectConfig, targetType: e.target.value as any })} className={selectClass}><option value="Single">Single</option><option value="Multiple">Multiple</option></select></div>
                 </div>
             )}
             <div className="flex justify-center pt-4">

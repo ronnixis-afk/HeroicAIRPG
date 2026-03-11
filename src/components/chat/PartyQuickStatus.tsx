@@ -226,7 +226,7 @@ export const PartyQuickStatus: React.FC = () => {
             <div className="flex flex-col items-center gap-1.5">
                 {isPartyHidden && (
                     <div className="text-body-sm font-bold text-brand-accent mb-1 animate-fade-in text-center drop-shadow-[0_0_8px_rgba(62,207,142,0.4)]">
-                        Dc {partyStealthScore}
+                        DC {partyStealthScore}
                     </div>
                 )}
 

@@ -304,8 +304,8 @@ const InventoryView: React.FC = () => {
                             <div className="text-brand-accent/60 cursor-help">
                                 <Icon name="info" className="w-3.5 h-3.5" />
                             </div>
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-brand-surface text-brand-text text-[10px] p-3 rounded-xl shadow-2xl border border-brand-primary opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-all z-50 leading-relaxed font-normal text-left">
-                                You gain a +2 bonus to damage rolls and +1 to Ac for wielding a single weapon.
+                            <div className="px-3 py-2 bg-brand-accent/5 rounded border border-brand-accent/20 text-brand-accent text-xs italic mb-4">
+                                You gain a +2 bonus to damage rolls and +1 to AC for wielding a single weapon.
                             </div>
                         </div>
                     )}

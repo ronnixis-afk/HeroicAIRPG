@@ -39,7 +39,7 @@ const ScaleRadio: React.FC<{ label: string, isActive: boolean, onClick: () => vo
 );
 
 const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => void, canAfford: boolean }> = ({ item, onBuy, canAfford }) => (
-    <div 
+    <div
         onClick={() => onBuy(item)}
         className={`
             bg-brand-surface p-3 rounded-xl border border-brand-primary/50 
@@ -55,7 +55,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                 <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
             </div>
             <p className="text-body-sm text-brand-text-muted line-clamp-1 italic mb-2">{item.description}</p>
-            
+
             {/* Mechanical Detail Section */}
             <div className="flex flex-wrap gap-1.5">
                 {/* Weapon/Armor Stats */}
@@ -66,12 +66,12 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                     </span>
                 )}
                 {item.armorStats && (
-                    <span className="text-[9px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 capitalize tracking-normal">
-                        Ac {(item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0)}
+                    <span className="text-body-xs font-medium text-brand-accent/70 shrink-0">
+                        AC {(item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0)}
                         {item.armorStats.plusAC !== 0 && ` (${item.armorStats.plusAC >= 0 ? '+' : ''}${item.armorStats.plusAC})`}
                     </span>
                 )}
-                
+
                 {/* Passive Buffs */}
                 {item.buffs?.map((buff, idx) => {
                     const { label, colorClass } = getBuffTag(buff);
@@ -91,8 +91,8 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                 )}
             </div>
         </div>
-        
-        <button 
+
+        <button
             className={`
                 btn-sm min-w-[70px] gap-1
                 ${canAfford ? 'btn-primary' : 'btn-secondary opacity-50'}
@@ -106,15 +106,15 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
 
 const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (item: Item) => void }> = ({ item, onSell }) => {
     const sellPrice = Math.floor((item.price || 0) / 2);
-    
+
     return (
-        <div 
+        <div
             onClick={() => onSell(item)}
             className="bg-brand-surface p-3 rounded-xl border border-brand-primary/50 flex justify-between items-center group hover:border-brand-danger/30 transition-all cursor-pointer hover:bg-brand-surface-raised relative overflow-hidden"
         >
-             <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-danger opacity-0 group-hover:opacity-100 transition-opacity" />
-             
-             <div className="flex-grow min-w-0 mr-4 pl-2">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand-danger opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <div className="flex-grow min-w-0 mr-4 pl-2">
                 <div className="flex items-center gap-2 mb-1">
                     <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
                     {item.quantity && item.quantity > 1 && <span className="text-body-sm font-bold text-brand-text-muted">x{item.quantity}</span>}
@@ -124,10 +124,10 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
                         </span>
                     )}
                 </div>
-                 <p className="text-body-sm text-brand-text-muted line-clamp-1 italic">{item.description}</p>
-             </div>
-             
-             <button 
+                <p className="text-body-sm text-brand-text-muted line-clamp-1 italic">{item.description}</p>
+            </div>
+
+            <button
                 className="btn-secondary btn-sm min-w-[70px] gap-1 text-brand-text border-brand-primary hover:border-brand-danger hover:text-brand-danger"
             >
                 <span className="tabular-nums">{sellPrice}</span>
@@ -138,14 +138,14 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
 };
 
 const StoreView: React.FC = () => {
-    const { 
-        gameData, 
-        fetchStoreCategory, 
-        buyItem, 
-        sellItem, 
-        identifyAndAppraiseItems 
+    const {
+        gameData,
+        fetchStoreCategory,
+        buyItem,
+        sellItem,
+        identifyAndAppraiseItems
     } = useContext(GameDataContext);
-    
+
     const [mode, setMode] = useState<'buy' | 'sell'>('buy');
     const [activeScale, setActiveScale] = useState<'Person' | 'Mount' | 'Ship'>('Person');
     const [activeCategory, setActiveCategory] = useState(SHOP_CATEGORIES[0].id);
@@ -182,7 +182,7 @@ const StoreView: React.FC = () => {
     const inventory = gameData.globalStoreInventory?.[`${activeScale}:${activeCategory}`] || [];
     const playerGold = gameData.playerInventory.carried.find(i => i.tags?.includes('currency'))?.quantity || 0;
     const currencyName = gameData.mapSettings?.style === 'sci-fi' ? 'Credits' : 'Gold';
-    
+
     // Filter sellable items (must have price, not be currency)
     const allItemsForSale = [
         ...gameData.playerInventory.carried.map(i => Object.assign(i.clone(), { _sourceList: 'Carried' })),
@@ -190,14 +190,14 @@ const StoreView: React.FC = () => {
         ...gameData.playerInventory.storage.map(i => Object.assign(i.clone(), { _sourceList: 'Stored' }))
     ];
 
-    const sellableItems = allItemsForSale.filter(i => 
-        !i.tags?.includes('currency') && 
+    const sellableItems = allItemsForSale.filter(i =>
+        !i.tags?.includes('currency') &&
         (i.price || 0) > 0
     );
 
     // Count Unidentified
-    const unidentifiedCount = allItemsForSale.filter(i => 
-        i.tags?.includes('unidentified') || 
+    const unidentifiedCount = allItemsForSale.filter(i =>
+        i.tags?.includes('unidentified') ||
         (i.name && i.name.toLowerCase().includes('unidentified'))
     ).length;
 
@@ -236,25 +236,23 @@ const StoreView: React.FC = () => {
         <div className="p-4 pt-8 max-w-2xl mx-auto h-full flex flex-col">
             <h1 className="text-center mb-1">Marketplace</h1>
             <p className="text-body-base text-brand-text-muted mb-4 text-center font-medium italic">Buy and sell equipment and supplies.</p>
-            
+
             <div className="flex justify-center mb-4 bg-brand-surface p-1 rounded-2xl w-full max-w-xs mx-auto border border-brand-primary/30 shadow-sm">
-                <button 
+                <button
                     onClick={() => setMode('buy')}
-                    className={`flex-1 btn-md transition-all duration-200 focus:outline-none ${
-                        mode === 'buy' 
-                            ? 'btn-primary shadow-lg shadow-brand-accent/20' 
+                    className={`flex-1 btn-md transition-all duration-200 focus:outline-none ${mode === 'buy'
+                            ? 'btn-primary shadow-lg shadow-brand-accent/20'
                             : 'text-brand-text-muted hover:text-brand-text'
-                    }`}
+                        }`}
                 >
                     Buy
                 </button>
-                <button 
+                <button
                     onClick={() => setMode('sell')}
-                    className={`flex-1 btn-md transition-all duration-200 focus:outline-none ${
-                        mode === 'sell' 
-                            ? 'bg-brand-danger text-white shadow-lg shadow-brand-danger/20' 
+                    className={`flex-1 btn-md transition-all duration-200 focus:outline-none ${mode === 'sell'
+                            ? 'bg-brand-danger text-white shadow-lg shadow-brand-danger/20'
                             : 'text-brand-text-muted hover:text-brand-text'
-                    }`}
+                        }`}
                 >
                     Sell
                 </button>
@@ -270,7 +268,7 @@ const StoreView: React.FC = () => {
 
             <div className="flex-1 overflow-y-auto custom-scroll pr-1 pb-24">
                 <div className="space-y-4 animate-fade-in">
-                    
+
                     {mode === 'buy' ? (
                         <>
                             <div className="flex flex-col w-full px-1">
@@ -282,19 +280,19 @@ const StoreView: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-4 gap-2 w-full">
                                     {SHOP_CATEGORIES.map(cat => (
-                                        <CategoryTab 
+                                        <CategoryTab
                                             key={cat.id}
-                                            label={cat.label} 
-                                            isActive={activeCategory === cat.id} 
-                                            onClick={() => setActiveCategory(cat.id)} 
+                                            label={cat.label}
+                                            isActive={activeCategory === cat.id}
+                                            onClick={() => setActiveCategory(cat.id)}
                                         />
                                     ))}
                                 </div>
                             </div>
 
                             <div className="flex justify-center w-full">
-                                <button 
-                                    onClick={() => handleRefreshCategory()} 
+                                <button
+                                    onClick={() => handleRefreshCategory()}
                                     disabled={isLoading}
                                     className="btn-secondary btn-md w-48"
                                 >
@@ -315,10 +313,10 @@ const StoreView: React.FC = () => {
                                 ) : inventory.length > 0 ? (
                                     <div className="space-y-2">
                                         {inventory.map((item, idx) => (
-                                            <StoreItemCard 
-                                                key={`${item.id}-${idx}`} 
-                                                item={item} 
-                                                onBuy={handleBuyClick} 
+                                            <StoreItemCard
+                                                key={`${item.id}-${idx}`}
+                                                item={item}
+                                                onBuy={handleBuyClick}
                                                 canAfford={(item.price || 99999) <= playerGold}
                                             />
                                         ))}
@@ -333,14 +331,14 @@ const StoreView: React.FC = () => {
                         </>
                     ) : (
                         <div className="animate-fade-in">
-                             <div className="flex justify-between items-end mb-3 px-1">
+                            <div className="flex justify-between items-end mb-3 px-1">
                                 <h3 className="mb-0 text-body-base">Personal Gear</h3>
                                 <div className="flex items-center gap-1.5 text-brand-accent font-black text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm">
                                     <Icon name="currencyCoins" className="w-3.5 h-3.5" />
                                     <span>{playerGold} {currencyName}</span>
                                 </div>
                             </div>
-                            
+
                             {unidentifiedCount > 0 && (
                                 <div className="mb-3 p-4 bg-brand-accent/5 border border-brand-accent/20 rounded-2xl flex justify-between items-center animate-page">
                                     <div className="text-body-sm font-medium text-brand-text">
@@ -360,10 +358,10 @@ const StoreView: React.FC = () => {
                             {sellableItems.length > 0 ? (
                                 <div className="space-y-2">
                                     {sellableItems.map((item) => (
-                                        <SellItemCard 
-                                            key={item.id} 
-                                            item={item} 
-                                            onSell={handleSellClick} 
+                                        <SellItemCard
+                                            key={item.id}
+                                            item={item}
+                                            onSell={handleSellClick}
                                         />
                                     ))}
                                 </div>
@@ -375,7 +373,7 @@ const StoreView: React.FC = () => {
                             )}
                         </div>
                     )}
-                    
+
                     <div className="mt-4 p-4 bg-brand-surface rounded-2xl border border-brand-primary/30 text-center shadow-inner">
                         <p className="text-body-sm text-brand-text-muted italic leading-relaxed">
                             Prices fluctuate based on location and scarcity. Selling items typically returns 50% of their base value.

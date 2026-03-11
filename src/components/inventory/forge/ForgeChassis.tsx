@@ -36,7 +36,7 @@ export const ForgeChassis: React.FC<ForgeChassisProps> = ({
     return (
         <div className="bg-brand-surface p-6 rounded-2xl border border-brand-primary shadow-lg mb-6 animate-fade-in">
             <label className="block text-body-sm font-bold text-brand-text-muted mb-4 ml-1">Base Chassis</label>
-            
+
             {showWeaponChassis && (
                 <div className="space-y-6">
                     {forgeScale === 'Person' && (
@@ -51,20 +51,20 @@ export const ForgeChassis: React.FC<ForgeChassisProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Base Damage</label>
-                            <input 
-                                type="text" 
-                                value={baseDamageDice} 
-                                onChange={e => setBaseDamageDice(e.target.value)} 
-                                className="w-full input-md text-center font-bold" 
-                                placeholder="1d8" 
+                            <input
+                                type="text"
+                                value={baseDamageDice}
+                                onChange={e => setBaseDamageDice(e.target.value)}
+                                className="w-full input-md text-center font-bold"
+                                placeholder="1d8"
                             />
                         </div>
                         <div>
                             <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Damage Type</label>
                             <div className="relative">
-                                <select 
-                                    value={baseDamageType} 
-                                    onChange={e => setBaseDamageType(e.target.value)} 
+                                <select
+                                    value={baseDamageType}
+                                    onChange={e => setBaseDamageType(e.target.value)}
                                     className="w-full input-md appearance-none cursor-pointer font-bold"
                                 >
                                     {DAMAGE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -84,9 +84,9 @@ export const ForgeChassis: React.FC<ForgeChassisProps> = ({
                         <div>
                             <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Armor Type</label>
                             <div className="relative">
-                                <select 
-                                    value={armorType} 
-                                    onChange={e => setArmorType(e.target.value as any)} 
+                                <select
+                                    value={armorType}
+                                    onChange={e => setArmorType(e.target.value as any)}
                                     className="w-full input-md appearance-none cursor-pointer font-bold"
                                 >
                                     <option value="light">Light</option>
@@ -99,9 +99,9 @@ export const ForgeChassis: React.FC<ForgeChassisProps> = ({
                                 </div>
                             </div>
                         </div>
-                        <div>
-                            <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1 text-center">Base Ac</label>
-                            <div className="flex justify-center">
+                        <div className="flex-1">
+                            <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1 text-center">Base AC</label>
+                            <div className="flex items-center justify-center gap-2">
                                 <NumberStepper value={baseAC} onChange={setBaseAC} min={0} max={20} />
                             </div>
                         </div>

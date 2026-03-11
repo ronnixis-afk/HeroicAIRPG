@@ -13,13 +13,26 @@ interface ActorActionsProps {
     onRemoveAbility: (index: number) => void;
 }
 
-export const ActorActions: React.FC<ActorActionsProps> = ({ 
-    actor, 
-    onChange, 
-    onAddAttack, 
-    onRemoveAttack, 
-    onAddAbility, 
-    onRemoveAbility 
+const AbilitySaveEditor: React.FC<{ ability: CombatActorSpecialAbility, onChange: (val: string) => void }> = ({ ability, onChange }) => (
+    <div className="space-y-1.5 flex-1">
+        <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Resisted By</label>
+        <select
+            value={ability.saveAbility}
+            onChange={e => onChange(e.target.value)}
+            className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold capitalize"
+        >
+            {ABILITY_SCORES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+    </div>
+);
+
+export const ActorActions: React.FC<ActorActionsProps> = ({
+    actor,
+    onChange,
+    onAddAttack,
+    onRemoveAttack,
+    onAddAbility,
+    onRemoveAbility
 }) => {
     const [openAttacks, setOpenAttacks] = useState(true);
     const [openAbilities, setOpenAbilities] = useState(true);
@@ -34,8 +47,8 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                 <div className="space-y-4 pt-2">
                     <div className="flex justify-between items-center px-2 mb-2">
                         <label className="text-[10px] font-black text-brand-text-muted tracking-normal">Strikes per Turn</label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             value={actor.numberOfAttacks || 1}
                             onChange={e => onChange(['numberOfAttacks'], parseInt(e.target.value) || 1)}
                             className="w-16 bg-brand-primary h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-base font-black tabular-nums shadow-inner"
@@ -43,7 +56,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                     </div>
                     {(actor.attacks || []).map((attack, index) => (
                         <div key={index} className="bg-brand-primary/20 p-4 rounded-2xl border border-brand-surface/50 relative shadow-inner animate-fade-in">
-                            <button 
+                            <button
                                 onClick={() => onRemoveAttack(index)}
                                 className="absolute top-3 right-3 text-brand-text-muted hover:text-brand-danger transition-colors p-1"
                             >
@@ -58,8 +71,8 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                 <div className="space-y-1.5">
                                     <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Type</label>
                                     <div className="relative">
-                                        <select 
-                                            value={attack.damageType} 
+                                        <select
+                                            value={attack.damageType}
                                             onChange={e => onChange(['attacks', index, 'damageType'], e.target.value)}
                                             className="w-full bg-brand-primary h-11 px-4 pr-10 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold appearance-none cursor-pointer"
                                         >
@@ -83,20 +96,20 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                 <div className="space-y-4 pt-2">
                     {(actor.specialAbilities || []).map((ability, index) => (
                         <div key={index} className="bg-brand-primary/20 p-4 rounded-2xl border border-brand-surface/50 relative shadow-inner animate-fade-in">
-                            <button 
+                            <button
                                 onClick={() => onRemoveAbility(index)}
                                 className="absolute top-3 right-3 text-brand-text-muted hover:text-brand-danger transition-colors p-1"
                             >
                                 <Icon name="close" className="w-4 h-4" />
                             </button>
-                            
+
                             <div className="space-y-4 pt-1">
                                 <InputField label="Ability Name" value={ability.name} onChange={e => onChange(['specialAbilities', index, 'name'], e.target.value)} />
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Logic</label>
-                                        <select 
-                                            value={ability.type} 
+                                        <select
+                                            value={ability.type}
                                             onChange={e => onChange(['specialAbilities', index, 'type'], e.target.value)}
                                             className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold"
                                         >
@@ -107,8 +120,8 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Scope</label>
-                                        <select 
-                                            value={ability.targetType} 
+                                        <select
+                                            value={ability.targetType}
                                             onChange={e => onChange(['specialAbilities', index, 'targetType'], e.target.value)}
                                             className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold"
                                         >
@@ -123,8 +136,8 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                         <InputField label="Magnitude" value={ability.damageDice || ''} onChange={e => onChange(['specialAbilities', index, 'damageDice'], e.target.value)} placeholder="e.g. 3d6" />
                                         <div className="space-y-1.5">
                                             <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Nature</label>
-                                            <select 
-                                                value={ability.damageType} 
+                                            <select
+                                                value={ability.damageType}
                                                 onChange={e => onChange(['specialAbilities', index, 'damageType'], e.target.value)}
                                                 className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold capitalize"
                                             >
@@ -138,8 +151,8 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
                                             <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Effect</label>
-                                            <select 
-                                                value={ability.status} 
+                                            <select
+                                                value={ability.status}
                                                 onChange={e => onChange(['specialAbilities', index, 'status'], e.target.value)}
                                                 className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold"
                                             >
@@ -155,20 +168,9 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                 )}
 
                                 {ability.type !== 'Heal' && (
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className="col-span-1">
-                                            <InputField label="Dc" type="number" value={String(ability.dc)} onChange={e => onChange(['specialAbilities', index, 'dc'], parseInt(e.target.value) || 10)} />
-                                        </div>
-                                        <div className="col-span-2">
-                                            <label className="block text-[10px] font-black text-brand-text-muted tracking-normal mb-1.5 ml-1">Resisted By</label>
-                                            <select 
-                                                value={ability.saveAbility} 
-                                                onChange={e => onChange(['specialAbilities', index, 'saveAbility'], e.target.value)}
-                                                className="w-full bg-brand-primary h-11 px-3 rounded-xl border border-brand-surface focus:border-brand-accent text-body-sm font-bold capitalize"
-                                            >
-                                                {ABILITY_SCORES.map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
-                                        </div>
+                                    <div className="grid grid-cols-2 gap-3 mb-3">
+                                        <InputField label="DC" type="number" value={String(ability.dc)} onChange={e => onChange(['specialAbilities', index, 'dc'], parseInt(e.target.value) || 10)} />
+                                        <AbilitySaveEditor ability={ability} onChange={(newVal) => onChange(['specialAbilities', index, 'saveAbility'], newVal)} />
                                     </div>
                                 )}
                             </div>
