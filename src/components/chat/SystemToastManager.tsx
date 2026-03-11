@@ -101,7 +101,12 @@ export const SystemToastManager: React.FC = () => {
         // Auto-dismiss
         setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== newToast.id));
-        }, 5000);
+        }, 10000);
+    };
+
+    const removeToast = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        setToasts(prev => prev.filter(t => t.id !== id));
     };
 
     const handleToastClick = (toast: Toast) => {
@@ -164,10 +169,17 @@ export const SystemToastManager: React.FC = () => {
                         <div className={`text-[11px] font-bold opacity-90 mb-0.5 ${getTypeColor(toast.type)}`}>
                             {toast.title}
                         </div>
-                        <div className="text-body-sm text-brand-text truncate leading-relaxed">
+                        <div className="text-body-sm text-brand-text leading-relaxed whitespace-pre-wrap break-words">
                             {toast.message}
                         </div>
                     </div>
+                    
+                    <button 
+                        onClick={(e) => removeToast(e, toast.id)}
+                        className="p-1 -mr-2 text-brand-text-muted hover:text-white transition-colors flex-shrink-0 self-start"
+                    >
+                        <Icon name="close" className="w-4 h-4" />
+                    </button>
                 </div>
             ))}
         </div>
