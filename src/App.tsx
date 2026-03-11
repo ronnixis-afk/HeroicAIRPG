@@ -382,7 +382,6 @@ const GameInterface: React.FC = () => {
         isOpen={combatInitiationStatus.isActive}
         step={combatInitiationStatus.step}
         progress={combatInitiationStatus.progress}
-        narrative={combatInitiationStatus.narrative}
       />
       <LootPanel />
 
