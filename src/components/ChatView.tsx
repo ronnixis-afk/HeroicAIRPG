@@ -16,6 +16,7 @@ import { calculateAlignmentRelationshipShift } from '../utils/npcUtils';
 import { isLocaleMatch } from '../utils/mapUtils';
 import CombatConsensusPanel from './combat/CombatConsensusModal';
 import { EntityLightbox } from './chat/EntityLightbox';
+import { SystemToastManager } from './chat/SystemToastManager';
 
 // Custom Hooks
 import { useAudioPlayback } from './chat/useAudioPlayback';
@@ -437,6 +438,7 @@ const ChatView: React.FC = () => {
                     <div ref={chatEndRef} className="h-1" />
                 </div>
             </div>
+            <SystemToastManager />
             <EntityLightbox />
         </div>
     );
