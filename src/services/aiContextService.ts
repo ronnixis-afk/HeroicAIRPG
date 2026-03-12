@@ -170,6 +170,7 @@ export const getRelevantLore = (searchText: string, worldLore: LoreEntry[], quer
     }
 
     if (topEntries.length === 0) return '';
+    // Fix: Filter entries to ensure they belong to the current zone if they are location-based
     return topEntries.map(s => `[RESONANT LORE (${s.entry.title})]: ${s.entry.content}`).join('\n');
 };
 
@@ -359,8 +360,9 @@ ${recentMemory || "The journey has just begun."}
         const npcRegistryDisplay = (gameData.npcs || [])
             .filter(n => {
                 const isAtLocale = isLocaleMatch(n.currentPOI || "", gameData.currentLocale || "");
+                const isSameZone = !n.location || n.location === (z?.name || 'Unknown');
                 const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
-                return (isAtLocale || isActiveCompanion) && !n.isBodyCleared;
+                return (isAtLocale && isSameZone || isActiveCompanion) && !n.isBodyCleared;
             })
             .map(n => {
                 const memoryBlock = getRelevantMemories(lastMessage.content, n.memories, queryEmbedding);

@@ -98,6 +98,7 @@ export const useExtractionStep = (
                             sector: newCoords,
                             zone: details.name || destHint,
                             site_name: narratorLoc.site_name || 'Open Area',
+                            site_id: `open-area-${newCoords}`,
                             is_new_site: true,
                             transition_type: 'zone_change'
                         };
@@ -107,6 +108,7 @@ export const useExtractionStep = (
                             sector: newCoords,
                             zone: destHint,
                             site_name: narratorLoc.site_name || 'Open Area',
+                            site_id: `open-area-${newCoords}`,
                             is_new_site: true,
                             transition_type: 'zone_change'
                         };
@@ -120,7 +122,7 @@ export const useExtractionStep = (
                     sector: gameData.playerCoordinates || '0-0',
                     zone: gameData.current_site_name || 'The Wilds',
                     site_name: gameData.current_site_name || 'Open Area',
-                    site_id: gameData.current_site_id || 'open-area',
+                    site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
                     is_new_site: false,
                     transition_type: 'staying'
                 };
@@ -168,7 +170,7 @@ export const useExtractionStep = (
                             sector: gameData.playerCoordinates || '0-0',
                             zone: gameData.current_site_name || 'The Wilds',
                             site_name: gameData.current_site_name || 'Open Area',
-                            site_id: gameData.current_site_id || 'open-area',
+                            site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
                             is_new_site: false,
                             transition_type: 'staying'
                         };
