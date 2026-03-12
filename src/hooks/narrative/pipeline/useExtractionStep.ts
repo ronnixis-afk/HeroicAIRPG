@@ -355,13 +355,25 @@ export const useExtractionStep = (
             });
 
             // Announce the collective narrative alignment shift
-            if (relChangeDisplay.length > 0 && housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+            if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `sys-align-${Date.now()}`,
                         sender: 'system',
-                        content: `**Action Alignment Detected**: *${housekeepingResult.userAlignmentShift}*\n**Reactions**: ${relChangeDisplay.join(', ')}`,
+                        content: `**Alignment Shift**: *${housekeepingResult.userAlignmentShift}*`,
+                        type: 'neutral'
+                    }
+                });
+            }
+
+            if (relChangeDisplay.length > 0) {
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-rel-${Date.now()}`,
+                        sender: 'system',
+                        content: `**Reactions**: ${relChangeDisplay.join(', ')}`,
                         type: 'neutral'
                     }
                 });

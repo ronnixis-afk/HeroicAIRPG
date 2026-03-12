@@ -53,16 +53,22 @@ export const SystemToastManager: React.FC = () => {
 
         // Check if this is a dual-update message from ChatView.tsx
         // Format: "**Alignment Shift**: *+X Good* (Morality axis).\n**Reactions**: NPC (+Y)..."
-        if (lowerContent.includes('alignment shift') && lowerContent.includes('reactions:')) {
-            const sections = content.split('\n');
-            sections.forEach(section => {
-                if (section.toLowerCase().includes('alignment shift')) {
-                    addToast('Alignment Update', section, 'alignment');
-                } else if (section.toLowerCase().includes('reactions:')) {
-                    addToast('Relationship Update', section, 'relationship');
-                }
-            });
-            return;
+        if (lowerContent.includes('alignment shift') || lowerContent.includes('alignment detected')) {
+            const hasReactions = lowerContent.includes('reactions:');
+            
+            if (hasReactions) {
+                // Split multi-part messages
+                const sections = content.split('\n');
+                sections.forEach(section => {
+                    const lowerSection = section.toLowerCase();
+                    if (lowerSection.includes('alignment shift') || lowerSection.includes('alignment detected')) {
+                        addToast('Alignment Update', section, 'alignment');
+                    } else if (lowerSection.includes('reactions:')) {
+                        addToast('Relationship Update', section, 'relationship');
+                    }
+                });
+                return;
+            }
         }
 
         // Standard single categorization
@@ -75,7 +81,7 @@ export const SystemToastManager: React.FC = () => {
         } else if (lowerContent.includes('level up') || lowerContent.includes('leveled up')) {
             type = 'level';
             title = 'Level Up';
-        } else if (lowerContent.includes('alignment shift')) {
+        } else if (lowerContent.includes('alignment shift') || lowerContent.includes('alignment detected')) {
             type = 'alignment';
             title = 'Alignment Update';
         } else if (lowerContent.includes('reactions:')) {
@@ -123,7 +129,7 @@ export const SystemToastManager: React.FC = () => {
 
         // Add the toast
         const newToast: Toast = {
-            id: `toast-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+            id: `toast-${Date.now()}-${Math.floor(Math.random() * 1000000).toString(36)}`,
             title,
             message: cleanContent,
             type,

@@ -208,20 +208,27 @@ const ChatView: React.FC = () => {
                     }
                 }
 
-                let syncMessage = `**Alignment Shift**: *${change}* (${axis} axis).`;
-                if (shifts.length > 0) {
-                    syncMessage += `\n**Reactions**: ${shifts.join(', ')}`;
-                }
-
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `sys-align-${Date.now()}`,
                         sender: 'system',
-                        content: syncMessage,
+                        content: `**Alignment Shift**: *${change}* (${axis} axis).`,
                         timestamp: gameData.currentTime || new Date().toISOString()
                     }
                 });
+
+                if (shifts.length > 0) {
+                    dispatch({
+                        type: 'ADD_MESSAGE',
+                        payload: {
+                            id: `sys-rel-${Date.now()}`,
+                            sender: 'system',
+                            content: `**Reactions**: ${shifts.join(', ')}`,
+                            timestamp: gameData.currentTime || new Date().toISOString()
+                        }
+                    });
+                }
             }
 
             await submitUserMessage({
