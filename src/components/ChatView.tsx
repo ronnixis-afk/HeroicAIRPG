@@ -37,7 +37,7 @@ const ChatView: React.FC = () => {
         dispatch
     } = useContext(GameDataContext);
 
-    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActivePanel, setActingCharacterId } = useUI();
+    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActivePanel, setActingCharacterId, isVoiceActive } = useUI();
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const isInitialRender = useRef(true);
@@ -132,14 +132,14 @@ const ChatView: React.FC = () => {
 
     // HANDS-FREE AUTO-PLAY EFFECT
     useEffect(() => {
-        if (isHandsFree && processedMessages.length > 0) {
+        if (isHandsFree && !isVoiceActive && processedMessages.length > 0) {
             const lastMsg = processedMessages[processedMessages.length - 1];
             // GUARD: Only trigger if the message is from AI and we aren't already playing it
             if (lastMsg && lastMsg.sender === 'ai' && lastMsg.content && playingMessageId !== lastMsg.id) {
                 speak(lastMsg.content, lastMsg.id);
             }
         }
-    }, [processedMessages.length, isHandsFree, speak, playingMessageId]);
+    }, [processedMessages.length, isHandsFree, isVoiceActive, speak, playingMessageId]);
 
     useEffect(() => {
         const handleAlignmentAction = async (e: Event) => {
