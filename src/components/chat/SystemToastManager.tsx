@@ -48,14 +48,27 @@ export const SystemToastManager: React.FC = () => {
     }, [messages, lastProcessedMsgId]);
 
     const processSystemMessage = (msg: ChatMessage) => {
-
         const content = msg.content || '';
+        const lowerContent = content.toLowerCase();
+
+        // Check if this is a dual-update message from ChatView.tsx
+        // Format: "**Alignment Shift**: *+X Good* (Morality axis).\n**Reactions**: NPC (+Y)..."
+        if (lowerContent.includes('alignment shift') && lowerContent.includes('reactions:')) {
+            const sections = content.split('\n');
+            sections.forEach(section => {
+                if (section.toLowerCase().includes('alignment shift')) {
+                    addToast('Alignment Update', section, 'alignment');
+                } else if (section.toLowerCase().includes('reactions:')) {
+                    addToast('Relationship Update', section, 'relationship');
+                }
+            });
+            return;
+        }
+
+        // Standard single categorization
         let type: Toast['type'] = 'general';
         let title = 'System Update';
         
-        const lowerContent = content.toLowerCase();
-
-        // Categorize message
         if (msg.rolls && msg.rolls.length > 0) {
             type = 'roll';
             title = 'Action Check';
@@ -89,10 +102,22 @@ export const SystemToastManager: React.FC = () => {
             title = 'Combat Log';
         }
 
-        // Clean up markdown bold/italic tags and enforce sentence case
-        let cleanContent = content.replace(/(\*\*|\*)/g, '').trim();
-        // Capitalize first letter if it exists
+        addToast(title, content, type);
+    };
+
+    const addToast = (title: string, rawMessage: string, type: Toast['type']) => {
+        // Clean up markdown bold/italic tags
+        let cleanContent = rawMessage.replace(/(\*\*|\*)/g, '').trim();
+        
+        // Remove "Reactions: " prefix for cleaner relationship toasts
+        if (type === 'relationship' && cleanContent.toLowerCase().startsWith('reactions:')) {
+            cleanContent = cleanContent.slice(10).trim();
+        }
+
+        // Enforce sentence case: Capitalize first letter, lower the rest (unless it's a known name or title)
+        // But for many system messages, just ensuring first letter is capped and avoiding ALL CAPS is enough.
         if (cleanContent.length > 0) {
+            // First check if it's already basically okay
             cleanContent = cleanContent.charAt(0).toUpperCase() + cleanContent.slice(1);
         }
 
@@ -129,7 +154,7 @@ export const SystemToastManager: React.FC = () => {
         switch (type) {
             case 'inventory': return '/icons/backpack.png';
             case 'relationship': return '/icons/people.png';
-            case 'alignment': return '/icons/lore.png';
+            case 'alignment': return '/icons/heroes.png';
             case 'roll': return <Icon name="dice" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_5px_rgba(62,207,142,0.6)]" />;
             case 'level': return '/icons/heroes.png';
             case 'xp': return '/icons/quests.png';
