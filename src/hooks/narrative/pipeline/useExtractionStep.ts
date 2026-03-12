@@ -375,10 +375,6 @@ export const useExtractionStep = (
             });
         }
 
-        // 4. Resolve Quest Progress
-        if (housekeepingResult.objectives?.length > 0) {
-            finalUpdates.objectives = [...(finalUpdates.objectives || []), ...housekeepingResult.objectives];
-        }
 
         // 5. Resolve Auditor Result Metadata
         if (resolvedLocale) finalUpdates.currentLocale = resolvedLocale;
