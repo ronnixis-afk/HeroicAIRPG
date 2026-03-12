@@ -315,7 +315,7 @@ The player has expended a HEROIC POINT this round.
 export const transcribeAudio = async (base64Audio: string, mimeType: string): Promise<string> => {
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.0-flash-lite',
         contents: {
             parts: [
                 { inlineData: { mimeType, data: base64Audio } },
@@ -334,7 +334,7 @@ export const refineTranscription = async (transcript: string, history: any[], ga
     const context = `[WORLD]: ${gameData.worldSummary || 'Standard TTRPG world.'}\n[RECENT CHAT]: ${JSON.stringify((history || []).slice(-5))}`;
     const prompt = `You are a Transcription Auditor. Refine the following raw speech transcription to ensure it correctly identifies proper nouns (NPCs, Items, Locations) from the world context.\n\nRAW TRANSCRIPT: "${transcript}"\n\nCONTEXT:\n${context}\n\nReturn ONLY the corrected transcription text. No metadata.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.0-flash-lite',
         contents: prompt
     });
     return response.text?.trim() || transcript;
