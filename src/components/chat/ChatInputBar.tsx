@@ -180,12 +180,12 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
 
         // Status label mapping
         const statusLabels: Record<LiveVoiceStatus, string> = {
-            idle: 'Tap To Start Voice Mode',
+            idle: 'Tap to Start Voice Mode',
             connecting: 'Connecting...',
             listening: 'Listening...',
             thinking: 'Processing...',
             speaking: 'Speaking...',
-            error: 'Connection Lost'
+            error: 'Connection Lost. Tap to Retry.'
         };
 
         return (
@@ -244,7 +244,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                                 onClick={props.onRepeatLast}
                                 className="text-[10px] font-bold text-brand-text-muted hover:text-brand-text px-3 py-1.5 rounded-full border border-brand-primary/30 hover:bg-brand-primary/30 transition-all"
                             >
-                                Tap To Interrupt
+                                Tap to Interrupt
                             </button>
                         )}
                         <button

@@ -41,7 +41,7 @@ export const useHandsFreeVoice = () => {
     }, [gameData?.messages?.length]);
 
     const connect = useCallback(async () => {
-        if (!gameData || status !== 'idle') return;
+        if (!gameData || (status !== 'idle' && status !== 'error')) return;
 
         // Build a condensed system instruction for the Live API voice model
         const voiceSystemInstruction = buildVoiceSystemInstruction(gameData);
