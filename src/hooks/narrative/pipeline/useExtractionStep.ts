@@ -19,7 +19,8 @@ export const useExtractionStep = (
         aiNarrative: string,
         gameData: GameData,
         aiMessageId: string,
-        aiResponse: AIResponse
+        aiResponse: AIResponse,
+        isExplicit: boolean = false
     ) => {
         const registryNpcNames = (gameData.npcs ?? []).map(n => n.name ? String(n.name).toLowerCase().trim() : 'unknown');
         const excludeList = [
@@ -299,69 +300,72 @@ export const useExtractionStep = (
 
         let relChangeDisplay: string[] = [];
 
-        (gameData.npcs || []).forEach(n => {
-            const npcUpdates = mergedNpcUpdates.find(u => u.id === n.id);
-            const status = npcUpdates?.status || n.status;
-            const npcPOI = npcUpdates?.currentPOI || n.currentPOI || "";
+        // SKIP Alignment and Relationship check if this was an explicit UI action
+        if (!isExplicit) {
+            (gameData.npcs || []).forEach(n => {
+                const npcUpdates = mergedNpcUpdates.find(u => u.id === n.id);
+                const status = npcUpdates?.status || n.status;
+                const npcPOI = npcUpdates?.currentPOI || n.currentPOI || "";
 
-            const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npcPOI === 'Current' || npcPOI === 'With Party';
-            const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
-            const isAlive = status !== 'Dead';
-            const isSentient = n.isSentient !== false && !n.isShip;
+                const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npcPOI === 'Current' || npcPOI === 'With Party';
+                const isActiveCompanion = n.companionId && activeCompanionIds.has(n.companionId);
+                const isAlive = status !== 'Dead';
+                const isSentient = n.isSentient !== false && !n.isShip;
 
-            if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
-                let changeAmount = 0;
-                let triggerCombat = false;
+                if ((isAtLocale || isActiveCompanion) && isAlive && isSentient) {
+                    let changeAmount = 0;
+                    let triggerCombat = false;
 
-                // Unconditionally drop relationship if in Combat and AI resolution considers them enemies
-                // (Note: To accurately identify engaged enemies in the future, we rely on combat turn order)
-                if (gameData.combatState?.isActive) {
-                    const isEnemy = gameData.combatState.enemies?.some((e: any) => e.id === n.id);
-                    if (isEnemy) {
-                        changeAmount = -50 - (n.relationship || 0); // Force to -50 exactly, or subtract if already lower
+                    // Unconditionally drop relationship if in Combat and AI resolution considers them enemies
+                    // (Note: To accurately identify engaged enemies in the future, we rely on combat turn order)
+                    if (gameData.combatState?.isActive) {
+                        const isEnemy = gameData.combatState.enemies?.some((e: any) => e.id === n.id);
+                        if (isEnemy) {
+                            changeAmount = -50 - (n.relationship || 0); // Force to -50 exactly, or subtract if already lower
+                        }
                     }
-                }
-                // Or calculate relationship based on intent, if not immediately fighting them
-                else if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
-                    changeAmount = calculateAlignmentRelationshipShift(housekeepingResult.userAlignmentShift, n.moralAlignment);
-                }
-
-                if (changeAmount !== 0) {
-                    const newRel = Math.max(-100, Math.min(100, Number(n.relationship || 0) + changeAmount));
-                    dispatch({ type: 'UPDATE_NPC', payload: { ...n, relationship: newRel } });
-
-                    if (newRel <= -50 && !gameData.combatState?.isActive) {
-                        dispatch({
-                            type: 'ADD_MESSAGE',
-                            payload: {
-                                id: `sys-combat-trig-${Date.now()}-${n.id}`,
-                                sender: 'system',
-                                content: `**Combat Triggered!** Your relationship with ${n.name} has deteriorated past the breaking point. They are now hostile!`,
-                                type: 'negative'
-                            }
-                        });
-                        // Combat Initialization should theoretically be called here via a pipeline trigger, 
-                        // but for now, the system message alerts the player.
+                    // Or calculate relationship based on intent, if not immediately fighting them
+                    else if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+                        changeAmount = calculateAlignmentRelationshipShift(housekeepingResult.userAlignmentShift, n.moralAlignment);
                     }
 
-                    if (!gameData.combatState?.isActive) {
-                        relChangeDisplay.push(`${n.name} (${changeAmount > 0 ? '+' : ''}${changeAmount})`);
-                    }
-                }
-            }
-        });
+                    if (changeAmount !== 0) {
+                        const newRel = Math.max(-100, Math.min(100, Number(n.relationship || 0) + changeAmount));
+                        dispatch({ type: 'UPDATE_NPC', payload: { ...n, relationship: newRel } });
 
-        // Announce the collective narrative alignment shift
-        if (relChangeDisplay.length > 0 && housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
-            dispatch({
-                type: 'ADD_MESSAGE',
-                payload: {
-                    id: `sys-align-${Date.now()}`,
-                    sender: 'system',
-                    content: `**Action Alignment Detected**: *${housekeepingResult.userAlignmentShift}*\n**Reactions**: ${relChangeDisplay.join(', ')}`,
-                    type: 'neutral'
+                        if (newRel <= -50 && !gameData.combatState?.isActive) {
+                            dispatch({
+                                type: 'ADD_MESSAGE',
+                                payload: {
+                                    id: `sys-combat-trig-${Date.now()}-${n.id}`,
+                                    sender: 'system',
+                                    content: `**Combat Triggered!** Your relationship with ${n.name} has deteriorated past the breaking point. They are now hostile!`,
+                                    type: 'negative'
+                                }
+                            });
+                            // Combat Initialization should theoretically be called here via a pipeline trigger, 
+                            // but for now, the system message alerts the player.
+                        }
+
+                        if (!gameData.combatState?.isActive) {
+                            relChangeDisplay.push(`${n.name} (${changeAmount > 0 ? '+' : ''}${changeAmount})`);
+                        }
+                    }
                 }
             });
+
+            // Announce the collective narrative alignment shift
+            if (relChangeDisplay.length > 0 && housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-align-${Date.now()}`,
+                        sender: 'system',
+                        content: `**Action Alignment Detected**: *${housekeepingResult.userAlignmentShift}*\n**Reactions**: ${relChangeDisplay.join(', ')}`,
+                        type: 'neutral'
+                    }
+                });
+            }
         }
 
         if (!gameData.combatState?.isActive && housekeepingResult.npcMemories?.length > 0) {
@@ -415,6 +419,7 @@ export const useExtractionStep = (
 
         return { engagementConfirmed: isEngaged };
     }, [dispatch, combatActions, notifyInventoryChanges]);
+
 
     return { processConsequences };
 };
