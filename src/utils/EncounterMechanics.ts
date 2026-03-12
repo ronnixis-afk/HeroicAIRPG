@@ -85,17 +85,7 @@ You MUST update 'updates.gmNotes' (Current Encounter Plot) with exactly THREE co
 *JSON Schema: "gmNotes": "Sentence 1. Sentence 2. Sentence 3."*
 `;
 
-    const questInstruction = `
-[SYSTEM_OVERRIDE: ENCOUNTER QUEST]:
-You MUST create a NEW tracked objective in 'updates.objectives' for this encounter.
-- The quest goal MUST be the resolution of the [ENCOUNTER PILLARS].
-- It MUST NOT be more than 30 words.
-- It MUST include a clear quest completion condition.
-- Set "isTracked": true.
-- You MUST provide a "title" and "content" for the objective.
-`;
-
-    return `${basePillars}\n${gmNotesInstruction}\n${questInstruction}`;
+    return `${basePillars}\n${gmNotesInstruction}`;
 };
 
 /**

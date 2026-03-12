@@ -18,7 +18,6 @@ export const performHousekeeping = async (
 ): Promise<{
   inventoryUpdates: any[];
   userAlignmentShift: string;
-  objectives: any[];
   npcMemories: { npcId: string, memory: string }[];
 }> => {
 
@@ -92,11 +91,7 @@ export const performHousekeeping = async (
     [NPC MEMORY INSTRUCTIONS]
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
 
-    [QUEST AUDIT INSTRUCTIONS]
-    1. Did the narrative introduce a NEW mission, task, or overarching goal? If so, extract it into 'objectives' with a 'title' and 'content' (which must define the static completion condition), and status 'active'.
-    2. Did the narrative explicitly advance an active quest? Extract it in 'objectives' with the new 'nextStep' and a short 'progressUpdate' summarizing the advancement.
-    3. Did the narrative explicitly resolve (complete/fail) an existing quest? Extract it in 'objectives' with 'status' set to 'completed' or 'failed', along with a final 'progressUpdate'.
-    4. If there are no quest changes, leave 'objectives' empty.
+    // (Quest Audit Instructions removed as per user request to keep only Location Discovery quests)
 
     [OUTPUT JSON SCHEMA]
     {
@@ -111,9 +106,6 @@ export const performHousekeeping = async (
       "userAlignmentShift": "Good|Evil|Lawful|Chaotic|Neutral",
       "npcMemories": [
         { "npcId": "string", "memory": "string" }
-      ],
-      "objectives": [
-        { "title": "string", "content": "string", "nextStep": "string", "progressUpdate": "string", "status": "active|completed|failed" }
       ]
     }
     `;
@@ -133,11 +125,10 @@ export const performHousekeeping = async (
     return {
       inventoryUpdates: result.inventoryUpdates || [],
       userAlignmentShift: result.userAlignmentShift || "Neutral",
-      npcMemories: result.npcMemories || [],
-      objectives: result.objectives || []
+      npcMemories: result.npcMemories || []
     };
   } catch (e) {
     console.error("Housekeeper failed:", e);
-    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [], objectives: [] };
+    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [] };
   }
 };

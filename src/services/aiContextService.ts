@@ -416,7 +416,7 @@ You are STRICTLY FORBIDDEN from reusing names from the following global registry
 
 [SYSTEM_OVERRIDE PROCESSING]:
 If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, you MUST execute those instructions exactly. 
-- Specifically, if [SYSTEM_OVERRIDE: ENCOUNTER QUEST] is present, you MUST generate a new objective in 'updates.objectives' following the provided constraints.
+- Specifically, if a [SYSTEM_OVERRIDE] is present, you MUST execute those instructions exactly. 
 
 [CRITICAL INVARIANTS]:
 1. SPATIAL ANCHORING: If the player moves, you MUST update 'location_update.site_name' and provide a 'transition_type'.
@@ -426,7 +426,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 2. PLAIN TEXT ONLY: No Markdown (**, *) in 'narration'.
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.
-5. QUEST GENERATION: If the narrative organically introduces a new mission, task, or overarching goal for the party, you MUST generate a new objective in 'updates.objectives'. Provide a 'title' and a 'content' that explicitly defines the completion condition.
+5. QUEST GENERATION (LOCATION DISCOVERY ONLY): You are STRICTLY FORBIDDEN from generating or proposing new missions or tasks UNLESS the party has just transitioned to a NEW Point of Interest or Location. Only in the event of Location Discovery may you create a single objective focused on uncovering the secrets or resolving the threat of that specific site. Provide a 'title' and a 'content' that explicitly defines the completion condition.
 6. QUEST PROGRESSION: If the player advances an existing active quest (especially the one marked as isTracked), you MUST update it in 'updates.objectives'. Provide the new 'nextStep' (Current Lead) and a short 'progressUpdate' string summarizing the advancement.
 7. QUEST STATUS: If the player completes or fails an existing quest, include it in 'updates.objectives' and set 'status' to 'completed' or 'failed', along with a final 'progressUpdate'.
 `;
