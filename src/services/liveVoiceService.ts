@@ -55,7 +55,7 @@ export class LiveVoiceService {
     private processorNode: ScriptProcessorNode | null = null;
     private callbacks: LiveVoiceCallbacks | null = null;
     private idleTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    private idleTimeoutMs: number = 10000;
+    private idleTimeoutMs: number = 15000;
 
     // Audio playback queue
     private playbackQueue: Float32Array[] = [];
@@ -103,7 +103,7 @@ export class LiveVoiceService {
             const { token } = await tokenResponse.json();
 
             // 2. Connect WebSocket to Gemini Live API
-            const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${token}`;
+            const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?access_token=${token}`;
             
             this.ws = new WebSocket(wsUrl);
 
@@ -115,7 +115,7 @@ export class LiveVoiceService {
                 
                 const configMessage = {
                     setup: {
-                        model: "models/gemini-2.5-flash-preview-native-audio-dialog",
+                        model: "models/gemini-2.0-flash-exp",
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {
@@ -153,9 +153,11 @@ export class LiveVoiceService {
             };
 
             this.ws.onclose = (event) => {
-                console.log('[LiveVoice] WebSocket closed:', event.reason || 'No reason');
+                console.log('[LiveVoice] WebSocket closed:', event.code, event.reason || 'No reason');
                 this.cleanup();
-                this.setStatus('idle');
+                if (this._status !== 'error') {
+                    this.setStatus('idle');
+                }
                 this.callbacks?.onDisconnect();
             };
 
@@ -175,14 +177,18 @@ export class LiveVoiceService {
         }
     }
 
-    /**
-     * Wait for the setup complete message from the server.
-     */
     private waitForSetupComplete(): Promise<void> {
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
+                this.ws?.removeEventListener('close', onEarlyClose);
                 reject(new Error('Setup timeout - no response from server'));
             }, 10000);
+
+            const onEarlyClose = (event: CloseEvent) => {
+                clearTimeout(timeout);
+                reject(new Error(`WebSocket closed during setup (Code: ${event.code}, Reason: ${event.reason || 'None'})`));
+            };
+            this.ws?.addEventListener('close', onEarlyClose, { once: true });
 
             const originalHandler = this.ws!.onmessage;
             this.ws!.onmessage = (event) => {
@@ -190,6 +196,7 @@ export class LiveVoiceService {
                     const data = JSON.parse(event.data);
                     if (data.setupComplete) {
                         clearTimeout(timeout);
+                        this.ws?.removeEventListener('close', onEarlyClose);
                         this.ws!.onmessage = originalHandler;
                         console.log('[LiveVoice] Setup complete');
                         resolve();
