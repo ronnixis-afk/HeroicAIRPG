@@ -8,7 +8,6 @@ import { useUI } from '../../context/UIContext';
 import { GameDataContext } from '../../context/GameDataContext';
 import { useEntityDictionary, DictionaryEntry } from '../../hooks/useEntityDictionary';
 import MentionList from './MentionList';
-import type { LiveVoiceStatus } from '../../services/liveVoiceService';
 
 interface ChatInputBarProps {
     value: string;
@@ -19,9 +18,6 @@ interface ChatInputBarProps {
     isGeneratingImage: boolean;
     isHandsFree: boolean;
     onRepeatLast: () => void;
-    voiceStatus: LiveVoiceStatus;
-    onVoiceConnect: () => void;
-    onVoiceDisconnect: () => void;
     isCombatActive: boolean;
     isPlayerTurn: boolean;
     onAutoResolve: () => void;
@@ -176,85 +172,28 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
     };
 
     if (props.isHandsFree) {
-        const isVoiceActive = props.voiceStatus !== 'idle' && props.voiceStatus !== 'error';
-
-        // Status label mapping
-        const statusLabels: Record<LiveVoiceStatus, string> = {
-            idle: 'Tap to Start Voice Mode',
-            connecting: 'Connecting...',
-            listening: 'Listening...',
-            thinking: 'Processing...',
-            speaking: 'Speaking...',
-            error: 'Connection Lost. Tap to Retry.'
-        };
-
         return (
             <div
                 onClick={handleInteraction}
-                className={`flex flex-col items-center justify-center p-4 gap-3 bg-brand-bg/80 rounded-3xl border shadow-2xl animate-fade-in relative overflow-hidden transition-all ${
-                    isVoiceActive
-                        ? 'border-brand-accent/40 shadow-[0_0_30px_rgba(62,207,142,0.15)]'
-                        : props.voiceStatus === 'error' ? 'border-brand-danger/40' : 'border-brand-primary/30'
-                } ${!props.isChatViewActive ? 'hover:scale-[1.02] active:scale-95' : ''}`}
+                className={`flex items-center justify-center p-4 gap-8 bg-brand-bg/80 rounded-3xl border border-brand-primary/30 shadow-2xl animate-fade-in relative overflow-hidden transition-all ${!props.isChatViewActive ? 'hover:scale-[1.02] active:scale-95' : ''}`}
             >
-                {/* Voice Waveform Visualizer */}
-                <div className="flex items-center justify-center gap-[3px] h-16 w-full max-w-[200px]">
-                    {isVoiceActive ? (
-                        Array.from({ length: 7 }).map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-[4px] rounded-full transition-all duration-300 ${
-                                    props.voiceStatus === 'speaking'
-                                        ? 'bg-brand-accent animate-voice-bar'
-                                        : props.voiceStatus === 'thinking'
-                                        ? 'bg-brand-accent/50 animate-thinking-pulse'
-                                        : 'bg-brand-accent/70 animate-voice-bar-idle'
-                                }`}
-                                style={{
-                                    animationDelay: `${i * 0.08}s`,
-                                    height: props.voiceStatus === 'speaking' ? undefined
-                                        : props.voiceStatus === 'thinking' ? '8px'
-                                        : undefined
-                                }}
-                            />
-                        ))
-                    ) : (
-                        <button
-                            onClick={props.voiceStatus === 'error' ? props.onVoiceConnect : props.onVoiceConnect}
-                            className="w-16 h-16 rounded-full bg-brand-accent flex items-center justify-center text-black hover:opacity-90 transition-all active:scale-95 shadow-[0_0_20px_rgba(62,207,142,0.3)]"
-                        >
-                            <Icon name="microphone" className="w-8 h-8" />
-                        </button>
-                    )}
-                </div>
+                <button onClick={props.onRepeatLast} className="w-16 h-16 rounded-full bg-brand-surface flex items-center justify-center text-brand-text-muted hover:text-brand-text hover:bg-brand-primary transition-all active:scale-95 border border-brand-primary shadow-lg">
+                    <Icon name="play" className="w-8 h-8" />
+                </button>
 
-                {/* Status Label */}
-                <span className={`text-body-sm font-bold transition-colors duration-300 ${
-                    props.voiceStatus === 'error' ? 'text-brand-danger'
-                    : isVoiceActive ? 'text-brand-accent' : 'text-brand-text-muted'
-                } ${props.voiceStatus === 'thinking' ? 'animate-pulse' : ''}`}>
-                    {statusLabels[props.voiceStatus]}
-                </span>
-
-                {/* Controls Row */}
-                {isVoiceActive && (
-                    <div className="flex items-center gap-3 animate-fade-in">
-                        {props.voiceStatus === 'speaking' && (
-                            <button
-                                onClick={props.onRepeatLast}
-                                className="text-[10px] font-bold text-brand-text-muted hover:text-brand-text px-3 py-1.5 rounded-full border border-brand-primary/30 hover:bg-brand-primary/30 transition-all"
-                            >
-                                Tap to Interrupt
-                            </button>
-                        )}
-                        <button
-                            onClick={props.onVoiceDisconnect}
-                            className="text-[10px] font-bold text-brand-danger/70 hover:text-brand-danger px-3 py-1.5 rounded-full border border-brand-danger/20 hover:bg-brand-danger/10 transition-all"
-                        >
-                            End Voice
-                        </button>
-                    </div>
+                {props.isCombatActive && props.isPlayerTurn && (
+                    <button
+                        onClick={props.onAutoResolve}
+                        className="w-16 h-16 rounded-full bg-brand-surface flex items-center justify-center text-brand-danger hover:bg-brand-primary transition-all active:scale-95 shadow-lg border-2 border-brand-danger"
+                        title="Auto-Combat Player Turn"
+                    >
+                        <Icon name="sword" className="w-8 h-8" />
+                    </button>
                 )}
+
+                <button onClick={props.onMicClick} className="w-16 h-16 rounded-full bg-brand-accent flex items-center justify-center text-black hover:opacity-90 transition-all active:scale-95 shadow-[0_0_20px_rgba(62,207,142,0.3)]">
+                    <Icon name="microphone" className="w-8 h-8" />
+                </button>
 
                 <NavigationOverlay />
             </div>

@@ -41,7 +41,6 @@ import { generateSceneVisuals } from './services/imageGenerationService';
 import { useAudioPlayback } from './components/chat/useAudioPlayback';
 import { PickpocketModal } from './components/modals/PickpocketModal';
 import { TravelConfirmationModal } from './components/map/TravelConfirmationModal';
-import { useHandsFreeVoice } from './hooks/useHandsFreeVoice';
 
 interface HeaderProps {
   currentTime: string;
@@ -133,8 +132,7 @@ const GameInterface: React.FC = () => {
     isAssessing, isAuditing, pendingCombat,
     isGeneratingScene, setIsGeneratingScene,
     isSpeechModalOpen, setIsSpeechModalOpen,
-    isHeroicModeActive, setIsHeroicModeActive,
-    setIsVoiceActive
+    isHeroicModeActive, setIsHeroicModeActive
   } = useUI();
 
   const [panelsAreMounted, setPanelsAreMounted] = useState(false);
@@ -150,14 +148,6 @@ const GameInterface: React.FC = () => {
     gameData?.narrationVoice || "Classic Narrator (Male)",
     gameData?.narrationTone || "Classic Fantasy"
   );
-
-  // Advanced Voice Mode (Gemini Live API)
-  const { voiceStatus, isVoiceActive: hookIsVoiceActive, connectVoice, disconnectVoice } = useHandsFreeVoice();
-
-  // Sync voice active state to UI context for global suppression of standard TTS
-  useEffect(() => {
-    setIsVoiceActive(hookIsVoiceActive);
-  }, [hookIsVoiceActive, setIsVoiceActive]);
 
   // Global Context Cache: Ensures non-React services can access current game settings (like Faster GM)
   useEffect(() => {
@@ -374,9 +364,6 @@ const GameInterface: React.FC = () => {
             isGeneratingImage={isGeneratingScene}
             isHandsFree={gameData?.isHandsFree ?? false}
             onRepeatLast={handleRepeatLast}
-            voiceStatus={voiceStatus}
-            onVoiceConnect={connectVoice}
-            onVoiceDisconnect={disconnectVoice}
             isCombatActive={isCombatActive}
             isPlayerTurn={isPlayerTurn}
             onAutoResolve={performAutomatedPlayerTurn}

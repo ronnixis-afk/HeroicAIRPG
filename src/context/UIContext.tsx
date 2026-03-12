@@ -67,8 +67,6 @@ interface UIContextType {
     setChatInput: React.Dispatch<React.SetStateAction<string>>;
     isHeroicModeActive: boolean;
     setIsHeroicModeActive: (active: boolean) => void;
-    isVoiceActive: boolean;
-    setIsVoiceActive: (active: boolean) => void;
 
     // Status & Loading
     isLoading: boolean;
@@ -181,7 +179,6 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Chat
     const [chatInput, setChatInput] = useState('');
     const [isHeroicModeActive, setIsHeroicModeActive] = useState(false);
-    const [isVoiceActive, setIsVoiceActive] = useState(false);
 
     // Status
     const [isLoading, setIsLoading] = useState(true);
@@ -240,8 +237,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         isZonePanelOpen, setIsZonePanelOpen,
         isSpeechModalOpen, setIsSpeechModalOpen,
         isPickpocketModalOpen, setIsPickpocketModalOpen,
-        pickpocketTarget, setPickpocketTarget,
-        isVoiceActive, setIsVoiceActive
+        pickpocketTarget, setPickpocketTarget
     };
 
     return (

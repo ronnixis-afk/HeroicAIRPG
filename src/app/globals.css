@@ -386,35 +386,3 @@
 .animate-toast-container {
   animation: toast-zoom-in-out 10s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-/* Voice Mode: Active Speaking Bars */
-@keyframes voice-bar {
-  0%, 100% { height: 8px; }
-  25% { height: 32px; }
-  50% { height: 16px; }
-  75% { height: 40px; }
-}
-
-.animate-voice-bar {
-  animation: voice-bar 0.8s ease-in-out infinite;
-}
-
-/* Voice Mode: Idle Listening Bars */
-@keyframes voice-bar-idle {
-  0%, 100% { height: 6px; opacity: 0.5; }
-  50% { height: 18px; opacity: 0.8; }
-}
-
-.animate-voice-bar-idle {
-  animation: voice-bar-idle 1.8s ease-in-out infinite;
-}
-
-/* Voice Mode: Thinking Pulse */
-@keyframes thinking-pulse {
-  0%, 100% { height: 6px; opacity: 0.3; }
-  50% { height: 10px; opacity: 0.6; }
-}
-
-.animate-thinking-pulse {
-  animation: thinking-pulse 1.2s ease-in-out infinite;
-}
