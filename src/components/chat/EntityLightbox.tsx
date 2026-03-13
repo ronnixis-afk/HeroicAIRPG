@@ -62,6 +62,7 @@ export const EntityLightbox: React.FC = () => {
                         character={gameData.playerCharacter}
                         fromList="carried"
                         onActionCompleted={onClose}
+                        hideName={true}
                     />
                 );
             case 'npc':
@@ -203,6 +204,7 @@ export const EntityLightbox: React.FC = () => {
     if (type === 'npc') return renderContent();
 
     const getTitle = () => {
+        if (type === 'item') return (data as Item).name;
         if (type === 'location') return (data as any).name || 'Discovery Detail';
         if (type === 'lore' || type === 'objective') return (data as LoreEntry).title;
         return 'Information';

@@ -28,11 +28,12 @@ interface ItemDetailViewProps {
     onEquipRequest?: () => void;
     onUnequipRequest?: () => void;
     onActionCompleted?: () => void;
+    hideName?: boolean;
 }
 
 export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     item, ownerId, character, fromList, primaryCurrencyItemId,
-    onEquipRequest, onUnequipRequest, onActionCompleted
+    onEquipRequest, onUnequipRequest, onActionCompleted, hideName
 }) => {
     const { gameData, dropItem, splitItem, updateItem, moveItem, useItem, transferItem, consolidateCurrency, performPlayerAttack } = useContext(GameDataContext) as GameDataContextType;
 
@@ -356,12 +357,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                 <div className="animate-fade-in">
                     <div className="mb-3">
                         {/* Name + inline edit */}
-                        <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-brand-text font-merriweather leading-tight flex-1 min-w-0">{item.name}</h3>
-                            <button onClick={() => setIsEditing(true)} className="btn-icon bg-brand-primary/30 border border-brand-surface text-brand-text-muted hover:text-brand-accent shrink-0">
-                                <Icon name="edit" className="w-4 h-4" />
-                            </button>
-                        </div>
+                        {!hideName && (
+                            <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-brand-text font-merriweather leading-tight flex-1 min-w-0">{item.name}</h3>
+                            </div>
+                        )}
 
                         {/* Property Tag Row */}
                         {(() => {
@@ -533,6 +533,14 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 )}
                             </div>
                         </div>
+
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="btn-secondary btn-md w-full mt-6 gap-2"
+                        >
+                            <Icon name="edit" className="w-4 h-4" /> Edit Item
+                        </button>
+
                         <button onClick={() => setIsDropModalOpen(true)} className="w-full mt-8 flex items-center justify-center gap-2 group transition-all">
                             <Icon name="trash" className="w-4 h-4 text-brand-danger group-hover:scale-110 transition-transform" />
                             <span className="text-body-sm font-bold text-brand-danger hover:underline">Discard Item</span>

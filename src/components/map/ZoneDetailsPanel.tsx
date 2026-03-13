@@ -338,9 +338,6 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                             )}
                                         </div>
                                     </div>
-                                    <button onClick={() => setIsEditing(true)} className="btn-icon text-brand-text-muted hover:text-brand-accent shrink-0 ml-4">
-                                        <Icon name="edit" className="w-5 h-5" />
-                                    </button>
                                 </div>
 
                                 <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">
@@ -398,6 +395,13 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                         </button>
                                     </div>
                                 )}
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="btn-secondary btn-md w-full mt-6 gap-2"
+                                >
+                                    <Icon name="edit" className="w-4 h-4 text-brand-text-muted" />
+                                    Edit Zone Details
+                                </button>
                             </div>
                         )}
                     </div>

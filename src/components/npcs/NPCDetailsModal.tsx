@@ -132,13 +132,6 @@ const NPCViewContent: React.FC<{
                             </span>
                         )}
                     </div>
-                    <button
-                        onClick={onEdit}
-                        className="btn-icon bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary"
-                        aria-label="Edit Profile"
-                    >
-                        <Icon name="edit" className="w-5 h-5" />
-                    </button>
                 </div>
 
                 <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
@@ -222,6 +215,14 @@ const NPCViewContent: React.FC<{
                     >
                         <Icon name="character" className="w-5 h-5 mr-3" />
                         {toTitleCase("Invite to Party")}
+                    </button>
+
+                    <button
+                        onClick={onEdit}
+                        className="btn-secondary btn-lg rounded-2xl w-full"
+                    >
+                        <Icon name="edit" className="w-5 h-5 mr-3" />
+                        {toTitleCase("Edit Profile")}
                     </button>
 
                     <div className="flex flex-col items-center gap-4">

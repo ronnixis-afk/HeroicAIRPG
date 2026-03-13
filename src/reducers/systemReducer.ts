@@ -195,6 +195,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 nemeses: [],
                 plotPoints: [],
                 knowledge: [],
+                npcs: [],
                 mapZones: [],
                 combatState: null,
                 gmNotes: "",
@@ -202,7 +203,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: "",
                 current_site_id: "",
                 current_site_name: "",
-                currentTime: "Day 1, 08:00",
+                currentTime: state.currentTime || "Day 1, 08:00",
                 skillConfiguration: state.skillConfiguration || 'Fantasy',
                 isPartyHidden: false,
                 partyStealthScore: 10
