@@ -15,6 +15,8 @@ export const SystemToastManager: React.FC = () => {
     const { gameData } = useContext(GameDataContext);
     const { setActiveView } = useUI();
     const [toasts, setToasts] = useState<Toast[]>([]);
+    const [queue, setQueue] = useState<Toast[]>([]);
+    const [isProcessingQueue, setIsProcessingQueue] = useState(false);
     
     const [lastProcessedMsgId, setLastProcessedMsgId] = useState<string | null>(null);
 
@@ -127,7 +129,7 @@ export const SystemToastManager: React.FC = () => {
             cleanContent = cleanContent.charAt(0).toUpperCase() + cleanContent.slice(1);
         }
 
-        // Add the toast
+        // Create the toast object
         const newToast: Toast = {
             id: `toast-${Date.now()}-${Math.floor(Math.random() * 1000000).toString(36)}`,
             title,
@@ -135,13 +137,36 @@ export const SystemToastManager: React.FC = () => {
             type,
         };
 
-        setToasts(prev => [...prev, newToast]);
-
-        // Auto-dismiss
-        setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== newToast.id));
-        }, 10000);
+        // Add to queue instead of active toasts
+        setQueue(prev => [...prev, newToast]);
     };
+
+    // Effect to process the queue sequentially
+    useEffect(() => {
+        if (queue.length === 0 || isProcessingQueue) return;
+
+        const processNextToast = async () => {
+            setIsProcessingQueue(true);
+            
+            // Get the next toast
+            const nextToast = queue[0];
+            
+            // Remove it from queue and add to active toasts
+            setQueue(prev => prev.slice(1));
+            setToasts(prev => [...prev, nextToast]);
+
+            // Auto-dismiss after 10s
+            setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== nextToast.id));
+            }, 10000);
+
+            // Wait 500ms before allowing the next toast to be processed
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setIsProcessingQueue(false);
+        };
+
+        processNextToast();
+    }, [queue, isProcessingQueue]);
 
     const removeToast = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
@@ -196,17 +221,6 @@ export const SystemToastManager: React.FC = () => {
                         ${toast.type === 'inventory' ? 'cursor-pointer pointer-events-auto hover:bg-brand-primary/10 transition-colors' : 'pointer-events-none'}
                     `}
                 >
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-2xl z-0" preserveAspectRatio="none">
-                        <rect 
-                            x="0" y="0" width="100%" height="100%" 
-                            rx="16" ry="16" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            className="text-brand-accent animate-toast-border shadow-sm drop-shadow-[0_0_8px_rgba(62,207,142,0.5)]"
-                            pathLength="100"
-                        />
-                    </svg>
                     
                     <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden z-10">
                          {typeof getTypeIcon(toast.type) === 'string' ? (

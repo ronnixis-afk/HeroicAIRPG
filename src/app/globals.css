@@ -361,20 +361,7 @@
   animation: exit 0.8s ease-in forwards;
 }
 
-@keyframes toast-border-draw {
-  from {
-    stroke-dasharray: 100;
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100;
-  }
-}
 
-.animate-toast-border {
-  animation: toast-border-draw 10s linear forwards;
-}
 
 @keyframes toast-zoom-in-out {
   0% { opacity: 0; transform: scale(0.9) translateY(20px); }
