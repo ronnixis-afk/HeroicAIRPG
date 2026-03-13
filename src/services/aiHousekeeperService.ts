@@ -50,6 +50,26 @@ export const performHousekeeping = async (
 
   const socialRegistry = Array.from(socialMap.values());
 
+  // Format existing inventory context
+  const playerInv = gameData.playerInventory || { equipped: [], carried: [], storage: [], assets: [] };
+  const playerItems = [
+    ...playerInv.equipped.map(i => `${i.name} (Equipped)`),
+    ...playerInv.carried.map(i => i.name),
+    ...playerInv.storage.map(i => `${i.name} (Storage)`),
+    ...playerInv.assets.map(i => `${i.name} (Asset)`)
+  ];
+
+  const companionInventoryContext = (gameData.companions || []).map(c => {
+    const cInv = gameData.companionInventories[c.id] || { equipped: [], carried: [], storage: [], assets: [] };
+    const cItems = [
+      ...cInv.equipped.map(i => `${i.name} (Equipped)`),
+      ...cInv.carried.map(i => i.name),
+      ...cInv.storage.map(i => `${i.name} (Storage)`),
+      ...cInv.assets.map(i => `${i.name} (Asset)`)
+    ];
+    return `${c.name} Inventory: ${cItems.length > 0 ? cItems.join(', ') : 'Empty'}`;
+  }).join('\n    ');
+
   const prompt = `
     You are the "Social & Mechanical Housekeeper". 
     Your task is to extract relationship shifts, inventory changes, and specific NPC memories from the narrative.
@@ -63,16 +83,28 @@ export const performHousekeeping = async (
     [SOCIAL REGISTRY (COMPANIONS & OBSERVERS)]
     ${socialRegistry.length > 0 ? JSON.stringify(socialRegistry) : "No established characters are present."}
 
+    [CURRENT INVENTORIES (FOR CONTEXT)]
+    Player Inventory: ${playerItems.length > 0 ? playerItems.join(', ') : 'Empty'}
+    ${companionInventoryContext}
+
     [INVENTORY EXTRACTION RULES - STRICT POLICY]
     1. **ACQUISITION vs. PRESENCE**: ONLY add items if the narrative confirms a character HAS PHYSICALLY ACQUIRED it. 
        - DO NOT add items simply because they are mentioned as being in the room, on a shelf, or wielded by an enemy.
        - VALID VERBS: "picked up", "received", "looted", "grabbed", "was handed", "purchased", "stole".
        - INVALID MENTIONS: "You see a...", "The merchant shows you...", "The guard has a...", "A chest sits in the corner".
-    2. **OWNER IDENTIFICATION**:
+    2. **DUPLICATE PREVENTION**:
+       - BEFORE adding an item, check if the character ALREADY HAS it or a very similar item in their inventory.
+       - IF the character already has the item, DO NOT add it again unless it is a stackable resource (Gold, Credits, Ammunition, Consumables, Materials).
+       - For unique gear (weapons, armor, tools), assume one is enough.
+    3. **REMOVAL VALIDATION**:
+       - ONLY remove items if the narrative confirms they are lost, dropped, destroyed, or consumed.
+       - CRITICAL: Check the [CURRENT INVENTORIES] context. If an item is NOT in the character's inventory, you CANNOT remove it.
+       - Use the exact name from the character's inventory for the removal.
+    4. **OWNER IDENTIFICATION**:
        - If the narrative says "You receive/take..." -> ownerId is "player".
        - If the narrative says "[Companion Name] takes..." -> ownerId is the specific ID from the SOCIAL REGISTRY.
        - DEFAULT: If it is unclear but the Player is the one acting, default to ownerId: "player".
-    3. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
+    5. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
 
     [ALIGNMENT AUDIT INSTRUCTIONS]
     ${explicitAlignment ? `
