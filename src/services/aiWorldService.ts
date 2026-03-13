@@ -4,7 +4,7 @@ import { getAi, cleanJson } from './aiClient';
 import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapSector, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
-import { parseCoords } from '../utils/mapUtils';
+import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 
 /**
  * THE PLOT EXPANDER (Tactical Specialist)
@@ -268,6 +268,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     [STRICT CONSTRAINTS]
     - title: MAX 3 WORDS.
     - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
+    - title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
     - One POI MUST be titled "Open Area", which serves as the generic entry point for visitors.
     - content: MAX 30 WORDS.
     - Generate EXACTLY 4 POIs.
@@ -311,7 +312,8 @@ export const generateZoneDetails = async (
     sector?: MapSector,
     additionalContext?: string,
     mapSettings?: MapSettings,
-    worldSummary?: string
+    worldSummary?: string,
+    existingNames: string[] = []
 ): Promise<{ name: string, description: string, hostility: number, keywords: string[] }> => {
 
     // Extract theme from worldSummary or mapSettings (usually derived from skillConfiguration)
@@ -344,12 +346,30 @@ export const generateZoneDetails = async (
     
     Return JSON: { "name": "string", "description": "string", "hostility": number, "keywords": ["string"] }`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-flash-lite-latest',
-        contents: input,
-        config: { responseMimeType: "application/json" }
-    });
-    return JSON.parse(cleanJson(response.text || '{"name":"Uncharted Zone","description":"A mysterious area.","hostility":0,"keywords":[]}'));
+
+    const maxRetries = 2;
+    let attempts = 0;
+    let finalDetails = { name: "Uncharted Zone", description: "A mysterious area.", hostility: 0, keywords: [] };
+
+    while (attempts <= maxRetries) {
+        const response = await ai.models.generateContent({
+            model: 'gemini-flash-lite-latest',
+            contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The previous name was too similar to existing locations. Choose a DIFFERENT, DISTINCT noun or adjective.` : ''),
+            config: { responseMimeType: "application/json" }
+        });
+
+        const details = JSON.parse(cleanJson(response.text || '{}'));
+        if (details.name && !isNameTooSimilar(details.name, existingNames)) {
+            finalDetails = details;
+            break;
+        }
+
+        // If even the first attempt fails validation, we still save it as a fallback but keep trying
+        if (attempts === 0) finalDetails = details;
+        attempts++;
+    }
+
+    return finalDetails as { name: string, description: string, hostility: number, keywords: string[] };
 };
 
 /**
@@ -452,7 +472,8 @@ export const preloadAdjacentZones = async (
                     sector,
                     completeContext,
                     gameData.mapSettings,
-                    gameData.worldSummary
+                    gameData.worldSummary,
+                    runningZones.map(z => z.name)
                 );
 
                 const newZone: MapZone = {

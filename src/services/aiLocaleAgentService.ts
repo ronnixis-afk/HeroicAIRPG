@@ -3,7 +3,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { GameData, MapSector } from '../types';
-import { parseCoords } from '../utils/mapUtils';
+import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 
 /**
  * THE LOCATION SPECIALIST (Locale Agent 3.0)
@@ -12,7 +12,8 @@ import { parseCoords } from '../utils/mapUtils';
  */
 export const resolveLocaleCreation = async (
     requestedName: string,
-    gameData: GameData
+    gameData: GameData,
+    existingPois: string[] = []
 ): Promise<{
     name: string;
     sub_location: string;
@@ -62,27 +63,52 @@ export const resolveLocaleCreation = async (
     }
     `;
 
-    try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
-            }
-        });
 
-        const result = JSON.parse(cleanJson(response.text || "{}"));
-        return {
-            name: result.name || requestedName,
-            sub_location: result.sub_location || "Open Area",
-            content: result.content || "A specific location within the region.",
-            isNew: !!result.isNew,
-            isLiteralTransition: !!result.isLiteralTransition,
-            validation_passed: result.validation_passed !== undefined ? result.validation_passed : true,
-            reasoning: result.reasoning || "Standard validation."
+    try {
+        const maxRetries = 2;
+        let attempts = 0;
+        let finalResult = {
+            name: requestedName,
+            sub_location: "Open Area",
+            content: "A specific location within the region.",
+            isNew: true,
+            isLiteralTransition: true,
+            validation_passed: true,
+            reasoning: "Standard validation."
         };
+
+        while (attempts <= maxRetries) {
+            const ai = getAi();
+            const response = await ai.models.generateContent({
+                model: 'gemini-3-flash-preview',
+                contents: prompt + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The name "${finalResult.name}" is too similar to existing locations: [${existingPois.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
+                config: {
+                    responseMimeType: "application/json",
+                    thinkingConfig: { thinkingBudget: 0 }
+                }
+            });
+
+            const result = JSON.parse(cleanJson(response.text || "{}"));
+            const newResult = {
+                name: result.name || requestedName,
+                sub_location: result.sub_location || "Open Area",
+                content: result.content || "A specific location within the region.",
+                isNew: !!result.isNew,
+                isLiteralTransition: !!result.isLiteralTransition,
+                validation_passed: result.validation_passed !== undefined ? result.validation_passed : true,
+                reasoning: result.reasoning || "Standard validation."
+            };
+
+            if (!newResult.isNew || !isNameTooSimilar(newResult.name, existingPois)) {
+                finalResult = newResult;
+                break;
+            }
+
+            if (attempts === 0) finalResult = newResult;
+            attempts++;
+        }
+
+        return finalResult;
     } catch (e) {
         console.error("Location Specialist failed:", e);
         return {

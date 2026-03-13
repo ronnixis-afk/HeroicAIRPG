@@ -72,3 +72,42 @@ export const isLocaleMatch = (poi1: string, poi2: string): boolean => {
     
     return checkPrefix(n1, n2) || checkPrefix(n2, n1);
 };
+
+/**
+ * Calculates a basic Jaccard similarity between two strings based on character n-grams (3-grams).
+ * Returns a score between 0 and 1.
+ */
+export const checkNameSimilarity = (name1: string, name2: string): number => {
+    const s1 = normalizeLocale(name1);
+    const s2 = normalizeLocale(name2);
+    
+    if (s1 === s2) return 1.0;
+    if (s1.includes(s2) || s2.includes(s1)) return 0.8; // High similarity if one contains the other
+
+    const getGrams = (str: string) => {
+        const grams = new Set<string>();
+        for (let i = 0; i < str.length - 2; i++) {
+            grams.add(str.substring(i, i + 3));
+        }
+        return grams;
+    };
+
+    const grams1 = getGrams(s1);
+    const grams2 = getGrams(s2);
+    
+    if (grams1.size === 0 || grams2.size === 0) return 0;
+
+    const intersection = new Set([...grams1].filter(x => grams2.has(x)));
+    const union = new Set([...grams1, ...grams2]);
+
+    return intersection.size / union.size;
+};
+
+/**
+ * Checks if a name is too similar to any name in an array of existing names.
+ * Threshold defaults to 0.5 (where 1.0 is identical).
+ */
+export const isNameTooSimilar = (newName: string, existingNames: string[], threshold: number = 0.5): boolean => {
+    if (!newName || !existingNames.length) return false;
+    return existingNames.some(existing => checkNameSimilarity(newName, existing) >= threshold);
+};

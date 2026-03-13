@@ -81,7 +81,8 @@ export const useExtractionStep = (
                     newCoords = `${nx}-${ny}`;
 
                     try {
-                        const details = await generateZoneDetails(newCoords, destHint, undefined, undefined, gameData.mapSettings, gameData.worldSummary);
+                        const existingZoneNames = (gameData.mapZones || []).map(z => z.name);
+                        const details = await generateZoneDetails(newCoords, destHint, undefined, undefined, gameData.mapSettings, gameData.worldSummary, existingZoneNames);
                         const newZone: MapZone = {
                             id: `zone-${newCoords}-${Date.now()}`,
                             coordinates: newCoords,
@@ -164,7 +165,11 @@ export const useExtractionStep = (
             // Note: Not an 'else if' because a failed 'returning' falls through to this block
             if (narratorLoc.transition_type === 'exploring_new' || !narratorLoc.transition_type) {
                 try {
-                    const validationResult = await resolveLocaleCreation(narratorLoc.site_name, gameData);
+                    const existingPois = (gameData.knowledge || [])
+                        .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'))
+                        .map(k => k.title);
+
+                    const validationResult = await resolveLocaleCreation(narratorLoc.site_name, gameData, existingPois);
                     if (!validationResult.validation_passed) {
                         finalUpdates.location_update = {
                             ...narratorLoc,
