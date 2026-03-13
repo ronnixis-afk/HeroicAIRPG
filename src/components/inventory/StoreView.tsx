@@ -66,7 +66,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                     </span>
                 )}
                 {item.armorStats && (
-                    <span className="text-body-xs font-medium text-brand-accent/70 shrink-0">
+                    <span className="text-body-sm text-brand-text-muted">
                         AC {(item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0)}
                         {item.armorStats.plusAC !== 0 && ` (${item.armorStats.plusAC >= 0 ? '+' : ''}${item.armorStats.plusAC})`}
                     </span>
