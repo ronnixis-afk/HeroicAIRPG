@@ -51,10 +51,17 @@ export const useExtractionStep = (
             const isShipDestination = (gameData.companions ?? []).some(c => c.isShip && c.name.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim());
 
             // EVENT LANGUAGE FILTER: Prevent dramatic narrative events from creating fake POIs.
-            const eventPatterns = /\b(death|dying|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb)\b/i;
-            const isEventName = eventPatterns.test(narratorLoc.site_name);
+            const eventPatterns = /\b(death|dying|killed|slain|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb|victim|demise)\b/i;
+            
+            // NPC NAME PROTECTION: If the name contains any NPC that was JUST marked as dead.
+            const deadNpcNames = (aiResponse.npc_resolution || [])
+                .filter(res => res.isFollowing === false && /dead|killed|slain|dies/i.test(res.summary))
+                .map(res => res.name.toLowerCase().trim());
 
-            if (narratorLoc.transition_type === 'zone_change') {
+            const isNpcDeathSite = deadNpcNames.some(name => narratorLoc.site_name.toLowerCase().includes(name));
+            const isEventName = eventPatterns.test(narratorLoc.site_name) || isNpcDeathSite;
+
+            if (narratorLoc.transition_type === 'zone_change' && !isEventName) {
                 const destHint = narratorLoc.destination_zone_hint || narratorLoc.site_name;
                 const destHintLower = destHint.toLowerCase().trim();
 
@@ -175,7 +182,7 @@ export const useExtractionStep = (
             }
 
             // Note: Not an 'else if' because a failed 'returning' falls through to this block
-            if (narratorLoc.transition_type === 'exploring_new' || !narratorLoc.transition_type) {
+            if ((narratorLoc.transition_type === 'exploring_new' || !narratorLoc.transition_type) && !isEventName) {
                 try {
                     const existingPois = (gameData.knowledge || [])
                         .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'))

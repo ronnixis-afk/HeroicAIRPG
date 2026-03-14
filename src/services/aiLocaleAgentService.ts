@@ -49,7 +49,7 @@ export const resolveLocaleCreation = async (
     [PHYSICALITY FILTER]
     1. SITE NAME: The building/area (e.g., "The Iron Forge"). Proper Noun. MAX 3 WORDS.
     2. SUB-LOCATION: The specific spot (e.g., "Anvil Area", "Main Desk"). MAX 3 WORDS.
-    3. FORBIDDEN: Do not use "Hiding" or "Combat" as locations. Use physical spots.
+    3. FORBIDDEN: Do not use "Hiding", "Combat", or event-based names (e.g., "Death of [Name]") as locations. A locale must be a PHYSICAL CONTAINER or landmark.
 
     [OUTPUT JSON SCHEMA]
     {

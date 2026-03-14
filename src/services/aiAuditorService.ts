@@ -67,6 +67,7 @@ export const auditSystemState = async (
        - Identify the **Site Name** (e.g., "The Silver Spire"). Max 3 words.
        - Identify the **Sub-Location** (e.g., "Observatory Deck"). Max 3 words.
        - **Uniqueness Rule**: The site name must not be identical to the current zone name ("${currentZoneName}").
+       - **EVENT PROTECTION**: Do NOT use narrative event names as site names (e.g., "Death of X", "Aftermath of Battle", "The Ambush"). Use physical container names only.
 
     2. **Social Reconciliation**: 
        - Update "currentPOI" for present npcs to match the new site.
