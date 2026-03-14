@@ -241,7 +241,7 @@ export const useAutomatedActions = (
                 allPotentialTargets
             );
 
-            dispatch({ type: 'ADD_MESSAGE', payload: { id: `ai-${Date.now()}`, sender: 'ai', content: `Attacks: ${narrative}`, rolls } });
+            dispatch({ type: 'ADD_MESSAGE', payload: { id: `ai-${Date.now()}`, sender: 'ai', content: narrative, rolls } });
             dispatch({ type: 'ADVANCE_TURN' });
 
         } catch (e) { console.error(e); dispatch({ type: 'ADVANCE_TURN' }); } finally { setIsAiGenerating(false); }
