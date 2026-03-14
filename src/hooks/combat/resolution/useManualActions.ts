@@ -54,7 +54,7 @@ export const useManualActions = (
         let validTargetIds = targetIds;
 
         const effect = 'effect' in source ? source.effect : undefined;
-        const isHealingAction = effect && (effect.type === 'Heal' || !!effect.healDice);
+        const isHealingAction = effect && effect.type === 'Heal';
 
         if (!isHealingAction) {
             validTargetIds = targetIds.filter(id => {

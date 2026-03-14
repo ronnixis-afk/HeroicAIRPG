@@ -77,8 +77,8 @@ const TargetAvatar: React.FC<{
 const formatEffectString = (effect: AbilityEffect, actor?: PlayerCharacter | Companion, inventory?: Inventory | null): string => {
     let parts: string[] = [];
     const dc = actor ? actor.getStandardAbilityDC(inventory || undefined) : effect.dc;
-    const damage = (actor && effect.type === 'Damage') ? actor.getStandardEffectFormula(effect, inventory || undefined) : effect.damageDice;
-    const heal = (actor && effect.type === 'Heal') ? actor.getStandardEffectFormula(effect, inventory || undefined) : effect.healDice;
+    const damage = (actor && effect.type === 'Damage') ? (effect.damageDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.damageDice;
+    const heal = (actor && effect.type === 'Heal') ? (effect.healDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.healDice;
 
     if (effect.type === 'Damage') {
         parts.push(`Deals ${damage || 'damage'}`);
@@ -196,7 +196,6 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
         if (!activeSource) return 'Unknown';
         if ('effect' in activeSource && activeSource.effect) {
             if (activeSource.effect.type === 'Heal') return 'Heal';
-            if (activeSource.effect.healDice) return 'Heal';
         }
         return 'Damage';
     }, [activeSource, mode]);
