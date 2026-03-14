@@ -327,7 +327,7 @@ export const useCharacterActions = (
                         dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
                     };
 
-                    preloadAdjacentZones(coords, mapZonesUpdate, gameData!, dispatchZoneUpdate, dispatchKnowledgeUpdate)
+                    preloadAdjacentZones(coords, mapZonesUpdate, gameData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData!.knowledge || [])
                         .catch(e => console.error("Initial preloading failed:", e));
                 }, 150);
             }

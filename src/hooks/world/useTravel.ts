@@ -187,7 +187,7 @@ export const useTravel = (
                 dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
             };
 
-            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate)
+            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
                 .catch(e => console.error("Silent preloading failed at top-level:", e));
 
         } catch (e) {

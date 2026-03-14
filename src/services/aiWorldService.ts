@@ -257,7 +257,7 @@ export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: Map
 /**
  * Generates Points of Interest for a specific zone.
  */
-export const generatePoisForZone = async (zone: MapZone, worldSummary: string, mapSettings?: MapSettings): Promise<any[]> => {
+export const generatePoisForZone = async (zone: MapZone, worldSummary: string, mapSettings?: MapSettings, existingNames: string[] = []): Promise<any[]> => {
     const ai = getAi();
     const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
     const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
@@ -274,13 +274,38 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     - Generate EXACTLY 4 POIs.
     Return JSON array: [{ "title": "string", "content": "string" }]`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-flash-lite-latest',
-        contents: input,
-        config: { responseMimeType: "application/json" }
-    });
-    const result = JSON.parse(cleanJson(response.text || '[]'));
-    return Array.isArray(result) ? result : [];
+    const maxRetries = 2;
+    let attempts = 0;
+    let finalPois: any[] = [];
+
+    while (attempts <= maxRetries) {
+        const response = await ai.models.generateContent({
+            model: 'gemini-flash-lite-latest',
+            contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] Some generated titles were too similar to existing locations: [${existingNames.join(', ')}]. Choose DIFFERENT, DISTINCT nouns or adjectives.` : ''),
+            config: { responseMimeType: "application/json" }
+        });
+
+        const result = JSON.parse(cleanJson(response.text || '[]'));
+        const pois = Array.isArray(result) ? result : [];
+        
+        // If it's the first attempt, we keep it as a fallback
+        if (attempts === 0) finalPois = pois;
+
+        // Validate uniqueness (excluding "Open Area")
+        const hasCollision = pois.some(p => {
+            const title = p.title || "";
+            if (title.toLowerCase().includes("open area")) return false;
+            return isNameTooSimilar(title, existingNames) || isNameTooSimilar(title, [zone.name]);
+        });
+
+        if (!hasCollision && pois.length > 0) {
+            finalPois = pois;
+            break;
+        }
+        attempts++;
+    }
+
+    return finalPois;
 };
 
 /**
@@ -398,7 +423,8 @@ export const preloadAdjacentZones = async (
     existingZones: MapZone[],
     gameData: GameData,
     dispatchZoneUpdate: (zone: MapZone) => void,
-    dispatchKnowledgeUpdate?: (knowledge: Omit<LoreEntry, 'id'>[]) => void
+    dispatchKnowledgeUpdate?: (knowledge: Omit<LoreEntry, 'id'>[]) => void,
+    existingPois: LoreEntry[] = []
 ): Promise<void> => {
     const p = parseCoords(currentCoords);
     if (!p) return;
@@ -414,27 +440,29 @@ export const preloadAdjacentZones = async (
         { dx: -1, dy: 1 }  // southwest
     ];
 
-    // Maintain a running list of existing zones to avoid generating duplicates during the sequential loop
-    const runningZones = [...existingZones];
+    // Maintain a running list of all names to avoid generating duplicates
+    const runningZoneNames = existingZones.map(z => z.name);
+    const poiNames = existingPois.map(p => p.title);
+    const allInhabitedNames = [...new Set([...runningZoneNames, ...poiNames])];
 
     for (const d of directions) {
         const targetX = p.x + d.dx;
         const targetY = p.y + d.dy;
         const targetCoords = `${targetX}-${targetY}`;
 
-        const existing = runningZones.find(z => z.coordinates === targetCoords);
+        const existing = existingZones.find(z => z.coordinates === targetCoords);
         if (!existing) {
             // Uncharted zone. Preload it.
             const sector = gameData.mapSectors?.find(s => s.coordinates.includes(targetCoords));
 
             // Gather immediate neighbor names for context
-            const neighborNames = runningZones
-                .filter(z => {
+            const neighborNames = existingZones
+                .filter((z: MapZone) => {
                     const zp = parseCoords(z.coordinates);
                     if (!zp) return false;
                     return Math.abs(zp.x - targetX) <= 1 && Math.abs(zp.y - targetY) <= 1;
                 })
-                .map(z => z.name);
+                .map((z: MapZone) => z.name);
 
             const contextStr = neighborNames.length > 0
                 ? `Adjacent to: ${neighborNames.join(', ')}.`
@@ -456,7 +484,7 @@ export const preloadAdjacentZones = async (
             // Fetch actual details sequentially
             try {
                 // Determine uniqueness context
-                const allNamesList = runningZones.map(z => z.name).join(', ');
+                const allNamesList = allInhabitedNames.join(', ');
                 const validationContext = `
                 CRITICAL UNIQUENESS VALIDATION:
                 The new zone name MUST NOT match or be highly similar to ANY of these existing zones: [${allNamesList}].
@@ -473,7 +501,7 @@ export const preloadAdjacentZones = async (
                     completeContext,
                     gameData.mapSettings,
                     gameData.worldSummary,
-                    runningZones.map(z => z.name)
+                    allInhabitedNames
                 );
 
                 const newZone: MapZone = {
@@ -491,7 +519,7 @@ export const preloadAdjacentZones = async (
                 };
 
                 // Add to our running list so subsequent loops avoid duplicating this newly generated name
-                runningZones.push(newZone);
+                if (newZone.name) allInhabitedNames.push(newZone.name);
 
                 // Dispatch resolved zone
                 dispatchZoneUpdate(newZone);
@@ -499,7 +527,7 @@ export const preloadAdjacentZones = async (
                 // Generate and dispatch POIs for the preloaded zone
                 if (dispatchKnowledgeUpdate) {
                     try {
-                        const pois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings);
+                        const pois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings, allInhabitedNames);
                         const knowledgeEntries: Omit<LoreEntry, 'id'>[] = pois.map(p => ({
                             title: p.title,
                             content: p.content,
@@ -509,6 +537,13 @@ export const preloadAdjacentZones = async (
                             visited: p.title.toLowerCase().includes('open area')
                         }));
                         dispatchKnowledgeUpdate(knowledgeEntries);
+                        
+                        // Add new POIs to our global list
+                        knowledgeEntries.forEach(ke => {
+                            if (!ke.title.toLowerCase().includes('open area')) {
+                                allInhabitedNames.push(ke.title);
+                            }
+                        });
                     } catch (poiError) {
                         console.error("POI preloading failed for:", targetCoords, poiError);
                     }
