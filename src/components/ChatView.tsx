@@ -37,7 +37,7 @@ const ChatView: React.FC = () => {
         dispatch
     } = useContext(GameDataContext);
 
-    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActivePanel, setActingCharacterId } = useUI();
+    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActivePanel, setActingCharacterId, isHeroicModeActive } = useUI();
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const isInitialRender = useRef(true);
@@ -237,7 +237,7 @@ const ChatView: React.FC = () => {
                 content: label,
                 mode: 'CHAR',
                 explicitAlignment: alignment
-            });
+            }, isHeroicModeActive);
         };
 
         window.addEventListener('alignment-action', handleAlignmentAction);
