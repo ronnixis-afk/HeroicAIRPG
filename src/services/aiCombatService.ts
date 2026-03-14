@@ -168,7 +168,10 @@ export const enrichCombatantDetails = async (
     
     **MANDATORY ENRICHMENT RULES**:
     1. **ALIGNMENT**: DEFAULT TO 'enemy' unless the narrative context clearly identifies them as allies.
-    2. **SKINNING ABILITIES**: Rewrite the names and descriptions of 'attacks' and 'specialAbilities' to match the World Setting (Sci-Fi, Modern, Fantasy, Magitech) while keeping the effect clear. (e.g. A generic 'Melee Strike' with Fire damage becomes 'Plasma Sword').
+    2. **SKINNING ABILITIES**: Rewrite the names and descriptions of 'attacks' and 'specialAbilities' to match the World Setting (Sci-Fi, Modern, Fantasy, Magitech).
+    3. **DAMAGE TYPE ALIGNMENT**: Set the 'damageType' of attacks and abilities to match the theme (e.g. A "Fire Mage" should have 'Fire', a "Robot" might have 'Electric' or 'Force').
+    4. **TARGETING**: Identify if the narrative implies the ability hits 'Single' or 'Multiple' targets.
+    5. **IDENTIFICATION SYNC**: If the [SCENE CONTEXT] mentions a specific name or title (e.g. "Foreman Jack"), YOU MUST use that exact name for the corresponding combatant. Avoid adding generic surnames if the narrative already identified a specific one.
     
     Return JSON mapping the INDEX to the new data: 
     { 
@@ -177,8 +180,8 @@ export const enrichCombatantDetails = async (
         "affinity": "AffinityName", 
         "description": "Short description", 
         "alignment": "enemy",
-        "attacks": [{ "name": "Skinned Attack Name" }],
-        "specialAbilities": [{ "name": "Skinned Ability Name", "description": "Skinned description." }]
+        "attacks": [{ "name": "Skinned Attack Name", "damageType": "...", "description": "Short description of the strike" }],
+        "specialAbilities": [{ "name": "Skinned Ability Name", "description": "Evocative effect description.", "damageType": "...", "targetType": "Single|Multiple" }]
       }
     }`;
 

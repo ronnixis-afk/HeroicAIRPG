@@ -52,12 +52,28 @@ export const useCombatGeneration = (
         const stagedResults: { actor: CombatActor, npc: any }[] = [];
 
         suggestions.forEach(suggestion => {
-            const resolvedId = suggestion.id || (suggestion.name?.toLowerCase().includes('npc-') ? suggestion.name : null);
+            let resolvedId = suggestion.id || (suggestion.name?.toLowerCase().includes('npc-') ? suggestion.name : null);
+            let finalName = suggestion.name || '';
 
-            // PREVENT RE-STAGING OF ALREADY STAGED OR DEAD ACTORS
+            // 1. DEDUPLICATION: Attempt to find by Name if ID is missing
+            if (!resolvedId && finalName) {
+                const standardizedTarget = finalName.toLowerCase().trim();
+                const registryMatch = gameData?.npcs.find(n => n.name.toLowerCase().trim() === standardizedTarget);
+                if (registryMatch) {
+                    resolvedId = registryMatch.id;
+                }
+            }
+
+            // 2. PREVENT RE-STAGING OF ALREADY STAGED OR DEAD ACTORS
             if (resolvedId) {
+                // Skip if already in the active combat tracker
                 if (currentEnemyIds.has(resolvedId)) return;
+                
+                // Skip if already staged in THIS loop (prevents AI doubling down on same name)
+                if (stagedResults.some(r => r.actor.id === resolvedId)) return;
+
                 const registryEntry = gameData?.npcs.find(n => n.id === resolvedId);
+                // Skip if dead
                 if (registryEntry?.status === 'Dead') return;
             }
 
@@ -78,7 +94,6 @@ export const useCombatGeneration = (
 
             const params = getDifficultyParams(suggestion.difficulty || suggestion.cr?.toString() || 'Normal', playerLevel);
 
-            let finalName = suggestion.name || '';
             const lowerName = finalName.toLowerCase();
             if (lowerName.includes('replace') || lowerName.includes('unknown') || lowerName.includes('[') || lowerName.trim() === '') {
                 finalName = '';
@@ -134,6 +149,7 @@ export const useCombatGeneration = (
 
             if (suggestion.description) actor.description = suggestion.description;
 
+            // Only create a new NPC entry if this wasn't matched to an existing one
             const npc = actor.alignment === 'enemy' && !actor.id.startsWith('npc-') ? combatActorToNPC(actor, currentLocale) : null;
 
             if (!suppressDispatch) {
@@ -263,6 +279,8 @@ export const useCombatGeneration = (
                             skinData.attacks.forEach((skinnedAtk: any, j: number) => {
                                 if (actor.attacks && actor.attacks[j]) {
                                     actor.attacks[j].name = skinnedAtk.name;
+                                    if (skinnedAtk.damageType) actor.attacks[j].damageType = skinnedAtk.damageType;
+                                    if (skinnedAtk.description) (actor.attacks[j] as any).description = skinnedAtk.description;
                                 }
                             });
                         }
@@ -271,6 +289,8 @@ export const useCombatGeneration = (
                                 if (actor.specialAbilities && actor.specialAbilities[j]) {
                                     actor.specialAbilities[j].name = skinnedAb.name;
                                     actor.specialAbilities[j].description = skinnedAb.description || actor.specialAbilities[j].description;
+                                    if (skinnedAb.damageType) actor.specialAbilities[j].damageType = skinnedAb.damageType;
+                                    if (skinnedAb.targetType) actor.specialAbilities[j].targetType = skinnedAb.targetType;
                                 }
                             });
                         }
