@@ -77,11 +77,11 @@ export const useNarrativeManager = (
      * Standardizes the execution of AI Agents: P1 (Librarian) -> P2 (Mechanics) -> P3 (Narrator) -> P4 (Auditor)
      */
     const executePipeline = useCallback(async (
-        input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean }
+        input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean, targetCoordinates?: string }
     ) => {
         if (!gameData || (isPipelineActiveRef.current && !input.bypassLock)) return;
         isPipelineActiveRef.current = true;
-        const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false } = input;
+        const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false, targetCoordinates } = input;
 
         try {
             const startTime = performance.now();
@@ -162,13 +162,15 @@ export const useNarrativeManager = (
             // We trigger this without 'await' to allow the UI to unlock for the player
             setIsAuditing(true);
             setIsHousekeeping(true);
+            const aiNarrative = aiResponse.narration || "";
             processConsequences(
                 userMessage.content,
-                aiResponse.narration || "",
+                aiNarrative || "",
                 gameData,
                 aiMessage.id,
                 aiResponse,
-                !!userMessage.explicitAlignment
+                !!userMessage.explicitAlignment,
+                targetCoordinates || mechanicsOverride?.targetCoordinates
             ).then(extraction => {
                 if (isOoc) return; // Auditor doesn't need to force combat/extraction updates for OOC chatter
 
@@ -216,12 +218,12 @@ export const useNarrativeManager = (
      */
     const submitAutomatedEvent = useCallback(async (
         intentText: string,
-        mechanics: { diceRolls: any[], mechanicsSummary: string, combatInstruction: string, isHostileIntent: boolean, newGmNotes?: string },
+        mechanics: { diceRolls: any[], mechanicsSummary: string, combatInstruction: string, isHostileIntent: boolean, newGmNotes?: string, targetCoordinates?: string },
         systemInstruction?: string
     ) => {
         if (!gameData) return;
         const msg: ChatMessage = { id: `auto-${Date.now()}`, sender: 'user', mode: 'CHAR', content: intentText };
-        await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true });
+        await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true, targetCoordinates: mechanics.targetCoordinates });
     }, [gameData, executePipeline]);
 
     const summarizeDayLog = useCallback(async (day: string, dayEntries: StoryLog[], previousDayEntries: StoryLog[]) => {

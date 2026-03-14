@@ -164,7 +164,8 @@ export const useTravel = (
                 mechanicsSummary: preRolledSummary,
                 combatInstruction: generativeCombatInstruction,
                 isHostileIntent,
-                newGmNotes
+                newGmNotes,
+                targetCoordinates: coordinates
             };
 
             const systemContext = `[SYSTEM] Player arrived at: ${zone?.name || locationName} ${travelMethod ? `via ${travelMethod}` : ''}.

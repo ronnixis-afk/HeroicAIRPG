@@ -20,7 +20,8 @@ export const useExtractionStep = (
         gameData: GameData,
         aiMessageId: string,
         aiResponse: AIResponse,
-        isExplicit: boolean = false
+        isExplicit: boolean = false,
+        forcedCoordinates?: string
     ) => {
         const registryNpcNames = (gameData.npcs ?? []).map(n => n.name ? String(n.name).toLowerCase().trim() : 'unknown');
         const excludeList = [
@@ -60,7 +61,14 @@ export const useExtractionStep = (
                 // 1. Try to find the zone
                 let targetZone = (gameData.mapZones || []).find(z => z.name.toLowerCase().includes(destHintLower) || destHintLower.includes(z.name.toLowerCase()));
 
-                let newCoords = gameData.playerCoordinates || '0-0';
+                let newCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
+
+                // If we have forced coordinates, and we found a zone, ensure the zone coordinates match the forced ones
+                if (forcedCoordinates && targetZone && targetZone.coordinates !== forcedCoordinates) {
+                    // Coordinates mismatch: Trust the forced ones (the user-confirmed travel target)
+                    // If the zone exists elsewhere, we ignore it and treat this as a potentially new site or exploration
+                    targetZone = (gameData.mapZones || []).find(z => z.coordinates === forcedCoordinates);
+                }
 
                 if (targetZone) {
                     newCoords = targetZone.coordinates;
@@ -72,13 +80,15 @@ export const useExtractionStep = (
                         transition_type: 'zone_change'
                     };
                 } else {
-                    // Generate new offset coordinate
-                    const p = newCoords.split('-');
-                    let nx = parseInt(p[0]) || 0;
-                    let ny = parseInt(p[1]) || 0;
-                    nx += (Math.random() > 0.5 ? 1 : -1);
-                    ny += (Math.random() > 0.5 ? 1 : -1);
-                    newCoords = `${nx}-${ny}`;
+                    // Generate new offset coordinate only if NOT forced
+                    if (!forcedCoordinates) {
+                        const p = newCoords.split('-');
+                        let nx = parseInt(p[0]) || 0;
+                        let ny = parseInt(p[1]) || 0;
+                        nx += (Math.random() > 0.5 ? 1 : -1);
+                        ny += (Math.random() > 0.5 ? 1 : -1);
+                        newCoords = `${nx}-${ny}`;
+                    }
 
                     try {
                         const existingZoneNames = (gameData.mapZones || []).map(z => z.name);
@@ -119,20 +129,22 @@ export const useExtractionStep = (
                 resolvedLocale = finalUpdates.location_update.site_name || 'Open Area';
             } else if (narratorLoc.transition_type === 'staying' || isEventName) {
                 // Snap back to current location — no physical movement occurred.
+                const snapCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
                 finalUpdates.location_update = {
                     ...narratorLoc,
-                    sector: gameData.playerCoordinates || '0-0',
+                    sector: snapCoords,
                     zone: gameData.current_site_name || 'The Wilds',
                     site_name: gameData.current_site_name || 'Open Area',
-                    site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
+                    site_id: gameData.current_site_id || `open-area-${snapCoords}`,
                     is_new_site: false,
                     transition_type: 'staying'
                 };
                 resolvedLocale = gameData.current_site_name || '';
             } else if (narratorLoc.transition_type === 'returning') {
                 // Try to find the existing location in knowledge
+                const lookupCoords = forcedCoordinates || gameData.playerCoordinates;
                 const knownLocation = (gameData.knowledge || []).find(k => {
-                    if (!k.tags?.includes('location') || k.coordinates !== gameData.playerCoordinates) return false;
+                    if (!k.tags?.includes('location') || k.coordinates !== lookupCoords) return false;
 
                     const kTitleParts = k.title.toLowerCase().trim().split(/\s+/);
                     const nTitleParts = narratorLoc.site_name.toLowerCase().trim().split(/\s+/);
@@ -148,7 +160,7 @@ export const useExtractionStep = (
                     // Snap to the known POI
                     finalUpdates.location_update = {
                         ...narratorLoc,
-                        sector: gameData.playerCoordinates || '0-0',
+                        sector: lookupCoords || '0-0',
                         zone: gameData.current_site_name || 'The Wilds',
                         site_name: knownLocation.title,
                         site_id: knownLocation.id,
