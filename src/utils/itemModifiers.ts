@@ -308,7 +308,7 @@ export const getEnhancementPill = (item: Item): MechanicalPill | null => {
  */
 export const getActivePowerPill = (effect: AbilityEffect): MechanicalPill => {
     let label = 'Active Power';
-    if (effect.type === 'Damage') label = `${effect.damageDice} ${effect.damageType || 'Force'} Impact`;
+    if (effect.type === 'Damage') label = `${effect.damageDice} ${effect.damageType || 'Force'} Impact${effect.saveEffect === 'half' ? ' (Half on Save)' : ''}`;
     else if (effect.type === 'Heal') label = `${effect.healDice} Restoration`;
     else if (effect.type === 'Status') label = `${effect.status} Influence`;
 

@@ -184,10 +184,10 @@ export const calculateDiceRolls = (gameData: GameData, requests: DiceRollRequest
                     systemEffect = ('effect' in found && found.effect) ? { ...found.effect } : { ...(found as any) };
                     if ('getStandardAbilityDC' in lookupTarget.actor && systemEffect) {
                         const actorInstance = lookupTarget.actor as PlayerCharacter | Companion;
-                        systemEffect.dc = actorInstance.getStandardAbilityDC(lookupTarget.inventory);
+                        systemEffect.dc = systemEffect.dc || actorInstance.getStandardAbilityDC(lookupTarget.inventory);
                         const standardDice = actorInstance.getStandardEffectFormula(systemEffect, lookupTarget.inventory);
-                        if (systemEffect.type === 'Heal') systemEffect.healDice = standardDice;
-                        else if (systemEffect.type === 'Damage') systemEffect.damageDice = standardDice;
+                        if (systemEffect.type === 'Heal') systemEffect.healDice = systemEffect.healDice || standardDice;
+                        else if (systemEffect.type === 'Damage') systemEffect.damageDice = systemEffect.damageDice || standardDice;
                     }
                     if (systemEffect && systemEffect.saveAbility && request.targetName && request.rollType !== 'Saving Throw') {
                         const victimName = request.targetName;

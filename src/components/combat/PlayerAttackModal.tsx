@@ -83,7 +83,7 @@ const formatEffectString = (effect: AbilityEffect, actor?: PlayerCharacter | Com
     if (effect.type === 'Damage') {
         parts.push(`Deals ${damage || 'damage'}`);
         if (dc && effect.saveAbility) {
-            parts.push(`(DC ${dc} ${effect.saveAbility.slice(0, 3)} save)`);
+            parts.push(`(DC ${dc} ${effect.saveAbility.slice(0, 3)} save${effect.saveEffect === 'half' ? ', half dmg' : ''})`);
         }
     } else if (effect.type === 'Heal') {
         parts.push(`Heals ${heal || 'health'}`);

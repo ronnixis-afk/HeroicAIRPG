@@ -247,6 +247,7 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
             damageType,
             dc,
             saveAbility: 'dexterity',
+            saveEffect: type === 'Damage' ? 'half' : 'negate',
             status: 'Poisoned'
         },
         usage: { type: 'charges', maxUses: uses, currentUses: uses }
