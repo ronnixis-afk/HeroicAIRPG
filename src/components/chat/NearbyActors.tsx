@@ -142,7 +142,13 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
     };
 
     const NPCContextMenu = ({ npc }: { npc: NPC }) => (
-        <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-2xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px]">
+        <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-2xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px] max-w-[75vw] w-max">
+            <div className="px-4 py-3 border-b border-brand-primary/30 mb-1">
+                <div className="text-body-sm font-bold text-brand-text whitespace-nowrap overflow-hidden text-ellipsis">{npc.name}</div>
+                <div className="text-body-sm font-normal text-brand-text-muted capitalize">
+                    {npc.gender} {npc.race}
+                </div>
+            </div>
             <button
                 onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
