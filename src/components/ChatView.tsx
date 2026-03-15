@@ -304,65 +304,11 @@ const ChatView: React.FC = () => {
                     {processedMessages.map((msg, index) => {
                         if (!msg) return null;
 
-                        // Location Change Detection Logic
-                        let renderLocationHeader = null;
-                        if (msg.sender === 'ai' || msg.sender === 'system') {
-                            const currentLocName = msg.current_site_name || msg.currentPOI || msg.location;
-                            const currentZoneName = msg.location;
-                            // Search backwards for the last relevant AI/System message to compare location
-                            let prevLocName = null;
-                            for (let k = index - 1; k >= 0; k--) {
-                                const prevMsg = processedMessages[k];
-                                if (prevMsg && (prevMsg.sender === 'ai' || prevMsg.sender === 'system')) {
-                                    prevLocName = prevMsg.current_site_name || prevMsg.currentPOI || prevMsg.location;
-                                    break;
-                                }
-                            }
 
-                            if (currentLocName && !isLocaleMatch(currentLocName, prevLocName || '')) {
-                                // Time Formatting
-                                const rawTime = msg.timestamp || gameData?.currentTime || new Date().toISOString();
-                                const dateObj = new Date(rawTime);
-                                let timeString = "Unknown Time";
-
-                                if (!isNaN(dateObj.getTime())) {
-                                    timeString = new Intl.DateTimeFormat('en-US', {
-                                        hour: 'numeric',
-                                        minute: '2-digit',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        year: 'numeric'
-                                    }).format(dateObj).replace(' AM', 'am').replace(' PM', 'pm');
-                                }
-
-                                renderLocationHeader = (
-                                    <div className="w-full max-w-[83%] flex flex-col items-start mt-10 mb-4 animate-fade-in text-left">
-                                        <h3 className="text-2xl font-black text-brand-text font-serif tracking-tight drop-shadow-md mb-0.5 capitalize">
-                                            {currentLocName}
-                                        </h3>
-                                        <div className="flex items-center gap-2">
-                                            {currentZoneName && currentZoneName !== currentLocName && (
-                                                <>
-                                                    <span className="text-[12px] font-medium text-brand-accent/90 capitalize tracking-normal flex items-center gap-1.5 font-sans">
-                                                        <Icon name="location" className="w-3.5 h-3.5" />
-                                                        {currentZoneName}
-                                                    </span>
-                                                    <span className="text-brand-text-muted/40 text-[10px]">•</span>
-                                                </>
-                                            )}
-                                            <span className="text-[10px] font-medium text-brand-text-muted tracking-wide font-sans mt-0.5">
-                                                {timeString}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            }
-                        }
 
                         if (msg.sender === 'system_group') {
                             return (
                                 <React.Fragment key={msg.id}>
-                                    {renderLocationHeader}
                                     <SystemMessageGroup messages={msg.group} />
                                 </React.Fragment>
                             );
@@ -392,7 +338,6 @@ const ChatView: React.FC = () => {
 
                         return (
                             <React.Fragment key={msg.id}>
-                                {renderLocationHeader}
                                 <MessageItem
                                     msg={msg}
                                     onSpeak={speak}
