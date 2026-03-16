@@ -63,7 +63,7 @@ export const ForgeIdentity: React.FC<ForgeIdentityProps> = ({
                         value={lorePrompt}
                         onChange={e => setLorePrompt(e.target.value)}
                         placeholder="Describe appearance, history, or unique traits..."
-                        className="w-full input-md min-h-[54px] leading-relaxed"
+                        className="w-full input-md min-h-[44px] leading-relaxed"
                     />
                 </div>
             </div>

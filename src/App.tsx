@@ -77,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, onTimeClick
   return (
     <header className="h-[54px] bg-brand-bg flex-shrink-0 flex items-center justify-between px-4 border-b border-brand-primary/10">
       <button onClick={onTimeClick} className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity group text-left">
-        <span className="text-brand-accent text-[8px] mb-0.5 animate-pulse">●</span>
+        <span className="text-brand-accent text-[6px] mb-0.5 animate-pulse">●</span>
         <span className="text-body-sm text-brand-text-muted font-bold group-hover:text-brand-text transition-colors">{formattedHeaderString}</span>
       </button>
 
@@ -85,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, onTimeClick
         <button onClick={onMenuClick} className="btn-icon p-1 text-brand-text-muted hover:text-brand-accent transition-colors relative">
           <Icon name="menu" className="w-[30px] h-[30px]" />
           {badgeCount !== undefined && badgeCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-brand-accent text-black text-[8px] font-black h-[18px] min-w-[18px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-10 shadow-sm animate-pulse">
+            <span className="absolute -top-1.5 -right-1.5 bg-brand-accent text-black text-[6px] font-black h-[18px] min-w-[18px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-10 shadow-sm animate-pulse">
               {badgeCount > 9 ? '9+' : badgeCount}
             </span>
           )}

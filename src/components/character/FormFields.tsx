@@ -69,7 +69,7 @@ export const TextareaField: React.FC<TextareaFieldProps> = ({ label, value, onCh
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full bg-brand-primary p-4 rounded-xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent min-h-[54px] text-body-base text-brand-text leading-relaxed shadow-inner"
+            className="w-full bg-brand-primary p-4 rounded-xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent min-h-[44px] text-body-base text-brand-text leading-relaxed shadow-inner"
         />
     </div>
 );
