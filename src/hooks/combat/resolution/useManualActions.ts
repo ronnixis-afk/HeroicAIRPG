@@ -104,13 +104,11 @@ export const useManualActions = (
         const isMultiTargetAction = effect?.targetType === 'Multiple';
 
         if (isMultiTargetAction) {
-            // Logic Gate: Single request for Area Effect. 
-            // The dice engine (calculateDiceRolls) detects 'Multiple' and automatically expands one request to every valid target in the pool.
             requests.push({
                 rollerName: actorInstance.name,
                 rollType: isHealingAction ? 'Healing Roll' : 'Attack Roll',
                 checkName: source.name,
-                targetName: actorInstance.name, // Placeholder, engine overrides based on pool
+                targetName: actorInstance.name, 
                 mode,
                 abilityName: source.name,
                 isHeroic: wasHeroic
@@ -128,7 +126,6 @@ export const useManualActions = (
                 });
             }
         } else {
-            // Single target loop (for multi-strike weapons or single target spells)
             for (const targetId of validTargetIds) {
                 const target = allPotentialTargets.find(e => e.id === targetId);
                 if (!target) continue;
@@ -147,14 +144,32 @@ export const useManualActions = (
 
         if (requests.length === 0) return;
 
-        // Pass Heroic state to the processor for mechanical doubling
         const { rolls, summary } = processDiceRolls(requests, { isHeroic: wasHeroic });
 
-        if ('id' in source && (source as Ability).usage && (source as Ability).usage?.type !== 'passive') {
-            dispatch({ type: 'USE_ABILITY', payload: { abilityId: source.id, ownerId: effectiveOwnerId } });
-        } else if ('tags' in source && source.tags?.some(t => t.toLowerCase().includes('consumable'))) {
-            const listName = actorInventory.equipped.some(i => i.id === (source as Item).id) ? 'equipped' : 'carried';
-            dispatch({ type: 'USE_ITEM', payload: { itemId: (source as Item).id, list: listName, ownerId: effectiveOwnerId } });
+        // --- USAGE DEDUCTION ---
+        if ('tags' in source) {
+            // It's an ITEM
+            const item = source as Item;
+            const isConsumable = item.tags?.some(t => t.toLowerCase().includes('consumable'));
+            const hasQuantity = (item.quantity || 0) > 0;
+            const hasCharges = item.usage?.type === 'charges' || item.usage?.type === 'per_short_rest' || item.usage?.type === 'per_long_rest';
+
+            if (isConsumable || hasQuantity || hasCharges) {
+                const listName = actorInventory.equipped.some(i => i.id === item.id) ? 'equipped' : 'carried';
+                dispatch({ 
+                    type: 'USE_ITEM', 
+                    payload: { itemId: item.id, list: listName, ownerId: effectiveOwnerId } 
+                });
+            }
+        } else {
+            // It's an ABILITY
+            const ability = source as Ability;
+            if (ability.usage && ability.usage.type !== 'passive') {
+                dispatch({ 
+                    type: 'USE_ABILITY', 
+                    payload: { abilityId: ability.id, ownerId: effectiveOwnerId } 
+                });
+            }
         }
 
         const aiNarrates = gameData.combatConfiguration?.aiNarratesTurns ?? true;

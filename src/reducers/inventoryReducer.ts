@@ -289,9 +289,24 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
             const { itemId, list, ownerId } = action.payload;
             const newState = { ...state };
             const processUse = (inv: Inventory): Inventory => {
-                const newList = [...inv[list]];
-                const idx = newList.findIndex(i => i.id === itemId);
+                let foundList = list;
+                let idx = inv[foundList].findIndex(i => i.id === itemId);
+
+                // Resilience: If not found in hinted list, search ALL lists
+                if (idx === -1) {
+                    const allLists: (keyof Inventory)[] = ['equipped', 'carried', 'storage', 'assets'];
+                    for (const l of allLists) {
+                        const i = inv[l].findIndex(item => item.id === itemId);
+                        if (i > -1) {
+                            foundList = l;
+                            idx = i;
+                            break;
+                        }
+                    }
+                }
+
                 if (idx > -1) {
+                    const newList = [...inv[foundList]];
                     const item = newList[idx];
                     const isRechargeable = item.usage?.type === 'per_short_rest' || item.usage?.type === 'per_long_rest';
                     
@@ -331,8 +346,9 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                         // Last of a simple item -> Remove
                         newList.splice(idx, 1);
                     }
+                    return { ...inv, [foundList]: newList };
                 }
-                return { ...inv, [list]: newList };
+                return inv;
             };
             const isPlayer = ownerId === 'player' || ownerId === state.playerCharacter.id;
             if (isPlayer) {
