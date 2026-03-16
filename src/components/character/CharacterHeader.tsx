@@ -99,8 +99,8 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {/* XP Bar */}
             <div className="w-full mb-8">
                 <div className="flex justify-between items-end mb-2 px-1">
-                    <label className="text-[10px] font-bold text-brand-text-muted tracking-normal">Experience</label>
-                    <span className="text-[10px] font-bold text-brand-text-muted">
+                    <label className="text-body-sm font-bold text-brand-text-muted tracking-normal">Experience</label>
+                    <span className="text-body-sm font-bold text-brand-text-muted">
                         <span className="text-brand-text">{currentXP.toLocaleString()}</span> <span className="opacity-40">/</span> {nextLevelXP.toLocaleString()} Xp
                     </span>
                 </div>
@@ -116,7 +116,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {showHeroicPoints && (
                 <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner group">
                     <div className="flex justify-between items-center">
-                        <h3 className="mb-0 text-brand-text text-lg">Heroic Potential</h3>
+                        <h3 className="mb-0 text-brand-text">Heroic Potential</h3>
                         <div className="flex flex-wrap gap-2.5">
                             {Array.from({ length: maxHeroic }).map((_, i) => (
                                 <div
@@ -176,11 +176,11 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Sliders for Player only */}
                 {!isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
+                        <h3 className="text-brand-text mb-2">Alignment</h3>
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
-                                <label className="text-xs font-bold text-brand-text tracking-normal">
+                                <label className="text-body-sm font-bold text-brand-text tracking-normal">
                                     {getGoodEvilLabel(character.alignment?.goodEvil || 0)}({character.alignment?.goodEvil || 0})
                                 </label>
                             </div>
@@ -196,7 +196,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
-                                <label className="text-xs font-bold text-brand-text tracking-normal">
+                                <label className="text-body-sm font-bold text-brand-text tracking-normal">
                                     {getLawChaosLabel(character.alignment?.lawChaos || 0)}({character.alignment?.lawChaos || 0})
                                 </label>
                             </div>
@@ -215,7 +215,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Dropdowns for Companions only */}
                 {isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h3 className="text-brand-text text-lg mb-2">Alignment</h3>
+                        <h3 className="text-brand-text mb-2">Alignment</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <SelectField
                                 label="Moral Alignment (Good/Evil)"

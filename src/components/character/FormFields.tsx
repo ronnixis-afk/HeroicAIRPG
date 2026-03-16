@@ -83,6 +83,6 @@ interface CheckboxFieldProps {
 export const CheckboxField: React.FC<CheckboxFieldProps> = ({ label, checked, onChange }) => (
     <div className="flex items-center justify-center input-md cursor-pointer hover:border-brand-accent/30 w-full group" onClick={() => onChange({ target: { checked: !checked } } as any)}>
         <input type="checkbox" checked={checked} onChange={onChange} className="custom-checkbox" />
-        <span className="ml-3 text-body-base text-brand-text-muted font-bold group-hover:text-brand-text transition-colors select-none">{label}</span>
+        <span className="ml-3 text-body-sm text-brand-text-muted font-bold group-hover:text-brand-text transition-colors select-none">{label}</span>
     </div>
 );

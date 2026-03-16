@@ -66,15 +66,15 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                             {isRefining ? '' : (ability.name || 'Unnamed Ability')}
                         </h4>
                         {ability.isLevelUpTrait && !isRefining && (
-                            <span className="inline-flex items-center bg-brand-accent/10 text-brand-accent text-[6px] font-bold px-1.5 py-0.5 rounded border border-brand-accent/20">Trait Point</span>
+                            <span className="inline-flex items-center bg-brand-accent/10 text-brand-accent text-body-sm font-bold px-1.5 py-0.5 rounded border border-brand-accent/20">Trait Point</span>
                         )}
                         {disabledReason && !isRefining && (
-                            <span className="inline-flex items-center bg-brand-danger/10 text-brand-danger text-[7px] font-bold px-2 py-0.5 rounded border border-brand-danger/20 tracking-normal animate-pulse">
+                            <span className="inline-flex items-center bg-brand-danger/10 text-brand-danger text-body-sm font-bold px-2 py-0.5 rounded border border-brand-danger/20 tracking-normal animate-pulse">
                                 Disabled: {disabledReason}
                             </span>
                         )}
                     </div>
-                    <span className="text-[8px] font-bold text-brand-accent/80 mt-1 tracking-normal">
+                    <span className="text-body-sm font-bold text-brand-accent/80 mt-1 tracking-normal">
                         {formatUsage(ability.usage)}
                     </span>
                 </div>
@@ -102,12 +102,12 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                 <div className="animate-page space-y-4 pt-4 border-t border-brand-primary/20 mt-4 relative z-10">
                     {hasBuffs && (
                         <div>
-                            <label className="text-[8px] font-bold text-brand-text-muted block mb-2 opacity-50">Passive Bonuses</label>
+                            <label className="text-body-sm font-bold text-brand-text-muted block mb-2 opacity-50">Passive Bonuses</label>
                             <div className="flex flex-wrap gap-1.5">
                                 {ability.buffs?.map((buff, i) => {
                                     const { label, colorClass } = getBuffTag(buff);
                                     return (
-                                        <span key={i} className={`text-[7px] font-bold px-3 py-1 rounded-full border bg-brand-bg/50 ${colorClass}`}>
+                                        <span key={i} className={`text-body-sm font-bold px-3 py-1 rounded-full border bg-brand-bg/50 ${colorClass}`}>
                                             {label}
                                         </span>
                                     );
@@ -118,12 +118,12 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
 
                     {hasEffect && (
                         <div>
-                            <label className="text-[8px] font-bold text-brand-text-muted block mb-2 opacity-50">Mechanical Effect</label>
+                            <label className="text-body-sm font-bold text-brand-text-muted block mb-2 opacity-50">Mechanical Effect</label>
                             <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-surface flex items-center gap-4">
                                 <Icon name="sparkles" className="w-5 h-5 text-brand-accent/70 shrink-0" />
                                 <div className="text-body-sm font-bold text-brand-text leading-tight">
-                                    <div className="opacity-50 text-[7px] mb-1 capitalize">{ability.effect?.type} {ability.effect?.targetType}</div>
-                                    <div className="text-brand-accent text-sm">
+                                    <div className="opacity-50 text-body-sm mb-1 capitalize">{ability.effect?.type} {ability.effect?.targetType}</div>
+                                    <div className="text-brand-accent text-body-base">
                                         {ability.effect?.damageDice || ability.effect?.healDice || ability.effect?.status}
                                         {ability.effect?.dc && ` (DC ${ability.effect.dc})`}
                                         {ability.effect?.damageType && ` [${ability.effect.damageType}]`}
@@ -136,7 +136,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                     {ability.tags && ability.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-2">
                             {ability.tags.map(tag => (
-                                <span key={tag} className="text-[7px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-full capitalize border border-brand-primary/30">{tag}</span>
+                                <span key={tag} className="text-body-sm font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-full capitalize border border-brand-primary/30">{tag}</span>
                             ))}
                         </div>
                     )}
@@ -344,7 +344,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 <div className="flex flex-col">
                     <h3 className="text-brand-text mb-0">Class Features & Traits</h3>
                     {metrics.total > 0 && (
-                        <span className="text-[8px] font-bold text-brand-accent mt-1 tracking-normal">
+                        <span className="text-body-sm font-bold text-brand-accent mt-1 tracking-normal">
                             Trait Points: {metrics.used} / {metrics.total}
                         </span>
                     )}
@@ -395,7 +395,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                             <div className="w-11 h-11 rounded-full bg-brand-primary/30 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                                 <Icon name="plus" className="w-6 h-6" />
                             </div>
-                            <span className="text-body-base font-bold">Add Level {earnedAtLevel} Trait</span>
+                            <span className="text-body-sm font-bold">Add Level {earnedAtLevel} Trait</span>
                         </button>
                     );
                 })}
@@ -405,7 +405,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-colors mt-2"
                 >
                     <Icon name="plus" className="w-3.5 h-3.5" />
-                    <span className="text-[8px] font-bold tracking-normal opacity-60">Custom Feature</span>
+                    <span className="text-body-sm font-bold tracking-normal opacity-60">Custom Feature</span>
                 </button>
 
                 {sortedAbilities.length === 0 && metrics.available === 0 && (
@@ -469,13 +469,13 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                                     {trait.name}
                                                 </h4>
                                                 {trait.requiredConfig && (
-                                                    <span className="text-[7px] font-bold text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded-full border border-brand-accent/20">
+                                                    <span className="text-body-sm font-bold text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded-full border border-brand-accent/20">
                                                         {trait.requiredConfig}
                                                     </span>
                                                 )}
                                             </div>
-                                            {isOwned && <span className="text-[9px] font-bold text-brand-accent/40 border border-brand-accent/20 px-3 py-0.5 rounded-full">Owned</span>}
-                                            {isLocked && <span className="text-[9px] font-bold text-brand-danger border border-brand-danger/20 px-3 py-0.5 rounded-full">Locked</span>}
+                                            {isOwned && <span className="text-body-sm font-bold text-brand-accent/40 border border-brand-accent/20 px-3 py-0.5 rounded-full">Owned</span>}
+                                            {isLocked && <span className="text-body-sm font-bold text-brand-danger border border-brand-danger/20 px-3 py-0.5 rounded-full">Locked</span>}
                                         </div>
                                         <p className="text-body-sm text-brand-text-muted line-clamp-2 leading-relaxed italic">{trait.description}</p>
 
@@ -488,7 +488,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                         <div className="flex flex-wrap gap-1.5 mt-2">
                                             {trait.buffs?.map((buff, i) => {
                                                 const { label, colorClass } = getBuffTag(buff);
-                                                return <span key={i} className={`text-[9px] font-bold border px-2.5 py-0.5 rounded-full ${colorClass}`}>{label}</span>;
+                                                return <span key={i} className={`text-body-sm font-bold border px-2.5 py-0.5 rounded-full ${colorClass}`}>{label}</span>;
                                             })}
                                         </div>
                                     </button>
@@ -535,7 +535,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                             <label className="block text-xs font-bold text-brand-text-muted ml-1 tracking-normal">Activation & Usage</label>
                             <div className="grid grid-cols-3 gap-4">
                                 <div>
-                                    <label className="block text-[10px] font-bold text-brand-text-muted mb-1.5 ml-1">Type</label>
+                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Type</label>
                                     <select
                                         value={editingAbility.usage?.type || 'passive'}
                                         onChange={(e) => {
@@ -555,7 +555,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-brand-text-muted mb-1.5 ml-1">Limit</label>
+                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Limit</label>
                                     <input
                                         type="number"
                                         value={editingAbility.usage?.maxUses || 0}
@@ -572,7 +572,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-bold text-brand-text-muted mb-1.5 ml-1">Current</label>
+                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Current</label>
                                     <input
                                         type="number"
                                         value={editingAbility.usage?.currentUses ?? 0}

@@ -69,7 +69,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
 
                             return (
                                 <div key={ability} className={`flex flex-col items-center border p-4 rounded-2xl transition-all ${isBuffed ? 'border-brand-accent bg-brand-accent/5 shadow-lg shadow-brand-accent/5' : 'border-brand-primary bg-brand-primary/10'}`}>
-                                    <label className="text-body-tiny text-brand-text-muted capitalize mb-2">{ability}</label>
+                                    <label className="text-body-sm text-brand-text-muted capitalize mb-2">{ability}</label>
                                     <div className={`text-3xl font-black tracking-tight ${isBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
                                         {formatModifier(modifier)}
                                     </div>
@@ -139,12 +139,12 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
                                         className="custom-checkbox"
                                     />
                                     <span 
-                                        className={`font-mono font-black text-body-tiny w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
+                                        className={`font-mono font-black text-body-sm w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
                                         title={tooltipLines.join('\n')}
                                     >
                                         {formatModifier(totalBonus)}
                                     </span>
-                                    <span className="text-body-base text-brand-text-muted group-hover:text-brand-text transition-colors capitalize">{ability}</span>
+                                    <span className="text-body-sm text-brand-text-muted group-hover:text-brand-text transition-colors capitalize">{ability}</span>
                                 </div>
                             );
                         })}
