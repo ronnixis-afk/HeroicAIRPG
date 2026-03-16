@@ -544,6 +544,34 @@ export const forgeRandomItem = (
     return item;
 }
 
+// --- THEME-AWARE KEYWORDS ---
+const THEME_KEYWORDS: Record<SkillConfiguration, Record<string, string[]>> = {
+    'Fantasy': {
+        consumables: ['potion', 'elixir', 'draught', 'food', 'bread', 'wine', 'herb', 'tonic', 'scroll'],
+        throwables: ['bomb', 'grenade', 'vial', 'oil', 'firepot', 'flask'],
+        weapons: ['sword', 'bow', 'dagger', 'axe', 'spear', 'mace', 'staff', 'blade', 'claymore', 'hammer'],
+        armors: ['mail', 'plate', 'leather', 'gambeson', 'shield', 'cuirass']
+    },
+    'Sci-Fi': {
+        consumables: ['stim', 'medkit', 'ration', 'battery', 'injector', 'pill', 'booster', 'canister'],
+        throwables: ['thermal', 'emp', 'plasma grenade', 'mine', 'explosive', 'grenade', 'charge'],
+        weapons: ['laser', 'blaster', 'rifle', 'pistol', 'saber', 'plasma', 'railgun', 'cannon', 'carbine'],
+        armors: ['power armor', 'mesh', 'shield generator', 'carbon', 'plating', 'exosuit']
+    },
+    'Modern': {
+        consumables: ['pill', 'soda', 'snack', 'first aid', 'bandage', 'medicine', 'water', 'energy drink'],
+        throwables: ['grenade', 'molotov', 'flashbang', 'smoke', 'c4', 'dynamite'],
+        weapons: ['handgun', 'rifle', 'shotgun', 'knife', 'baton', 'pistol', 'revolver', 'smg'],
+        armors: ['vest', 'helmet', 'ballistic', 'shield', 'kevlar']
+    },
+    'Magitech': {
+        consumables: ['aether', 'crystal', 'mana stim', 'potion', 'battery', 'vial', 'capacitor'],
+        throwables: ['arcane bomb', 'sonic grenade', 'shock vial', 'core', 'unstable'],
+        weapons: ['arc-blade', 'mana-pistol', 'staff', 'focus', 'gauntlet', 'wand', 'caster'],
+        armors: ['reinforced', 'engraved', 'plate', 'barrier', 'kinetic', 'plated']
+    }
+};
+
 export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fantasy'): any[] => {
     return items.map(itemData => {
         if (!itemData) return itemData;
@@ -562,13 +590,17 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
 
         if (tags.includes('currency')) return { ...itemData, isNew: true };
 
-        // Determine category based on hints or name heuristics
+        // Determine category based on hints or name heuristics + Theme Awareness
         if (isUsable) {
-            if (tags.some((t: string) => t.includes('weapon')) || name.includes('sword') || name.includes('bow') || name.includes('dagger')) category = 'Weapons';
-            else if (tags.some((t: string) => t.includes('armor')) || tags.includes('shield') || name.includes('mail') || name.includes('plate')) category = 'Armors';
+            const theme = THEME_KEYWORDS[skillConfig] || THEME_KEYWORDS['Fantasy'];
+            
+            const check = (list: string[]) => list.some(k => name.includes(k));
+
+            if (tags.some((t: string) => t.includes('weapon')) || check(theme.weapons)) category = 'Weapons';
+            else if (tags.some((t: string) => t.includes('armor')) || tags.includes('shield') || check(theme.armors)) category = 'Armors';
             else if (tags.includes('accessory') || name.includes('ring') || name.includes('amulet') || slotHint) category = 'Accessories';
-            else if (tags.includes('consumable') || name.includes('potion')) category = 'Consumables';
-            else if (tags.includes('throwable') || name.includes('grenade')) category = 'Throwables';
+            else if (tags.includes('consumable') || check(theme.consumables)) category = 'Consumables';
+            else if (tags.includes('throwable') || check(theme.throwables)) category = 'Throwables';
         } else {
             category = 'Quest';
         }

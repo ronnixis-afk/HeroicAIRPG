@@ -291,14 +291,42 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                 const idx = newList.findIndex(i => i.id === itemId);
                 if (idx > -1) {
                     const item = newList[idx];
-                    if (item.usage?.type === 'charges' || item.usage?.type === 'per_short_rest' || item.usage?.type === 'per_long_rest') {
+                    const isRechargeable = item.usage?.type === 'per_short_rest' || item.usage?.type === 'per_long_rest';
+                    
+                    if (item.usage && item.usage.type === 'charges') {
+                        const usage = item.usage; // Local stable copy for type safety
+                        const newUses = Math.max(0, usage.currentUses - 1);
+                        const isDepleted = newUses === 0;
+                        const hasMultipleStacks = (item.quantity || 1) > 1;
+
+                        if (isDepleted && hasMultipleStacks) {
+                            // If depleted but we have a stack, reset charges and reduce quantity
+                            newList[idx] = new Item({
+                                ...item,
+                                quantity: (item.quantity || 1) - 1,
+                                usage: { ...usage, currentUses: usage.maxUses }
+                            });
+                        } else if (isDepleted && !hasMultipleStacks) {
+                            // Last use of the last stack -> Remove
+                            newList.splice(idx, 1);
+                        } else {
+                            // Normal charge reduction
+                            newList[idx] = new Item({
+                                ...item,
+                                usage: { ...usage, currentUses: newUses }
+                            });
+                        }
+                    } else if (isRechargeable && item.usage) {
+                        // Just reduce charges, never remove
                         newList[idx] = new Item({
                             ...item,
                             usage: { ...item.usage, currentUses: Math.max(0, item.usage.currentUses - 1) }
                         });
                     } else if (item.quantity && item.quantity > 1) {
+                        // Simple quantity reduction for items without complex usage (e.g. food)
                         newList[idx] = new Item({ ...item, quantity: item.quantity - 1 });
-                    } else if (item.quantity === 1 && !item.usage) {
+                    } else {
+                        // Last of a simple item -> Remove
                         newList.splice(idx, 1);
                     }
                 }
