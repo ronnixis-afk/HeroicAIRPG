@@ -13,6 +13,7 @@ import {
     generateActionSuggestions,
     checkObjectiveCompletion
 } from './aiNarratorService';
+import { enrichItemDetails } from './aiItemService';
 /* Fix: Import determineContextRequirements from aiContextService to allow central re-export */
 import { determineContextRequirements, getRelevantLore, getAdjacencyContext, getAvailableSkillsContext, ContextKey } from './aiContextService';
 import { auditSystemState } from './aiAuditorService';
@@ -73,6 +74,7 @@ export {
     generateObjectiveFollowUpAction,
     generateActionSuggestions,
     checkObjectiveCompletion,
+    enrichItemDetails,
     /* Fix: Export determineContextRequirements to resolve dependency errors in narrative hooks */
     determineContextRequirements
 };

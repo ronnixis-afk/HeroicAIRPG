@@ -400,7 +400,8 @@ export const forgeRandomItem = (
     slotHint?: BodySlot,
     scaleHint?: string,
     departmentHint?: string,
-    isIdentified: boolean = false
+    isIdentified: boolean = false,
+    isUsable: boolean = true
 ): Item => {
     let tableKey = 'consumables';
     const catLower = category.toLowerCase();
@@ -420,7 +421,7 @@ export const forgeRandomItem = (
     else if (catLower.includes('utilit')) tableKey = 'utilities';
     else if (catLower.includes('consumable')) tableKey = 'consumables';
     else if (catLower.includes('throw')) tableKey = 'throwables';
-    else if (catLower.includes('quest')) tableKey = 'quest';
+    else if (catLower.includes('quest') || !isUsable) tableKey = 'quest';
     else if (isMacroScale) {
         const roll = Math.random();
         tableKey = roll < 0.4 ? 'weapons' : roll < 0.7 ? 'armors' : roll < 0.9 ? 'accessories' : 'consumables';
@@ -485,9 +486,10 @@ export const forgeRandomItem = (
     const isArmor = tableKey === 'armors' || !!baseItemData.armorStats;
     const isConsumable = tableKey === 'consumables';
     const isThrowable = tableKey === 'throwables';
+    const isQuest = tableKey === 'quest' || (baseItemData.tags || []).some((t: string) => t.toLowerCase() === 'quest');
 
-    const typeHint = isWeapon ? 'weapon' : (isArmor ? 'armor' : (isConsumable ? 'consumable' : (isThrowable ? 'throwable' : 'other')));
-    const finalRarity = tableKey === 'quest' ? 'Common' : rarity;
+    const typeHint = isQuest ? 'quest' : (isWeapon ? 'weapon' : (isArmor ? 'armor' : (isConsumable ? 'consumable' : (isThrowable ? 'throwable' : 'other'))));
+    const finalRarity = isQuest ? 'Common' : rarity;
 
     const modStrings = generateSystemModifiers(finalRarity, typeHint, skillConfig, slotHint);
 
@@ -528,7 +530,6 @@ export const forgeRandomItem = (
     });
 
     // Identification Logic
-    const isQuest = tableKey === 'quest' || item.tags?.some(t => t.toLowerCase() === 'quest');
     if (isIdentified || isQuest) {
         item.name = item.name || blueprintTemplateName;
         item.description = item.description || 'A unique discovery.';
@@ -539,9 +540,9 @@ export const forgeRandomItem = (
 
     item.tags = inferTagsFromStats(item);
     item.details = buildMechanicalSummary(item, blueprintTemplateName);
-    item.price = calculateItemPrice(item);
+    item.price = isQuest ? 0 : calculateItemPrice(item);
     return item;
-};
+}
 
 export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fantasy'): any[] => {
     return items.map(itemData => {
@@ -555,16 +556,25 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
         let category = 'Utilities';
         const name = (itemData.name || '').toLowerCase();
         const tags = (Array.isArray(itemData.tags) ? itemData.tags : []).map((t: any) => String(t).toLowerCase());
+        
+        const isUsable = itemData.type !== 'Non-Usable';
+        const slotHint = itemData.slot as BodySlot | undefined;
 
         if (tags.includes('currency')) return { ...itemData, isNew: true };
-        if (tags.some((t: string) => t.includes('weapon')) || name.includes('sword') || name.includes('bow') || name.includes('dagger')) category = 'Weapons';
-        else if (tags.some((t: string) => t.includes('armor')) || tags.includes('shield') || name.includes('mail') || name.includes('plate')) category = 'Armors';
-        else if (tags.includes('accessory') || name.includes('ring') || name.includes('amulet')) category = 'Accessories';
-        else if (tags.includes('consumable') || name.includes('potion')) category = 'Consumables';
-        else if (tags.includes('throwable') || name.includes('grenade')) category = 'Throwables';
+
+        // Determine category based on hints or name heuristics
+        if (isUsable) {
+            if (tags.some((t: string) => t.includes('weapon')) || name.includes('sword') || name.includes('bow') || name.includes('dagger')) category = 'Weapons';
+            else if (tags.some((t: string) => t.includes('armor')) || tags.includes('shield') || name.includes('mail') || name.includes('plate')) category = 'Armors';
+            else if (tags.includes('accessory') || name.includes('ring') || name.includes('amulet') || slotHint) category = 'Accessories';
+            else if (tags.includes('consumable') || name.includes('potion')) category = 'Consumables';
+            else if (tags.includes('throwable') || name.includes('grenade')) category = 'Throwables';
+        } else {
+            category = 'Quest';
+        }
 
         // Force identified for items added via narrative/SKIN logic
-        const baseItem = forgeRandomItem(category, itemData.rarity || 'Common', skillConfig, undefined, undefined, undefined, true);
+        const baseItem = forgeRandomItem(category, itemData.rarity || 'Common', skillConfig, slotHint, undefined, undefined, true, isUsable);
 
         return {
             ...baseItem,

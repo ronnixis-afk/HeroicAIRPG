@@ -111,9 +111,10 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     **CONTEXT**:
     Player Level: ${level}
     
-    **STRICT POLICY - CONSERVATIVE BUFFS**:
+    **STRICT POLICY - CONSERVATIVE BUFFS & DESCRIPTIVE ITEMS**:
     - ONLY include mechanical buffs (enhancementBonus, plusAC, buffs) if the narrative explicitly describes the item as superior, magical, advanced, or masterwork.
     - Plain, mundane, or scavenged items MUST NOT have any buffs.
+    - **DESCRIPTIVE ITEMS**: If the item name or context implies it is a "Quest Item", "Note", "Letter", "Book", "Key", or "Trophy", it MUST NOT have any mechanical stats (weaponStats, armorStats, buffs, effect). These items are purely for narrative and flavor.
     - If the item is "Credits" or "Gold", ensure you assign a logical 'quantity' based on the lore context.
 
     **STRICT POLICY - ENHANCEMENT SCALE (ONLY IF BUFFED)**:
@@ -127,11 +128,11 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     5. 'usage': { "type": "charges|per_short_rest|per_long_rest", "maxUses": number, "currentUses": number }
 
     **INSTRUCTIONS**:
-    - **PRICING**: Use logical market rates (e.g., Common: 10-100g, Rare: 500-2000g, Legendary: 10000g+).
+    - **PRICING**: Use logical market rates (e.g., Common: 10-100g, Rare: 500-2000g, Legendary: 10000g+). If it is a quest item, set price to 0.
     - **DESCRIPTION**: Atmospheric flavor text. MUST be under 20 words.
     - **DETAILS**: Longer lore and history details (if applicable).
     - **STRICT RULE**: DO NOT include numerical stats (e.g. "AC 3", "+1") in the 'name' or 'description'. Use pure flavor.
-    - **BODY SLOT**: Select: Head, Eyes, Neck, Shoulders, Body, Vest, Bracers, Gloves, Main Hand, Off Hand, Ring 1, Forward 2, Waist, Legs, Feet, Accessory 1, Accessory 2.
+    - **BODY SLOT**: For gear, select: Head, Eyes, Neck, Shoulders, Body, Vest, Bracers, Gloves, Main Hand, Off Hand, Ring 1, Ring 2, Waist, Legs, Feet, Accessory 1, Accessory 2. For non-gear (Quest Items, Notes), set bodySlotTag to null.
     
     Return JSON only containing: name, description, details, rarity, tags, keywords, weaponStats, armorStats, effect, buffs, usage, price, bodySlotTag, quantity.`;
 

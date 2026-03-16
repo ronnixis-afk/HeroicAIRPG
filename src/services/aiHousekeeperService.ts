@@ -96,15 +96,18 @@ export const performHousekeeping = async (
        - BEFORE adding an item, check if the character ALREADY HAS it or a very similar item in their inventory.
        - IF the character already has the item, DO NOT add it again unless it is a stackable resource (Gold, Credits, Ammunition, Consumables, Materials).
        - For unique gear (weapons, armor, tools), assume one is enough.
-    3. **REMOVAL VALIDATION**:
+    3. **CLASSIFICATION (WATERFALL LOGIC)**: 
+       - Classify items as type: "Usable" (Gear, Consumables, Weapons) or "Non-Usable" (Notes, Letters, Maps, Keys, Quest Items).
+       - If "Usable", identify the logical 'slot' (Head, Eyes, Neck, Shoulders, Body, Vest, Bracers, Gloves, Main Hand, Off Hand, Ring, Waist, Legs, Feet, Accessory).
+    4. **REMOVAL VALIDATION**:
        - ONLY remove items if the narrative confirms they are lost, dropped, destroyed, or consumed.
        - CRITICAL: Check the [CURRENT INVENTORIES] context. If an item is NOT in the character's inventory, you CANNOT remove it.
        - Use the exact name from the character's inventory for the removal.
-    4. **OWNER IDENTIFICATION**:
+    5. **OWNER IDENTIFICATION**:
        - If the narrative says "You receive/take..." -> ownerId is "player".
        - If the narrative says "[Companion Name] takes..." -> ownerId is the specific ID from the SOCIAL REGISTRY.
        - DEFAULT: If it is unclear but the Player is the one acting, default to ownerId: "player".
-    5. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
+    6. **QUANTITY**: If currency (Gold, Credits) is added, estimate a logical amount based on narrative context (e.g. "a few coins" = 5, "a heavy purse" = 50).
 
     [ALIGNMENT AUDIT INSTRUCTIONS]
     ${explicitAlignment ? `
@@ -117,7 +120,7 @@ export const performHousekeeping = async (
        - "Lawful" (following rules, deferring to authority, methodical checks)
        - "Chaotic" (breaking rules, reckless behavior, spontaneous actions)
        - "Neutral" (casual conversation, basic exploration, walking)
-    2. Output this single string into the 'userAlignmentShift' field.
+     2. Output this single string into the 'userAlignmentShift' field.
     `}
 
     [NPC MEMORY INSTRUCTIONS]
@@ -132,7 +135,16 @@ export const performHousekeeping = async (
           "ownerId": "player OR companion-id", 
           "list": "carried|equipped|storage|assets", 
           "action": "add|remove",
-          "items": [ { "name": "string", "quantity": number, "description": "flavor summary", "rarity": "string" } ] 
+          "items": [ 
+            { 
+              "name": "string", 
+              "quantity": number, 
+              "description": "flavor summary", 
+              "rarity": "string",
+              "type": "Usable|Non-Usable",
+              "slot": "string OR null"
+            } 
+          ] 
         }
       ],
       "userAlignmentShift": "Good|Evil|Lawful|Chaotic|Neutral",

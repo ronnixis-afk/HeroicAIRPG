@@ -3,7 +3,7 @@
 
 import React, { useCallback } from 'react';
 import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone } from '../../../types';
-import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails } from '../../../services/geminiService';
+import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails, enrichItemDetails } from '../../../services/geminiService';
 import { forgeSkins } from '../../../utils/itemMechanics';
 import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
 import { isLocaleMatch } from '../../../utils/mapUtils';
@@ -235,10 +235,19 @@ export const useExtractionStep = (
         // 2. Resolve Inventory Transitions
         if (housekeepingResult.inventoryUpdates?.length > 0) {
             const skillConfig = gameData.skillConfiguration || 'Fantasy';
-            const skinnedUpdates = housekeepingResult.inventoryUpdates.map(batch => {
+            
+            // Waterfall: Forge -> Enrich (Thematic Pass)
+            const skinnedUpdates = await Promise.all(housekeepingResult.inventoryUpdates.map(async batch => {
                 if (batch.action === 'remove') return batch;
-                return { ...batch, items: forgeSkins(batch.items, skillConfig) };
-            });
+                
+                const forgedItems = forgeSkins(batch.items, skillConfig);
+                const enrichedItems = await Promise.all(forgedItems.map(item => 
+                    enrichItemDetails(item, gameData)
+                ));
+                
+                return { ...batch, items: enrichedItems };
+            }));
+
             finalUpdates.inventoryUpdates = [...(finalUpdates.inventoryUpdates || []), ...skinnedUpdates];
 
             skinnedUpdates.forEach(batch => {
