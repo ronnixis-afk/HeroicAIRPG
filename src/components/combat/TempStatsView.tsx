@@ -175,7 +175,7 @@ const TempStatsView: React.FC = () => {
                 </div>
 
                 {/* Actors List */}
-                <div className="relative flex justify-center items-center mb-6 px-1 border-b border-brand-primary/20 pb-4 min-h-[44px]">
+                <div className="relative flex justify-center items-center mb-6 px-1 border-b border-brand-primary/20 pb-4 min-h-[54px]">
                     <h2 className="mb-0">Actors</h2>
                     <button
                         onClick={() => setIsAddEnemyModalOpen(true)}
