@@ -30,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, hideHeader, child
         {/* Fixed Header */}
         {!hideHeader && (
           <div className="flex justify-between items-center p-6 pb-2 flex-shrink-0">
-            <h3 id="modal-title" className="text-brand-text truncate pr-4 mb-0">{title}</h3>
+            <h3 id="modal-title" className="text-brand-text font-bold tracking-tight truncate pr-4 mb-0">{title}</h3>
             <button
               onClick={onClose}
               className="btn-icon text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/40 transition-all"

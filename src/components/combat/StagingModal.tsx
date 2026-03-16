@@ -126,7 +126,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-1">
-                        <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Difficulty Cr</label>
+                        <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Difficulty Cr</label>
                         <div className="relative">
                             <select 
                                 value={difficultyTag}
@@ -144,7 +144,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                         </div>
                     </div>
                     <div className="col-span-1">
-                        <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Size</label>
+                        <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Size</label>
                         <div className="relative">
                             <select 
                                 value={enemySize} 
@@ -162,7 +162,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Movement</label>
+                        <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Movement</label>
                         <div className="relative">
                             <select 
                                 value={selectedArchetype} 
@@ -177,7 +177,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                         </div>
                     </div>
                     <div>
-                        <label className="block text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Affinity</label>
+                        <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Affinity</label>
                         <div className="relative">
                             <select 
                                 value={selectedAffinity} 
@@ -195,7 +195,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                 </div>
 
                 <div className="space-y-3">
-                    <label className="block text-body-sm font-bold text-brand-text-muted ml-1">Combat Alignment</label>
+                    <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Combat Alignment</label>
                     <div className="flex gap-2">
                         <AlignmentButton label="Enemy" active={alignment === 'enemy'} onClick={() => setAlignment('enemy')} colorClass="text-brand-danger" />
                         <AlignmentButton label="Neutral" active={alignment === 'neutral'} onClick={() => setAlignment('neutral')} colorClass="text-brand-text-muted" />
@@ -209,7 +209,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                 </div>
                 
                 <div className="pt-2">
-                    <label className="block text-body-sm font-bold text-brand-text-muted mb-3 ml-1">Select Template</label>
+                    <label className="block text-xs font-bold text-brand-text-muted mb-3 ml-1">Select Template</label>
                     <div className="grid grid-cols-2 gap-3">
                         {Object.keys(templates).map(key => (
                             <button

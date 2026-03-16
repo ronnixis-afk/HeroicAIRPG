@@ -380,7 +380,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             type="range" min="-50" max="50" step="1"
                             value={editedNPC.relationship}
                             onChange={(e) => handleChange('relationship', parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-brand-secondary rounded-full appearance-none cursor-pointer accent-brand-accent"
+                            className="w-full h-1.5 bg-brand-secondary rounded-full appearance-none cursor-pointer accent-brand-accent mb-2"
                         />
                     </div>
 
@@ -456,7 +456,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                         </StyledInputGroup>
 
                         <div className="bg-brand-primary/5 p-5 rounded-2xl border border-brand-primary/20 space-y-5">
-                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-2 opacity-60">{toTitleCase("Alignment Disposition")}</h5>
+                            <h5 className="text-xs font-bold text-brand-text-muted mb-2 opacity-60">Alignment Disposition</h5>
                             <div className="grid grid-cols-2 gap-4">
                                 <StyledInputGroup label="Moral Alignment (Good/Evil)">
                                     <div className="relative">
@@ -493,7 +493,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     </div>
 
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                        <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">{toTitleCase("Spatial Registry")}</h5>
+                        <h5 className="text-xs font-bold text-brand-text-muted mb-4 opacity-60">Spatial Registry</h5>
                         <div className="grid grid-cols-2 gap-4">
                             <StyledInputGroup label="Last Visited Zone">
                                 <div className="relative">
@@ -527,7 +527,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
 
                     {!editedNPC.companionId && (
                         <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                            <h5 className="text-xs font-black text-brand-text-muted tracking-widest mb-4 opacity-60">{toTitleCase("Mechanical Blueprints")}</h5>
+                            <h5 className="text-xs font-bold text-brand-text-muted mb-4 opacity-60">Mechanical Blueprints</h5>
                             <div className="flex flex-wrap gap-3">
                                 <PillSelect label="Difficulty" value={currentDifficultyTag} onChange={handleDifficultyPresetChange} options={difficultyPresets} colorClass="bg-brand-danger/10 text-brand-danger border-brand-danger/20" />
                                 <PillSelect label="Size" value={editedNPC.size || 'Medium'} onChange={(val) => handleChange('size', val)} options={sizes} colorClass="bg-blue-400/10 text-blue-400 border-blue-400/20" />
@@ -543,7 +543,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             onClick={handleDelete}
                             className="btn-icon-delete px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2"
                         >
-                            <Icon name="trash" className="w-4 h-4" /> {toTitleCase("Purge")}
+                            <Icon name="trash" className="w-4 h-4" /> Purge
                         </button>
                         <div className="flex gap-3 flex-1">
                             <button

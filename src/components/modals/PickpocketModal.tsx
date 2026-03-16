@@ -60,7 +60,7 @@ export const PickpocketModal: React.FC = () => {
                 </div>
 
                 <div className="space-y-3 relative z-10">
-                    <label className="block text-body-sm font-bold text-brand-text-muted ml-1 uppercase tracking-widest opacity-60">Intended Item</label>
+                    <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1 opacity-60">Intended Item</label>
                     <input 
                         type="text" 
                         value={itemIntent}

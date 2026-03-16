@@ -218,18 +218,21 @@ const InventoryView: React.FC = () => {
 
     return (
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="flex justify-between items-center mb-2 px-2">
-                <div className="w-10"></div>
-                <h1 className="text-center flex-1">Inventory</h1>
-                <div className="w-10 flex justify-end">
-                    {isSelectionMode && (
-                        <button onClick={exitSelectionMode} className="btn-icon text-brand-accent hover:bg-brand-primary transition-colors">
-                            <Icon name="close" className="w-5 h-5" />
-                        </button>
-                    )}
-                </div>
+            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20 relative">
+                <h1 className="text-brand-text mb-2">Inventory</h1>
+                {isSelectionMode && (
+                    <button
+                        onClick={exitSelectionMode}
+                        className="absolute right-2 top-0 btn-icon text-brand-accent hover:bg-brand-primary transition-colors"
+                        title="Exit selection mode"
+                    >
+                        <Icon name="close" className="w-5 h-5" />
+                    </button>
+                )}
+                <p className="text-body-base text-brand-text-muted font-medium italic">
+                    Manage gear for yourself and your companions.
+                </p>
             </div>
-            <p className="text-center text-brand-text-muted mb-6 text-body-base">Manage gear for yourself and your companions.</p>
 
             <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-4'}`}>
                 <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-2 pb-2 gap-4 justify-around`}>

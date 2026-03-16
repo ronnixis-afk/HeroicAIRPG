@@ -8,6 +8,7 @@ import { Icon } from '../Icon';
 // Fix: Ensure all type imports are correctly resolved from the barrel file
 import { Item, Ability, PlayerCharacter, Companion, CombatActor, RollMode, Inventory, getItemRarityColor, AbilityEffect } from '../../types';
 import { getBuffTag } from '../../utils/itemModifiers';
+import { toTitleCase } from '../../utils/npcUtils';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { canBeTargeted } from '../../utils/resolution/StatusRules';
 
@@ -340,7 +341,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                     )}
 
                     <div className="space-y-3">
-                        <label className="block text-body-sm font-medium text-brand-text-muted ml-1">Action Type</label>
+                        <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Action Type</label>
                         <div className="flex gap-2 bg-brand-primary p-1 rounded-xl shadow-inner">
                             <button onClick={() => { setMode('weapon'); setAssignments([]); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-black transition-all ${mode === 'weapon' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Attack</button>
                             <button onClick={() => { setMode('ability'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-black transition-all ${mode === 'ability' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Ability</button>
@@ -373,7 +374,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                         </div>
                     ) : (
                         <div className="animate-fade-in space-y-4">
-                            <label className="block text-body-sm font-medium text-brand-text-muted ml-1">Select {mode}</label>
+                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Select {toTitleCase(mode)}</label>
                             {currentList.length === 0 ? (
                                 <div className="py-12 text-center border-2 border-dashed border-brand-primary/30 rounded-2xl bg-brand-surface/20">
                                     <p className="text-body-sm text-brand-text-muted italic">No {mode}s available in current loadout.</p>
@@ -429,7 +430,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                     {isPlayerAttacking && (
                         <div className="animate-fade-in space-y-3">
                             <div className="flex justify-between items-center px-1">
-                                <label className="block text-body-sm font-medium text-brand-text-muted">Heroic Action</label>
+                                <label className="block text-xs font-bold text-brand-text-muted mb-2">Heroic Action</label>
                                 <span className="text-[8px] font-medium text-brand-text-muted italic opacity-60">Spend 1 point for a legendary outcome</span>
                             </div>
                             <button
@@ -461,7 +462,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                     {(mode === 'weapon' || selectedSourceId) && (
                         <div className="animate-fade-in space-y-4">
                             <div className="flex justify-between items-end px-1">
-                                <label className="text-body-sm font-medium text-brand-text-muted">Target Selection {sourceType === 'Heal' ? '(Allies)' : ''}</label>
+                                <label className="text-xs font-bold text-brand-text-muted mb-2">Target Selection {sourceType === 'Heal' ? '(Allies)' : ''}</label>
                                 <span className="text-[8px] font-medium text-brand-accent capitalize tracking-normal bg-brand-accent/10 px-2 py-0.5 rounded-md border border-brand-accent/20">
                                     {isMultiTargetAbility ? 'Entire Team' : `Slots: ${totalAssigned}/${maxTotalAttacks}`}
                                 </span>
@@ -506,7 +507,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
                     {(mode === 'weapon' || selectedSourceId) && (
                         <div className="animate-fade-in space-y-3">
-                            <label className="block text-body-sm font-medium text-brand-text-muted ml-1">{isQuickAction ? 'Action Intent' : 'Dialogue & Flavor'}</label>
+                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">{isQuickAction ? 'Action Intent' : 'Dialogue & Flavor'}</label>
                             <AutoResizingTextarea
                                 value={flavorText}
                                 onChange={(e) => setFlavorText(e.target.value)}
