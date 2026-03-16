@@ -70,7 +70,7 @@ export const useNarrativeManager = (
         });
     }, [gameData, dispatch]);
 
-    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions);
+    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions, { setIsAuditing, setIsHousekeeping });
 
     /**
      * UNIFIED PIPELINE RUNNER

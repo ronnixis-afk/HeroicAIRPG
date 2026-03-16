@@ -3,7 +3,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { ThinkingLevel } from '@google/genai';
-import { GameData, NPC, DiceRollRequest } from '../types';
+import { GameData, NPC, DiceRollRequest, ExtractionScope, ExtractionScopeFlags } from '../types';
 
 /**
  * THE SYSTEM AUDITOR (Spatial and Temporal Specialist)
@@ -13,7 +13,8 @@ export const auditSystemState = async (
     userAction: string,
     narrativeResult: string,
     gameData: GameData,
-    excludeList: string[] = []
+    excludeList: string[] = [],
+    flags?: ExtractionScopeFlags
 ): Promise<{
     currentLocale: string;
     newNPCs: Partial<NPC>[];
@@ -63,21 +64,21 @@ export const auditSystemState = async (
     Male, Female, Non-binary, Unspecified.
 
     [Instructions]
-    1. **Spatial Anchoring**: Did the narrative describe moving to a new building or room?
+    1. **Spatial Anchoring**: ${flags?.spatialChange ? `Did the narrative describe moving to a new building or room?
        - Identify the **Site Name** (e.g., "The Silver Spire"). Max 3 words.
        - Identify the **Sub-Location** (e.g., "Observatory Deck"). Max 3 words.
        - **Uniqueness Rule**: The site name must not be identical to the current zone name ("${currentZoneName}").
-       - **EVENT PROTECTION**: Do NOT use narrative event names as site names (e.g., "Death of X", "Aftermath of Battle", "The Ambush"). Use physical container names only.
+       - **EVENT PROTECTION**: Do NOT use narrative event names as site names (e.g., "Death of X", "Aftermath of Battle", "The Ambush"). Use physical container names only.` : "SKIP: No physical movement occurred."}
 
-    2. **Social Reconciliation**: 
+    2. **Social Reconciliation**: ${flags?.socialChange ? `
        - Update "currentPOI" for present npcs to match the new site.
-       - Identify deaths: if an npc is killed in the narrative, set "status": "Dead".
+       - Identify deaths: if an npc is killed in the narrative, set "status": "Dead".` : "SKIP: No social or status changes occurred."}
 
-    3. **Npc Discovery**: Identify new characters introduced. 
+    3. **Npc Discovery**: ${flags?.socialChange ? `Identify new characters introduced. 
        - **Strict Ancestry Rule**: You must select the "race" field from the [Valid Ancestries] list.
-       - **Essential Status Rule**: Set "is_essential" as true for unique named characters.
+       - **Essential Status Rule**: Set "is_essential" as true for unique named characters.` : "SKIP: No new characters were introduced."}
 
-    4. **Engagement Check (Critical)**: Determine if the scene has escalated to active combat.
+    4. **Engagement Check (Critical)**: ${flags?.engagementChange ? `Determine if the scene has escalated to active combat.
        - set "activeEngagement" to true only if:
          a) Hostiles have explicitly attacked the player.
          b) The player has explicitly attacked a target.
@@ -86,7 +87,7 @@ export const auditSystemState = async (
          a) Enemies are present but unaware of the player.
          b) Enemies are present but only talking/threatening without attacking.
          c) Hostiles were defeated or have fled this turn.
-         d) A theft or pickpocket attempt was explicitly narrated as an "unnoticed failure", "close call", or a "narrow miss" where the npc remains unaware of the player's attempt.
+         d) A theft or pickpocket attempt was explicitly narrated as an "unnoticed failure", "close call", or a "narrow miss" where the npc remains unaware of the player's attempt.` : "SKIP: No combat or engagement changes occurred."}
 
     [Output Json Schema]
     {
@@ -132,6 +133,68 @@ export const auditSystemState = async (
             activeEngagement: false, 
             missedRollRequests: [], 
             turnSummary: ""
+        };
+    }
+};
+
+/**
+ * THE RELEVANCE GATE (Step 0)
+ * High-speed classification to determine if Phase 4 extraction is even needed.
+ * Optimized for speed and low token usage using gemini-flash-lite.
+ */
+export const detectExtractionScope = async (
+    userAction: string,
+    aiNarrative: string
+): Promise<ExtractionScope> => {
+    const prompt = `
+    Analyze the dialogue and narration to determine if any game state updates are required.
+    
+    [USER]: "${userAction}"
+    [NARRATIVE]: "${aiNarrative}"
+
+    [CLASSIFICATION RULES]
+    - spatialChange: Player moved to a new building, room, or zone.
+    - socialChange: New NPCs appeared, or existing NPCs died/changed status.
+    - itemChange: Items were picked up, looted, lost, or consumed.
+    - alignmentChange: Actions with moral weight (Good/Evil/Law/Chaos).
+    - engagementChange: Combat started, ended, or aggressive intent was resolved.
+    - timeChange: Significant time passed (minutes/hours).
+
+    Return JSON: { "spatialChange": bool, "socialChange": bool, "itemChange": bool, "alignmentChange": bool, "engagementChange": bool, "timeChange": bool }
+    `;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-flash-lite-latest',
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json"
+            }
+        });
+
+        const flags = JSON.parse(cleanJson(response.text || "{}"));
+        const required = Object.values(flags).some(v => v === true);
+
+        return {
+            required,
+            flags: {
+                spatialChange: !!flags.spatialChange,
+                socialChange: !!flags.socialChange,
+                itemChange: !!flags.itemChange,
+                alignmentChange: !!flags.alignmentChange,
+                engagementChange: !!flags.engagementChange,
+                timeChange: !!flags.timeChange
+            }
+        };
+    } catch (e) {
+        // Fallback: Default to true on error to ensure consistency
+        return {
+            required: true,
+            flags: {
+                spatialChange: true, socialChange: true, itemChange: true,
+                alignmentChange: true, engagementChange: true, timeChange: true
+            }
         };
     }
 };

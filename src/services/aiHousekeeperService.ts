@@ -2,7 +2,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { ThinkingLevel } from '@google/genai';
-import { GameData, AIUpdatePayload } from '../types';
+import { GameData, AIUpdatePayload, ExtractionScopeFlags } from '../types';
 import { isLocaleMatch } from '../utils/mapUtils';
 
 /**
@@ -14,7 +14,8 @@ export const performHousekeeping = async (
   userAction: string,
   narrativeResult: string,
   gameData: GameData,
-  explicitAlignment?: string
+  explicitAlignment?: string,
+  flags?: ExtractionScopeFlags
 ): Promise<{
   inventoryUpdates: any[];
   userAlignmentShift: string;
@@ -88,10 +89,11 @@ export const performHousekeeping = async (
     ${companionInventoryContext}
 
     [INVENTORY EXTRACTION RULES - STRICT POLICY]
-    1. **ACQUISITION vs. PRESENCE**: ONLY add items if the narrative confirms a character HAS PHYSICALLY ACQUIRED it. 
+    [INVENTORY EXTRACTION RULES - STRICT POLICY]
+    1. **ACQUISITION vs. PRESENCE**: ${flags?.itemChange ? `ONLY add items if the narrative confirms a character HAS PHYSICALLY ACQUIRED it. 
        - DO NOT add items simply because they are mentioned as being in the room, on a shelf, or wielded by an enemy.
        - VALID VERBS: "picked up", "received", "looted", "grabbed", "was handed", "purchased", "stole".
-       - INVALID MENTIONS: "You see a...", "The merchant shows you...", "The guard has a...", "A chest sits in the corner".
+       - INVALID MENTIONS: "You see a...", "The merchant shows you...", "The guard has a...", "A chest sits in the corner".` : "SKIP: No inventory acquisitions occurred."}
     2. **DUPLICATE PREVENTION**:
        - BEFORE adding an item, check if the character ALREADY HAS it or a very similar item in their inventory.
        - IF the character already has the item, DO NOT add it again unless it is a stackable resource (Gold, Credits, Ammunition, Consumables, Materials).
@@ -99,10 +101,10 @@ export const performHousekeeping = async (
     3. **CLASSIFICATION (WATERFALL LOGIC)**: 
        - Classify items as type: "Usable" (Gear, Consumables, Weapons) or "Non-Usable" (Notes, Letters, Maps, Keys, Quest Items).
        - If "Usable", identify the logical 'slot' (Head, Eyes, Neck, Shoulders, Body, Vest, Bracers, Gloves, Main Hand, Off Hand, Ring, Waist, Legs, Feet, Accessory).
-    4. **REMOVAL VALIDATION**:
+    4. **REMOVAL VALIDATION**: ${flags?.itemChange ? `
        - ONLY remove items if the narrative confirms they are lost, dropped, destroyed, or consumed.
        - CRITICAL: Check the [CURRENT INVENTORIES] context. If an item is NOT in the character's inventory, you CANNOT remove it.
-       - Use the exact name from the character's inventory for the removal.
+       - Use the exact name from the character's inventory for the removal.` : "SKIP: No inventory losses occurred."}
     5. **OWNER IDENTIFICATION**:
        - If the narrative says "You receive/take..." -> ownerId is "player".
        - If the narrative says "[Companion Name] takes..." -> ownerId is the specific ID from the SOCIAL REGISTRY.

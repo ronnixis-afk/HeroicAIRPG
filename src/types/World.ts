@@ -14,6 +14,24 @@ export interface LocationUpdate {
   destination_zone_hint?: string;
 }
 
+/**
+ * Flags indicating which extraction steps are required based on narrative analysis.
+ * Part of Phase 4/Step 0 optimization.
+ */
+export interface ExtractionScopeFlags {
+  spatialChange: boolean;    // Location discovery, zone transitions, or physical movement
+  socialChange: boolean;     // New NPCs, NPC deaths, or status updates
+  itemChange: boolean;       // Picking up or losing items
+  alignmentChange: boolean;  // Actions with moral or ethical weight
+  engagementChange: boolean; // Transitions into or out of combat
+  timeChange: boolean;       // Significant passage of time
+}
+
+export interface ExtractionScope {
+  required: boolean;         // True if ANY flag is true
+  flags: ExtractionScopeFlags;
+}
+
 // Fix: Added NPCResolution interface to support structured AI social status updates
 export interface NPCResolution {
   name: string;

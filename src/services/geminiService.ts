@@ -16,7 +16,7 @@ import {
 import { enrichItemDetails } from './aiItemService';
 /* Fix: Import determineContextRequirements from aiContextService to allow central re-export */
 import { determineContextRequirements, getRelevantLore, getAdjacencyContext, getAvailableSkillsContext, ContextKey } from './aiContextService';
-import { auditSystemState } from './aiAuditorService';
+import { auditSystemState, detectExtractionScope } from './aiAuditorService';
 import { performHousekeeping } from './aiHousekeeperService';
 import { assessSkillIntent, verifyCombatRelevance } from './aiSkillAssessorService';
 import { resolveLocaleCreation } from './aiLocaleAgentService';
@@ -67,6 +67,7 @@ export {
     generateNarrativeRoundResponse,
     generateGrandDesign,
     auditSystemState,
+    detectExtractionScope,
     performHousekeeping,
     generateStorySummary,
     summarizeDay,

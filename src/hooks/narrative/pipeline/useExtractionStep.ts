@@ -2,8 +2,8 @@
 // hooks/narrative/pipeline/useExtractionStep.ts
 
 import React, { useCallback } from 'react';
-import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone } from '../../../types';
-import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails, enrichItemDetails } from '../../../services/geminiService';
+import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone, ExtractionScopeFlags } from '../../../types';
+import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails, enrichItemDetails, detectExtractionScope } from '../../../services/geminiService';
 import { forgeSkins } from '../../../utils/itemMechanics';
 import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
 import { isLocaleMatch } from '../../../utils/mapUtils';
@@ -12,7 +12,8 @@ import { parseGameTime, addDuration, formatGameTime } from '../../../utils/timeU
 export const useExtractionStep = (
     dispatch: React.Dispatch<GameAction>,
     notifyInventoryChanges: (updates: any[]) => void,
-    combatActions: any
+    combatActions: any,
+    uiSetters?: { setIsAuditing: (val: boolean) => void, setIsHousekeeping: (val: boolean) => void }
 ) => {
     const processConsequences = useCallback(async (
         userContent: string,
@@ -30,11 +31,39 @@ export const useExtractionStep = (
             ...registryNpcNames
         ].filter((n): n is string => !!n);
 
-        // 1. Concurrent Audit & Housekeeping
-        const [auditResult, housekeepingResult] = await Promise.all([
-            auditSystemState(userContent, aiNarrative, gameData, excludeList),
-            performHousekeeping(userContent, aiNarrative, gameData, aiResponse.updates?.adventureBrief || (gameData.messages.slice(-1)[0]?.explicitAlignment))
-        ]);
+        // Step 0: Detection Gate (Relevance Optimization)
+        const scope = await detectExtractionScope(userContent, aiNarrative);
+
+        if (!scope.required) {
+            if (uiSetters) {
+                uiSetters.setIsAuditing(false);
+                uiSetters.setIsHousekeeping(false);
+            }
+            return { engagementConfirmed: false };
+        }
+
+        // 1. Concurrent Audit & Housekeeping (Gated)
+        const auditPromise = (scope.flags.spatialChange || scope.flags.socialChange || scope.flags.engagementChange || scope.flags.timeChange)
+            ? auditSystemState(userContent, aiNarrative, gameData, excludeList, scope.flags)
+            : Promise.resolve({
+                currentLocale: gameData.currentLocale || '',
+                timePassedMinutes: 0,
+                newNPCs: [],
+                npcUpdates: [],
+                activeEngagement: false,
+                missedRollRequests: [],
+                turnSummary: ""
+            });
+
+        const housekeepingPromise = (scope.flags.itemChange || scope.flags.alignmentChange || scope.flags.socialChange)
+            ? performHousekeeping(userContent, aiNarrative, gameData, aiResponse.updates?.adventureBrief || (gameData.messages.slice(-1)[0]?.explicitAlignment), scope.flags)
+            : Promise.resolve({
+                inventoryUpdates: [],
+                userAlignmentShift: "Neutral",
+                npcMemories: []
+            });
+
+        const [auditResult, housekeepingResult] = await Promise.all([auditPromise, housekeepingPromise]);
 
         const finalUpdates: AIUpdatePayload = {
             ...(aiResponse.updates || {}),
