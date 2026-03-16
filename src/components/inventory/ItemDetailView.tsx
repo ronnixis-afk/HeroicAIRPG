@@ -504,70 +504,78 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                         {isUsingItem ? <Icon name="spinner" className="w-4 h-4 animate-spin text-black" /> : 'Use Item'}
                                     </button>
                                     {isTargetDropdownOpen && (
-                                        <div className="absolute bottom-full mb-2 w-[240px] sm:w-[280px] left-1/2 -translate-x-1/2 bg-brand-surface rounded-2xl shadow-2xl z-[110] border border-brand-primary overflow-hidden animate-fade-in py-2">
-                                            <div className="px-4 py-2 border-b border-brand-primary/10">
-                                                <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-wider">Select Target</span>
-                                            </div>
-                                            <div className="p-1 max-h-[320px] overflow-y-auto custom-scrollbar">
-                                                {/* Player Target */}
-                                                <button onClick={() => handleTargetSelect(gameData?.playerCharacter.id || 'player')} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-xl group">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
-                                                        {gameData?.playerCharacter.imageUrl ? (
-                                                            <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <span className="text-[10px] font-bold text-brand-text-muted flex items-center justify-center h-full">
-                                                                {gameData?.playerCharacter.name.slice(0, 2).toUpperCase()}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex flex-col min-w-0">
-                                                        <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">Self ({toTitleCase(gameData?.playerCharacter.name)})</span>
-                                                    </div>
-                                                </button>
-
-                                                {/* Companion Targets */}
-                                                {gameData?.companions.map(companion => (
-                                                    <button key={companion.id} onClick={() => handleTargetSelect(companion.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-xl group">
-                                                        <div className="w-8 h-8 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
-                                                            {companion.imageUrl ? (
-                                                                <img src={companion.imageUrl} className="w-full h-full object-cover" />
+                                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 animate-fade-in backdrop-blur-sm">
+                                            <div className="w-full max-w-[320px] bg-brand-surface rounded-3xl shadow-2xl border border-brand-primary overflow-hidden flex flex-col max-h-[80vh]">
+                                                <div className="px-6 py-4 border-b border-brand-primary/10 flex justify-between items-center bg-brand-primary/5">
+                                                    <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-wider">Select Target</span>
+                                                    <button onClick={() => setIsTargetDropdownOpen(false)} className="text-brand-text-muted hover:text-brand-text transition-colors">
+                                                        <Icon name="x" className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="p-2 overflow-y-auto custom-scrollbar flex-1">
+                                                    {/* Player Target */}
+                                                    <button onClick={() => handleTargetSelect(gameData?.playerCharacter.id || 'player')} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
+                                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                            {gameData?.playerCharacter.imageUrl ? (
+                                                                <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
                                                             ) : (
                                                                 <span className="text-[10px] font-bold text-brand-text-muted flex items-center justify-center h-full">
-                                                                    {companion.name.slice(0, 2).toUpperCase()}
+                                                                    {gameData?.playerCharacter.name.slice(0, 2).toUpperCase()}
                                                                 </span>
                                                             )}
                                                         </div>
                                                         <div className="flex flex-col min-w-0">
-                                                            <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(companion.name)}</span>
-                                                            <span className="text-[10px] text-brand-text-muted font-medium capitalize">
-                                                                {companion.relationship >= 50 ? 'Loyal' : (companion.relationship >= 10 ? 'Friendly' : 'Companion')}
-                                                            </span>
+                                                            <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">Self ({toTitleCase(gameData?.playerCharacter.name)})</span>
                                                         </div>
                                                     </button>
-                                                ))}
 
-                                                {/* Nearby NPC Targets */}
-                                                {(gameData?.npcs || [])
-                                                    .filter(npc => npc.currentPOI === gameData?.currentLocale && npc.status === 'Alive')
-                                                    .map(npc => (
-                                                        <button key={npc.id} onClick={() => handleTargetSelect(npc.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-xl group">
-                                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
-                                                                {npc.image ? (
-                                                                    <img src={npc.image} className="w-full h-full object-cover" />
+                                                    <div className="h-px bg-brand-primary/10 my-2 mx-4" />
+
+                                                    {/* Companion Targets */}
+                                                    {gameData?.companions.map(companion => (
+                                                        <button key={companion.id} onClick={() => handleTargetSelect(companion.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
+                                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                                {companion.imageUrl ? (
+                                                                    <img src={companion.imageUrl} className="w-full h-full object-cover" />
                                                                 ) : (
                                                                     <span className="text-[10px] font-bold text-brand-text-muted flex items-center justify-center h-full">
-                                                                        {npc.name.slice(0, 2).toUpperCase()}
+                                                                        {companion.name.slice(0, 2).toUpperCase()}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                             <div className="flex flex-col min-w-0">
-                                                                <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(npc.name)}</span>
-                                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit mt-0.5 ${npc.alignment === 'enemy' ? 'text-red-400 bg-red-400/10' : (npc.alignment === 'ally' ? 'text-emerald-400 bg-emerald-400/10' : 'text-yellow-400 bg-yellow-400/10')}`}>
-                                                                    {toTitleCase(npc.alignment || 'Neutral')}
+                                                                <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(companion.name)}</span>
+                                                                <span className="text-[10px] text-brand-text-muted font-medium capitalize">
+                                                                    {companion.relationship >= 50 ? 'Loyal' : (companion.relationship >= 10 ? 'Friendly' : 'Companion')}
                                                                 </span>
                                                             </div>
                                                         </button>
                                                     ))}
+
+                                                    {/* Nearby NPC Targets (excluding duplicates from companion list) */}
+                                                    {(gameData?.npcs || [])
+                                                        .filter(npc => npc.currentPOI === gameData?.currentLocale && npc.status === 'Alive')
+                                                        .filter(npc => !gameData?.companions.some(c => c.id === (npc.companionId || npc.id.replace('npc-', ''))))
+                                                        .map(npc => (
+                                                            <button key={npc.id} onClick={() => handleTargetSelect(npc.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
+                                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                                    {npc.image ? (
+                                                                        <img src={npc.image} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <span className="text-[10px] font-bold text-brand-text-muted flex items-center justify-center h-full">
+                                                                            {npc.name.slice(0, 2).toUpperCase()}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex flex-col min-w-0">
+                                                                    <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(npc.name)}</span>
+                                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit mt-0.5 ${npc.alignment === 'enemy' ? 'text-red-400 bg-red-400/10' : (npc.alignment === 'ally' ? 'text-emerald-400 bg-emerald-400/10' : 'text-yellow-400 bg-yellow-400/10')}`}>
+                                                                        {toTitleCase(npc.alignment || 'Neutral')}
+                                                                    </span>
+                                                                </div>
+                                                            </button>
+                                                        ))}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
