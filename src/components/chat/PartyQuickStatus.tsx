@@ -197,9 +197,13 @@ export const PartyQuickStatus: React.FC = () => {
         return (
             <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px] max-w-[75vw] w-max">
                 <div className="px-4 py-3 border-b border-brand-primary/30 mb-1">
-                    <div className="text-body-sm font-bold text-brand-text whitespace-nowrap overflow-hidden text-ellipsis">{char.name}</div>
+                    <div className="text-body-sm font-bold text-brand-text whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-1.5">
+                        {char.name}
+                        {char.gender?.toLowerCase() === 'male' && <Icon name="male" className="w-3 h-3 text-blue-400" />}
+                        {char.gender?.toLowerCase() === 'female' && <Icon name="female" className="w-3 h-3 text-pink-400" />}
+                    </div>
                     <div className="text-body-sm font-normal text-brand-text-muted capitalize">
-                        {char.gender} {char.race}
+                        {char.race}
                     </div>
                 </div>
                 <button onClick={() => navigateToView('character', charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
