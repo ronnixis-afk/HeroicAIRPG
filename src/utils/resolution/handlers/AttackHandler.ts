@@ -146,8 +146,16 @@ export const resolveAttack = (
         // Resolve Ability/Item Active Effect (Damage + Status)
         if (systemEffect) {
             const effect = systemEffect;
-            if (effect.damageDice) {
-                const { count, sides, bonus: staticBonus } = parseDiceString(effect.damageDice);
+            // Priority 1: Use explicit damageDice on the effect (Item-specific)
+            // Priority 2: Use character-level scaling formula (if applicable)
+            const activeDice = effect.damageDice || (
+                (isPCorCompanion && 'getStandardEffectFormula' in roller)
+                    ? (roller as PlayerCharacter | Companion).getStandardEffectFormula(effect)
+                    : undefined
+            );
+
+            if (activeDice) {
+                const { count, sides, bonus: staticBonus } = parseDiceString(activeDice);
                 let diceResult = 0;
                 for(let i=0; i<count * critMultiplier; i++) diceResult += rollDice(1, sides);
                 let damageTotal = Math.max(1, diceResult + staticBonus);

@@ -270,9 +270,10 @@ export const useExtractionStep = (
                 if (batch.action === 'remove') return batch;
                 
                 const forgedItems = forgeSkins(batch.items, skillConfig);
-                const enrichedItems = await Promise.all(forgedItems.map(item => 
-                    enrichItemDetails(item, gameData)
-                ));
+                const enrichedItems = await Promise.all(forgedItems.map(async (item) => {
+                    const enriched = await enrichItemDetails(item, gameData);
+                    return { ...item, ...enriched };
+                }));
                 
                 return { ...batch, items: enrichedItems };
             }));
@@ -285,7 +286,7 @@ export const useExtractionStep = (
                 const action = batch.action || 'add';
                 const isRemoval = action === 'remove';
                 batch.items.forEach((item: any) => {
-                    if (!item) return;
+                    if (!item || !item.name) return;
                     dispatch({
                         type: 'ADD_MESSAGE',
                         payload: {

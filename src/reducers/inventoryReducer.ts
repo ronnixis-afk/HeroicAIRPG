@@ -15,7 +15,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                     assets: inv.assets.map(i => i.id === item.id ? item : i),
                 };
             };
-            if (ownerId === 'player') {
+            const isPlayer = ownerId === 'player' || ownerId === state.playerCharacter.id;
+            if (isPlayer) {
                 newState.playerCharacter = newState.playerCharacter; // Trigger react update
                 newState.playerInventory = updateList(newState.playerInventory);
             } else if (newState.companionInventories[ownerId]) {
@@ -40,7 +41,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                     assets: inv.assets.map(finder),
                 };
             };
-            if (ownerId === 'player') {
+            const isPlayer = ownerId === 'player' || ownerId === state.playerCharacter.id;
+            if (isPlayer) {
                 newState.playerInventory = mark(newState.playerInventory);
             } else if (newState.companionInventories[ownerId]) {
                 newState.companionInventories = {
@@ -332,7 +334,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                 }
                 return { ...inv, [list]: newList };
             };
-            if (ownerId === 'player') {
+            const isPlayer = ownerId === 'player' || ownerId === state.playerCharacter.id;
+            if (isPlayer) {
                 newState.playerInventory = processUse(newState.playerInventory);
             } else if (newState.companionInventories[ownerId]) {
                 newState.companionInventories = {

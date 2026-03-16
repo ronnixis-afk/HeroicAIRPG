@@ -52,7 +52,11 @@ export const useManualActions = (
 
         let actorInstance = gameData.playerCharacter as PlayerCharacter | Companion;
         let actorInventory = gameData.playerInventory;
-        const ownerId = sourceActorId || gameData.playerCharacter.id;
+        let ownerId = sourceActorId || gameData.playerCharacter.id;
+
+        // NORMALIZATION: If the owner is the player character, use the literal 'player' for inventory actions
+        // This ensures the inventoryReducer correctly identifies the player's inventory.
+        const effectiveOwnerId = (ownerId === gameData.playerCharacter.id) ? 'player' : ownerId;
 
         if (sourceActorId && sourceActorId !== gameData.playerCharacter.id) {
             const companion = gameData.companions.find(c => c.id === sourceActorId);
@@ -147,10 +151,10 @@ export const useManualActions = (
         const { rolls, summary } = processDiceRolls(requests, { isHeroic: wasHeroic });
 
         if ('id' in source && (source as Ability).usage && (source as Ability).usage?.type !== 'passive') {
-            dispatch({ type: 'USE_ABILITY', payload: { abilityId: source.id, ownerId } });
+            dispatch({ type: 'USE_ABILITY', payload: { abilityId: source.id, ownerId: effectiveOwnerId } });
         } else if ('tags' in source && source.tags?.some(t => t.toLowerCase().includes('consumable'))) {
             const listName = actorInventory.equipped.some(i => i.id === (source as Item).id) ? 'equipped' : 'carried';
-            dispatch({ type: 'USE_ITEM', payload: { itemId: (source as Item).id, list: listName, ownerId } });
+            dispatch({ type: 'USE_ITEM', payload: { itemId: (source as Item).id, list: listName, ownerId: effectiveOwnerId } });
         }
 
         const aiNarrates = gameData.combatConfiguration?.aiNarratesTurns ?? true;

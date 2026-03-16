@@ -148,15 +148,26 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
         });
         const details = JSON.parse(cleanJson(response.text || '{}'));
 
-        const tempItem = new Item(details);
-        details.tags = inferTagsFromStats(details);
-        const sysSummary = buildMechanicalSummary(tempItem);
-        details.details = (details.details ? details.details + '\n\n' : '') + sysSummary;
+        // Ensure we don't accidentally wipe out the name or description if the AI response is empty
+        const finalName = details.name || item.name;
+        const finalDesc = details.description || item.description;
 
-        return details;
+        const mergedData = {
+            ...item,
+            ...details,
+            name: finalName,
+            description: finalDesc
+        };
+
+        const tempItem = new Item(mergedData);
+        mergedData.tags = inferTagsFromStats(mergedData);
+        const sysSummary = buildMechanicalSummary(tempItem);
+        mergedData.details = (mergedData.details ? mergedData.details + '\n\n' : '') + sysSummary;
+
+        return mergedData;
     } catch (e) {
         console.error("Item Enrichment failed", e);
-        return {};
+        return item; // Return the original item instead of an empty object
     }
 };
 

@@ -35,11 +35,14 @@ export const resolveHealing = (
 
     if (systemEffect) {
          let diceFormula = '';
-         if ('getStandardEffectFormula' in roller) {
-             diceFormula = (roller as PlayerCharacter | Companion).getStandardEffectFormula(systemEffect);
-         }
-
-         const activeDice = diceFormula || systemEffect.healDice || '1d8';
+         
+         // Priority 1: Use explicit healDice on the effect (Item-specific)
+         // Priority 2: Use character-level scaling formula
+         const activeDice = systemEffect.healDice || (
+             ('getStandardEffectFormula' in roller) 
+                 ? (roller as PlayerCharacter | Companion).getStandardEffectFormula(systemEffect)
+                 : '1d8'
+         );
          
          if (activeDice) {
              diceStr = activeDice;
@@ -47,7 +50,7 @@ export const resolveHealing = (
              staticBonus = b;
              for(let i=0; i<count * heroicMultiplier; i++) diceResult += rollDice(1, sides);
              healingAmount = diceResult + staticBonus;
-             if (isHeroic) logs.push(`  -> Heroic healing dice doubled!`);
+             if (isHeroic) logs.push(`  -> Heroic healing healing dice doubled!`);
          }
     }
 
