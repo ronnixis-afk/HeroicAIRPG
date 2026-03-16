@@ -129,6 +129,15 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     : Math.min(state.playerCharacter.heroicPoints || 0, currentMaxHeroic)
             });
 
+            if (type === 'short') {
+                // Recharge short rest abilities
+                newPlayer.abilities = newPlayer.abilities.map(a =>
+                    a.usage?.type === 'per_short_rest'
+                        ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
+                        : a
+                );
+            }
+
             if (type === 'long') {
                 newPlayer.abilities = newPlayer.abilities.map(a =>
                     a.usage ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } } : a
@@ -153,6 +162,15 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                         : Math.min(c.maxHitPoints, (c.currentHitPoints || 0) + heal),
                     temporaryHitPoints: newCompMaxTempHP
                 });
+
+                if (type === 'short') {
+                    // Recharge short rest abilities
+                    updatedComp.abilities = updatedComp.abilities.map(a =>
+                        a.usage?.type === 'per_short_rest'
+                            ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
+                            : a
+                    );
+                }
 
                 if (type === 'long') {
                     updatedComp.abilities = updatedComp.abilities.map(a =>

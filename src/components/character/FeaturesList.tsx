@@ -366,6 +366,8 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     let disabledReason = undefined;
                     if (ability.name === "Flurry of Blows" && !isStrictlyUnarmed) {
                         disabledReason = "Must be Unarmed";
+                    } else if (ability.usage && ability.usage.type !== 'passive' && ability.usage.currentUses === 0) {
+                        disabledReason = "0 Charges";
                     }
 
                     return (

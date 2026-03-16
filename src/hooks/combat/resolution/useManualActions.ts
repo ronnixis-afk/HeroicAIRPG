@@ -20,6 +20,20 @@ export const useManualActions = (
     const { isHeroicModeActive, setIsHeroicModeActive } = useUI();
 
     const performPlayerAttack = useCallback(async (source: Item | Ability, targetIds: string[], flavorText?: string, mode: RollMode = 'normal', sourceActorId?: string) => {
+        // Guard: Check if it's an ability with zero charges
+        if ('usage' in source && source.usage && source.usage.type !== 'passive' && source.usage.currentUses <= 0) {
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `sys-no-charges-${Date.now()}`,
+                    sender: 'system',
+                    content: `${source.name} has no charges remaining! You must rest to recharge it.`,
+                    type: 'neutral'
+                }
+            });
+            return;
+        }
+
         // Phase 2: Capture and consume Heroic state immediately to anchor the async flow.
         // We spending the point here as the single source of authority for manual actions.
         const wasHeroic = isHeroicModeActive;
