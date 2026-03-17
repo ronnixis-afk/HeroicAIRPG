@@ -28,7 +28,8 @@ export interface ModifierDefinition {
  * Returns the localized label for Temp HP based on game setting.
  */
 export const getTempHpLabel = (config?: SkillConfiguration): string => {
-    const activeConfig = config || (window as any).gameDataCache?.skillConfiguration;
+    const isBrowser = typeof window !== 'undefined';
+    const activeConfig = config || (isBrowser ? (window as any).gameDataCache?.skillConfiguration : undefined);
     if (activeConfig === 'Sci-Fi' || activeConfig === 'Magitech') return 'Shield';
     return 'Temp HP';
 };
