@@ -2,56 +2,8 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { Item, GameData, CombatActor, SkillConfiguration, NPC } from '../types';
-import { calculateItemPrice, getItemRarityDistribution, forgeRandomItem, RARITY_TIERS, buildMechanicalSummary } from '../utils/itemMechanics';
+import { calculateItemPrice, getItemRarityDistribution, forgeRandomItem, RARITY_TIERS, buildMechanicalSummary, inferTagsFromStats } from '../utils/itemMechanics';
 import { getAIModifierInstructions } from '../utils/itemModifiers';
-
-export const inferTagsFromStats = (itemData: any): string[] => {
-    const rawTags = Array.isArray(itemData.tags) ? itemData.tags : (typeof itemData.tags === 'string' ? [itemData.tags] : []);
-    const tags = new Set<string>(rawTags.filter((t: any) => typeof t === 'string').map((t: any) => t as string));
-
-    if (itemData.buffs && Array.isArray(itemData.buffs) && itemData.buffs.length > 0) {
-        tags.add('buff');
-        if (!itemData.weaponStats && !itemData.armorStats && !itemData.bodySlotTag) {
-            tags.add('consumable');
-        }
-    }
-
-    if (itemData.effect) {
-        tags.add('mechanical');
-    }
-
-    if (itemData.weaponStats) {
-        const ability = itemData.weaponStats.ability?.toLowerCase();
-        const isHeavy = Array.from(tags).some(t => t.toLowerCase().includes('heavy'));
-        if (isHeavy) {
-            tags.add('Heavy Weapon');
-        } else if (ability === 'dexterity') {
-            tags.add('Light Weapon');
-        } else {
-            tags.add('Medium Weapon');
-        }
-    }
-
-    if (itemData.armorStats) {
-        if (itemData.armorStats.armorType === 'shield') {
-            tags.add('shield');
-            tags.add('Light Armor');
-        } else {
-            const type = itemData.armorStats.armorType?.toLowerCase();
-            if (type === 'light') tags.add('Light Armor');
-            else if (type === 'medium') tags.add('Medium Armor');
-            else if (type === 'heavy') tags.add('Heavy Armor');
-            else tags.add('Light Armor');
-        }
-    }
-
-    const toRemove = ['unidentified', 'weapon', 'armor', 'heavy weapon', 'light weapon', 'medium weapon', 'light armor', 'medium armor', 'heavy armor'];
-    toRemove.forEach(r => {
-        tags.delete(r);
-    });
-
-    return Array.from(tags);
-};
 
 /**
  * Conservative check for item acquisition intent in user messages.

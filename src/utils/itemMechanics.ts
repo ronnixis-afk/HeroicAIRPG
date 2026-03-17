@@ -3,10 +3,58 @@
 import { Item, AbilityEffect, AbilityUsage, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, BodySlot } from '../types';
 import { applyModifierToItem, parseModifierString, getBuffTag } from './itemModifiers';
 import { CATEGORY_WEIGHTS, RARITY_DISTRIBUTIONS, RARITY_TIERS, LOOT_TABLES } from './item/itemRegistry';
-import { inferTagsFromStats } from '../services/aiItemService';
-
 // Re-export common data for UI consumers
 export { CATEGORY_WEIGHTS, RARITY_TIERS };
+
+// --- HELPERS ---
+
+export const inferTagsFromStats = (itemData: any): string[] => {
+    const rawTags = Array.isArray(itemData.tags) ? itemData.tags : (typeof itemData.tags === 'string' ? [itemData.tags] : []);
+    const tags = new Set<string>(rawTags.filter((t: any) => typeof t === 'string').map((t: any) => t as string));
+
+    if (itemData.buffs && Array.isArray(itemData.buffs) && itemData.buffs.length > 0) {
+        tags.add('buff');
+        if (!itemData.weaponStats && !itemData.armorStats && !itemData.bodySlotTag) {
+            tags.add('consumable');
+        }
+    }
+
+    if (itemData.effect) {
+        tags.add('mechanical');
+    }
+
+    if (itemData.weaponStats) {
+        const ability = itemData.weaponStats.ability?.toLowerCase();
+        const isHeavy = Array.from(tags).some(t => t.toLowerCase().includes('heavy'));
+        if (isHeavy) {
+            tags.add('Heavy Weapon');
+        } else if (ability === 'dexterity') {
+            tags.add('Light Weapon');
+        } else {
+            tags.add('Medium Weapon');
+        }
+    }
+
+    if (itemData.armorStats) {
+        if (itemData.armorStats.armorType === 'shield') {
+            tags.add('shield');
+            tags.add('Light Armor');
+        } else {
+            const type = itemData.armorStats.armorType?.toLowerCase();
+            if (type === 'light') tags.add('Light Armor');
+            else if (type === 'medium') tags.add('Medium Armor');
+            else if (type === 'heavy') tags.add('Heavy Armor');
+            else tags.add('Light Armor');
+        }
+    }
+
+    const toRemove = ['unidentified', 'weapon', 'armor', 'heavy weapon', 'light weapon', 'medium weapon', 'light armor', 'medium armor', 'heavy armor'];
+    toRemove.forEach(r => {
+        tags.delete(r);
+    });
+
+    return Array.from(tags);
+};
 
 // --- CONSTANTS ---
 const RANGED_KEYWORDS = ['bow', 'crossbow', 'sling', 'bolt', 'arrow', 'cannon', 'laser', 'battery', 'dart', 'arbalest'];
@@ -260,10 +308,12 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
  * the mandatory Enhancement/Active slots from the passive buff budget.
  */
 export const generateSystemModifiers = (rarity: string, typeHint: string = 'other', skillConfig: SkillConfiguration = 'Fantasy', slotHint?: BodySlot): string[] => {
-    if (typeHint === 'quest' || typeHint === 'consumable' || typeHint === 'throwable') return [];
+    if (typeHint === 'quest' || typeHint === 'throwable') return [];
+    if (typeHint === 'consumable' && rarity === 'Common') return [];
 
     const d = (n: number) => Math.floor(Math.random() * n) + 1;
     const isWepOrArmor = (typeHint === 'weapon' || typeHint === 'armor');
+    const isConsumable = typeHint === 'consumable';
     const modifiers: Set<string> = new Set();
 
     // 1. PHASE A: MANDATORY REWARD SLOT
@@ -280,14 +330,18 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
     // 2. PHASE B: PASSIVE BUDGET CALCULATION
     // Budget determines the number of additional passive modifiers rolled.
     let passiveBudget = 0;
-    switch (rarity) {
-        case 'Common': passiveBudget = 0; break;
-        case 'Uncommon': passiveBudget = 1; break;
-        case 'Rare': passiveBudget = 1 + (Math.random() > 0.6 ? 1 : 0); break;
-        case 'Very Rare': passiveBudget = 2; break;
-        case 'Legendary': passiveBudget = 3; break;
-        case 'Artifact': passiveBudget = 3 + d(2); break;
-        default: passiveBudget = 0;
+    if (isConsumable) {
+        passiveBudget = 1; // Consumables get exactly one property (Buff or Effect)
+    } else {
+        switch (rarity) {
+            case 'Common': passiveBudget = 0; break;
+            case 'Uncommon': passiveBudget = 1; break;
+            case 'Rare': passiveBudget = 1 + (Math.random() > 0.6 ? 1 : 0); break;
+            case 'Very Rare': passiveBudget = 2; break;
+            case 'Legendary': passiveBudget = 3; break;
+            case 'Artifact': passiveBudget = 3 + d(2); break;
+            default: passiveBudget = 0;
+        }
     }
 
     if (passiveBudget === 0 && modifiers.size === 0) return [];
@@ -298,8 +352,9 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
         // Exclude mandatory slots from the random pool
         if (isWepOrArmor && (s === "Mechanical Effect" || s.startsWith("Enhancement"))) return false;
 
-        // Exclude Enhancement for non-weapons/armor
-        if (!isWepOrArmor && s.startsWith("Enhancement")) return false;
+        // Exclude Enhancement for non-weapons/armor/consumables
+        if (!isWepOrArmor && !isConsumable && s.startsWith("Enhancement")) return false;
+        if (isConsumable && s.startsWith("Enhancement")) return false; // Consumables don't get enhancement bonuses
 
         // Category filtering
         if (typeHint === 'weapon') return s.startsWith("Ability") || s.startsWith("Combat") || s.startsWith("ExDam");
@@ -492,13 +547,15 @@ export const forgeRandomItem = (
     const finalRarity = isQuest ? 'Common' : rarity;
 
     const modStrings = generateSystemModifiers(finalRarity, typeHint, skillConfig, slotHint);
+    const rolledStatBuffs = modStrings.filter(s => s !== "Mechanical Effect");
+    const hasRolledStatBuff = rolledStatBuffs.length > 0;
+    const canHaveActiveEffect = isThrowable || (modStrings.includes("Mechanical Effect") && !isWeapon && !isArmor);
 
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
-    const canHaveActiveEffect = isConsumable || isThrowable || (modStrings.includes("Mechanical Effect") && !isWeapon && !isArmor);
-
-    if (canHaveActiveEffect) {
+    // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff
+    if (canHaveActiveEffect || (isConsumable && !baseItemData.effect && !hasRolledStatBuff)) {
         const forcedEffectType = isConsumable ? 'Heal' : (isThrowable ? (Math.random() > 0.5 ? 'Damage' : 'Status') : undefined);
         const mech = generateMechanicalEffect(finalRarity, forcedEffectType, (isConsumable || isThrowable));
         if (mech) { effect = mech.effect; usage = mech.usage; }
@@ -524,9 +581,11 @@ export const forgeRandomItem = (
         bodySlotTag: slotHint || baseItemData.bodySlotTag
     });
 
-    modStrings.filter(s => s !== "Mechanical Effect").forEach(modStr => {
+    rolledStatBuffs.forEach(modStr => {
         const parsed = parseModifierString(modStr);
-        if (parsed) applyModifierToItem(item, parsed.type, parsed.value, parsed.subOption);
+        if (parsed) {
+            applyModifierToItem(item, parsed.type, parsed.value, parsed.subOption, isConsumable ? 'Active' : 'Passive');
+        }
     });
 
     // Identification Logic
