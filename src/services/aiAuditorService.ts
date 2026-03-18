@@ -108,7 +108,7 @@ export const auditSystemState = async (
             model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 1536 }, 
+                thinkingConfig: { thinkingBudget: 512 }, 
                 responseMimeType: "application/json"
             }
         });
@@ -171,7 +171,7 @@ export const detectExtractionScope = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 1536 }
+                thinkingConfig: { thinkingBudget: 512 }
             }
         });
 

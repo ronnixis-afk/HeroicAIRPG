@@ -84,7 +84,7 @@ export const resolveLocaleCreation = async (
                 contents: prompt + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The name "${finalResult.name}" is too similar to existing locations: [${existingPois.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
                 config: {
                     responseMimeType: "application/json",
-                    thinkingConfig: { thinkingBudget: 1536 }
+                    thinkingConfig: { thinkingBudget: 512 }
                 }
             });
 

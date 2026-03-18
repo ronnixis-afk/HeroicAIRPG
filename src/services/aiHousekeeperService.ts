@@ -163,7 +163,7 @@ export const performHousekeeping = async (
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        thinkingConfig: { thinkingBudget: 1536 }
+        thinkingConfig: { thinkingBudget: 512 }
       }
     });
 

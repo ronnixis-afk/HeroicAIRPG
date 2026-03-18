@@ -40,7 +40,7 @@ export const generateItemCorrection = async (userContent: string, narrative: str
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 10240 }
+            thinkingConfig: { thinkingBudget: 512 }
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
@@ -95,7 +95,7 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
             contents: contextPrompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 10240 }
+                thinkingConfig: { thinkingBudget: 512 }
             }
         });
         const details = JSON.parse(cleanJson(response.text || '{}'));
@@ -164,7 +164,7 @@ export const identifyItems = async (items: Item[], gameData: GameData): Promise<
             contents: input,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 10240 }
+                thinkingConfig: { thinkingBudget: 512 }
             }
         });
 
@@ -219,7 +219,7 @@ export const generateItemPrices = async (items: Item[]): Promise<{ id: string, p
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 10240 }
+            thinkingConfig: { thinkingBudget: 512 }
         }
     });
     return JSON.parse(cleanJson(response.text || '[]'));
@@ -267,7 +267,7 @@ export const generateStoreCategoryInventory = async (category: string, blueprint
             contents: input,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 10240 }
+                thinkingConfig: { thinkingBudget: 512 }
             }
         });
         const skins = JSON.parse(cleanJson(response.text || '[]'));
@@ -321,7 +321,7 @@ export const generateForgeDetails = async (
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 10240 }
+            thinkingConfig: { thinkingBudget: 512 }
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
@@ -365,7 +365,7 @@ export const skinItemsForCharacter = async (items: Item[], character: any, world
             model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
         });
 
         const skins = JSON.parse(cleanJson(response.text || '[]'));
@@ -421,7 +421,7 @@ export const generateStolenItem = async (intendedItem: string, npc: NPC, gameDat
             model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || "{}"));
     } catch (e) {
