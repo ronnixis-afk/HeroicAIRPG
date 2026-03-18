@@ -45,7 +45,7 @@ export const THINKING_BUDGETS = {
     /** Standard budget for logical tasks and state updates */
     LOGIC: 512,
     /** Medium budget for specific analytical tasks */
-    TASK: 1536,
+    TASK: 512,
     /** Ultra high budget for complex scenario and character initialization */
-    SCENARIO: 10240,
+    SCENARIO: 5120,
 };

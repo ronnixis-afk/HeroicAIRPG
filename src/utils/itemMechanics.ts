@@ -590,7 +590,7 @@ export const forgeRandomItem = (
         isNew: true,
         weaponStats: isWeapon && baseItemData.weaponStats ? JSON.parse(JSON.stringify(baseItemData.weaponStats)) : undefined,
         armorStats: isArmor && baseItemData.armorStats ? JSON.parse(JSON.stringify(baseItemData.armorStats)) : undefined,
-        buffs: [],
+        buffs: baseItemData.buffs ? JSON.parse(JSON.stringify(baseItemData.buffs)) : [],
         tags: finalTags,
         effect: effect || (baseItemData.effect ? JSON.parse(JSON.stringify(baseItemData.effect)) : undefined),
         usage: usage || (baseItemData.usage ? JSON.parse(JSON.stringify(baseItemData.usage)) : undefined),
