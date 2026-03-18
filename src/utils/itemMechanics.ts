@@ -441,6 +441,11 @@ export const calculateItemPrice = (item: Item): number => {
         case 'Legendary': base = d(6) * 25000; break;
         case 'Artifact': base = 100000; break;
     }
+    
+    if (item.tags?.some(t => t.toLowerCase() === 'consumable')) {
+        return Math.max(1, Math.floor(base * 0.1));
+    }
+    
     return base;
 };
 
@@ -546,7 +551,17 @@ export const forgeRandomItem = (
     const typeHint = isQuest ? 'quest' : (isWeapon ? 'weapon' : (isArmor ? 'armor' : (isConsumable ? 'consumable' : (isThrowable ? 'throwable' : 'other'))));
     const finalRarity = isQuest ? 'Common' : rarity;
 
-    const modStrings = generateSystemModifiers(finalRarity, typeHint, skillConfig, slotHint);
+    const baseHasBuffs = baseItemData.buffs && baseItemData.buffs.length > 0;
+    const baseHasEffect = !!baseItemData.effect;
+
+    let modStrings: string[] = [];
+    // Consumables should only legally ever have 1 effect or 1 active buff. If the base blueprint already has one, skip generating any more.
+    if (isConsumable && (baseHasBuffs || baseHasEffect)) {
+        modStrings = [];
+    } else {
+        modStrings = generateSystemModifiers(finalRarity, typeHint, skillConfig, slotHint);
+    }
+    
     const rolledStatBuffs = modStrings.filter(s => s !== "Mechanical Effect");
     const hasRolledStatBuff = rolledStatBuffs.length > 0;
     const canHaveActiveEffect = isThrowable || (modStrings.includes("Mechanical Effect") && !isWeapon && !isArmor);
@@ -555,8 +570,7 @@ export const forgeRandomItem = (
     let usage: AbilityUsage | undefined;
 
     // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff AND have no base buffs
-    const baseHasBuffs = baseItemData.buffs && baseItemData.buffs.length > 0;
-    if (canHaveActiveEffect || (isConsumable && !baseItemData.effect && !hasRolledStatBuff && !baseHasBuffs)) {
+    if (canHaveActiveEffect || (isConsumable && !baseHasEffect && !hasRolledStatBuff && !baseHasBuffs)) {
         // Only force Heal 50% of the time for generic consumables to allow for more variety 
         const forcedEffectType = isConsumable ? (Math.random() > 0.5 ? 'Heal' : 'Status') : (isThrowable ? (Math.random() > 0.5 ? 'Damage' : 'Status') : undefined);
         const mech = generateMechanicalEffect(finalRarity, forcedEffectType, (isConsumable || isThrowable));
