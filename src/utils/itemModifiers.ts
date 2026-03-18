@@ -1,6 +1,7 @@
 // utils/itemModifiers.ts
 
 import { Item, Buff, ABILITY_SCORES, SKILL_NAMES, DAMAGE_TYPES, AbilityScoreName, SkillName, DamageType, SkillConfiguration, BuffDuration, ActiveBuff, AbilityEffect } from '../types';
+import { formatAbilityEffect } from './itemMechanics';
 
 export type ModifierCategory = 'enhancement' | 'ability' | 'skill' | 'combat' | 'defense' | 'save' | 'resist' | 'exdam' | 'temp_hp';
 
@@ -308,14 +309,15 @@ export const getEnhancementPill = (item: Item): MechanicalPill | null => {
  * Formats an AbilityEffect into a standardized UI pill.
  */
 export const getActivePowerPill = (effect: AbilityEffect): MechanicalPill => {
-    let label = 'Active Power';
-    if (effect.type === 'Damage') label = `${effect.damageDice} ${effect.damageType || 'Force'} Impact${effect.saveEffect === 'half' ? ' (Half on Save)' : ''}`;
-    else if (effect.type === 'Heal') label = `${effect.healDice} Restoration`;
-    else if (effect.type === 'Status') label = `${effect.status} Influence`;
+    const label = formatAbilityEffect(effect);
+    let colorClass = 'text-purple-400 border-purple-500/50';
+
+    if (effect.type === 'Heal') colorClass = 'text-emerald-400 border-emerald-500/50';
+    else if (effect.type === 'Damage') colorClass = 'text-red-400 border-red-500/50';
 
     return {
         label,
-        colorClass: 'text-purple-400 border-purple-500/50',
+        colorClass,
         icon: 'sparkles'
     };
 };

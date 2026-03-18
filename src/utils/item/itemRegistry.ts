@@ -123,9 +123,9 @@ export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
         { name: 'Wondrous Trinket', tags: ['accessory'], bodySlotTag: 'Accessory 1' },
     ],
     consumables: [
-        { name: 'Minor Healing Potion', tags: ['consumable'], effect: { type: 'Heal', healDice: '2d4+2', targetType: 'Single' } },
-        { name: 'Healing Potion', tags: ['consumable'], effect: { type: 'Heal', healDice: '4d4+4', targetType: 'Single' } },
-        { name: 'Scroll of Healing', tags: ['consumable'], effect: { type: 'Heal', healDice: '1d8', targetType: 'Single' } },
+        { name: 'Minor Healing Potion', tags: ['consumable'], effect: { type: 'Heal', targetType: 'Single' } },
+        { name: 'Healing Potion', tags: ['consumable'], effect: { type: 'Heal', targetType: 'Single' } },
+        { name: 'Scroll of Healing', tags: ['consumable'], effect: { type: 'Heal', targetType: 'Single' } },
         { name: 'Potion of Strength', tags: ['consumable'], buffs: [{ type: 'ability', bonus: 2, abilityName: 'strength', duration: 'Active' }] as any },
         { name: 'Potion of Agility', tags: ['consumable'], buffs: [{ type: 'ability', bonus: 2, abilityName: 'dexterity', duration: 'Active' }] as any },
         { name: 'Potion of Endurance', tags: ['consumable'], buffs: [{ type: 'ability', bonus: 2, abilityName: 'constitution', duration: 'Active' }] as any },

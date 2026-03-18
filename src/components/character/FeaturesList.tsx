@@ -1,7 +1,8 @@
 // components/character/FeaturesList.tsx
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { PlayerCharacter, Companion, type Ability, type AbilityUsage, type SkillConfiguration, type Inventory } from '../../types';
+import { PlayerCharacter, Companion, type Ability, type AbilityUsage, type SkillConfiguration, type Inventory, type AbilityEffect } from '../../types';
+import { formatAbilityEffect } from '../../utils/itemMechanics';
 import { Icon } from '../Icon';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import Modal from '../Modal';
@@ -116,17 +117,15 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                         </div>
                     )}
 
-                    {hasEffect && (
+                    {hasEffect && ability.effect && (
                         <div>
                             <label className="text-body-sm font-bold text-brand-text-muted block mb-2 opacity-50">Mechanical Effect</label>
                             <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-surface flex items-center gap-4">
                                 <Icon name="sparkles" className="w-5 h-5 text-brand-accent/70 shrink-0" />
                                 <div className="text-body-sm font-bold text-brand-text leading-tight">
-                                    <div className="opacity-50 text-body-sm mb-1 capitalize">{ability.effect?.type} {ability.effect?.targetType}</div>
-                                    <div className="text-brand-accent text-body-base">
-                                        {ability.effect?.damageDice || ability.effect?.healDice || ability.effect?.status}
-                                        {ability.effect?.dc && ` (DC ${ability.effect.dc})`}
-                                        {ability.effect?.damageType && ` [${ability.effect.damageType}]`}
+                                    <div className="opacity-50 text-[10px] mb-1 capitalize">Action Output</div>
+                                    <div className="text-brand-accent text-body-sm">
+                                        {formatAbilityEffect(ability.effect)}
                                     </div>
                                 </div>
                             </div>

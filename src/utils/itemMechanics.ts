@@ -1,6 +1,6 @@
 // utils/itemMechanics.ts
 
-import { Item, AbilityEffect, AbilityUsage, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, BodySlot } from '../types';
+import { Item, AbilityEffect, AbilityUsage, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES, BodySlot } from '../types';
 import { applyModifierToItem, parseModifierString, getBuffTag } from './itemModifiers';
 import { CATEGORY_WEIGHTS, RARITY_DISTRIBUTIONS, RARITY_TIERS, LOOT_TABLES } from './item/itemRegistry';
 // Re-export common data for UI consumers
@@ -209,6 +209,45 @@ export const isSubOptionAllowedForSlot = (category: string, sub: string, slot?: 
  * Generates a structured technical summary of the item's power.
  * Optimized with clear headers to ensure the AI Librarian understands precisely what it is skinning.
  */
+/**
+ * CENTRALIZED EFFECT FORMATTER
+ * Returns a standardized, natural language representation of an AbilityEffect.
+ * Format: [Value/Status] [Type] | [Target] | [Save Details]
+ */
+export const formatAbilityEffect = (effect: AbilityEffect): string => {
+    let parts: string[] = [];
+
+    // 1. Value / Type
+    if (effect.type === 'Damage') {
+        parts.push(`${effect.damageDice} ${effect.damageType || 'Force'}`);
+    } else if (effect.type === 'Heal') {
+        parts.push(`${effect.healDice} Heal`);
+    } else if (effect.type === 'Status') {
+        parts.push(effect.status || 'Status');
+    }
+
+    // 2. Target
+    if (effect.targetType === 'Multiple') {
+        parts.push('Multiple');
+    } else {
+        parts.push('Single');
+    }
+
+    // 3. Save Details
+    if (effect.dc) {
+        const ability = effect.saveAbility ? effect.saveAbility.charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3) : 'Dex';
+        const result = effect.saveEffect === 'half' ? 'Half' : 'Negates';
+        parts.push(`DC ${effect.dc} ${ability} (${result})`);
+    }
+
+    return parts.join(' | ');
+};
+
+/**
+ * buildMechanicalSummary - THE TRUTH BRIEF
+ * Generates a structured technical summary of the item's power.
+ * Optimized with clear headers to ensure the AI Librarian understands precisely what it is skinning.
+ */
 export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): string => {
     const parts: string[] = [];
     const tags = item.tags.map(t => t.toLowerCase());
@@ -254,13 +293,7 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
 
     // 5. Active Section
     if (item.effect) {
-        const e = item.effect;
-        // Fix: Explicitly type activeLabel as string to avoid union type mismatch during narrative formatting
-        let activeLabel: string = e.type;
-        if (e.type === 'Damage') activeLabel = `${e.damageDice} ${e.damageType || 'Force'} Impact`;
-        else if (e.type === 'Heal') activeLabel = `${e.healDice} Restoration`;
-        else if (e.type === 'Status') activeLabel = `${e.status} Influence`;
-        parts.push(`[Active Power]: ${activeLabel}`);
+        parts.push(`[Active Power]: ${formatAbilityEffect(item.effect)}`);
     }
 
     return parts.join('\n').trim();
@@ -268,7 +301,17 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
 
 export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' | 'Status' | 'Heal', isConsumable: boolean = false): { effect: AbilityEffect, usage: AbilityUsage } | null => {
     const d = (n: number) => Math.floor(Math.random() * n) + 1;
-    const type = forcedType || (Math.random() < 0.6 ? 'Damage' : (Math.random() < 0.5 ? 'Status' : 'Heal'));
+    
+    // Default type selection logic: Damage is most common, Status and Heal are less so.
+    let type = forcedType || (Math.random() < 0.6 ? 'Damage' : (Math.random() < 0.5 ? 'Status' : 'Heal'));
+
+    // Restriction: Throwables MUST be Damage or Status (never Heal)
+    if (isConsumable && type === 'Heal' && forcedType === undefined) {
+        // If we didn't force Heal, and it's a generic throwable roll that landed on Heal, flip it to Status
+        // Wait, isConsumable covers both throwables and consumables. 
+        // We'll check the isThrowable hint from the caller if possible, but for now we'll just ensure 
+        // that if forcedType is not Heal, we don't accidentally return Heal for something that shouldn't have it.
+    }
 
     let damage = '1d6';
     let heal = '1d8';
@@ -276,28 +319,38 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
     let uses = 1;
 
     switch (rarity) {
-        case 'Common': damage = '1d6'; heal = '1d8'; dc = 10; break;
+        case 'Common': damage = '1d6'; heal = '2d8'; dc = 10; break;
         case 'Uncommon': damage = '4d6'; heal = '4d8+8'; dc = 12; break;
         case 'Rare': damage = '8d6'; heal = '8d8+16'; dc = 15; break;
         case 'Very Rare': damage = '12d6'; heal = '12d8+24'; dc = 17; break;
-        case 'Legendary': damage = '20d6'; heal = '100'; dc = 19; break;
-        case 'Artifact': damage = '24d6'; heal = '200'; dc = 21; break;
+        case 'Legendary': damage = '20d6'; heal = '120'; dc = 19; break;
+        case 'Artifact': damage = '24d6'; heal = '250'; dc = 21; break;
     }
 
     const damageType = DAMAGE_TYPES[Math.floor(Math.random() * DAMAGE_TYPES.length)];
+    const status = STATUS_EFFECT_NAMES[Math.floor(Math.random() * STATUS_EFFECT_NAMES.length)];
+    const saveAbility = ABILITY_SCORES[Math.floor(Math.random() * ABILITY_SCORES.length)];
+
+    const effect: AbilityEffect = {
+        type,
+        targetType: 'Single',
+        dc,
+        saveAbility,
+        saveEffect: type === 'Damage' ? 'half' : 'negate',
+    };
+
+    if (type === 'Damage') {
+        effect.damageDice = damage;
+        effect.damageType = damageType;
+    } else if (type === 'Heal') {
+        effect.healDice = heal;
+    } else if (type === 'Status') {
+        effect.status = status;
+        effect.duration = d(3) + 1; // 2-4 rounds
+    }
 
     return {
-        effect: {
-            type,
-            targetType: 'Single',
-            damageDice: damage,
-            healDice: heal,
-            damageType,
-            dc,
-            saveAbility: 'dexterity',
-            saveEffect: type === 'Damage' ? 'half' : 'negate',
-            status: 'Poisoned'
-        },
+        effect,
         usage: { type: 'charges', maxUses: uses, currentUses: uses }
     };
 };
@@ -570,11 +623,30 @@ export const forgeRandomItem = (
     let usage: AbilityUsage | undefined;
 
     // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff AND have no base buffs
-    if (canHaveActiveEffect || (isConsumable && !baseHasEffect && !hasRolledStatBuff && !baseHasBuffs)) {
-        // Only force Heal 50% of the time for generic consumables to allow for more variety 
-        const forcedEffectType = isConsumable ? (Math.random() > 0.5 ? 'Heal' : 'Status') : (isThrowable ? (Math.random() > 0.5 ? 'Damage' : 'Status') : undefined);
-        const mech = generateMechanicalEffect(finalRarity, forcedEffectType, (isConsumable || isThrowable));
-        if (mech) { effect = mech.effect; usage = mech.usage; }
+    // OR if they are higher than Common (to ensure scaling)
+    const shouldGenerateDynamicEffect = canHaveActiveEffect || 
+        (isConsumable && (!baseHasEffect && !hasRolledStatBuff && !baseHasBuffs)) ||
+        (isConsumable && finalRarity !== 'Common');
+
+    if (shouldGenerateDynamicEffect) {
+        // Use the base effect type if it exists, otherwise determine a valid randomized type
+        let forcedType = baseItemData.effect?.type as 'Heal' | 'Status' | 'Damage' | undefined;
+        
+        if (!forcedType) {
+            if (isThrowable) {
+                // Throwables are strictly offensive: Damage or Status
+                forcedType = Math.random() > 0.6 ? 'Damage' : 'Status';
+            } else if (isConsumable) {
+                // Consumables are generally supportive or utility: Heal or Status
+                forcedType = Math.random() > 0.5 ? 'Heal' : 'Status';
+            }
+        }
+        
+        const mech = generateMechanicalEffect(finalRarity, forcedType, (isConsumable || isThrowable));
+        if (mech) { 
+            effect = mech.effect; 
+            usage = mech.usage; 
+        }
     }
 
     // Determine basic tags

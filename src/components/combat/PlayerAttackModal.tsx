@@ -9,6 +9,7 @@ import { Icon } from '../Icon';
 import { Item, Ability, PlayerCharacter, Companion, CombatActor, RollMode, Inventory, getItemRarityColor, AbilityEffect } from '../../types';
 import { getBuffTag } from '../../utils/itemModifiers';
 import { toTitleCase } from '../../utils/npcUtils';
+import { formatAbilityEffect } from '../../utils/itemMechanics';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { canBeTargeted } from '../../utils/resolution/StatusRules';
 
@@ -76,25 +77,19 @@ const TargetAvatar: React.FC<{
 };
 
 const formatEffectString = (effect: AbilityEffect, actor?: PlayerCharacter | Companion, inventory?: Inventory | null): string => {
-    let parts: string[] = [];
     const dc = actor ? actor.getStandardAbilityDC(inventory || undefined) : effect.dc;
-    const damage = (actor && effect.type === 'Damage') ? (effect.damageDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.damageDice;
-    const heal = (actor && effect.type === 'Heal') ? (effect.healDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.healDice;
+    const damageDice = (actor && effect.type === 'Damage') ? (effect.damageDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.damageDice;
+    const healDice = (actor && effect.type === 'Heal') ? (effect.healDice || actor.getStandardEffectFormula(effect, inventory || undefined)) : effect.healDice;
 
-    if (effect.type === 'Damage') {
-        parts.push(`Deals ${damage || 'damage'}`);
-        if (dc && effect.saveAbility) {
-            parts.push(`(DC ${dc} ${effect.saveAbility.slice(0, 3)} save${effect.saveEffect === 'half' ? ', half dmg' : ''})`);
-        }
-    } else if (effect.type === 'Heal') {
-        parts.push(`Heals ${heal || 'health'}`);
-    } else if (effect.type === 'Status') {
-        parts.push(`Applies ${effect.status || 'status'}`);
-        if (effect.duration) {
-            parts.push(`for ${effect.duration} rounds`);
-        }
-    }
-    return parts.join(' ');
+    // Create a temporary effect object for formatting
+    const displayEffect: AbilityEffect = {
+        ...effect,
+        dc,
+        damageDice,
+        healDice
+    };
+
+    return formatAbilityEffect(displayEffect);
 };
 
 const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, sourceActorId, isQuickAction }) => {
