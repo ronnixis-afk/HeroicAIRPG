@@ -1,6 +1,7 @@
 // services/aiWorldService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapSector, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
@@ -39,10 +40,10 @@ export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSu
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
         return response.text?.trim() || "A localized threat emerges from the environment. They seek to disrupt your progress through the area. A hidden danger complicates the immediate path.";
@@ -83,11 +84,11 @@ export const generateWorldPreview = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 },
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC },
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {
@@ -156,11 +157,11 @@ export const generateWorldSectors = async (lore: any[], settings: MapSettings): 
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 512 }
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
         }
     });
 
@@ -208,10 +209,10 @@ export const generateGlobalWorldSummary = async (lore: LoreEntry[]): Promise<str
     - MAXIMUM 200 WORDS.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
         config: {
-            thinkingConfig: { thinkingBudget: 512 }
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
         }
     });
     return response.text?.trim() || "A vast and unexplored world.";
@@ -230,9 +231,9 @@ export const generateMapSectorDetails = async (gameData: GameData): Promise<Part
     Return JSON: { "name": "string", "description": "string", "color": "hex string", "keywords": ["string"] }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
-        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -248,10 +249,10 @@ export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: Map
     Return JSON: { "sectors": [], "zones": [] }`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -321,9 +322,9 @@ export const generatePoiDetail = async (localeName: string, zoneName: string, zo
     - Write an atmospheric description (MAX 30 WORDS).`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
-        config: { thinkingConfig: { thinkingBudget: 512 } }
+        config: { thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
     });
     return response.text || "A place of significance.";
 };
@@ -381,9 +382,9 @@ export const generateZoneDetails = async (
 
     while (attempts <= maxRetries) {
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The previous name was too similar to existing locations. Choose a DIFFERENT, DISTINCT noun or adjective.` : ''),
-            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
         });
 
         const details = JSON.parse(cleanJson(response.text || '{}'));

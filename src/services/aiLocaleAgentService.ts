@@ -2,6 +2,7 @@
 // services/aiLocaleAgentService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { GameData, MapSector } from '../types';
 import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 
@@ -80,11 +81,11 @@ export const resolveLocaleCreation = async (
         while (attempts <= maxRetries) {
             const ai = getAi();
             const response = await ai.models.generateContent({
-                model: 'gemini-3.1-flash-lite-preview',
+                model: AI_MODELS.DEFAULT,
                 contents: prompt + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The name "${finalResult.name}" is too similar to existing locations: [${existingPois.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
                 config: {
                     responseMimeType: "application/json",
-                    thinkingConfig: { thinkingBudget: 512 }
+                    thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
                 }
             });
 

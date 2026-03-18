@@ -12,6 +12,7 @@
  * - Transcription capture
  * - Idle timeout
  */
+import { AI_MODELS } from '../config/aiConfig';
 
 // Mapping UI voice names to Gemini Live API voice names
 const LIVE_VOICE_MAP: Record<string, string> = {
@@ -115,7 +116,7 @@ export class LiveVoiceService {
                 
                 const configMessage = {
                     setup: {
-                        model: "models/gemini-2.0-flash-exp",
+                        model: AI_MODELS.LIVE_VOICE,
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: {

@@ -1,6 +1,7 @@
 // services/aiItemService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { Item, GameData, CombatActor, SkillConfiguration, NPC } from '../types';
 import { calculateItemPrice, getItemRarityDistribution, forgeRandomItem, RARITY_TIERS, buildMechanicalSummary, inferTagsFromStats } from '../utils/itemMechanics';
 import { getAIModifierInstructions } from '../utils/itemModifiers';
@@ -36,11 +37,11 @@ export const generateItemCorrection = async (userContent: string, narrative: str
     Return JSON: { "updates": { "inventoryUpdates": [ { "ownerId": "player", "list": "carried", "items": [ { "name": "string", "quantity": number, "description": "MAX 20 WORDS", "rarity": "string" } ] } ] } }`;
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 512 }
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
@@ -215,11 +216,11 @@ export const generateItemPrices = async (items: Item[]): Promise<{ id: string, p
     const input = `Price items based on rarity, power, and world lore.\nItems: ${JSON.stringify(items.map(i => ({ id: i.id, name: i.name, rarity: i.rarity, tags: i.tags, mechanics: i.details })))}\nReturn JSON: [{ id, price }]`;
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 512 }
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
         }
     });
     return JSON.parse(cleanJson(response.text || '[]'));
@@ -317,11 +318,11 @@ export const generateForgeDetails = async (
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: AI_MODELS.DEFAULT,
         contents: input,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 512 }
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
         }
     });
     return JSON.parse(cleanJson(response.text || '{}'));

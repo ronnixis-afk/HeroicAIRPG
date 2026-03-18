@@ -21,6 +21,7 @@ import { performHousekeeping } from './aiHousekeeperService';
 import { assessSkillIntent, verifyCombatRelevance } from './aiSkillAssessorService';
 import { resolveLocaleCreation } from './aiLocaleAgentService';
 import { getEmbeddingAi } from './aiClient';
+import { AI_MODELS } from '../config/aiConfig';
 
 /**
  * Sends a text string to the secure Next.js backend to generate a semantic vector embedding.
@@ -32,7 +33,7 @@ export const generateEmbedding = async (text: string): Promise<number[] | undefi
     try {
         const ai = getEmbeddingAi();
         const response = await ai.models.embedContent({
-            model: 'text-embedding-004',
+            model: AI_MODELS.EMBEDDING,
             contents: text
         });
 

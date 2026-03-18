@@ -1,3 +1,5 @@
+import { AI_MODELS } from '../config/aiConfig';
+
 // Mocking the GoogleGenAI interface to proxy requests to our secure Next.js backend.
 export const getAi = (): any => {
     return {
@@ -57,7 +59,7 @@ export const getEmbeddingAi = (): any => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         text: requestOptions.contents,
-                        model: requestOptions.model || 'text-embedding-004'
+                        model: requestOptions.model || AI_MODELS.EMBEDDING
                     })
                 });
 

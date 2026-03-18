@@ -5,6 +5,7 @@ import { PrismaClient } from '../../../generated/prisma';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { resolveUserTier, canAccessAI } from '../../../lib/tierConfig';
+import { AI_MODELS } from '../../../config/aiConfig';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { text, model = 'text-embedding-004' } = body;
+        const { text, model = AI_MODELS.EMBEDDING } = body;
 
         if (!text) {
             return NextResponse.json({ error: 'Text is required for embedding.' }, { status: 400 });

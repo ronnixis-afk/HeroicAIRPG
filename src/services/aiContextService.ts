@@ -3,6 +3,7 @@
 
 import { GameData, ChatMessage, LoreEntry, ActorSuggestion, SKILL_DEFINITIONS, SKILL_NAMES, PlayerCharacter, Companion, CombatActor, CalculatedCombatStats, Inventory, NPC, NPCMemory, StoryLog } from '../types';
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ThinkingLevel } from '@google/genai';
 import { isLocaleMatch } from '../utils/mapUtils';
 import { canBeTargeted } from '../utils/resolution/StatusRules';
@@ -57,11 +58,11 @@ Return JSON: { "keys": ["key1", "key2"] }`;
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
 

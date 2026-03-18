@@ -1,5 +1,6 @@
 
 import { getAi } from './aiClient';
+import { AI_MODELS } from '../config/aiConfig';
 import { ChatMessage, PlayerCharacter, Companion, CombatActor, ImageGenerationStyle, GameData } from '../types';
 
 // Helper to extract base64 and mimeType from data URI
@@ -59,7 +60,7 @@ export const generateCharacterImage = async (description: string, items: any[], 
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-image-preview',
+            model: AI_MODELS.IMAGE_GEN,
             contents: { parts: [{ text: prompt }] },
             config: {
                 imageConfig: {

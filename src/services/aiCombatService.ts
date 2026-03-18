@@ -2,6 +2,7 @@
 // services/aiCombatService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ActorSuggestion, GameData, ChatMessage, AffinityDefinition, CombatActor, Item, ActorAlignment } from '../types';
 import { LootDropPlan } from '../utils/lootMechanics';
 
@@ -53,11 +54,11 @@ export const resolveCombatAlignments = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -189,11 +190,11 @@ export const enrichCombatantDetails = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -386,11 +387,11 @@ export const reassessCombatEnemies = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
         const parsed = JSON.parse(cleanJson(response.text || '[]'));

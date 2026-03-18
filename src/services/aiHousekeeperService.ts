@@ -1,6 +1,7 @@
 // services/aiHousekeeperService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ThinkingLevel } from '@google/genai';
 import { GameData, AIUpdatePayload, ExtractionScopeFlags } from '../types';
 import { isLocaleMatch } from '../utils/mapUtils';
@@ -159,11 +160,11 @@ export const performHousekeeping = async (
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: 'gemini-3.1-flash-lite-preview',
+      model: AI_MODELS.DEFAULT,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        thinkingConfig: { thinkingBudget: 512 }
+        thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
       }
     });
 

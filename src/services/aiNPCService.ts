@@ -1,5 +1,6 @@
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { NPC, GameData } from '../types';
 
 /**
@@ -83,11 +84,11 @@ export const extractNPCsFromNarrative = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
 
@@ -167,11 +168,11 @@ export const refineNPCDetails = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
 
@@ -220,11 +221,11 @@ export const analyzeRelationshipUpdates = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
 

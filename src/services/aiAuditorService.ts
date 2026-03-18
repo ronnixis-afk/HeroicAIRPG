@@ -2,6 +2,7 @@
 // services/aiAuditorService.ts
 
 import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ThinkingLevel } from '@google/genai';
 import { GameData, NPC, DiceRollRequest, ExtractionScope, ExtractionScopeFlags } from '../types';
 
@@ -105,10 +106,10 @@ export const auditSystemState = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 512 }, 
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, 
                 responseMimeType: "application/json"
             }
         });
@@ -167,11 +168,11 @@ export const detectExtractionScope = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-preview',
+            model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 512 }
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
             }
         });
 
