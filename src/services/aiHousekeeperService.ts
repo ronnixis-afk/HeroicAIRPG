@@ -159,7 +159,7 @@ export const performHousekeeping = async (
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: 'gemini-flash-lite-latest',
+      model: 'gemini-3.1-flash-lite',
       contents: prompt,
       config: {
         responseMimeType: "application/json"

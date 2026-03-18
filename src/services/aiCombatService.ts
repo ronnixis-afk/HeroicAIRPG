@@ -53,11 +53,11 @@ export const resolveCombatAlignments = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 4000 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -124,9 +124,10 @@ export const generateCombatEncounterSuggestions = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
-            config: { responseMimeType: "application/json" }
+            config: {
+                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(response.text || '[]');
         return Array.isArray(parsed) ? parsed : [];
@@ -188,11 +189,11 @@ export const enrichCombatantDetails = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 4000 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -229,9 +230,10 @@ export const generateCombatStartNarrative = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
-            config: { responseMimeType: "application/json" }
+            config: {
+                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
     } catch (e) {
@@ -257,9 +259,10 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-flash-lite',
         contents: input,
-        config: { responseMimeType: "application/json" }
+        config: {
+                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
     });
     return JSON.parse(response.text || '{}');
 };
@@ -303,9 +306,10 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: input,
-            config: { responseMimeType: "application/json" }
+            config: {
+                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(extractJson(response.text || '[]'));
 
@@ -382,11 +386,11 @@ export const reassessCombatEnemies = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 4000 }
             }
         });
         const parsed = JSON.parse(cleanJson(response.text || '[]'));

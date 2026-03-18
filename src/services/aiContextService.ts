@@ -57,7 +57,7 @@ Return JSON: { "keys": ["key1", "key2"] }`;
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json"

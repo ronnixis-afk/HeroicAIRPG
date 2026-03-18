@@ -105,9 +105,10 @@ export const auditSystemState = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
-            config: { 
+            config: {
+                thinkingConfig: { thinkingBudget: 4000 }, 
                 responseMimeType: "application/json"
             }
         });
@@ -166,7 +167,7 @@ export const detectExtractionScope = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json"

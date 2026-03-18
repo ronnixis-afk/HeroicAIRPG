@@ -83,11 +83,11 @@ export const extractNPCsFromNarrative = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 4000 }
             }
         });
 
@@ -167,11 +167,11 @@ export const refineNPCDetails = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 4000 }
             }
         });
 
@@ -220,7 +220,7 @@ export const analyzeRelationshipUpdates = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-flash-lite-latest',
+            model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",

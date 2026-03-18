@@ -80,11 +80,11 @@ export const resolveLocaleCreation = async (
         while (attempts <= maxRetries) {
             const ai = getAi();
             const response = await ai.models.generateContent({
-                model: 'gemini-3-flash-preview',
+                model: 'gemini-3.1-flash-lite',
                 contents: prompt + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] The name "${finalResult.name}" is too similar to existing locations: [${existingPois.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
                 config: {
                     responseMimeType: "application/json",
-                    thinkingConfig: { thinkingBudget: 0 }
+                    thinkingConfig: { thinkingBudget: 4000 }
                 }
             });
 

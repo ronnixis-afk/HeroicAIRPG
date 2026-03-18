@@ -196,13 +196,13 @@ export const useNpcActions = (
         };
 
         try {
-            // Speed Update: Explicitly override to gemini-3-flash-preview for recruitment dialogue.
+            // Speed Update: Explicitly override to gemini-3.1-flash-lite for recruitment dialogue.
             const aiRes = await generateResponse(
                 systemPrompt,
                 { ...gameData, messages: [...gameData.messages, systemPrompt] },
                 undefined,
                 undefined,
-                'gemini-3-flash-preview'
+                'gemini-3.1-flash-lite'
             );
 
             const aiMessage: ChatMessage = {

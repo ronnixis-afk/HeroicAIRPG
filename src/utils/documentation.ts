@@ -426,7 +426,7 @@ Auditor (Flash): State extraction, spatial anchoring, scale-aware item skinning.
 
 ## 1. TTS and STT Pipelines
 Neural TTS: gemini-2.5-flash-preview-tts returns raw PCM.
-STT: MediaRecorder -> gemini-3-flash-preview (transcribe).`
+STT: MediaRecorder -> gemini-3.1-flash-lite (transcribe).`
     },
     {
         title: "Diagnostics And System Checks",
