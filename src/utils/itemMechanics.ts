@@ -554,9 +554,11 @@ export const forgeRandomItem = (
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
-    // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff
-    if (canHaveActiveEffect || (isConsumable && !baseItemData.effect && !hasRolledStatBuff)) {
-        const forcedEffectType = isConsumable ? 'Heal' : (isThrowable ? (Math.random() > 0.5 ? 'Damage' : 'Status') : undefined);
+    // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff AND have no base buffs
+    const baseHasBuffs = baseItemData.buffs && baseItemData.buffs.length > 0;
+    if (canHaveActiveEffect || (isConsumable && !baseItemData.effect && !hasRolledStatBuff && !baseHasBuffs)) {
+        // Only force Heal 50% of the time for generic consumables to allow for more variety 
+        const forcedEffectType = isConsumable ? (Math.random() > 0.5 ? 'Heal' : 'Status') : (isThrowable ? (Math.random() > 0.5 ? 'Damage' : 'Status') : undefined);
         const mech = generateMechanicalEffect(finalRarity, forcedEffectType, (isConsumable || isThrowable));
         if (mech) { effect = mech.effect; usage = mech.usage; }
     }
