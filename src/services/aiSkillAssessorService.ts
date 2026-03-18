@@ -72,10 +72,10 @@ export const assessSkillIntent = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 },
+                thinkingConfig: { thinkingBudget: 1536 },
                 responseMimeType: "application/json"
             }
         });
@@ -136,10 +136,11 @@ export const verifyCombatRelevance = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                responseMimeType: "application/json"
+                responseMimeType: "application/json",
+                thinkingConfig: { thinkingBudget: 1536 }
             }
         });
 

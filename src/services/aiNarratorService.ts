@@ -35,7 +35,7 @@ export const generateNarrativeResponse = async (
 
     const isHidden = gameData.isPartyHidden;
 
-    const primaryModel = modelOverride || 'gemini-3.1-flash-lite';
+    const primaryModel = modelOverride || 'gemini-3.1-flash-lite-preview';
 
     let totalPromptTokens = 0;
     let totalCandidateTokens = 0;
@@ -181,7 +181,8 @@ export const generateNarrativeResponse = async (
             config: {
                 systemInstruction: systemInstruction,
                 responseMimeType: "application/json",
-                responseSchema: outputSchema as any
+                responseSchema: outputSchema as any,
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -284,10 +285,10 @@ The player has expended a HEROIC POINT this round.
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: [{ parts: [{ text: prompt }] }],
             config: {
-                thinkingConfig: { thinkingBudget: -1 },
+                thinkingConfig: { thinkingBudget: 10240 },
                 systemInstruction: systemInstruction,
                 responseMimeType: "application/json"
             }
@@ -316,7 +317,7 @@ The player has expended a HEROIC POINT this round.
 export const transcribeAudio = async (base64Audio: string, mimeType: string): Promise<string> => {
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: {
             parts: [
                 { inlineData: { mimeType, data: base64Audio } },
@@ -335,7 +336,7 @@ export const refineTranscription = async (transcript: string, history: any[], ga
     const context = `[WORLD]: ${gameData.worldSummary || 'Standard TTRPG world.'}\n[RECENT CHAT]: ${JSON.stringify((history || []).slice(-5))}`;
     const prompt = `You are a Transcription Auditor. Refine the following raw speech transcription to ensure it correctly identifies proper nouns (NPCs, Items, Locations) from the world context.\n\nRAW TRANSCRIPT: "${transcript}"\n\nCONTEXT:\n${context}\n\nReturn ONLY the corrected transcription text. No metadata.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: prompt
     });
     return response.text?.trim() || transcript;
@@ -348,9 +349,9 @@ export const generateGrandDesign = async (gameData: any): Promise<string> => {
     const ai = getAi();
     const prompt = `You are the Master Architect. Analyze the world lore, character goals, and recent history to weave an overarching narrative "Grand Design". This brief acts as a compass for long-term consistency.\n\nWORLD LORE: ${gameData.worldSummary}\nPLAYER HISTORY: ${JSON.stringify((gameData.story || []).slice(-10))}\n\nReturn a 2-paragraph strategic brief for the Game Master.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: -1 } }
+        config: { thinkingConfig: { thinkingBudget: 1536 } }
     });
     return response.text?.trim() || "";
 };
@@ -362,8 +363,8 @@ export const generateStorySummary = async (story: any[]): Promise<string> => {
     const ai = getAi();
     const prompt = `Synthesize the following chronicle of events into a concise history of the journey so far (Max 200 words).\n\nLOGS: ${JSON.stringify(story)}`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: -1 } },
+        model: 'gemini-3.1-flash-lite-preview',
+            config: { thinkingConfig: { thinkingBudget: 1536 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -376,8 +377,8 @@ export const summarizeDay = async (entries: any[], previousEntries: any[]): Prom
     const ai = getAi();
     const prompt = `Summarize the day's deeds into a single evocative paragraph of narrative prose.\n\nPREVIOUS CONTEXT: ${JSON.stringify((previousEntries || []).slice(-2))}\n\nTODAY'S EVENTS: ${JSON.stringify(entries)}\n\nReturn only the summary text.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: -1 } },
+        model: 'gemini-3.1-flash-lite-preview',
+            config: { thinkingConfig: { thinkingBudget: 1536 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -390,8 +391,8 @@ export const generateGmNotes = async (gameData: any): Promise<string> => {
     const ai = getAi();
     const prompt = `Provide a 3-sentence tactical encounter brief for the current situation.\n\nLOCALE: ${gameData.currentLocale}\nCHRONICLE: ${JSON.stringify((gameData.story || []).slice(-3))}`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: -1 } },
+        model: 'gemini-3.1-flash-lite-preview',
+            config: { thinkingConfig: { thinkingBudget: 1536 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -414,8 +415,8 @@ export const generateObjectiveFollowUpAction = async (objective: any, history: a
     Suggest the immediate next first-person action (Max 15 words) they should take to advance towards completing this quest.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: -1 } },
+        model: 'gemini-3.1-flash-lite-preview',
+            config: { thinkingConfig: { thinkingBudget: 1536 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -428,10 +429,10 @@ export const generateActionSuggestions = async (gameData: any): Promise<string[]
     const ai = getAi();
     const prompt = `Provide 4 short, evocative first-person actions the player might take in this situation.\n\nCONTEXT: ${JSON.stringify({ locale: gameData.currentLocale, activeQuest: gameData.objectives.find((o: any) => o.isTracked), recentHistory: (gameData.story || []).slice(-3) })}\n\nReturn ONLY a JSON array of strings.`;
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: prompt,
         config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 1536 }, responseMimeType: "application/json" }
     });
     try {
         const parsed = JSON.parse(cleanJson(response.text || "[]"));
@@ -460,11 +461,11 @@ export const checkObjectiveCompletion = async (objective: any, history: any[], l
     Only mark as completed if the recent context explicitly shows the goal was achieved.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: -1 }
+            thinkingConfig: { thinkingBudget: 1536 }
         }
     });
     try {

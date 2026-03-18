@@ -78,10 +78,10 @@ export const draftCompanionFromPrompt = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
 
         const data = JSON.parse(cleanJson(response.text || "{}"));
@@ -138,11 +138,11 @@ export const generateRecruitSkins = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: -1 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -271,10 +271,10 @@ export const weaveHero = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
 
         const result = JSON.parse(cleanJson(response.text || "{}"));
@@ -327,10 +327,10 @@ export const generateCharacterDetails = async (world: any[], prompt: string, cha
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -347,10 +347,10 @@ export const generateCompanionDetails = async (world: any[], prompt: string, com
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -362,10 +362,10 @@ export const generateNemesis = async (prompt: string, gameData: GameData) => {
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -397,10 +397,10 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const data = JSON.parse(cleanJson(response.text || '{}'));
         return Array.isArray(data.zones) ? data.zones : [];
@@ -448,11 +448,11 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: -1 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -509,10 +509,10 @@ export const skinAbilityFlavor = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || "{}"));
     } catch (e) {

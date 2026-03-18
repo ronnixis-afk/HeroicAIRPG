@@ -186,7 +186,7 @@ export const useManualActions = (
                     { ...gameData, messages: [...gameData.messages, narrativeRequest] },
                     undefined,
                     undefined,
-                    'gemini-3.1-flash-lite',
+                    'gemini-3.1-flash-lite-preview',
                     summary,
                     wasHeroic
                 );

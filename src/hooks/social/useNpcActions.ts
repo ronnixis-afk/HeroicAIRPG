@@ -202,7 +202,7 @@ export const useNpcActions = (
                 { ...gameData, messages: [...gameData.messages, systemPrompt] },
                 undefined,
                 undefined,
-                'gemini-3.1-flash-lite'
+                'gemini-3.1-flash-lite-preview'
             );
 
             const aiMessage: ChatMessage = {

@@ -53,11 +53,11 @@ export const resolveCombatAlignments = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: -1 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -124,10 +124,10 @@ export const generateCombatEncounterSuggestions = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(response.text || '[]');
         return Array.isArray(parsed) ? parsed : [];
@@ -189,11 +189,11 @@ export const enrichCombatantDetails = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: -1 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -230,10 +230,10 @@ export const generateCombatStartNarrative = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
     } catch (e) {
@@ -259,10 +259,10 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
 
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(response.text || '{}');
 };
@@ -306,10 +306,10 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: input,
             config: {
-                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(extractJson(response.text || '[]'));
 
@@ -386,11 +386,11 @@ export const reassessCombatEnemies = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+            model: 'gemini-3.1-flash-lite-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: -1 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         const parsed = JSON.parse(cleanJson(response.text || '[]'));
