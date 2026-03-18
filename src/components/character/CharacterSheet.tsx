@@ -272,7 +272,19 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
     const isVehicleOrMount = (charData as Companion).isShip || (charData as Companion).isMount;
 
     return (
-        <div className="animate-fade-in relative">
+        <div className="animate-fade-in relative p-2 pt-8 max-w-2xl mx-auto pb-24">
+            {/* Standardized Header */}
+            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
+                <h1 className="text-brand-text mb-2">
+                    {type === 'player' ? 'Character Sheet' : 'Companion Sheet'}
+                </h1>
+                <p className="text-body-base text-brand-text-muted font-medium italic">
+                    {type === 'player' 
+                        ? 'Review your stats, abilities, and progression.' 
+                        : `Manage ${charData.name}'s growth and capabilities.`}
+                </p>
+            </div>
+
             {/* Top Bar Controls for Companions */}
             {type === 'companion' && (
                 <div className="flex items-center mb-3 px-1 gap-2 py-1.5">
