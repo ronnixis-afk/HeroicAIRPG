@@ -328,12 +328,20 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
     }
 
     const damageType = DAMAGE_TYPES[Math.floor(Math.random() * DAMAGE_TYPES.length)];
-    const status = STATUS_EFFECT_NAMES[Math.floor(Math.random() * STATUS_EFFECT_NAMES.length)];
+    
+    // Filter out non-offensive status effects for offensive items
+    const offensiveStatuses = STATUS_EFFECT_NAMES.filter(s => s !== 'Invisible' && s !== 'Hidden' && s !== 'Disappeared');
+    const status = offensiveStatuses[Math.floor(Math.random() * offensiveStatuses.length)];
+    
     const saveAbility = ABILITY_SCORES[Math.floor(Math.random() * ABILITY_SCORES.length)];
+
+    // Target randomization (Throwables/Consumables often hit multiple)
+    // 40% chance of 'Multiple' targets for consumables/throwables, otherwise 'Single'
+    const targetType = (forcedType !== undefined || isConsumable) && Math.random() < 0.4 ? 'Multiple' : 'Single';
 
     const effect: AbilityEffect = {
         type,
-        targetType: 'Single',
+        targetType,
         dc,
         saveAbility,
         saveEffect: type === 'Damage' ? 'half' : 'negate',
