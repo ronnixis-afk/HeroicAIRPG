@@ -306,11 +306,10 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
     let type = forcedType || (Math.random() < 0.6 ? 'Damage' : (Math.random() < 0.5 ? 'Status' : 'Heal'));
 
     // Restriction: Throwables MUST be Damage or Status (never Heal)
+    // isConsumable covers both throwables and consumables in the current usage context of this function
     if (isConsumable && type === 'Heal' && forcedType === undefined) {
-        // If we didn't force Heal, and it's a generic throwable roll that landed on Heal, flip it to Status
-        // Wait, isConsumable covers both throwables and consumables. 
-        // We'll check the isThrowable hint from the caller if possible, but for now we'll just ensure 
-        // that if forcedType is not Heal, we don't accidentally return Heal for something that shouldn't have it.
+        // Correcting: If we are a throwable context and generic roll hit Heal, force it to Status
+        type = 'Status';
     }
 
     let damage = '1d6';
@@ -503,7 +502,10 @@ export const calculateItemPrice = (item: Item): number => {
         case 'Artifact': base = 100000; break;
     }
     
-    if (item.tags?.some(t => t.toLowerCase() === 'consumable')) {
+    if (item.tags?.some(t => {
+        const lower = t.toLowerCase();
+        return lower === 'consumable' || lower === 'throwable';
+    })) {
         return Math.max(1, Math.floor(base * 0.1));
     }
     
@@ -630,11 +632,12 @@ export const forgeRandomItem = (
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
-    // Consumables only get a dynamic effect if they don't have a base one AND didn't roll a stat buff AND have no base buffs
-    // OR if they are higher than Common (to ensure scaling)
-    const shouldGenerateDynamicEffect = canHaveActiveEffect || 
-        (isConsumable && (!baseHasEffect && !hasRolledStatBuff && !baseHasBuffs)) ||
-        (isConsumable && finalRarity !== 'Common');
+    // Consumables and Throwables only get dynamic effects if:
+    // 1. They don't have a base effect AND didn't roll a stat buff AND have no base buffs
+    // 2. OR if they are higher than Common (to ensure scaling), BUT ONLY if they don't already have an effect/buff
+    // Logic: Exactly one of (base effect, base buff, rolled stat buff, or dynamic effect).
+    const hasAnyExistingEffect = baseHasEffect || hasRolledStatBuff || baseHasBuffs;
+    const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect);
 
     if (shouldGenerateDynamicEffect) {
         // Use the base effect type if it exists, otherwise determine a valid randomized type
@@ -670,7 +673,7 @@ export const forgeRandomItem = (
         isNew: true,
         weaponStats: isWeapon && baseItemData.weaponStats ? JSON.parse(JSON.stringify(baseItemData.weaponStats)) : undefined,
         armorStats: isArmor && baseItemData.armorStats ? JSON.parse(JSON.stringify(baseItemData.armorStats)) : undefined,
-        buffs: baseItemData.buffs ? JSON.parse(JSON.stringify(baseItemData.buffs)) : [],
+        buffs: (isConsumable || isThrowable) && effect ? [] : (baseItemData.buffs ? JSON.parse(JSON.stringify(baseItemData.buffs)) : []),
         tags: finalTags,
         effect: effect || (baseItemData.effect ? JSON.parse(JSON.stringify(baseItemData.effect)) : undefined),
         usage: usage || (baseItemData.usage ? JSON.parse(JSON.stringify(baseItemData.usage)) : undefined),

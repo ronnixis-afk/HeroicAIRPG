@@ -80,8 +80,13 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     4. 'effect': { "type": "Damage|Status|Heal", "targetType": "Single|Multiple", "dc": number, "saveAbility": "dexterity|constitution|wisdom|etc", "damageDice": "string", "damageType": "string", "status": "string", "healDice": "string" }
     5. 'usage': { "type": "charges|per_short_rest|per_long_rest", "maxUses": number, "currentUses": number }
 
+    **STRICT POLICY - CONSUMABLES & THROWABLES (ONE EFFECT ONLY)**:
+    - Consumables and Throwables MUST ONLY have ONE of either 'effect' OR ONE entry in 'buffs'. Never both.
+    - Throwables must ONLY use 'Damage' or 'Status' effect types (NEVER 'Heal').
+    - PRICING: Consumables and Throwables are priced at 10% of standard market rates for their rarity (e.g. Common: 1-10g, Rare: 50-200g).
+
     **INSTRUCTIONS**:
-    - **PRICING**: Use logical market rates (e.g., Common: 10-100g, Rare: 500-2000g, Legendary: 10000g+). If it is a quest item, set price to 0.
+    - **PRICING**: Use logical market rates. Remember the 90% discount for consumables/throwables. If it is a quest item, set price to 0.
     - **DESCRIPTION**: Atmospheric flavor text. MUST be under 20 words.
     - **DETAILS**: Longer lore and history details (if applicable).
     - **STRICT RULE**: DO NOT include numerical stats (e.g. "AC 3", "+1") in the 'name' or 'description'. Use pure flavor.
