@@ -287,7 +287,7 @@ The player has expended a HEROIC POINT this round.
             model: 'gemini-3.1-flash-lite',
             contents: [{ parts: [{ text: prompt }] }],
             config: {
-                thinkingConfig: { thinkingBudget: 10240 },
+                thinkingConfig: { thinkingBudget: -1 },
                 systemInstruction: systemInstruction,
                 responseMimeType: "application/json"
             }
@@ -350,7 +350,7 @@ export const generateGrandDesign = async (gameData: any): Promise<string> => {
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
         contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: 10240 } }
+        config: { thinkingConfig: { thinkingBudget: -1 } }
     });
     return response.text?.trim() || "";
 };
@@ -363,7 +363,7 @@ export const generateStorySummary = async (story: any[]): Promise<string> => {
     const prompt = `Synthesize the following chronicle of events into a concise history of the journey so far (Max 200 words).\n\nLOGS: ${JSON.stringify(story)}`;
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: 10240 } },
+            config: { thinkingConfig: { thinkingBudget: -1 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -377,7 +377,7 @@ export const summarizeDay = async (entries: any[], previousEntries: any[]): Prom
     const prompt = `Summarize the day's deeds into a single evocative paragraph of narrative prose.\n\nPREVIOUS CONTEXT: ${JSON.stringify((previousEntries || []).slice(-2))}\n\nTODAY'S EVENTS: ${JSON.stringify(entries)}\n\nReturn only the summary text.`;
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: 10240 } },
+            config: { thinkingConfig: { thinkingBudget: -1 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -391,7 +391,7 @@ export const generateGmNotes = async (gameData: any): Promise<string> => {
     const prompt = `Provide a 3-sentence tactical encounter brief for the current situation.\n\nLOCALE: ${gameData.currentLocale}\nCHRONICLE: ${JSON.stringify((gameData.story || []).slice(-3))}`;
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: 10240 } },
+            config: { thinkingConfig: { thinkingBudget: -1 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -415,7 +415,7 @@ export const generateObjectiveFollowUpAction = async (objective: any, history: a
 
     const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
-            config: { thinkingConfig: { thinkingBudget: 10240 } },
+            config: { thinkingConfig: { thinkingBudget: -1 } },
         contents: prompt
     });
     return response.text?.trim() || "";
@@ -431,7 +431,7 @@ export const generateActionSuggestions = async (gameData: any): Promise<string[]
         model: 'gemini-3.1-flash-lite',
         contents: prompt,
         config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
     });
     try {
         const parsed = JSON.parse(cleanJson(response.text || "[]"));
@@ -464,7 +464,7 @@ export const checkObjectiveCompletion = async (objective: any, history: any[], l
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 10240 }
+            thinkingConfig: { thinkingBudget: -1 }
         }
     });
     try {

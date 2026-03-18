@@ -75,7 +75,7 @@ export const assessSkillIntent = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 10240 },
+                thinkingConfig: { thinkingBudget: -1 },
                 responseMimeType: "application/json"
             }
         });

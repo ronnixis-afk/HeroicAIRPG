@@ -42,7 +42,7 @@ export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSu
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 10240 }
+                thinkingConfig: { thinkingBudget: -1 }
             }
         });
         return response.text?.trim() || "A localized threat emerges from the environment. They seek to disrupt your progress through the area. A hidden danger complicates the immediate path.";
@@ -87,7 +87,7 @@ export const generateWorldPreview = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 10240 },
+                thinkingConfig: { thinkingBudget: -1 },
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {
@@ -160,7 +160,7 @@ export const generateWorldSectors = async (lore: any[], settings: MapSettings): 
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 1536 }
+            thinkingConfig: { thinkingBudget: -1 }
         }
     });
 
@@ -181,7 +181,7 @@ export const generateAdditionalLore = async (prompt: string, existingLore: LoreE
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
     });
     const result = JSON.parse(cleanJson(response.text || '{}'));
     return {
@@ -211,7 +211,7 @@ export const generateGlobalWorldSummary = async (lore: LoreEntry[]): Promise<str
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-            thinkingConfig: { thinkingBudget: 10240 }
+            thinkingConfig: { thinkingBudget: -1 }
         }
     });
     return response.text?.trim() || "A vast and unexplored world.";
@@ -251,7 +251,7 @@ export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: Map
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -413,7 +413,7 @@ export const parseTravelIntent = async (userContent: string, history: ChatMessag
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: -1 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{"destination":"","method":""}'));
 };
