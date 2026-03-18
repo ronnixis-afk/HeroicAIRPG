@@ -131,6 +131,15 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         if (onActionCompleted) onActionCompleted();
     };
 
+    // Determine if this consumable is a buff-only item (no offensive combat effect)
+    const isBuffOnlyConsumable = useMemo(() => {
+        if (!isConsumable) return false;
+        const hasActiveBuffs = item.buffs?.some(b => b.duration === 'Active');
+        const hasCombatEffect = item.effect && (item.effect.type === 'Damage' || item.effect.type === 'Status');
+        // Buff-only if it has active buffs and no offensive effect, OR if it only heals
+        return (hasActiveBuffs && !hasCombatEffect) || (item.effect?.type === 'Heal' && !hasActiveBuffs);
+    }, [isConsumable, item.buffs, item.effect]);
+
     const handleUse = async () => {
         if (isConsumable && !gameData?.combatState?.isActive) {
             setIsTargetDropdownOpen(prev => !prev);
@@ -141,13 +150,16 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         try {
             if (item.effect && ownerId === 'player') {
                 let targetIds: string[] = [];
-                if (item.effect.type === 'Heal') {
+                if (item.effect.type === 'Heal' || isBuffOnlyConsumable) {
                     targetIds = [gameData?.playerCharacter.id || 'player'];
                 } else if (gameData?.combatState?.enemies && gameData.combatState.enemies.length > 0) {
                     targetIds = [gameData.combatState.enemies[0].id];
                 }
 
-                if (targetIds.length > 0) {
+                if (isBuffOnlyConsumable) {
+                    // Buff-only consumables should not go through the attack pipeline
+                    await useItem(item.id, fromList, ownerId);
+                } else if (targetIds.length > 0) {
                     await performPlayerAttack(item, targetIds);
                 } else {
                     await useItem(item.id, fromList, ownerId);
@@ -167,7 +179,14 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
         setIsTargetDropdownOpen(false);
         setIsUsingItem(true);
         try {
-            await performPlayerAttack(item, [targetId]);
+            if (isBuffOnlyConsumable) {
+                // For buff-only consumables, apply the buff to the selected target
+                // and consume the item from the user's inventory
+                const resolvedTargetId = targetId === gameData?.playerCharacter.id ? 'player' : targetId;
+                await useItem(item.id, fromList, ownerId, resolvedTargetId);
+            } else {
+                await performPlayerAttack(item, [targetId]);
+            }
         } finally {
             setTimeout(() => {
                 setIsUsingItem(false);

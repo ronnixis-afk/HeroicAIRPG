@@ -153,7 +153,7 @@ export const useInventoryActions = (
         });
     }, [dispatch, gameData]);
     
-    const useItem = useCallback(async (itemId: string, list: keyof Inventory, ownerId: string) => {
+    const useItem = useCallback(async (itemId: string, list: keyof Inventory, ownerId: string, buffTargetId?: string) => {
         let itemName = 'Item';
         let activatedBuffs: ActiveBuff[] = [];
 
@@ -181,19 +181,35 @@ export const useInventoryActions = (
         }
 
         // Logic Gate: Inject active modifiers into character state
+        // If a buffTargetId is provided (e.g., using a consumable on a companion), apply buffs to that target
+        const effectiveBuffTarget = buffTargetId || ownerId;
         if (activatedBuffs.length > 0) {
-            dispatch({ type: 'ADD_ACTIVE_BUFF', payload: { ownerId, buffs: activatedBuffs } });
+            dispatch({ type: 'ADD_ACTIVE_BUFF', payload: { ownerId: effectiveBuffTarget, buffs: activatedBuffs } });
         }
 
+        // Always consume the item from the item owner's inventory
         dispatch({ type: 'USE_ITEM', payload: { itemId, list, ownerId } });
         
-        const buffSuffix = activatedBuffs.length > 0 ? ` and gained ${activatedBuffs.length} active modifier${activatedBuffs.length > 1 ? 's' : ''}` : '';
+        // Resolve the target name for the system message
+        let targetName = '';
+        if (buffTargetId && buffTargetId !== ownerId) {
+            if (buffTargetId === 'player' || buffTargetId === gameData?.playerCharacter.id) {
+                targetName = gameData?.playerCharacter.name || 'Player';
+            } else {
+                const comp = gameData?.companions.find(c => c.id === buffTargetId);
+                targetName = comp?.name || 'target';
+            }
+        }
+
+        const buffSuffix = activatedBuffs.length > 0 
+            ? ` and ${targetName || 'user'} gained ${activatedBuffs.length} active modifier${activatedBuffs.length > 1 ? 's' : ''}`
+            : '';
         dispatch({ 
             type: 'ADD_MESSAGE', 
             payload: { 
                 id: `sys-use-${Date.now()}`, 
                 sender: 'system', 
-                content: `Used ${itemName}${buffSuffix}.`, 
+                content: `Used ${itemName}${targetName ? ` on ${targetName}` : ''}${buffSuffix}.`, 
                 type: 'neutral' 
             } 
         });

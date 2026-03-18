@@ -43,7 +43,7 @@ export interface GameDataContextType {
   transferItem: (itemId: string, fromOwnerId: string, fromList: keyof Inventory, toOwnerId: string) => void;
   equipItem: (itemId: string, slot: BodySlot, ownerId: string) => void;
   unequipItem: (itemId: string, ownerId: string) => void;
-  useItem: (itemId: string, list: keyof Inventory, ownerId: string) => Promise<void>;
+  useItem: (itemId: string, list: keyof Inventory, ownerId: string, buffTargetId?: string) => Promise<void>;
   consolidateCurrency: (itemIdToConsolidate: string, ownerId: string) => void;
   switchWorld: () => void;
   removeStoryLogsByMessageIds: (messageIds: string[]) => void;
