@@ -57,7 +57,7 @@ export const resolveCombatAlignments = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -127,7 +127,7 @@ export const generateCombatEncounterSuggestions = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(response.text || '[]');
         return Array.isArray(parsed) ? parsed : [];
@@ -193,7 +193,7 @@ export const enrichCombatantDetails = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
@@ -233,7 +233,7 @@ export const generateCombatStartNarrative = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || '{}'));
     } catch (e) {
@@ -262,7 +262,7 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(response.text || '{}');
 };
@@ -309,7 +309,7 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
             model: 'gemini-3.1-flash-lite',
             contents: input,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const parsed = JSON.parse(extractJson(response.text || '[]'));
 
@@ -390,7 +390,7 @@ export const reassessCombatEnemies = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
         const parsed = JSON.parse(cleanJson(response.text || '[]'));

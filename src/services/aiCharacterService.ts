@@ -81,7 +81,7 @@ export const draftCompanionFromPrompt = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
 
         const data = JSON.parse(cleanJson(response.text || "{}"));
@@ -142,7 +142,7 @@ export const generateRecruitSkins = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 1536 }
             }
         });
 
@@ -274,7 +274,7 @@ export const weaveHero = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
 
         const result = JSON.parse(cleanJson(response.text || "{}"));
@@ -330,7 +330,7 @@ export const generateCharacterDetails = async (world: any[], prompt: string, cha
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -350,7 +350,7 @@ export const generateCompanionDetails = async (world: any[], prompt: string, com
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -365,7 +365,7 @@ export const generateNemesis = async (prompt: string, gameData: GameData) => {
         model: 'gemini-3.1-flash-lite',
         contents: input,
         config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
     });
     return JSON.parse(cleanJson(response.text || '{}'));
 };
@@ -400,7 +400,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         const data = JSON.parse(cleanJson(response.text || '{}'));
         return Array.isArray(data.zones) ? data.zones : [];
@@ -452,7 +452,7 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -512,7 +512,7 @@ export const skinAbilityFlavor = async (
             model: 'gemini-3.1-flash-lite',
             contents: prompt,
             config: {
-                thinkingConfig: { thinkingBudget: 4000 }, responseMimeType: "application/json" }
+                thinkingConfig: { thinkingBudget: 10240 }, responseMimeType: "application/json" }
         });
         return JSON.parse(cleanJson(response.text || "{}"));
     } catch (e) {

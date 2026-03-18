@@ -87,7 +87,7 @@ export const extractNPCsFromNarrative = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -171,7 +171,7 @@ export const refineNPCDetails = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 4000 }
+                thinkingConfig: { thinkingBudget: 10240 }
             }
         });
 
@@ -224,7 +224,7 @@ export const analyzeRelationshipUpdates = async (
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: 0 }
+                thinkingConfig: { thinkingBudget: 1536 }
             }
         });
 
