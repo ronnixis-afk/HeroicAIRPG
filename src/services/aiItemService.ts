@@ -76,7 +76,7 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     **MECHANICAL SCHEMAS**:
     1. 'weaponStats': { "ability": "strength|dexterity", "enhancementBonus": number, "damages": [{ "dice": "1d8", "type": "Slashing" }], "critRange": number }
     2. 'armorStats': { "baseAC": number, "armorType": "light|medium|heavy|shield", "plusAC": number, "strengthRequirement": number }
-    3. 'buffs': Array of { "type": "ac|attack|damage|save|skill|ability|resistance|immunity", "bonus": number, "skillName": "String", "abilityName": "String", "damageType": "String" }
+    3. 'buffs': Array of { "type": "ac|attack|damage|save|skill|ability|resistance|immunity|temp_hp|exdam", "bonus": number, "skillName": "String", "abilityName": "String", "damageType": "String", "duration": "Passive|Active" }
     4. 'effect': { "type": "Damage|Status|Heal", "targetType": "Single|Multiple", "dc": number, "saveAbility": "dexterity|constitution|wisdom|etc", "damageDice": "string", "damageType": "string", "status": "string", "healDice": "string" }
     5. 'usage': { "type": "charges|per_short_rest|per_long_rest", "maxUses": number, "currentUses": number }
 
@@ -156,7 +156,7 @@ export const identifyItems = async (items: Item[], gameData: GameData): Promise<
     5. STRICT RULE: DO NOT include numerical stats (e.g. "AC 4", "+2") in 'name' or 'description'.
     6. Ensure the Name and Flavor fit the World Lore context provided.
     
-    Return JSON array: [{ id, name, description, details, rarity, tags, keywords, weaponStats, armorStats, buffs, effect, usage, bodySlotTag }]`;
+    Return JSON array: [{ "id": "string", "name": "string", "description": "string", "details": "string", "rarity": "string", "tags": ["string"], "keywords": ["string"] }]`;
 
     try {
         const ai = getAi();

@@ -134,10 +134,14 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     // Determine if this consumable is a buff-only item (no offensive combat effect)
     const isBuffOnlyConsumable = useMemo(() => {
         if (!isConsumable) return false;
-        const hasActiveBuffs = item.buffs?.some(b => b.duration === 'Active');
+        const hasActiveBuffs = item.buffs?.some(b => b.duration === 'Active' || true); // All buffs on consumables are active
         const hasCombatEffect = item.effect && (item.effect.type === 'Damage' || item.effect.type === 'Status');
+        
+        // Return true if it's literally just a flavor item or has buffs but no combat effect
+        if (!item.effect && !item.buffs) return true;
+        
         // Buff-only if it has active buffs and no offensive effect, OR if it only heals
-        return (hasActiveBuffs && !hasCombatEffect) || (item.effect?.type === 'Heal' && !hasActiveBuffs);
+        return (hasActiveBuffs && !hasCombatEffect) || (item.effect?.type === 'Heal' && !hasCombatEffect);
     }, [isConsumable, item.buffs, item.effect]);
 
     const handleUse = async () => {

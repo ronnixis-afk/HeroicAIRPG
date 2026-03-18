@@ -164,10 +164,11 @@ export const useInventoryActions = (
                 if (item) {
                     itemName = item.name;
 
-                    // Phase 5: Filter and process only 'Active' buffs
+                    // Phase 5: Filter and process only 'Active' buffs or all buffs if it's a consumable
                     if (item.buffs) {
+                        const isConsumable = item.tags?.some(t => t.toLowerCase().includes('consumable'));
                         activatedBuffs = item.buffs
-                            .filter(b => b.duration === 'Active')
+                            .filter(b => b.duration === 'Active' || isConsumable)
                             .map(b => {
                                 const { duration, ...rest } = b;
                                 return {
