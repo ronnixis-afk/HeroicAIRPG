@@ -26,6 +26,7 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'AWARD_XP':
         case 'USE_ABILITY':
         case 'USE_HEROIC_POINT':
+        case 'ADD_ACTIVE_BUFF':
             return characterReducer(state, action);
 
         // Inventory Actions
