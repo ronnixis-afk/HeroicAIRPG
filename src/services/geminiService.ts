@@ -13,7 +13,7 @@ import {
     generateActionSuggestions,
     checkObjectiveCompletion
 } from './aiNarratorService';
-import { enrichItemDetails } from './aiItemService';
+import { enrichItemDetails } from './ItemGeneratorService';
 /* Fix: Import determineContextRequirements from aiContextService to allow central re-export */
 import { determineContextRequirements, getRelevantLore, getAdjacencyContext, getAvailableSkillsContext, ContextKey } from './aiContextService';
 import { auditSystemState, detectExtractionScope } from './aiAuditorService';
@@ -53,7 +53,7 @@ export const generateEmbedding = async (text: string): Promise<number[] | undefi
 // Re-export specific domain services
 export * from './aiCharacterService';
 export * from './aiCombatService';
-export * from './aiItemService';
+export * from './ItemGeneratorService';
 export * from './aiWorldService';
 export * from './aiNPCService';
 export { resolveLocaleCreation };

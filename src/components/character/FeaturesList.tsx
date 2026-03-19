@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { PlayerCharacter, Companion, type Ability, type AbilityUsage, type SkillConfiguration, type Inventory, type AbilityEffect } from '../../types';
-import { formatAbilityEffect } from '../../utils/itemMechanics';
+import { formatAbilityEffect } from '../../services/ItemGeneratorService';
 import { Icon } from '../Icon';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import Modal from '../Modal';

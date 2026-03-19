@@ -4,7 +4,7 @@ import { Icon } from '../../Icon';
 import { ModifierCategory, MODIFIER_REGISTRY } from '../../../utils/itemModifiers';
 import { NumberStepper } from '../../NumberStepper';
 import { BodySlot, BuffDuration } from '../../../types';
-import { isSubOptionAllowedForSlot } from '../../../utils/itemMechanics';
+import { isSubOptionAllowedForSlot } from '../../../services/ItemGeneratorService';
 
 export interface ForgeModifier {
     id: string;

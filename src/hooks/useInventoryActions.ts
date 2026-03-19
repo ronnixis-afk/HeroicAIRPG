@@ -3,7 +3,7 @@
 import React, { useCallback } from 'react';
 import { GameData, Item, Inventory, StoreItem, BodySlot, GameAction, FORGE_GROUPS, PlayerCharacter, Companion, ActiveBuff } from '../types';
 import { generateItemPrices, generateStoreCategoryInventory, identifyItems } from '../services/geminiService';
-import { forgeRandomItem } from '../utils/itemMechanics';
+import { forgeRandomItem } from '../services/ItemGeneratorService';
 
 const getShopRarityCounts = (level: number, totalCount: number = 10): Record<string, number> => {
     let distribution: Record<string, number>;
@@ -333,7 +333,7 @@ export const useInventoryActions = (
          
          const identifiedItems = await identifyItems(unidentified, gameData);
          
-         identifiedItems.forEach(item => {
+         identifiedItems.forEach((item: Item) => {
              dispatch({ type: 'UPDATE_ITEM', payload: { item, ownerId: 'player' } });
          });
          

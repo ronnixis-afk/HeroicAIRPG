@@ -9,7 +9,7 @@ import { Icon } from '../Icon';
 import { Item, Ability, PlayerCharacter, Companion, CombatActor, RollMode, Inventory, getItemRarityColor, AbilityEffect } from '../../types';
 import { getBuffTag } from '../../utils/itemModifiers';
 import { toTitleCase } from '../../utils/npcUtils';
-import { formatAbilityEffect } from '../../utils/itemMechanics';
+import { formatAbilityEffect } from '../../services/ItemGeneratorService';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { canBeTargeted } from '../../utils/resolution/StatusRules';
 

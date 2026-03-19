@@ -4,8 +4,7 @@
 import { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../../../context/GameDataContext';
 import { Item, AbilityEffect, AbilityUsage, FORGE_GROUPS, WeaponStats, ArmorStats, BodySlot, SkillConfiguration, BuffDuration } from '../../../types';
-import { generateForgeDetails } from '../../../services/aiItemService';
-import { calculateItemPrice, forgeRandomItem, buildMechanicalSummary, isModifierCategoryAllowedForSlot, generateMechanicalEffect, inferTagsFromStats } from '../../../utils/itemMechanics';
+import { generateForgeDetails, calculateItemPrice, forgeRandomItem, buildMechanicalSummary, isModifierCategoryAllowedForSlot, generateMechanicalEffect, inferTagsFromStats } from '../../../services/ItemGeneratorService';
 import { MODIFIER_REGISTRY, ModifierCategory, applyModifierToItem, getTempHpLabel } from '../../../utils/itemModifiers';
 import { ForgeModifier } from './ForgeModifiers';
 

@@ -2,7 +2,7 @@
 // utils/lootMechanics.ts
 
 import { CombatActor, CombatActorSize, Item, SkillConfiguration } from '../types';
-import { forgeRandomItem, rollWeightedRarity, rollWeightedCategory } from './itemMechanics';
+import { forgeRandomItem, rollWeightedRarity, rollWeightedCategory } from '../services/ItemGeneratorService';
 
 export interface LootSlotRequest {
     rarity: string;

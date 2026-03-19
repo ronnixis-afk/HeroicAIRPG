@@ -10,7 +10,7 @@ import {
     skinItemsForCharacter,
     preloadAdjacentZones
 } from '../services/geminiService';
-import { forgeSkins } from '../utils/itemMechanics';
+import { forgeSkins } from '../services/ItemGeneratorService';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
 import { useUI } from '../context/UIContext';
 import { companionToNPC } from '../utils/npcUtils';
@@ -202,8 +202,8 @@ export const useCharacterActions = (
             const skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
 
             const processedInventory: Inventory = {
-                equipped: skinnedEquipment.filter(i => i.equippedSlot),
-                carried: [startingFunds, ...skinnedEquipment.filter(i => !i.equippedSlot)],
+                equipped: skinnedEquipment.filter((i: Item) => i.equippedSlot),
+                carried: [startingFunds, ...skinnedEquipment.filter((i: Item) => !i.equippedSlot)],
                 storage: [],
                 assets: []
             };

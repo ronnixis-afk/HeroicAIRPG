@@ -4,7 +4,7 @@
 import React, { useCallback } from 'react';
 import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone, ExtractionScopeFlags } from '../../../types';
 import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails, enrichItemDetails, detectExtractionScope } from '../../../services/geminiService';
-import { forgeSkins } from '../../../utils/itemMechanics';
+import { forgeSkins } from '../../../services/ItemGeneratorService';
 import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
 import { isLocaleMatch } from '../../../utils/mapUtils';
 import { parseGameTime, addDuration, formatGameTime } from '../../../utils/timeUtils';

@@ -1,7 +1,7 @@
 // utils/itemModifiers.ts
 
 import { Item, Buff, ABILITY_SCORES, SKILL_NAMES, DAMAGE_TYPES, AbilityScoreName, SkillName, DamageType, SkillConfiguration, BuffDuration, ActiveBuff, AbilityEffect } from '../types';
-import { formatAbilityEffect } from './itemMechanics';
+import { formatAbilityEffect } from '../services/ItemGeneratorService';
 
 export type ModifierCategory = 'enhancement' | 'ability' | 'skill' | 'combat' | 'defense' | 'save' | 'resist' | 'exdam' | 'temp_hp';
 

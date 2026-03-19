@@ -1,12 +1,15 @@
-// utils/itemMechanics.ts
+// services/ItemGeneratorService.ts
 
-import { Item, AbilityEffect, AbilityUsage, TargetType, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES, BodySlot } from '../types';
-import { applyModifierToItem, parseModifierString, getBuffTag } from './itemModifiers';
-import { CATEGORY_WEIGHTS, RARITY_DISTRIBUTIONS, RARITY_TIERS, LOOT_TABLES } from './item/itemRegistry';
+import { getAi, cleanJson } from './aiClient';
+import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
+import { Item, AbilityEffect, AbilityUsage, TargetType, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES, BodySlot, GameData, CombatActor, NPC } from '../types';
+import { applyModifierToItem, parseModifierString, getBuffTag } from '../utils/itemModifiers';
+import { CATEGORY_WEIGHTS, RARITY_DISTRIBUTIONS, RARITY_TIERS, LOOT_TABLES } from '../utils/item/itemRegistry';
+
 // Re-export common data for UI consumers
 export { CATEGORY_WEIGHTS, RARITY_TIERS };
 
-// --- HELPERS ---
+// --- HELPERS FROM MECHANICS ---
 
 export const inferTagsFromStats = (itemData: any): string[] => {
     const rawTags = Array.isArray(itemData.tags) ? itemData.tags : (typeof itemData.tags === 'string' ? [itemData.tags] : []);
@@ -56,10 +59,7 @@ export const inferTagsFromStats = (itemData: any): string[] => {
     return Array.from(tags);
 };
 
-// --- CONSTANTS ---
 const RANGED_KEYWORDS = ['bow', 'crossbow', 'sling', 'bolt', 'arrow', 'cannon', 'laser', 'battery', 'dart', 'arbalest'];
-
-// --- HELPERS ---
 
 export const isRangedItem = (item: any): boolean => {
     const name = (item.name || '').toLowerCase();
@@ -139,7 +139,6 @@ export const isModifierCategoryAllowedForSlot = (category: string, slot?: BodySl
 export const isSubOptionAllowedForSlot = (category: string, sub: string, slot?: BodySlot): boolean => {
     if (!slot) return true;
 
-    // Temp HP is always allowed in its specific slots (handled by isModifierCategoryAllowedForSlot)
     if (category === 'temp_hp') return true;
 
     const s = slot.replace(/\s\d+$/, '').toLowerCase();
@@ -202,22 +201,9 @@ export const isSubOptionAllowedForSlot = (category: string, sub: string, slot?: 
     }
 };
 
-// --- CORE FACTORY LOGIC ---
-
-/**
- * buildMechanicalSummary - THE TRUTH BRIEF
- * Generates a structured technical summary of the item's power.
- * Optimized with clear headers to ensure the AI Librarian understands precisely what it is skinning.
- */
-/**
- * CENTRALIZED EFFECT FORMATTER
- * Returns a standardized, natural language representation of an AbilityEffect.
- * Format: [Value/Status] [Type] | [Target] | [Save Details]
- */
 export const formatAbilityEffect = (effect: AbilityEffect): string => {
     let parts: string[] = [];
 
-    // 1. Value / Type
     if (effect.type === 'Damage') {
         parts.push(`${effect.damageDice} ${effect.damageType || 'Force'}`);
     } else if (effect.type === 'Heal') {
@@ -226,14 +212,12 @@ export const formatAbilityEffect = (effect: AbilityEffect): string => {
         parts.push(effect.status || 'Status');
     }
 
-    // 2. Target
     if (effect.targetType === 'Multiple') {
         parts.push('Multiple');
     } else {
         parts.push('Single');
     }
 
-    // 3. Save Details
     if (effect.dc) {
         const ability = effect.saveAbility ? effect.saveAbility.charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3) : 'Dex';
         const result = effect.saveEffect === 'half' ? 'Half' : 'Negates';
@@ -243,26 +227,18 @@ export const formatAbilityEffect = (effect: AbilityEffect): string => {
     return parts.join(' | ');
 };
 
-/**
- * buildMechanicalSummary - THE TRUTH BRIEF
- * Generates a structured technical summary of the item's power.
- * Optimized with clear headers to ensure the AI Librarian understands precisely what it is skinning.
- */
 export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): string => {
     const parts: string[] = [];
     const tags = item.tags.map(t => t.toLowerCase());
 
-    // 1. Scale Section
     let scaleLabel = 'Personnel';
     if (tags.includes('ship')) scaleLabel = 'Vessel / Ship';
     else if (tags.includes('mount')) scaleLabel = 'Beast / Mount';
     parts.push(`[Scale]: ${scaleLabel}`);
 
-    // 2. Rarity & Slot
     parts.push(`[Tier]: ${item.rarity || 'Common'}`);
     parts.push(`[Chassis]: ${item.bodySlotTag || 'Universal'}`);
 
-    // 3. Power Profile (Core Stats)
     if (item.weaponStats) {
         const dmg = item.weaponStats.damages.map(d => `${d.dice} ${d.type}`).join(' + ');
         const isRanged = isRangedItem(item);
@@ -276,7 +252,7 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
         parts.push(powerDesc);
     } else if (item.armorStats) {
         const total = (item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0);
-        const weight = tags.includes('light armor') ? 'Light' : (tags.includes('medium armor') ? 'Medium' : (tags.includes('heavy armor') ? 'Heavy' : 'Custom'));
+        const weight = tags.includes('light armor') ? 'Light' : (tags.includes('medium armor') ? 'Heavy' : 'Custom');
 
         let powerDesc = `[Power]: AC ${total} (${weight} defense).`;
         if (item.armorStats.plusAC !== 0) {
@@ -285,13 +261,11 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
         parts.push(powerDesc);
     }
 
-    // 4. Passives Section
     if (item.buffs && item.buffs.length > 0) {
         const passiveLabels = item.buffs.map(b => getBuffTag(b).label);
         parts.push(`[Passives]: ${passiveLabels.join(', ')}`);
     }
 
-    // 5. Active Section
     if (item.effect) {
         parts.push(`[Active Power]: ${formatAbilityEffect(item.effect)}`);
     }
@@ -307,11 +281,9 @@ export const generateMechanicalEffect = (
 ): { effect: AbilityEffect, usage: AbilityUsage } | null => {
     const d = (n: number) => Math.floor(Math.random() * n) + 1;
     
-    // Default type selection logic refined: Damage is now significantly more common (80%)
     const roll = Math.random();
     let type = forcedType || (roll < 0.8 ? 'Damage' : (roll < 0.9 ? 'Status' : 'Heal'));
 
-    // Restriction: Throwables MUST be Damage or Status (never Heal)
     if (isConsumable && type === 'Heal' && forcedType === undefined) {
         type = 'Status';
     }
@@ -337,7 +309,6 @@ export const generateMechanicalEffect = (
     
     const saveAbility = ABILITY_SCORES[Math.floor(Math.random() * ABILITY_SCORES.length)];
 
-    // Target inheritance/randomization
     const targetType = forcedTargetType || ((forcedType !== undefined || isConsumable) && Math.random() < 0.4 ? 'Multiple' : 'Single');
 
     const effect: AbilityEffect = {
@@ -364,11 +335,6 @@ export const generateMechanicalEffect = (
     };
 };
 
-/**
- * generateSystemModifiers - THE BUDGET BALANCER
- * Refined to ensure that rarity always feels rewarding by separating 
- * the mandatory Enhancement/Active slots from the passive buff budget.
- */
 export const generateSystemModifiers = (rarity: string, typeHint: string = 'other', skillConfig: SkillConfiguration = 'Fantasy', slotHint?: BodySlot): string[] => {
     if (typeHint === 'quest' || typeHint === 'throwable') return [];
     if (typeHint === 'consumable' && rarity === 'Common') return [];
@@ -378,8 +344,6 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
     const isConsumable = typeHint === 'consumable';
     const modifiers: Set<string> = new Set();
 
-    // 1. PHASE A: MANDATORY REWARD SLOT
-    // Weapons and Armor receive a guaranteed enhancement bonus that does NOT spend budget.
     if (rarity !== 'Common' && isWepOrArmor) {
         let enhValue = 1;
         if (rarity === 'Rare') enhValue = 2;
@@ -389,11 +353,9 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
         modifiers.add(`Enhancement +${enhValue}`);
     }
 
-    // 2. PHASE B: PASSIVE BUDGET CALCULATION
-    // Budget determines the number of additional passive modifiers rolled.
     let passiveBudget = 0;
     if (isConsumable) {
-        passiveBudget = 1; // Consumables get exactly one property (Buff or Effect)
+        passiveBudget = 1; 
     } else {
         switch (rarity) {
             case 'Common': passiveBudget = 0; break;
@@ -408,21 +370,16 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
 
     if (passiveBudget === 0 && modifiers.size === 0) return [];
 
-    // 3. PHASE C: ROLL PASSIVES
     const tierData = RARITY_TIERS[rarity] || RARITY_TIERS['Common'];
     const allowedStats = (tierData.stats || []).filter(s => {
-        // Exclude mandatory slots from the random pool
         if (isWepOrArmor && (s === "Mechanical Effect" || s.startsWith("Enhancement"))) return false;
 
-        // Exclude Enhancement for non-weapons/armor/consumables
         if (!isWepOrArmor && !isConsumable && s.startsWith("Enhancement")) return false;
-        if (isConsumable && s.startsWith("Enhancement")) return false; // Consumables don't get enhancement bonuses
+        if (isConsumable && s.startsWith("Enhancement")) return false; 
 
-        // Category filtering
         if (typeHint === 'weapon') return s.startsWith("Ability") || s.startsWith("Combat") || s.startsWith("ExDam");
         if (typeHint === 'armor') return !s.startsWith("Combat") && !s.startsWith("ExDam");
 
-        // Slot filtering for Accessories
         if (typeHint === 'other' && slotHint) {
             let cat = 'skill';
             if (s.startsWith('Ability')) cat = 'ability';
@@ -442,7 +399,6 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
     if (allowedStats.length > 0) {
         const maxAttempts = 50;
         let attempts = 0;
-        // Total expected size is (Budget + Enhancement)
         const targetSize = passiveBudget + modifiers.size;
 
         while (modifiers.size < targetSize && attempts < maxAttempts) {
@@ -514,10 +470,6 @@ export const calculateItemPrice = (item: Item): number => {
     return base;
 };
 
-/**
- * forgeRandomItem - THE CHASSIS FACTORY
- * Deterministically creates mechanical blueprints based on department and scale.
- */
 export const forgeRandomItem = (
     category: string,
     rarity: string,
@@ -539,7 +491,6 @@ export const forgeRandomItem = (
     const isShipScale = majorLower === 'ship';
     const isMacroScale = isMountScale || isShipScale;
 
-    // --- REFINED CHASSIS SELECTION (Strict Department Sync) ---
     if (depLower.includes('weapon') || catLower.includes('weapon')) tableKey = 'weapons';
     else if (depLower.includes('protection') || depLower.includes('armor') || catLower.includes('armor') || catLower.includes('shield')) tableKey = 'armors';
     else if (depLower.includes('accessor') || gearKeywords.some(k => catLower.includes(k))) tableKey = 'accessories';
@@ -554,7 +505,6 @@ export const forgeRandomItem = (
 
     let baseList = [...(LOOT_TABLES[tableKey] || LOOT_TABLES['consumables'])];
 
-    // --- SUBTYPE FILTERING ---
     if (category && category !== 'Universal') {
         const filtered = baseList.filter(i => (i.name || '').toLowerCase().includes(category.toLowerCase()));
         if (filtered.length > 0) baseList = filtered;
@@ -566,7 +516,6 @@ export const forgeRandomItem = (
     if (tableKey === 'weapons') {
         const isHeavyBlueprint = (item: any) => item.tags?.some((t: string) => t.toLowerCase().includes('heavy'));
 
-        // Filter pool into quadrants to ensure perfect randomization balance
         const meleeNormal = baseList.filter(i => !isRangedItem(i) && !isHeavyBlueprint(i));
         const meleeHeavy = baseList.filter(i => !isRangedItem(i) && isHeavyBlueprint(i));
         const rangedNormal = baseList.filter(i => isRangedItem(i) && !isHeavyBlueprint(i));
@@ -574,7 +523,6 @@ export const forgeRandomItem = (
 
         const isOffHand = category === 'Off Hand' || category === 'Off Hand Weapon';
 
-        // Vessel Restriction: Ship weapons MUST be ranged or heavy-ranged.
         let quadrants: { items: any[] }[] = [];
         if (isShipScale) {
             quadrants = [
@@ -596,7 +544,6 @@ export const forgeRandomItem = (
             const pickedQuadrant = validQuadrants[Math.floor(Math.random() * validQuadrants.length)];
             baseItemData = pickedQuadrant.items[Math.floor(Math.random() * pickedQuadrant.items.length)];
         } else {
-            // Hard fallback if filtered subtypes emptied all quadrants
             baseItemData = baseList[Math.floor(Math.random() * baseList.length)];
         }
 
@@ -620,7 +567,6 @@ export const forgeRandomItem = (
     const baseHasEffect = !!baseItemData.effect;
 
     let modStrings: string[] = [];
-    // Consumables should only legally ever have 1 effect or 1 active buff. If the base blueprint already has one, skip generating any more.
     if (isConsumable && (baseHasBuffs || baseHasEffect)) {
         modStrings = [];
     } else {
@@ -634,22 +580,16 @@ export const forgeRandomItem = (
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
-    // Consumables and Throwables only get dynamic effects if:
-    // 1. They don't have a base effect AND didn't roll a stat buff AND have no base buffs
-    // 2. OR if they are higher than Common (to ensure scaling), BUT ONLY if they don't already have an effect/buff
-    // Logic: Exactly one of (base effect, base buff, rolled stat buff, or dynamic effect).
     const hasAnyExistingEffect = baseHasEffect || hasRolledStatBuff || baseHasBuffs;
     const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect);
 
     if (shouldGenerateDynamicEffect) {
-        // Use the base effect type if it exists, otherwise determine a valid randomized type
         let forcedType = baseItemData.effect?.type as 'Heal' | 'Status' | 'Damage' | undefined;
         
         if (!forcedType) {
             if (isThrowable) {
-                // Let generateMechanicalEffect handle the 80/20 split by default
+                // Keep default distribution
             } else if (isConsumable) {
-                // Consumables are generally supportive or utility: Heal or Status
                 forcedType = Math.random() > 0.5 ? 'Heal' : 'Status';
             }
         }
@@ -662,7 +602,6 @@ export const forgeRandomItem = (
         }
     }
 
-    // Determine basic tags
     const finalTags = [...(baseItemData.tags || [])];
     if (isWeapon) finalTags.push(pickedRangedStatus ? 'ranged' : 'melee');
     if (isShipScale) finalTags.push('ship');
@@ -689,7 +628,6 @@ export const forgeRandomItem = (
         }
     });
 
-    // Identification Logic
     if (isIdentified || isQuest) {
         item.name = item.name || blueprintTemplateName;
         item.description = item.description || 'A unique discovery.';
@@ -704,7 +642,6 @@ export const forgeRandomItem = (
     return item;
 }
 
-// --- THEME-AWARE KEYWORDS ---
 const THEME_KEYWORDS: Record<SkillConfiguration, Record<string, string[]>> = {
     'Fantasy': {
         consumables: ['potion', 'elixir', 'draught', 'food', 'bread', 'wine', 'herb', 'tonic', 'scroll'],
@@ -736,7 +673,6 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
     return items.map(itemData => {
         if (!itemData) return itemData;
 
-        // If it already has rich details, just mark it new
         if (itemData.weaponStats || itemData.armorStats || (itemData.buffs?.length > 0) || itemData.effect || (itemData.price > 0)) {
             return { ...itemData, isNew: true };
         }
@@ -750,10 +686,8 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
 
         if (tags.includes('currency')) return { ...itemData, isNew: true };
 
-        // Determine category based on hints or name heuristics + Theme Awareness
         if (isUsable) {
             const theme = THEME_KEYWORDS[skillConfig] || THEME_KEYWORDS['Fantasy'];
-            
             const check = (list: string[]) => list.some(k => name.includes(k));
 
             if (tags.some((t: string) => t.includes('weapon')) || check(theme.weapons)) category = 'Weapons';
@@ -765,7 +699,6 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
             category = 'Quest';
         }
 
-        // Force identified for items added via narrative/SKIN logic
         const baseItem = forgeRandomItem(category, itemData.rarity || 'Common', skillConfig, slotHint, undefined, undefined, true, isUsable);
 
         return {
@@ -777,4 +710,255 @@ export const forgeSkins = (items: any[], skillConfig: SkillConfiguration = 'Fant
             isNew: true
         };
     });
+};
+
+// --- AI SKINNING FROM AIITEMSERVICE ---
+
+export const detectItemAdditionIntent = (text: string): boolean => {
+    const lower = (text || '').toLowerCase();
+    if (lower.includes('take a look') || lower.includes('take damage') || lower.includes('take cover') || lower.includes('take a rest') || lower.includes('take aim')) return false;
+    return (lower.includes('pick up') || lower.includes('loot the') || lower.includes('grab the') || lower.includes('retrieve the') || lower.includes('collect the') || lower.includes('steal the') || lower.includes('pocket the'));
+};
+
+export const generateItemCorrection = async (userContent: string, narrative: string) => {
+    const input = `The user said: "${userContent}". The GM narrated: "${narrative}". Did the party acquire items? Extract into JSON.
+    STRICT RULE: ONLY extract items if they were explicitly picked up, stolen, looted, or received.
+    Return JSON: { "updates": { "inventoryUpdates": [ { "ownerId": "player", "list": "carried", "items": [ { "name": "string", "quantity": number, "description": "MAX 20 WORDS", "rarity": "string" } ] } ] } }`;
+    const ai = getAi();
+    const response = await ai.models.generateContent({
+        model: AI_MODELS.DEFAULT,
+        contents: input,
+        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
+    });
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const enrichItemDetails = async (item: Item, gameData: GameData): Promise<Partial<Item>> => {
+    const level = gameData.playerCharacter.level || 1;
+    const contextPrompt = `
+    Define the precise mechanical stats and thematic flavor for this item based on the current context.
+    
+    **CONCEPT**: 
+    Name: "${item.name}"
+    Narrative Context: "${item.description || item.details || 'Found during exploration.'}"
+    Initial Tags: ${(item.tags || []).join(', ') || 'None'}
+    
+    **WORLD LORE CONTEXT (THEMATIC SKINNING)**:
+    ${gameData.worldSummary || 'Standard Fantasy Setting'}
+
+    **CONTEXT**:
+    Player Level: ${level}
+    
+    **STRICT POLICY - CONSERVATIVE BUFFS & DESCRIPTIVE ITEMS**:
+    - ONLY include mechanical buffs (enhancementBonus, plusAC, buffs) if the narrative explicitly describes the item as superior, magical, advanced, or masterwork.
+    - Plain, mundane, or scavenged items MUST NOT have any buffs.
+    - **DESCRIPTIVE ITEMS**: If the item name or context implies it is a "Quest Item", "Note", "Letter", "Book", "Key", or "Trophy", it MUST NOT have any mechanical stats (weaponStats, armorStats, buffs, effect). These items are purely for narrative and flavor.
+    - If the item is "Credits" or "Gold", ensure you assign a logical 'quantity' based on the lore context.
+
+    **STRICT POLICY - ENHANCEMENT SCALE (ONLY IF BUFFED)**:
+    - Uncommon (+1), Rare (+2), Very Rare (+3), Legendary (+4), Artifact (+5).
+
+    **MECHANICAL SCHEMAS**:
+    1. 'weaponStats': { "ability": "strength|dexterity", "enhancementBonus": number, "damages": [{ "dice": "1d8", "type": "Slashing" }], "critRange": number }
+    2. 'armorStats': { "baseAC": number, "armorType": "light|medium|heavy|shield", "plusAC": number, "strengthRequirement": number }
+    3. 'buffs': Array of { "type": "ac|attack|damage|save|skill|ability|resistance|immunity|temp_hp|exdam", "bonus": number, "skillName": "String", "abilityName": "String", "damageType": "String", "duration": "Passive|Active" }
+    4. 'effect': { "type": "Damage|Status|Heal", "targetType": "Single|Multiple", "dc": number, "saveAbility": "dexterity|constitution|wisdom|etc", "damageDice": "string", "damageType": "string", "status": "string", "healDice": "string" }
+    5. 'usage': { "type": "charges|per_short_rest|per_long_rest", "maxUses": number, "currentUses": number }
+
+    **STRICT POLICY - CONSUMABLES & THROWABLES (ONE EFFECT ONLY)**:
+    - Consumables and Throwables MUST ONLY have ONE of either 'effect' OR ONE entry in 'buffs'. Never both.
+    - Throwables must ONLY use 'Damage' or 'Status' effect types (NEVER 'Heal').
+    - PRICING: Consumables and Throwables are priced at 10% of standard market rates for their rarity.
+
+    **INSTRUCTIONS**:
+    - **PRICING**: Use logical market rates. Remember the 90% discount for consumables/throwables. If it is a quest item, set price to 0.
+    - **DESCRIPTION**: Atmospheric flavor text. MUST be under 20 words.
+    - **DETAILS**: Longer lore and history details (if applicable).
+    - **STRICT RULE**: DO NOT include numerical stats (e.g. "AC 3", "+1") in the 'name' or 'description'. Use pure flavor.
+    - **BODY SLOT**: Select logical slot. For non-gear, set bodySlotTag to null.
+    
+    Return JSON only containing: name, description, details, rarity, tags, keywords, weaponStats, armorStats, effect, buffs, usage, price, bodySlotTag, quantity.`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: contextPrompt,
+            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+        });
+        const details = JSON.parse(cleanJson(response.text || '{}'));
+
+        const finalName = details.name || item.name;
+        const finalDesc = details.description || item.description;
+
+        const mergedData = { ...item, ...details, name: finalName, description: finalDesc };
+        const tempItem = new Item(mergedData);
+        mergedData.tags = inferTagsFromStats(mergedData);
+        const sysSummary = buildMechanicalSummary(tempItem);
+        mergedData.details = (mergedData.details ? mergedData.details + '\n\n' : '') + sysSummary;
+
+        return mergedData;
+    } catch (e) { return item; }
+};
+
+export const identifyItems = async (items: Item[], gameData: GameData): Promise<Item[]> => {
+    if (!items || items.length === 0) return [];
+    const input = `You are a legendary Appraiser and Lorekeeper.
+    
+    [WORLD LORE FOR SKINNING]
+    ${gameData.worldSummary || 'Standard setting.'}
+
+    [ITEMS TO IDENTIFY]
+    ${JSON.stringify(items.map((i, idx) => ({ id: i.id, _index: idx, rarity: i.rarity, mechanicalTruth: i.details || buildMechanicalSummary(i) })))}
+    
+    [THEMATIC INTEGRITY INSTRUCTIONS]
+    You MUST ensure the Name and Description of each item are logical representations of its Mechanical Truth.
+    1. RANGE: 'Ranged' items named Bow, Blaster, etc.
+    2. WEIGHT: 'Heavy Weight' is massive (Cannon, Greatsword). 'Light Weight' is compact (Dagger).
+    3. SCALING: 'Dexterity' -> precision. 'Strength' -> brute force.
+    4. ENHANCEMENTS: If '+1' or powerful passives, use 'Superior', 'Masterwork'.
+    
+    Return JSON array: [{ "id": "string", "name": "string", "description": "string", "details": "string", "rarity": "string", "tags": ["string"], "keywords": ["string"] }]`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: input,
+            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+        });
+        const rawJson = cleanJson(response.text || '[]');
+        let parsed = JSON.parse(rawJson);
+        if (!Array.isArray(parsed) && parsed.items && Array.isArray(parsed.items)) parsed = parsed.items;
+
+        if (Array.isArray(parsed)) {
+            return items.map((original, index) => {
+                let aiItem = parsed.find(p => p.id === original.id) || parsed[index];
+                if (!aiItem) return original;
+                const sanitizedTags = Array.isArray(aiItem.tags) ? aiItem.tags : (typeof aiItem.tags === 'string' ? [aiItem.tags] : []);
+                const sanitizedKeywords = Array.isArray(aiItem.keywords) ? aiItem.keywords : (typeof aiItem.keywords === 'string' ? [aiItem.keywords] : []);
+                const mergedData = {
+                    ...original, ...aiItem, id: original.id,
+                    tags: Array.from(new Set([...(original.tags || []), ...sanitizedTags])).filter(t => typeof t === 'string' && t.toLowerCase() !== 'unidentified'),
+                    keywords: Array.from(new Set([...(original.keywords || []), ...sanitizedKeywords])),
+                    isNew: true
+                };
+                const newItem = new Item(mergedData);
+                newItem.details = (aiItem.details ? aiItem.details + '\n\n' : '') + buildMechanicalSummary(newItem);
+                return newItem;
+            });
+        }
+        return [];
+    } catch (e) { return []; }
+};
+
+export const generateItemPrices = async (items: Item[]): Promise<{ id: string, price: number }[]> => {
+    const input = `Price items based on rarity, power, and lore.\nItems: ${JSON.stringify(items.map(i => ({ id: i.id, name: i.name, rarity: i.rarity, tags: i.tags, mechanics: i.details })))}\nReturn JSON: [{ id, price }]`;
+    const ai = getAi();
+    const response = await ai.models.generateContent({
+        model: AI_MODELS.DEFAULT,
+        contents: input,
+        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
+    });
+    return JSON.parse(cleanJson(response.text || '[]'));
+};
+
+export const generateStoreCategoryInventory = async (category: string, blueprints: Item[], worldSummary: string, scale: string = 'Person'): Promise<any[]> => {
+    const itemsContext = blueprints.map((b, i) => ({ index: i, rarity: b.rarity, mechanicalDetails: b.details }));
+    const isMacroScale = scale.toLowerCase().includes('ship') || scale.toLowerCase().includes('mount') || category.toLowerCase().includes('ship') || category.toLowerCase().includes('mount');
+    const scaleContext = isMacroScale ? `Vessel/Beast-Scale Component (${scale}). Render names and flavor for large-scale entities.` : 'Personnel-Scale gear.';
+
+    const input = `[IDENTITY]
+    You are the Shopkeeper providing thematic 'skins' (names and descriptions) for a shipment of items in a store.
+    [CONTEXT] Setting: ${worldSummary} Category: ${category} Scale: ${scaleContext}
+    [INPUT DATA] ${JSON.stringify(itemsContext, null, 2)}
+    [MECHANICAL GUIDELINES] 1. Names and Descriptions MUST reflect Mechanical Details. NO NUMBERS.
+    Return JSON: [{ "index": number, "name": "string", "description": "string", "details": "string" }]`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: input,
+            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+        });
+        const skins = JSON.parse(cleanJson(response.text || '[]'));
+        if (Array.isArray(skins)) {
+            return blueprints.map((blueprint, i) => {
+                const skin = skins.find(s => s.index === i);
+                const itemData = { ...blueprint, name: skin?.name || blueprint.name, description: skin?.description || blueprint.description };
+                itemData.details = (skin?.details ? skin.details + '\n\n' : '') + buildMechanicalSummary(new Item(itemData));
+                return itemData;
+            });
+        }
+        return blueprints;
+    } catch (e) { return blueprints; }
+};
+
+export const generateForgeDetails = async (blueprint: Item, worldSummary: string, userIdea: string): Promise<{ name: string, description: string }> => {
+    const summary = buildMechanicalSummary(blueprint);
+    const isMacroScale = (blueprint.tags || []).some(t => t.toLowerCase().includes('ship') || t.toLowerCase().includes('mount'));
+    const input = `Create a unique, thematic name and flavor for a forged RPG item.
+    [BLUEPRINT] ${summary}
+    [SCALE] ${isMacroScale ? 'Vessel/Beast-Scale.' : 'Personnel-Scale.'}
+    [WORLD LORE] ${worldSummary}
+    [USER IDEA] "${userIdea || 'A powerful custom creation.'}"
+    [INSTRUCTIONS] NO NUMBERS or STATS in the name or description. Use only evocative flavor. (Max 15 words).
+    Return JSON: { "name": "string", "description": "string" }`;
+
+    const ai = getAi();
+    const response = await ai.models.generateContent({
+        model: AI_MODELS.DEFAULT,
+        contents: input,
+        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
+    });
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const skinItemsForCharacter = async (items: Item[], character: any, worldSummary: string): Promise<Item[]> => {
+    const itemsContext = items.map((item, idx) => ({ index: idx, type: item.weaponStats ? 'Weapon' : (item.armorStats ? 'Armor' : 'Item'), stats: buildMechanicalSummary(item) }));
+    const prompt = `Provide unique skins for 3 starting items.
+    [CHARACTER] ${character.name}, ${character.profession}, ${character.background}. Appearance: ${character.appearance}
+    [LORE] ${worldSummary}
+    [ITEMS] ${JSON.stringify(itemsContext)}
+    [INSTRUCTIONS] Names and flavor MUST fit the character. NO numbers or stat indicators in flavor.
+    Return JSON array: [{ "index": number, "name": "string", "description": "string" }]`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: prompt,
+            config: { thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
+        });
+        const skins = JSON.parse(cleanJson(response.text || '[]'));
+        return items.map((item, i) => {
+            const skin = skins.find((s: any) => s.index === i);
+            if (skin) {
+                const updated = new Item({ ...item, name: skin.name, description: skin.description, isNew: true });
+                updated.details = (item.details ? item.details + '\n\n' : '') + buildMechanicalSummary(updated);
+                return updated;
+            }
+            return item;
+        });
+    } catch (e) { return items; }
+};
+
+export const generateStolenItem = async (intendedItem: string, npc: NPC, gameData: GameData): Promise<Partial<Item>> => {
+    const prompt = `You are an AI Item Architect. The player pickpocketed ${npc.name}.
+    INTENDED ITEM: "${intendedItem}"
+    NPC CONTEXT: ${npc.name} (${npc.description || 'A local character'}). Status: ${npc.status}.
+    WORLD CONTEXT: ${gameData.worldSummary || "Standard setting."}
+    [INSTRUCTIONS]
+    1. Skin the "INTENDED ITEM" based on the NPC. Return JSON: { "name": "string", "description": "string", "rarity": "string", "quantity": number }`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: prompt,
+            config: { thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
+        });
+        return JSON.parse(cleanJson(response.text || "{}"));
+    } catch (e) { return { name: intendedItem, description: "A lifted item.", rarity: "Common", quantity: 1 }; }
 };
