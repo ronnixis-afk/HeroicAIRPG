@@ -68,7 +68,7 @@ const ItemForgeView: React.FC = () => {
                     />
 
                     <div>
-                        <h3 className="text-center mb-6 border-b border-brand-primary/10 pb-3 text-body-base">Configuration</h3>
+                        <h2 className="text-center mb-6 border-b border-brand-primary/10 pb-3 text-body-base">Configuration</h2>
 
                         <div className="space-y-6">
                             <ForgeIdentity

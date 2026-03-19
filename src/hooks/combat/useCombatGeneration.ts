@@ -92,7 +92,7 @@ export const useCombatGeneration = (
                 safeTemplateKey = templatePool[Math.floor(Math.random() * templatePool.length)];
             }
 
-            const params = getDifficultyParams(suggestion.difficulty || suggestion.cr?.toString() || 'Normal', playerLevel);
+            const params = getDifficultyParams(suggestion.difficulty || 'Normal', playerLevel);
 
             const lowerName = finalName.toLowerCase();
             if (lowerName.includes('replace') || lowerName.includes('unknown') || lowerName.includes('[') || lowerName.trim() === '') {

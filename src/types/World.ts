@@ -376,8 +376,6 @@ export interface ActorSuggestion {
   template: string;
   size: CombatActorSize;
   difficulty: 'Weak' | 'Normal' | 'Elite' | 'Boss' | string;
-  cr?: number; // Keep for legacy
-  rank?: 'normal' | 'elite' | 'boss'; // Keep for legacy
   description?: string;
   isAlly: boolean;
   alignment?: ActorAlignment; // NEW: Combat alignment

@@ -59,7 +59,7 @@ export const WeaponStatsEditor: React.FC<{
 
     return (
         <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 mt-4 space-y-6 shadow-inner">
-            <h4 className="text-brand-text">Weapon Base Stats</h4>
+            <h2 className="text-brand-text">Weapon Base Stats</h2>
             
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                 <div className="col-span-1">

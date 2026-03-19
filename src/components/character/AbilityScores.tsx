@@ -46,7 +46,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
         <div className="space-y-6">
             {!hideScores && (
                 <div className="animate-fade-in">
-                    <h3 className="text-brand-text mb-4 px-1">Ability Scores</h3>
+                    <h2 className="text-brand-text mb-4 px-1">Ability Scores</h2>
                     <div className="grid grid-cols-2 gap-4">
                         {abilityScoreRenderOrder.map(ability => {
                             const baseScore = character.abilityScores?.[ability]?.score || 10;
@@ -104,7 +104,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
             
             {!hideSaves && (
                 <div className="animate-fade-in pt-4">
-                    <h3 className="text-brand-text mb-4 px-1">Saving Throws</h3>
+                    <h2 className="text-brand-text mb-4 px-1">Saving Throws</h2>
                     <div className="space-y-1 bg-brand-primary/10 p-3 rounded-2xl border border-brand-primary/30 shadow-inner">
                         {ABILITY_SCORES.map(ability => {
                             const isProficient = character.savingThrows?.[ability]?.proficient || false;

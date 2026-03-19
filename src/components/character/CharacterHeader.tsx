@@ -3,6 +3,7 @@ import { PlayerCharacter, Companion } from '../../types';
 import { getXPForLevel, getNextLevelXP } from '../../utils/mechanics';
 import { getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../../utils/npcUtils';
 import { Icon } from '../Icon';
+import { Button } from '../Button';
 import { InputField, SelectField, TextareaField } from './FormFields';
 
 interface CharacterHeaderProps {
@@ -72,14 +73,22 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                         )}
                     </div>
                     <div className="flex gap-3">
-                        <label className="btn-secondary btn-sm cursor-pointer">
-                            Upload
-                            <input type="file" className="hidden" accept="image/*" onChange={onImageUpload} />
-                        </label>
-                        <button
+                        <Button
+                            variant="secondary"
+                            size="sm"
+                            asChild
+                        >
+                            <label className="cursor-pointer">
+                                Upload
+                                <input type="file" className="hidden" accept="image/*" onChange={onImageUpload} />
+                            </label>
+                        </Button>
+                        <Button
+                            variant="primary"
+                            size="sm"
                             onClick={onRegenerateImage}
                             disabled={isGeneratingImage || !character.appearance || imageCooldown > 0}
-                            className="btn-primary btn-sm w-36 flex items-center justify-center gap-2"
+                            className="w-36 flex items-center justify-center gap-2"
                         >
                             {isGeneratingImage ? (
                                 <Icon name="spinner" className="w-4 h-4 animate-spin text-black" />
@@ -91,7 +100,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                                     Regenerate
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
@@ -116,7 +125,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {showHeroicPoints && (
                 <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner group">
                     <div className="flex justify-between items-center">
-                        <h3 className="mb-0 text-brand-text">Heroic Potential</h3>
+                        <h2 className="mb-0 text-brand-text">Heroic Potential</h2>
                         <div className="flex flex-wrap gap-2.5">
                             {Array.from({ length: maxHeroic }).map((_, i) => (
                                 <div
@@ -176,7 +185,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Sliders for Player only */}
                 {!isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h3 className="text-brand-text mb-2">Alignment</h3>
+                        <h2 className="text-brand-text mb-2">Alignment</h2>
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">

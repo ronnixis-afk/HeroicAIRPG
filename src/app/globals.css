@@ -51,23 +51,23 @@
 
   /* Typography System: 5 Header Sizes */
   h1 {
-    @apply text-4xl font-bold tracking-tight mb-4;
+    @apply font-merriweather text-4xl font-bold tracking-tight mb-4;
   }
 
   h2 {
-    @apply text-3xl font-bold tracking-tight mb-3;
+    @apply font-sans text-xl font-bold tracking-tight mb-3;
   }
 
   h3 {
-    @apply font-merriweather text-2xl font-bold tracking-tight mb-2;
+    @apply font-merriweather text-3xl font-bold tracking-tight mb-4;
   }
 
   h4 {
-    @apply text-xl font-bold tracking-tight mb-2;
+    @apply font-sans text-lg font-bold tracking-tight mb-2;
   }
 
   h5 {
-    @apply text-base font-bold mb-1;
+    @apply font-sans text-base font-bold mb-1;
   }
 
   /* Normal Text System: 5 Sizes */

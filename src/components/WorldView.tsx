@@ -257,7 +257,7 @@ const WorldView: React.FC = () => {
                         <div className="w-10 h-10 rounded-xl bg-brand-accent/10 flex items-center justify-center border border-brand-accent/20">
                             <Icon name="world" className="w-5 h-5 text-brand-accent" />
                         </div>
-                        <h3 className="text-brand-text mb-0">Realm Overview</h3>
+                        <h2 className="text-brand-text mb-0">Realm Overview</h2>
                     </div>
                     <button
                         onClick={handleGenerateSummary}

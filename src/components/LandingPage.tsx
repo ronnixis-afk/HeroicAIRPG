@@ -67,9 +67,9 @@ export default function LandingPage() {
 
                     {/* Hero Section (Centered) */}
                     <div className="flex-1 flex flex-col items-center justify-center px-4 py-20 text-center min-h-[70vh]">
-                        <h1 className="font-merriweather text-4xl md:text-6xl text-brand-text tracking-tight mb-2 drop-shadow-xl">
+                        <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text tracking-tight mb-2 drop-shadow-xl">
                             Heroic AI <span className="text-brand-accent">RPG</span>
-                        </h1>
+                        </h3>
                         <p className="text-lg md:text-2xl text-brand-text-muted font-medium mb-10 tracking-widest drop-shadow-md">
                             Create, Play, Evolve
                         </p>
@@ -87,9 +87,9 @@ export default function LandingPage() {
 
                     {/* News Section */}
                     <div className="w-full max-w-4xl mx-auto px-4 py-16 pb-24">
-                        <h3 className="text-brand-accent font-bold mb-8 text-xl text-center md:text-left tracking-wide">
+                        <h2 className="text-brand-accent font-bold mb-8 text-xl text-center md:text-left tracking-wide">
                             Recent Updates
-                        </h3>
+                        </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {NEWS_ITEMS.map((item, i) => (
                                 <div
@@ -97,7 +97,7 @@ export default function LandingPage() {
                                     className="bg-brand-surface/60 backdrop-blur-md p-6 rounded-2xl border border-brand-primary/30 hover:border-brand-primary/60 transition-colors"
                                 >
                                     <span className="text-xs text-brand-accent font-bold tracking-wider block mb-2">{item.date}</span>
-                                    <h4 className="text-brand-text font-bold text-lg mb-2">{item.title}</h4>
+                                    <h2 className="text-brand-text font-bold text-lg mb-2"> {item.title}</h2>
                                     <p className="text-sm text-brand-text-muted leading-relaxed">{item.content}</p>
                                 </div>
                             ))}

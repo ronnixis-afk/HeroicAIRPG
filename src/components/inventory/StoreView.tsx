@@ -330,7 +330,7 @@ const StoreView: React.FC = () => {
                     ) : (
                         <div className="animate-fade-in">
                             <div className="flex justify-between items-end mb-3 px-1">
-                                <h3 className="mb-0 text-body-base">Personal Gear</h3>
+                                <h2 className="mb-0 text-body-base">Personal Gear</h2>
                                 <div className="flex items-center gap-1.5 text-brand-accent font-black text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm">
                                     <Icon name="currencyCoins" className="w-3.5 h-3.5" />
                                     <span>{playerGold} {currencyName}</span>

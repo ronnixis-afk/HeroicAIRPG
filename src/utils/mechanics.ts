@@ -47,23 +47,6 @@ export const getEnemyXP = (cr: number): number => {
     return cr * 500; 
 };
 
-/**
- * Calculates the total number of Trait Points earned through leveling.
- * Characters gain 1 point every 3 levels.
- */
-export const calculateTotalTraitPoints = (level: number): number => {
-    return Math.floor(level / 3);
-};
-
-/**
- * Calculates the base number of Heroic Points for a given level.
- * Formula: 1 point at level 1, +1 per 5 levels (e.g. 2 at lvl 6, 3 at lvl 11).
- * Matches: Math.floor((level - 1) / 5) + 1
- */
-export const calculateBaseHeroicPoints = (level: number): number => {
-    return Math.floor((level - 1) / 5) + 1;
-};
-
 export type DifficultyPreset = 'Weak' | 'Normal' | 'Elite' | 'Boss';
 
 export const DEFAULT_SIZE_MODIFIERS = BASE_SIZE_MODIFIERS;
@@ -243,6 +226,15 @@ export const DEFAULT_AFFINITIES: Record<string, AffinityDefinition> = {
     }
 };
 
+/**
+ * Calculates the base number of Heroic Points for a given level.
+ * Formula: 1 point at level 1, +1 per 5 levels (e.g. 2 at lvl 6, 3 at lvl 11).
+ * Matches: Math.floor((level - 1) / 5) + 1
+ */
+export const calculateBaseHeroicPoints = (level: number): number => {
+    return Math.floor((level - 1) / 5) + 1;
+};
+
 export const getDifficultyParams = (tag: DifficultyPreset | string, playerLevel: number): { cr: number, rank: 'normal' | 'elite' | 'boss' } => {
     const normalized = tag.toLowerCase().trim();
     if (normalized === 'weak') {
@@ -256,11 +248,6 @@ export const getDifficultyParams = (tag: DifficultyPreset | string, playerLevel:
     }
     // Default to 'Normal'
     return { cr: Math.max(1, playerLevel), rank: 'normal' };
-};
-
-// Legacy support for CR only calculation
-export const calculateCrFromTag = (tag: string, playerLevel: number): number => {
-    return getDifficultyParams(tag, playerLevel).cr;
 };
 
 export const getSkillCheckXP = (dc: number): number => {

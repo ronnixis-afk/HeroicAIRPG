@@ -152,7 +152,7 @@ export const SpeechToTextModal: React.FC<SpeechToTextModalProps> = ({ isOpen, on
       if (error) {
            return (
               <>
-                  <h4 className="text-red-400">Audio Error</h4>
+                  <h2 className="text-red-400">Audio Error</h2>
                   <div className="w-full min-h-[80px] bg-brand-primary p-4 rounded-xl text-body-sm flex items-center justify-center">
                       <p className="text-red-400 text-center">{error}</p>
                   </div>
@@ -173,7 +173,7 @@ export const SpeechToTextModal: React.FC<SpeechToTextModalProps> = ({ isOpen, on
           case 'transcribing':
               return (
                    <>
-                      <h4 className="text-brand-accent">{recordingState === 'refining' ? 'Refining Intent...' : 'Transcribing...'}</h4>
+                      <h2 className="text-brand-accent">{recordingState === 'refining' ? 'Refining Intent...' : 'Transcribing...'}</h2>
                       <div className="w-28 h-28 flex items-center justify-center">
                           <Icon name="spinner" className="w-16 h-16 text-brand-accent animate-spin" />
                       </div>
@@ -185,7 +185,7 @@ export const SpeechToTextModal: React.FC<SpeechToTextModalProps> = ({ isOpen, on
           case 'recording':
               return (
                   <>
-                      <h4 className="text-brand-accent">Listening...</h4>
+                      <h2 className="text-brand-accent">Listening...</h2>
                       <button 
                           onClick={stopRecording}
                           className="relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300 bg-brand-accent active:scale-95 shadow-[0_0_30px_rgba(62,207,142,0.3)]"
@@ -201,7 +201,7 @@ export const SpeechToTextModal: React.FC<SpeechToTextModalProps> = ({ isOpen, on
           default:
               return (
                   <>
-                      <h4 className="text-brand-text-muted opacity-50">Initializing...</h4>
+                      <h2 className="text-brand-text-muted opacity-50">Initializing...</h2>
                       <div className="w-28 h-28 flex items-center justify-center">
                           <Icon name="spinner" className="w-10 h-10 text-brand-primary animate-spin" />
                       </div>

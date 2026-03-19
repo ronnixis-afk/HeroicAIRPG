@@ -101,7 +101,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-brand-primary/10 flex items-center justify-between gap-4">
-            <h3 className="text-brand-text line-clamp-1 overflow-hidden m-0 flex-1">{formattedWorldName}</h3>
+            <h2 className="text-brand-text line-clamp-1 overflow-hidden m-0 flex-1">{formattedWorldName}</h2>
             <button onClick={onClose} className="btn-icon text-brand-text-muted hover:text-brand-text transition-colors shrink-0">
               <Icon name="close" className="w-6 h-6" />
             </button>

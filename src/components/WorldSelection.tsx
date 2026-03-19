@@ -411,7 +411,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
             <header className="flex flex-row items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
-                <h1 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h1>
+                <h3 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h3>
                 <button
                     onClick={() => setIsDrawerOpen(true)}
                     className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
@@ -472,7 +472,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     </button>
                                 </div>
                                 <div className="mt-auto p-4 z-10 w-full flex flex-col relative">
-                                    <h3 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md">{world.name}</h3>
+                                    <h2 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {world.name}</h2>
                                     <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">Saved {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
                                     <div className="w-full bg-brand-accent text-black font-black text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
                                         <Icon name="play" className="w-3 h-3" /> Play
@@ -512,7 +512,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         Cloud
                                     </div>
                                     <div className="mt-auto p-4 z-10 w-full flex flex-col items-start text-left">
-                                        <h3 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md">{save.name}</h3>
+                                        <h2 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md"> {save.name}</h2>
                                         <p className="text-[9px] text-brand-text-muted mb-4 opacity-70 border-b border-brand-primary/30 pb-2 w-full shadow-black drop-shadow-md">{new Date(save.updatedAt).toLocaleDateString()}</p>
                                         <button
                                             onClick={() => handleRestoreCloudSave(save)}
@@ -537,12 +537,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 ) : previewData ? (
                     <div className="space-y-8 animate-page py-2">
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                            <h3 className="text-brand-text mb-2">The World of {worldName}</h3>
+                            <h2 className="text-brand-text mb-2"> The World of {worldName}</h2>
                             <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap font-medium opacity-90">{previewData.context}</p>
                         </div>
 
                         <div>
-                            <h4 className="px-1 mb-4">Ancestry Registry</h4>
+                            <h2 className="px-1 mb-4"> Ancestry Registry</h2>
                             <div className="space-y-3">
                                 {previewData.races.map((race, i) => (
                                     <div key={i} className="bg-brand-surface/40 p-4 rounded-xl border border-brand-primary/50">
@@ -557,7 +557,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         </div>
 
                         <div>
-                            <h4 className="px-1 mb-4">Major Factions</h4>
+                            <h2 className="px-1 mb-4"> Major Factions</h2>
                             <div className="space-y-4">
                                 {previewData.factions.map((faction, i) => (
                                     <div key={i} className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface">

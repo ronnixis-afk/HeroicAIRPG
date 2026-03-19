@@ -3,6 +3,7 @@ import React from 'react';
 import { NPC } from '../../types';
 import RelationshipBar from './RelationshipBar';
 import { Icon } from '../Icon';
+import { Button } from '../Button';
 import { toTitleCase, getRaceColor, getGenderColor } from '../../utils/npcUtils';
 
 interface NPCCardProps {
@@ -77,19 +78,20 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                 </div>
             </div>
 
-            {/* Delete Action (Hover) */}
             {onDelete && !npc.companionId && (
                 <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <button
+                    <Button
+                        variant="danger"
+                        size="icon"
                         onClick={(e) => {
                             e.stopPropagation();
                             onDelete(npc.id);
                         }}
-                        className="btn-icon-delete w-8 h-8 rounded-xl shadow-lg"
+                        className="w-8 h-8 rounded-xl shadow-lg"
                         aria-label="Delete acquaintance"
                     >
                         <Icon name="trash" className="w-3.5 h-3.5" />
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>
