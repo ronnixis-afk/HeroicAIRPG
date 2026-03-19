@@ -13,6 +13,8 @@ const NewTag: React.FC = () => (
     <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-bounce">New</span>
 );
 
+import PageHeader from './PageHeader';
+
 const EditableLoreContent: React.FC<{
     entry: LoreEntry;
     onSave: (entry: LoreEntry) => Promise<void>;
@@ -244,12 +246,10 @@ const WorldView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">Realm Codex</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    The history, myths, and facts that define this realm.
-                </p>
-            </div>
+            <PageHeader 
+                title="Realm Codex" 
+                subtitle="The history, myths, and facts that define this realm." 
+            />
 
             <div className="bg-brand-surface rounded-3xl border border-brand-primary/30 p-6 mb-12 shadow-xl animate-page overflow-hidden group">
                 <div className="flex justify-between items-center mb-6">

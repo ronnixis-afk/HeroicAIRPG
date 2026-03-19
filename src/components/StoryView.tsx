@@ -6,6 +6,7 @@ import { GameDataContext } from '../context/GameDataContext';
 import type { StoryLog } from '../types';
 import { Icon } from './Icon';
 import Button from './Button';
+import PageHeader from './PageHeader';
 
 const toTitleCase = (str: string) => {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -192,12 +193,10 @@ const StoryView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">The Chronicle</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    The evolving chronicle of your journey through the realms.
-                </p>
-            </div>
+            <PageHeader 
+                title="The Chronicle" 
+                subtitle="The evolving chronicle of your journey through the realms." 
+            />
 
             {sortedDays.length > 0 ? (
                 <div className="space-y-6">

@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { useForgeLogic } from './forge/useForgeLogic';
+import PageHeader from '../PageHeader';
 
 // Modular Components
 import { ForgeHeader } from './forge/ForgeHeader';
@@ -43,12 +44,11 @@ const ItemForgeView: React.FC = () => {
 
     return (
         <div className="p-2 pt-4 max-w-2xl mx-auto pb-12 h-full flex flex-col">
-            <div className="text-center mb-6 pb-4 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">Item Forge</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    Create custom equipment infused with system power.
-                </p>
-            </div>
+            <PageHeader 
+                title="Item Forge" 
+                subtitle="Create custom equipment infused with system power." 
+                className="mb-6 pb-4"
+            />
 
             <div className="flex-1 overflow-y-auto custom-scroll pr-1 pb-10">
                 <div className="space-y-8 animate-fade-in">

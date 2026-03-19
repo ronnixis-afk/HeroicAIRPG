@@ -6,6 +6,7 @@ import { GameDataContext } from '../context/GameDataContext';
 import { type LoreEntry, LORE_TAGS } from '../types';
 import { Icon } from './Icon';
 import Button from './Button';
+import PageHeader from './PageHeader';
 
 const toTitleCase = (str: string) => {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -238,12 +239,10 @@ const ObjectivesView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-32">
-            <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">Quest Log</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic leading-relaxed">
-                    The chronicle of your journey through the uncharted lands.
-                </p>
-            </div>
+            <PageHeader 
+                title="Quest Log" 
+                subtitle="The chronicle of your journey through the uncharted lands." 
+            />
 
             {trackedObjective && (
                 <div className="mb-16">

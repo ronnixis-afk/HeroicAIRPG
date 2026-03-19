@@ -13,6 +13,7 @@ import Modal from '../Modal';
 import { InventoryTab } from './InventoryTab';
 import { InventoryGridItem } from './InventoryGridItem';
 import { ItemDetailView } from './ItemDetailView';
+import PageHeader from '../PageHeader';
 
 type InventoryListType = 'carried' | 'storage' | 'assets';
 
@@ -218,8 +219,7 @@ const InventoryView: React.FC = () => {
 
     return (
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20 relative">
-                <h3 className="text-brand-text mb-2">Inventory</h3>
+            <PageHeader title="Inventory" subtitle="Manage gear for yourself and your companions.">
                 {isSelectionMode && (
                     <button
                         onClick={exitSelectionMode}
@@ -229,10 +229,7 @@ const InventoryView: React.FC = () => {
                         <Icon name="close" className="w-5 h-5" />
                     </button>
                 )}
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    Manage gear for yourself and your companions.
-                </p>
-            </div>
+            </PageHeader>
 
             <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-4'}`}>
                 <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-2 pb-2 gap-4 justify-around`}>

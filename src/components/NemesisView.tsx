@@ -5,6 +5,7 @@ import { Icon } from './Icon';
 import Button from './Button';
 import AutoResizingTextarea from './AutoResizingTextarea';
 import type { Nemesis } from '../types';
+import PageHeader from './PageHeader';
 
 const NewTag: React.FC = () => (
     <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-pulse">New</span>
@@ -183,12 +184,10 @@ const NemesisView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">Nemesis System</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    Persistent individuals or factions actively working against your party.
-                </p>
-            </div>
+            <PageHeader 
+                title="Nemesis System" 
+                subtitle="Persistent individuals or factions actively working against your party." 
+            />
 
             <div className="space-y-4 mb-16 animate-page">
                 {nemeses.length > 0 ? (

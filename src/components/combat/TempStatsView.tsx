@@ -5,6 +5,7 @@ import { GameDataContext } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { DEFAULT_TEMPLATES, DEFAULT_SIZE_MODIFIERS, DEFAULT_AFFINITIES, DEFAULT_ARCHETYPE_DEFINITIONS } from '../../utils/mechanics';
 import { Icon } from '../Icon';
+import PageHeader from '../PageHeader';
 import { ActorAvatar } from './ActorAvatar';
 import { ActorEditor } from './ActorEditor';
 import { StagingModal } from './StagingModal';
@@ -109,10 +110,10 @@ const TempStatsView: React.FC = () => {
         <>
             <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
                 {/* Header */}
-                <div className="text-center mb-10 pb-6 border-b border-brand-primary/20 relative">
-                    <h3 className="text-brand-text mb-2">
-                        {isActive ? 'Combat Manager' : 'Scene Manager'}
-                    </h3>
+                <PageHeader 
+                    title={isActive ? 'Combat Manager' : 'Scene Manager'}
+                    subtitle={isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
+                >
                     <div className="absolute right-0 top-1 flex gap-1">
                         {!isActive && enemies.length > 0 && (
                             <button onClick={handleClearScene} className="btn-icon text-brand-text-muted hover:text-brand-danger" title="Clear Scene">
@@ -123,10 +124,7 @@ const TempStatsView: React.FC = () => {
                             <Icon name="settings" className="w-5 h-5" />
                         </button>
                     </div>
-                    <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                        {isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
-                    </p>
-                </div>
+                </PageHeader>
 
                 {/* Staging Area */}
                 <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-primary/30 mb-8 shadow-inner">

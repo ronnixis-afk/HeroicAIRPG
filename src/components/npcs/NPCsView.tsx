@@ -4,6 +4,7 @@ import { GameDataContext } from '../../context/GameDataContext';
 import { Icon } from '../Icon';
 import NPCCard from './NPCCard';
 import NPCDetailsModal from './NPCDetailsModal';
+import PageHeader from '../PageHeader';
 import { companionToNPC } from '../../utils/npcUtils';
 import { type NPC, Companion } from '../../types';
 
@@ -139,12 +140,10 @@ const NPCsView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">Social Ledger</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    Allies, informants, and rivals encountered across the realms.
-                </p>
-            </div>
+            <PageHeader 
+                title="Social Ledger" 
+                subtitle="Allies, informants, and rivals encountered across the realms." 
+            />
 
             {/* Search Box */}
             <div className="relative mb-10 group px-1">

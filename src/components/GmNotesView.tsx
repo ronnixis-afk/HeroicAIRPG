@@ -8,6 +8,7 @@ import Button from './Button';
 import type { PlotPointType, PlotPoint, NPC } from '../types';
 import AutoResizingTextarea from './AutoResizingTextarea';
 import Modal from './Modal';
+import PageHeader from './PageHeader';
 
 const PlotPointTypeColors: Record<PlotPointType, string> = {
     'Achievement': 'bg-emerald-900/60 text-emerald-300 border-emerald-400/40',
@@ -182,12 +183,10 @@ const GmNotesView: React.FC = () => {
 
     return (
         <div className="p-4 pt-8 max-w-2xl mx-auto pb-32">
-            <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
-                <h3 className="text-brand-text mb-2">The Narrative Web</h3>
-                <p className="text-body-tiny text-brand-text-muted font-normal italic">
-                    Interconnect player choices, achievements, and secrets to guide the storyteller.
-                </p>
-            </div>
+            <PageHeader 
+                title="The Narrative Web" 
+                subtitle="Interconnect player choices, achievements, and secrets to guide the storyteller." 
+            />
 
             {/* SECTION 0: THE GRAND DESIGN */}
             <div className="mb-12">

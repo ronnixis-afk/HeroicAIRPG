@@ -7,6 +7,7 @@ import { Icon } from './Icon';
 import { CharacterSheet } from './character/CharacterSheet';
 import { CharacterTab } from './character/CharacterTab';
 import { CharacterCreationWizard } from './character/CharacterCreationWizard';
+import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
     const { gameData, updateCompanion } = useContext(GameDataContext);
@@ -72,10 +73,12 @@ const CharacterView: React.FC = () => {
                     <div className="w-32 h-32 rounded-full bg-brand-primary/20 flex items-center justify-center mb-8 border-2 border-dashed border-brand-accent/40 animate-pulse">
                         <Icon name="character" className="w-16 h-16 text-brand-accent opacity-40" />
                     </div>
-                    <h3 className="text-brand-text mb-2">Forge Your Legend</h3>
-                    <p className="text-body-tiny text-brand-text-muted mb-12 max-w-xs font-normal italic leading-relaxed">
-                        Every great chronicle starts with a single name and a defined spirit.
-                    </p>
+                    <PageHeader 
+                        title="Forge Your Legend" 
+                        subtitle="Every great chronicle starts with a single name and a defined spirit." 
+                        className="mb-12 border-none"
+                        subtitleClassName="max-w-xs mx-auto leading-relaxed"
+                    />
                     <button
                         onClick={() => setIsWizardOpen(true)}
                         className="btn-primary btn-lg rounded-full"
@@ -85,8 +88,10 @@ const CharacterView: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <h3 className="text-brand-text mb-1 text-center">The Party</h3>
-                    <p className="text-center text-brand-text-muted mb-4 text-body-tiny font-normal italic">Manage stats, abilities, and details for your party.</p>
+                    <PageHeader 
+                        title="The Party" 
+                        subtitle="Manage stats, abilities, and details for your party." 
+                    />
 
                     <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-4'}`}>
                         <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-2 pb-2 gap-4 justify-around`}>
