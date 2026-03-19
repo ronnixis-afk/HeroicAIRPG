@@ -1,6 +1,6 @@
 // utils/itemMechanics.ts
 
-import { Item, AbilityEffect, AbilityUsage, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES, BodySlot } from '../types';
+import { Item, AbilityEffect, AbilityUsage, TargetType, SkillConfiguration, SKILL_DEFINITIONS, SKILL_NAMES, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES, BodySlot } from '../types';
 import { applyModifierToItem, parseModifierString, getBuffTag } from './itemModifiers';
 import { CATEGORY_WEIGHTS, RARITY_DISTRIBUTIONS, RARITY_TIERS, LOOT_TABLES } from './item/itemRegistry';
 // Re-export common data for UI consumers
@@ -299,16 +299,20 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
     return parts.join('\n').trim();
 };
 
-export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' | 'Status' | 'Heal', isConsumable: boolean = false): { effect: AbilityEffect, usage: AbilityUsage } | null => {
+export const generateMechanicalEffect = (
+    rarity: string, 
+    forcedType?: 'Damage' | 'Status' | 'Heal', 
+    isConsumable: boolean = false,
+    forcedTargetType?: TargetType
+): { effect: AbilityEffect, usage: AbilityUsage } | null => {
     const d = (n: number) => Math.floor(Math.random() * n) + 1;
     
-    // Default type selection logic: Damage is most common, Status and Heal are less so.
-    let type = forcedType || (Math.random() < 0.6 ? 'Damage' : (Math.random() < 0.5 ? 'Status' : 'Heal'));
+    // Default type selection logic refined: Damage is now significantly more common (80%)
+    const roll = Math.random();
+    let type = forcedType || (roll < 0.8 ? 'Damage' : (roll < 0.9 ? 'Status' : 'Heal'));
 
     // Restriction: Throwables MUST be Damage or Status (never Heal)
-    // isConsumable covers both throwables and consumables in the current usage context of this function
     if (isConsumable && type === 'Heal' && forcedType === undefined) {
-        // Correcting: If we are a throwable context and generic roll hit Heal, force it to Status
         type = 'Status';
     }
 
@@ -328,15 +332,13 @@ export const generateMechanicalEffect = (rarity: string, forcedType?: 'Damage' |
 
     const damageType = DAMAGE_TYPES[Math.floor(Math.random() * DAMAGE_TYPES.length)];
     
-    // Filter out non-offensive status effects for offensive items
     const offensiveStatuses = STATUS_EFFECT_NAMES.filter(s => s !== 'Invisible' && s !== 'Hidden' && s !== 'Disappeared');
     const status = offensiveStatuses[Math.floor(Math.random() * offensiveStatuses.length)];
     
     const saveAbility = ABILITY_SCORES[Math.floor(Math.random() * ABILITY_SCORES.length)];
 
-    // Target randomization (Throwables/Consumables often hit multiple)
-    // 40% chance of 'Multiple' targets for consumables/throwables, otherwise 'Single'
-    const targetType = (forcedType !== undefined || isConsumable) && Math.random() < 0.4 ? 'Multiple' : 'Single';
+    // Target inheritance/randomization
+    const targetType = forcedTargetType || ((forcedType !== undefined || isConsumable) && Math.random() < 0.4 ? 'Multiple' : 'Single');
 
     const effect: AbilityEffect = {
         type,
@@ -541,10 +543,10 @@ export const forgeRandomItem = (
     if (depLower.includes('weapon') || catLower.includes('weapon')) tableKey = 'weapons';
     else if (depLower.includes('protection') || depLower.includes('armor') || catLower.includes('armor') || catLower.includes('shield')) tableKey = 'armors';
     else if (depLower.includes('accessor') || gearKeywords.some(k => catLower.includes(k))) tableKey = 'accessories';
-    else if (catLower.includes('utilit')) tableKey = 'utilities';
-    else if (catLower.includes('consumable')) tableKey = 'consumables';
-    else if (catLower.includes('throw')) tableKey = 'throwables';
-    else if (catLower.includes('quest') || !isUsable) tableKey = 'quest';
+    else if (catLower.includes('utilit') || depLower.includes('utilit')) tableKey = 'utilities';
+    else if (catLower.includes('consumable') || depLower.includes('consumable')) tableKey = 'consumables';
+    else if (catLower.includes('throw') || depLower.includes('throw')) tableKey = 'throwables';
+    else if (catLower.includes('quest') || depLower.includes('quest') || !isUsable) tableKey = 'quest';
     else if (isMacroScale) {
         const roll = Math.random();
         tableKey = roll < 0.4 ? 'weapons' : roll < 0.7 ? 'armors' : roll < 0.9 ? 'accessories' : 'consumables';
@@ -645,15 +647,15 @@ export const forgeRandomItem = (
         
         if (!forcedType) {
             if (isThrowable) {
-                // Throwables are strictly offensive: Damage or Status
-                forcedType = Math.random() > 0.6 ? 'Damage' : 'Status';
+                // Let generateMechanicalEffect handle the 80/20 split by default
             } else if (isConsumable) {
                 // Consumables are generally supportive or utility: Heal or Status
                 forcedType = Math.random() > 0.5 ? 'Heal' : 'Status';
             }
         }
         
-        const mech = generateMechanicalEffect(finalRarity, forcedType, (isConsumable || isThrowable));
+        const forcedTargetType = baseItemData.effect?.targetType;
+        const mech = generateMechanicalEffect(finalRarity, forcedType, (isConsumable || isThrowable), forcedTargetType);
         if (mech) { 
             effect = mech.effect; 
             usage = mech.usage; 

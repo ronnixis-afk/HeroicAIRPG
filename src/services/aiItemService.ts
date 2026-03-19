@@ -241,30 +241,30 @@ export const generateStoreCategoryInventory = async (category: string, blueprint
     const isMacroScale = scale.toLowerCase().includes('ship') || scale.toLowerCase().includes('mount') || category.toLowerCase().includes('ship') || category.toLowerCase().includes('mount');
     const scaleContext = isMacroScale ? `Vessel/Beast-Scale Component (${scale}). Render names and flavor for large-scale entities. For Ships: Hull, Batteries, Sensors, Thrusters. For Mounts: Barding, Saddles, Harnesses, Talons.` : 'Personnel-Scale gear.';
 
-    const input = `You are a merchant for "${category}". Skin these store items using the world lore for flavor.
+    const input = `[IDENTITY]
+    You are the Narrator and Shopkeeper of a high-fidelity AI RPG.
+    Your goal is to provide thematic 'skins' (names and descriptions) for a shipment of items in a store.
     
-    [WORLD LORE]
-    ${worldSummary}
+    [CONTEXT]
+    Setting: ${worldSummary}
+    Category: ${category}
+    Scale: ${scaleContext}
     
-    [SCALE CONTEXT]
-    ${scaleContext}
+    [INPUT DATA]
+    ${JSON.stringify(itemsContext, null, 2)}
 
-    [STOCK BLUEPRINTS]
-    ${JSON.stringify(itemsContext)}
-    
-    [THEMATIC INTEGRITY INSTRUCTIONS]
-    You MUST ensure the Name and Description of each item are logical representations of its Mechanical Details.
-    1. RANGE: If a weapon is 'Ranged', do NOT name it a 'Baton', 'Sword', or 'Mace'. Name it a 'Throwing Star', 'Blaster', 'Sling', 'Bow', etc.
-    2. WEIGHT: A 'Heavy Weight' item should sound massive and powerful (e.g. Greatsword, Cannon). A 'Light Weight' item should sound compact or surgical (e.g. Dagger, Pistol).
-    3. ATTRIBUTE: If a weapon is 'Dexterity-scaling', focus on precision, speed, and finesse in the name/flavor. If 'Strength-scaling', focus on brute impact, weight, and destructive force.
-    4. DAMAGE TYPE: Ensure the name fits the damage type (e.g., 'Bludgeoning' -> Hammer/Club/Staff, 'Slashing' -> Blade/Axe, 'Piercing' -> Spear/Rapier/Dart).
-    5. ENHANCEMENTS & BUFFS: Look for 'Enhancement' or '[Passives]' in the 'mechanicalDetails'. You MUST reflect this quality. High-rarity items with bonuses should sound 'Exceptional', 'Master-Crafted', or 'Blessed'. The description should mention how the item feels superior to its mundane counterparts.
+    [MECHANICAL GUIDELINES]
+    1. RELIABILITY: Items have specific 'mechanicalDetails'. 
+    2. NAMES/DESCRIPTIONS: You MUST ensure the Name and Description of each item are logical representations of its Mechanical Details.
+    3. THEMATIC FIT: Ensure names fit the category (${category}) and setting.
+    4. ACTIVE POWER: If 'mechanicalDetails' mentions an [Active Power] (e.g., 12d6 Fire damage or DC 17), the item's name and description MUST reflect this potency. A 12d6 item should sound legendary or highly destructive, while a 1d6 item sounds common.
+    5. ENHANCEMENTS: Look for 'Enhancement' in the 'mechanicalDetails'. You MUST reflect this quality.
 
     [INSTRUCTIONS]
-    Provide thematic names and atmospheric descriptions (MAX 20 WORDS) for each item index.
-    STRICT RULE: DO NOT include numerical stats (e.g. "+1", "AC 15") in 'name' or 'description'.
+    Provide thematic names and atmospheric descriptions (MAX 15 WORDS) for each item index.
+    STRICT RULE: DO NOT include numerical stats (e.g. "+1", "12d6", "DC 17") in 'name' or 'description'. Use descriptive adjectives instead (e.g., "Devastating", "God-touched", "Venom-slicked").
     
-    Return JSON: [{ index, name, description, details }]`;
+    Return JSON: [{ "index": number, "name": "string", "description": "string", "details": "string" }]`;
 
     try {
         const ai = getAi();
