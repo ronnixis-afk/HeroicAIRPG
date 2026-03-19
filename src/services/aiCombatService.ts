@@ -296,9 +296,9 @@ export const generateLoot = async (enemies: CombatActor[], gameData: GameData, l
     ${currencyInfo}
 
     [INSTRUCTIONS]
-    1. For each Slot, create a **Name** and a **Flavor Description** (MAX 20 WORDS) that fits the 'Dropped By' enemy and the 'Mechanical Blueprint' provided.
+    1. For each Slot, create a **Name** and a **Flavor Description** (MAX 20 WORDS) that fits the 'Dropped By' enemy and the 'Mechanical Blueprint' provided. **RULE**: If the item is NOT a consumable or throwable, the description MUST include the name of the enemy it was looted (e.g. 'A radiant longsword that once belonged to [enemy name]. It hums with holy energy...').
     2. **DO NOT CHANGE THE MECHANICS**. The Blueprint is absolute truth.
-    3. If a blueprint mentions "Weapon", "Armor", etc., your flavor text must reflect that item type.
+    3. **UTILITY ITEMS**: For Uncommon+ Utility items, use evocative gadget/artifact names (e.g. "Plasma Cannon", "Wand of Light"). Keep the charge-based usage (per rest) provided in the blueprint. These are NOT consumed on use.
     4. If there is currency, add ONE item entry named "${lootPlan.currencyName}" with quantity ${lootPlan.totalCurrency} and tag "currency".
     
     Return JSON array: [{ name, description, rarity, tags, price, quantity, weaponStats, armorStats, buffs, effect, usage }]

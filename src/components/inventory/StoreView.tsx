@@ -195,11 +195,6 @@ const StoreView: React.FC = () => {
         (i.price || 0) > 0
     );
 
-    // Count Unidentified
-    const unidentifiedCount = allItemsForSale.filter(i =>
-        i.tags?.includes('unidentified') ||
-        (i.name && i.name.toLowerCase().includes('unidentified'))
-    ).length;
 
     const handleBuyClick = (item: StoreItem) => {
         setSelectedItem(item);
@@ -339,21 +334,6 @@ const StoreView: React.FC = () => {
                                 </div>
                             </div>
 
-                            {unidentifiedCount > 0 && (
-                                <div className="mb-3 p-4 bg-brand-accent/5 border border-brand-accent/20 rounded-2xl flex justify-between items-center animate-page">
-                                    <div className="text-body-sm font-medium text-brand-text">
-                                        <span className="font-black text-brand-accent">{unidentifiedCount}</span> unidentified item{unidentifiedCount !== 1 ? 's' : ''}.
-                                    </div>
-                                    <button
-                                        onClick={handleIdentify}
-                                        disabled={isLoading}
-                                        className="btn-primary btn-sm gap-2 shadow-sm"
-                                    >
-                                        {isLoading ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="search" className="w-4 h-4" />}
-                                        Identify & appraise
-                                    </button>
-                                </div>
-                            )}
 
                             {sellableItems.length > 0 ? (
                                 <div className="space-y-2">
@@ -368,7 +348,6 @@ const StoreView: React.FC = () => {
                             ) : (
                                 <div className="text-center py-12 text-brand-text-muted italic border-2 border-dashed border-brand-primary/30 rounded-2xl bg-brand-surface/20">
                                     <p className="text-body-base">Nothing valuable found in your backpack.</p>
-                                    {unidentifiedCount > 0 && <p className="text-body-sm mt-1 opacity-60">Identify your loot to reveal its market value.</p>}
                                 </div>
                             )}
                         </div>

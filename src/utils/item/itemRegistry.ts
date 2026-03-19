@@ -140,6 +140,11 @@ export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
         { name: 'Thieves\' Tools', tags: ['utility'], description: 'Picks, wrenches, and files.' },
         { name: 'Healer\'s Kit', tags: ['utility', 'consumable'], description: 'Bandages and salves. 10 uses.', usage: { type: 'charges', maxUses: 10, currentUses: 10 }, effect: { type: 'Heal', healDice: '1', targetType: 'Single' } },
         { name: 'Spyglass', tags: ['utility'], description: 'Magnifies objects.' },
+        { name: 'Wand', tags: ['utility'], description: 'A slender wooden rod carved with runes.' },
+        { name: 'Heavy Ordnance', tags: ['utility', 'heavy'], description: 'A massive shoulder-mounted weapon system.' },
+        { name: 'Occult Mask', tags: ['utility'], description: 'A bone mask that feels cold to the touch.' },
+        { name: 'Tech Gauntlet', tags: ['utility'], description: 'A metallic glove covered in glowing circuits.' },
+        { name: 'Energy Projector', tags: ['utility'], description: 'A sleek device that focalizes power.' },
     ],
     throwables: [
         { name: 'Alchemist\'s Fire', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '1d4', damageType: 'Fire', targetType: 'Single' } },

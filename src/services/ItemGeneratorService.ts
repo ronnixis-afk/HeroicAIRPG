@@ -277,7 +277,8 @@ export const generateMechanicalEffect = (
     rarity: string, 
     forcedType?: 'Damage' | 'Status' | 'Heal', 
     isConsumable: boolean = false,
-    forcedTargetType?: TargetType
+    forcedTargetType?: TargetType,
+    isUtility?: boolean
 ): { effect: AbilityEffect, usage: AbilityUsage } | null => {
     const d = (n: number) => Math.floor(Math.random() * n) + 1;
     
@@ -300,6 +301,13 @@ export const generateMechanicalEffect = (
         case 'Very Rare': damage = '12d6'; heal = '12d8+24'; dc = 17; break;
         case 'Legendary': damage = '20d6'; heal = '120'; dc = 19; break;
         case 'Artifact': damage = '24d6'; heal = '250'; dc = 21; break;
+    }
+
+    if (isUtility) {
+        if (rarity === 'Common') uses = 1;
+        else if (rarity === 'Uncommon') uses = d(3);
+        else if (rarity === 'Rare') uses = d(4);
+        else uses = d(6);
     }
 
     const damageType = DAMAGE_TYPES[Math.floor(Math.random() * DAMAGE_TYPES.length)];
@@ -329,11 +337,17 @@ export const generateMechanicalEffect = (
         effect.duration = d(3) + 1; // 2-4 rounds
     }
 
-    return {
-        effect,
-        usage: { type: 'charges', maxUses: uses, currentUses: uses }
-    };
-};
+    const usage: AbilityUsage = isUtility 
+        ? { type: Math.random() > 0.6 ? 'per_long_rest' : 'per_short_rest', maxUses: uses, currentUses: uses }
+        : { type: 'charges', maxUses: uses, currentUses: uses };
+
+    if (isUtility && usage.type === 'per_long_rest') {
+        usage.maxUses = Math.max(1, Math.floor(uses / 2));
+        usage.currentUses = usage.maxUses;
+    }
+
+    return { effect, usage };
+}
 
 export const generateSystemModifiers = (rarity: string, typeHint: string = 'other', skillConfig: SkillConfiguration = 'Fantasy', slotHint?: BodySlot): string[] => {
     if (typeHint === 'quest' || typeHint === 'throwable') return [];
@@ -477,7 +491,7 @@ export const forgeRandomItem = (
     slotHint?: BodySlot,
     scaleHint?: string,
     departmentHint?: string,
-    isIdentified: boolean = false,
+    isIdentified: boolean = true,
     isUsable: boolean = true
 ): Item => {
     let tableKey = 'consumables';
@@ -580,8 +594,13 @@ export const forgeRandomItem = (
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
+    const isUtility = (baseItemData.tags || []).some((t: string) => t.toLowerCase() === 'utility') && !isConsumable;
+    
+    // DECISION: Should this utility item be active? (Uncommon+ utilities have high chance to be active)
+    const isActiveUtility = isUtility && finalRarity !== 'Common' && Math.random() > 0.3;
+
     const hasAnyExistingEffect = baseHasEffect || hasRolledStatBuff || baseHasBuffs;
-    const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect);
+    const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect) || (isActiveUtility && !hasAnyExistingEffect);
 
     if (shouldGenerateDynamicEffect) {
         let forcedType = baseItemData.effect?.type as 'Heal' | 'Status' | 'Damage' | undefined;
@@ -589,17 +608,22 @@ export const forgeRandomItem = (
         if (!forcedType) {
             if (isThrowable) {
                 // Keep default distribution
-            } else if (isConsumable) {
-                forcedType = Math.random() > 0.5 ? 'Heal' : 'Status';
+            } else if (isConsumable || isActiveUtility) {
+                const roll = Math.random();
+                forcedType = roll < 0.4 ? 'Heal' : (roll < 0.8 ? 'Damage' : 'Status');
             }
         }
         
         const forcedTargetType = baseItemData.effect?.targetType;
-        const mech = generateMechanicalEffect(finalRarity, forcedType, (isConsumable || isThrowable), forcedTargetType);
+        const mech = generateMechanicalEffect(finalRarity, forcedType, isConsumable || isThrowable, forcedTargetType, isUtility);
         if (mech) { 
             effect = mech.effect; 
             usage = mech.usage; 
         }
+    } else if (isActiveUtility && hasAnyExistingEffect && !usage) {
+        // It has buffs/modifiers but no effect yet - give it usage charges anyway
+        const mech = generateMechanicalEffect(finalRarity, undefined, false, undefined, true);
+        if (mech) usage = mech.usage;
     }
 
     const finalTags = [...(baseItemData.tags || [])];
@@ -614,7 +638,7 @@ export const forgeRandomItem = (
         isNew: true,
         weaponStats: isWeapon && baseItemData.weaponStats ? JSON.parse(JSON.stringify(baseItemData.weaponStats)) : undefined,
         armorStats: isArmor && baseItemData.armorStats ? JSON.parse(JSON.stringify(baseItemData.armorStats)) : undefined,
-        buffs: (isConsumable || isThrowable) && effect ? [] : (baseItemData.buffs ? JSON.parse(JSON.stringify(baseItemData.buffs)) : []),
+        buffs: (isConsumable || isThrowable || isActiveUtility) && (effect || usage) ? [] : (baseItemData.buffs ? JSON.parse(JSON.stringify(baseItemData.buffs)) : []),
         tags: finalTags,
         effect: effect || (baseItemData.effect ? JSON.parse(JSON.stringify(baseItemData.effect)) : undefined),
         usage: usage || (baseItemData.usage ? JSON.parse(JSON.stringify(baseItemData.usage)) : undefined),
@@ -624,16 +648,13 @@ export const forgeRandomItem = (
     rolledStatBuffs.forEach(modStr => {
         const parsed = parseModifierString(modStr);
         if (parsed) {
-            applyModifierToItem(item, parsed.type, parsed.value, parsed.subOption, isConsumable ? 'Active' : 'Passive');
+            applyModifierToItem(item, parsed.type, parsed.value, parsed.subOption, (isConsumable || isActiveUtility) ? 'Active' : 'Passive');
         }
     });
 
     if (isIdentified || isQuest) {
         item.name = item.name || blueprintTemplateName;
         item.description = item.description || 'A unique discovery.';
-    } else {
-        item.description = 'Needs appraisal.';
-        item.name = 'Unidentified Item';
     }
 
     item.tags = inferTagsFromStats(item);
@@ -770,9 +791,14 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     - Throwables must ONLY use 'Damage' or 'Status' effect types (NEVER 'Heal').
     - PRICING: Consumables and Throwables are priced at 10% of standard market rates for their rarity.
 
+    **STRICT POLICY - UTILITY ITEMS**:
+    - High-Tier (Uncommon+) Utility items are often gadgets, artifacts, or wands.
+    - They are NOT consumed on use. They MUST use 'per_short_rest' or 'per_long_rest' for their 'usage'.
+    - Use evocative names for these gadgets (e.g. "Plasma Cannon", "Wand of Light", "Occult Mask").
+
     **INSTRUCTIONS**:
     - **PRICING**: Use logical market rates. Remember the 90% discount for consumables/throwables. If it is a quest item, set price to 0.
-    - **DESCRIPTION**: Atmospheric flavor text. MUST be under 20 words.
+    - **DESCRIPTION**: Atmospheric flavor text. MUST be under 20 words. **RULE**: If the item is NOT a consumable or throwable, the description MUST include the name of the enemy it was looted from (e.g. 'A radiant longsword that once belonged to [enemy name]. It hums with holy energy...').
     - **DETAILS**: Longer lore and history details (if applicable).
     - **STRICT RULE**: DO NOT include numerical stats (e.g. "AC 3", "+1") in the 'name' or 'description'. Use pure flavor.
     - **BODY SLOT**: Select logical slot. For non-gear, set bodySlotTag to null.

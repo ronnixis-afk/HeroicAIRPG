@@ -307,49 +307,17 @@ export const useInventoryActions = (
     }, [dispatch]);
 
     const identifyAndAppraiseItems = useCallback(async (): Promise<number> => {
-         if(!gameData) return 0;
-         
-         const allCarried = gameData.playerInventory.carried;
-         const allEquipped = gameData.playerInventory.equipped;
-         const allStorage = gameData.playerInventory.storage;
-         
-         const unidentified = [...allCarried, ...allEquipped, ...allStorage].filter(i => 
-             i.tags?.includes('unidentified') || 
-             (i.name && i.name.toLowerCase().includes('unidentified'))
-         );
-         
-         if (unidentified.length === 0) {
-             dispatch({ 
-                type: 'ADD_MESSAGE', 
-                payload: { 
-                    id: `sys-ident-none-${Date.now()}`, 
-                    sender: 'system', 
-                    content: `No unidentified items found in inventory.`, 
-                    type: 'neutral' 
-                } 
-            });
-             return 0;
-         }
-         
-         const identifiedItems = await identifyItems(unidentified, gameData);
-         
-         identifiedItems.forEach((item: Item) => {
-             dispatch({ type: 'UPDATE_ITEM', payload: { item, ownerId: 'player' } });
-         });
-         
          dispatch({ 
             type: 'ADD_MESSAGE', 
             payload: { 
-                id: `sys-ident-${Date.now()}`, 
+                id: `sys-ident-all-${Date.now()}`, 
                 sender: 'system', 
-                content: `Identified ${identifiedItems.length} items.`, 
-                type: 'positive' 
+                content: `All items are already identified and appraised.`, 
+                type: 'neutral' 
             } 
         });
-        
-        return identifiedItems.length;
-
-    }, [gameData, dispatch]);
+        return 0;
+    }, [dispatch]);
 
     const priceUnpricedItems = useCallback(async () => {
         if (!gameData) return;

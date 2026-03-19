@@ -144,6 +144,37 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 );
             }
 
+            // --- RECHARGE ITEMS ---
+            const rechargeInventory = (inv: Inventory): Inventory => {
+                const updateItem = (item: Item) => {
+                    if (!item.usage) return item;
+                    const isShort = item.usage.type === 'per_short_rest';
+                    const isLong = item.usage.type === 'per_long_rest';
+                    if (type === 'long' && (isShort || isLong)) {
+                        return new Item({ ...item, usage: { ...item.usage, currentUses: item.usage.maxUses } });
+                    }
+                    if (type === 'short' && isShort) {
+                        return new Item({ ...item, usage: { ...item.usage, currentUses: item.usage.maxUses } });
+                    }
+                    return item;
+                };
+
+                return {
+                    ...inv,
+                    equipped: inv.equipped.map(updateItem),
+                    carried: inv.carried.map(updateItem),
+                    storage: inv.storage.map(updateItem),
+                    assets: inv.assets.map(updateItem),
+                };
+            };
+
+            const newPlayerInventory = rechargeInventory(state.playerInventory);
+            
+            const newCompanionInventories = { ...state.companionInventories };
+            Object.keys(newCompanionInventories).forEach(id => {
+                newCompanionInventories[id] = rechargeInventory(newCompanionInventories[id]);
+            });
+
             const newCompanions = state.companions.map(c => {
                 const heal = companionHeals[c.id] || 0;
                 const compInventory = state.companionInventories[c.id] || { equipped: [], carried: [], storage: [], assets: [] };
@@ -185,7 +216,9 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 ...state,
                 currentTime: newTime,
                 playerCharacter: newPlayer,
+                playerInventory: newPlayerInventory,
                 companions: newCompanions,
+                companionInventories: newCompanionInventories,
                 npcs: decayCorpses(state.npcs, state.mapZones, newTime)
             };
 

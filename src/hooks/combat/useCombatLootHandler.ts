@@ -36,10 +36,8 @@ export const useCombatLootHandler = (
             } else {
                const lootItems = lootPlan.slots.map(slot => {
                    const item = new Item(slot.blueprint);
-                   item.name = `Unidentified Item`;
-                   item.description = "A mysterious artifact of unknown power. Needs appraisal.";
+                   item.name = item.name || slot.blueprint.name;
                    if (!item.tags) item.tags = [];
-                   item.tags.push('unidentified');
                    return item;
                });
 
