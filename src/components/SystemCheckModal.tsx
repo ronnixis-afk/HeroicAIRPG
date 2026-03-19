@@ -254,7 +254,7 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
                 {/* Categories */}
                 {Object.entries(CHECKS).map(([category, checks]) => (
                     <div key={category} className="bg-brand-surface/40 p-4 rounded-2xl border border-brand-primary shadow-sm">
-                        <h2 className="text-body-base font-black text-brand-accent mb-3 px-1 border-b border-brand-accent/10 pb-2">{category}</h2>
+                        <h4 className="text-body-base font-black text-brand-accent mb-3 px-1 border-b border-brand-accent/10 pb-2">{category}</h4>
                         <div className="space-y-1">
                             {checks.map(check => (
                                 <CheckItem 

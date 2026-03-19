@@ -31,7 +31,7 @@ export const InventoryList: React.FC<InventoryListProps> = ({
     onUnequipRequest 
 }) => (
     <div className="mb-12">
-        <h2 className="text-brand-text mb-1 text-center tracking-tight">{title}</h2>
+        <h4 className="text-brand-text mb-1 text-center tracking-tight">{title}</h4>
         <p className="text-body-sm text-brand-text-muted mb-6 pb-2 border-b border-brand-primary/10 text-center italic font-medium">{description}</p>
         {items.length > 0 ? (
             <div className="space-y-1">

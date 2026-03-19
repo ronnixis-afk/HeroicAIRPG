@@ -43,7 +43,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                 <div className="w-16 h-16 rounded-full bg-brand-danger/10 flex items-center justify-center mb-6 border border-brand-danger/20">
                     <Icon name="danger" className="w-8 h-8 text-brand-danger" />
                 </div>
-                <h2>Combat Active</h2>
+                <h3>Combat Active</h3>
                 <p className="text-body-base text-brand-text-muted mb-8 max-w-xs">
                     You cannot rest or wait while in danger!
                 </p>
@@ -68,7 +68,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between items-start">
                         <div className="flex-1 pr-4">
-                            <h2>Short Rest (1 hour)</h2>
+                            <h4>Short Rest (1 hour)</h4>
                             <p className="text-body-sm text-brand-text-muted leading-relaxed">Recovers 1d8 Hp per level and resets short rest abilities.</p>
                         </div>
                         <button
@@ -90,7 +90,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                 <div className="flex flex-col gap-4">
                     <div className="flex justify-between items-start">
                         <div className="flex-1 pr-4">
-                            <h2>Long Rest (8 hours)</h2>
+                            <h4>Long Rest (8 hours)</h4>
                             <p className="text-body-sm text-brand-text-muted leading-relaxed">Fully recovers Hp and resets all abilities.</p>
                         </div>
                         <button
@@ -111,7 +111,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
             <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface/50 shadow-inner transition-all hover:border-brand-accent/20">
                 <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-center">
-                        <h2>Wait</h2>
+                        <h4>Wait</h4>
                         <div className="bg-brand-bg/50 px-3 py-1 rounded-full border border-brand-surface shadow-sm">
                             <span className="text-body-base font-black text-brand-accent tabular-nums">{waitHours}</span>
                             <span className="text-[10px] font-bold text-brand-text-muted ml-1.5 opacity-60">Hours</span>

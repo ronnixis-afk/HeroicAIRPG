@@ -41,7 +41,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
     return (
         <div className="flex-1 flex flex-col overflow-hidden animate-fade-in">
             <div className="text-center mb-8 shrink-0">
-                <h2 className="text-2xl font-bold text-brand-text">The Tavern Bounty</h2>
+                <h3 className="text-2xl font-bold text-brand-text">The Tavern Bounty</h3>
                 <p className="text-xs text-brand-text-muted italic">Six willing souls await your command.</p>
             </div>
 

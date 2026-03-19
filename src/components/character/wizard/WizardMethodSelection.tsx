@@ -12,7 +12,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
         return (
             <div className="flex-1 flex flex-col items-center justify-start py-4 space-y-10 animate-fade-in px-1">
                 <div className="text-center space-y-2">
-                    <h2 className="text-3xl font-bold text-brand-text">Enlist an Ally</h2>
+                    <h3 className="text-3xl font-bold text-brand-text">Enlist an Ally</h3>
                     <p className="text-sm text-brand-text-muted italic px-4">Choose how you wish to welcome a new companion to the party.</p>
                 </div>
 
@@ -25,7 +25,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                             <Icon name="users" className="w-8 h-8 text-black" />
                         </div>
                         <div className="text-left">
-                            <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Recruit from Tavern</h3>
+                            <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Recruit from Tavern</h4>
                             <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Choose from pre-generated candidates with quirky backgrounds.</p>
                         </div>
                     </button>
@@ -38,7 +38,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                             <Icon name="hammer" className="w-8 h-8 text-brand-text" />
                         </div>
                         <div className="text-left">
-                            <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Forge Custom Hero</h3>
+                            <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Forge Custom Hero</h4>
                             <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Manually select every trait for a specific ally.</p>
                         </div>
                     </button>
@@ -57,7 +57,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
     return (
         <div className="flex-1 flex flex-col items-center justify-start py-4 space-y-10 animate-fade-in px-1">
             <div className="text-center space-y-2">
-                <h2 className="text-3xl font-bold text-brand-text">Welcome a Companion</h2>
+                <h3 className="text-3xl font-bold text-brand-text">Welcome a Companion</h3>
                 <p className="text-sm text-brand-text-muted italic px-4">Begin the process of expanding your party's capabilities.</p>
             </div>
 
@@ -70,7 +70,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                         <Icon name="character" className="w-8 h-8 text-black" />
                     </div>
                     <div className="text-left">
-                        <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Enlist an Ally</h3>
+                        <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Enlist an Ally</h4>
                         <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Bring a living companion or sentient hireling into your group.</p>
                     </div>
                 </button>
@@ -83,7 +83,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                         <Icon name="world" className="w-8 h-8 text-black" />
                     </div>
                     <div className="text-left">
-                        <h3 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Commission a Vessel</h3>
+                        <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Commission a Vessel</h4>
                         <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Design a non-sentient vessel, mount, or industrial vehicle.</p>
                     </div>
                 </button>

@@ -335,10 +335,10 @@ const InventoryView: React.FC = () => {
 
                 {unslottedEquipped.length > 0 && (
                     <div className="mt-4 p-4 border border-brand-danger/10 bg-brand-danger/5 rounded-xl animate-fade-in">
-                        <h2 className="mb-3 flex items-center gap-2">
+                        <h4 className="mb-3 flex items-center gap-2">
                             <Icon name="danger" className="w-4 h-4 text-brand-danger" />
                             Unassigned Equipment
-                        </h2>
+                        </h4>
                         <div className="grid grid-cols-4 gap-2">
                             {unslottedEquipped.map(item => (
                                 <InventoryGridItem

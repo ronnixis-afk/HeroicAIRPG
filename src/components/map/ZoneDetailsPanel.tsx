@@ -318,7 +318,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-8">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="mb-0 truncate">{toTitleCase(name || 'Uncharted Territory')}</h4>
+                                        <h3 className="mb-0 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">
                                                 {coordinates}

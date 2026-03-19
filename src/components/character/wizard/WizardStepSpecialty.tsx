@@ -14,9 +14,9 @@ export const WizardStepSpecialty: React.FC<WizardStepSpecialtyProps> = ({ isComp
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-brand-text">
+                <h4 className="text-2xl font-bold text-brand-text">
                     {isCompanion ? "What is their specialty?" : "How do you strike?"}
-                </h2>
+                </h4>
                 <p className="text-sm text-brand-text-muted italic">Define their primary starting prowess.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">

@@ -63,30 +63,30 @@
     @apply tracking-tight;
     font-family: var(--font-heading);
     font-weight: var(--heading-weight);
+    margin-bottom: 0;
   }
 
-  h1 { 
-    font-size: var(--h1-size);
-    @apply mb-4; 
-  }
-
-  h2 { 
-    font-size: var(--h2-size);
-    @apply mb-3; 
-  }
-
-  h3 { 
+  /* Main Titles (Capped at H3 size) */
+  h1, h2, h3 { 
     font-size: var(--h3-size);
-    @apply mb-4; 
+    font-family: var(--font-merriweather), serif;
+    font-weight: 700;
+    @apply mb-4;
   }
 
+  /* Sub-sections */
   h4 { 
     font-size: var(--h4-size);
+    font-family: var(--font-heading);
+    font-weight: var(--heading-weight);
     @apply mb-2; 
   }
 
+  /* Nested Sub-sections */
   h5 { 
     font-size: var(--h5-size);
+    font-family: var(--font-heading);
+    font-weight: var(--heading-weight);
     @apply mb-1; 
   }
 

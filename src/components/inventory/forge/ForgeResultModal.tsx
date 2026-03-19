@@ -41,7 +41,7 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                 ) : forgedItem ? (
                     <div className="w-full space-y-8 animate-fade-in">
                         <div className="text-center space-y-2">
-                            <h2 className="text-brand-accent leading-tight">{forgedItem.name}</h2>
+                            <h3 className="text-brand-accent leading-tight mb-2">{forgedItem.name}</h3>
                             <p className="text-body-base italic text-brand-text-muted px-4 leading-relaxed font-medium">"{forgedItem.description}"</p>
                         </div>
 

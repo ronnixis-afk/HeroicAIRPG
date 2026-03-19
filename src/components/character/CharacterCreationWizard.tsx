@@ -288,7 +288,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
             </div>
             <div className="text-center space-y-3 w-full max-w-xs">
-                <h2 className="text-lg font-bold text-brand-text">{weavingMessage}</h2>
+                <h3 className="text-lg font-bold text-brand-text">{weavingMessage}</h3>
                 <p className="text-xs text-brand-text-muted italic animate-pulse">
                     {isShip ? "Technical schematics are being finalized..." : (isCompanion ? "The architect is drafting your new ally..." : "The architect is weaving your legend into the world...")}
                 </p>

@@ -193,7 +193,7 @@ const WorldView: React.FC = () => {
 
                     const categoryTitle = (
                         <div className="flex items-center gap-2">
-                            <span className="text-brand-text tracking-tight font-black">{displayCategory}</span>
+                            <h4 className="text-brand-text tracking-tight font-black mb-0">{displayCategory}</h4>
                             {hasNew && <NewTag />}
                         </div>
                     );
@@ -216,7 +216,7 @@ const WorldView: React.FC = () => {
 
                                     const title = (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-body-lg font-bold">{entry.title}</span>
+                                            <h5 className="text-body-lg font-bold mb-0">{entry.title}</h5>
                                             {entry.isNew && <NewTag />}
                                         </div>
                                     );
