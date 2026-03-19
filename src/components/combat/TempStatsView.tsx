@@ -130,7 +130,7 @@ const TempStatsView: React.FC = () => {
                 <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-primary/30 mb-8 shadow-inner">
                     {availableActors.length > 0 ? (
                         <div className="space-y-4">
-                            <h3 className="text-center">Add to Fight</h3>
+                            <h4 className="mb-0 text-brand-accent">Enemies</h4>
                             <div className="flex flex-wrap gap-2 justify-center">
                                 {availableActors.map(actor => (
                                     <button 
@@ -145,6 +145,7 @@ const TempStatsView: React.FC = () => {
                         </div>
                     ) : (
                         <div className="text-center py-6 bg-brand-bg/50 rounded-2xl border border-dashed border-brand-primary/40">
+                            <h4 className="mb-0 text-brand-text">Encounter Stats</h4>
                             <p className="text-brand-text-muted text-body-sm italic">All available actors are currently in the fray.</p>
                         </div>
                     )}

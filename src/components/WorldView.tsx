@@ -257,7 +257,7 @@ const WorldView: React.FC = () => {
                         <div className="w-10 h-10 rounded-xl bg-brand-accent/10 flex items-center justify-center border border-brand-accent/20">
                             <Icon name="world" className="w-5 h-5 text-brand-accent" />
                         </div>
-                        <h2 className="text-brand-text mb-0">Realm Overview</h2>
+                        <h4 className="mb-0">Realm Overview</h4>
                     </div>
                     <button
                         onClick={handleGenerateSummary}
@@ -296,7 +296,7 @@ const WorldView: React.FC = () => {
 
             <div className="mt-16 pt-10 border-t border-brand-primary/20">
                 <div className="text-center mb-8">
-                    <h2 className="text-brand-text mb-2">Unveil Secrets</h2>
+                    <h4 className="mb-0">Unveil Secrets</h4>
                     <p className="text-body-base text-brand-text-muted italic max-w-sm mx-auto">
                         Ask the architect to describe specific aspects of the realm or hidden histories.
                     </p>

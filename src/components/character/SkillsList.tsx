@@ -34,7 +34,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
     return (
         <div className="animate-fade-in space-y-6">
             <div className="px-1">
-                <h2 className="text-brand-text mb-1">Character Skills</h2>
+                <h5 className="mb-0">Character Skills</h5>
                 <p className="text-body-sm text-brand-text-muted font-medium tracking-normal opacity-70">
                     Configuration: <span className="text-brand-accent font-bold">{config}</span>
                 </p>

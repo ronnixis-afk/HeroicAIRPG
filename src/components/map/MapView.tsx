@@ -154,10 +154,7 @@ const SectorManagerModal: React.FC<{
                                     ) : (
                                         <div>
                                             <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: sector.color }}></div>
-                                                    <h4 className="mb-0 text-brand-text">{sector.name}</h4>
-                                                </div>
+                                                    <h5 className="mb-0 text-brand-text">{sector.name}</h5>
                                                 <div className="flex gap-1">
                                                     <button onClick={() => startEdit(sector)} className="btn-icon p-1.5 text-brand-text-muted hover:text-brand-accent"><Icon name="edit" className="w-4 h-4" /></button>
                                                     <button onClick={() => onDelete(sector.id)} className="btn-icon p-1.5 text-brand-text-muted hover:text-brand-danger"><Icon name="trash" className="w-4 h-4" /></button>

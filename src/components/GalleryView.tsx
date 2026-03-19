@@ -226,6 +226,7 @@ const GalleryView: React.FC = () => {
                     </button>
 
                     <div className="relative w-full max-w-2xl h-full flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+                        <h4 className="mb-0">Documentation</h4>
                         <div className="w-full relative group flex flex-col items-center h-full">
                             {!selectedImageUrl ? (
                                 <div className="w-full h-full flex items-center justify-center">

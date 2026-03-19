@@ -63,9 +63,9 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
             <div className="flex justify-between items-start mb-2 relative z-10">
                 <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center flex-wrap gap-2">
-                        <h2 className={`text-body-lg font-bold truncate leading-tight transition-colors mb-0 ${isRefining ? 'text-brand-text-muted bg-brand-primary/30 animate-pulse rounded px-2 h-5 w-3/4' : 'text-brand-text group-hover:text-brand-accent'}`}>
+                        <h5 className={`text-body-lg font-bold truncate leading-tight transition-colors mb-0 ${isRefining ? 'text-brand-text-muted bg-brand-primary/30 animate-pulse rounded px-2 h-5 w-3/4' : 'text-brand-text group-hover:text-brand-accent'}`}>
                             {isRefining ? '' : (ability.name || 'Unnamed Ability')}
-                        </h2>
+                        </h5>
                         {ability.isLevelUpTrait && !isRefining && (
                             <span className="inline-flex items-center bg-brand-accent/10 text-brand-accent text-body-sm font-bold px-1.5 py-0.5 rounded border border-brand-accent/20">Trait Point</span>
                         )}
@@ -324,7 +324,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         <div className="animate-fade-in pb-12">
             <div className="mb-10 px-1">
                 <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-brand-text">Combat Behavior Tactics</h2>
+                    <h5 className="text-brand-text mb-0">Combat Behavior Tactics</h5>
                     <div className="relative group/tooltip flex items-center justify-center">
                         <div className="text-brand-text-muted hover:text-brand-text cursor-help p-0.5 rounded-full transition-colors opacity-60 hover:opacity-100">
                             <Icon name="info" className="w-5 h-5" />
@@ -341,7 +341,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
             <div className="flex justify-between items-center mb-6 px-1">
                 <div className="flex flex-col">
-                    <h2 className="text-brand-text mb-0">Class Features & Traits</h2>
+                    <h5 className="text-brand-text mb-0">Class Features & Traits</h5>
                     {metrics.total > 0 && (
                         <span className="text-body-sm font-bold text-brand-accent mt-1 tracking-normal">
                             Trait Points: {metrics.used} / {metrics.total}
@@ -464,9 +464,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                     >
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-2">
-                                                <h2 className={`text-body-base font-bold ${isOwned || isLocked ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
+                                                <h5 className={`text-body-base font-bold ${isOwned || isLocked ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
                                                     {trait.name}
-                                                </h2>
+                                                </h5>
                                                 {trait.requiredConfig && (
                                                     <span className="text-body-sm font-bold text-brand-accent bg-brand-accent/10 px-2 py-0.5 rounded-full border border-brand-accent/20">
                                                         {trait.requiredConfig}

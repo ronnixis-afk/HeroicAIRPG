@@ -191,7 +191,7 @@ const GmNotesView: React.FC = () => {
             {/* SECTION 0: THE GRAND DESIGN */}
             <div className="mb-12">
                 <div className="mb-4 text-center">
-                    <h2 className="text-brand-text mb-1">The Grand Design</h2>
+                    <h4 className="text-brand-text mb-0">The Grand Design</h4>
                     <p className="text-body-sm text-brand-text-muted">An generated compass that directs the overall plot.</p>
                 </div>
                 <div className="flex justify-center">
@@ -208,10 +208,10 @@ const GmNotesView: React.FC = () => {
             {/* SECTION 1: CURRENT PLOT */}
             <div className="mb-12">
                 <div className="flex flex-col items-center mb-4">
-                    <h3 className="text-brand-accent flex items-center gap-2 mb-0">
+                    <h4 className="text-brand-accent flex items-center gap-2 mb-0">
                         <Icon name="sparkles" className="w-5 h-5" /> 
                         Current Encounter Plot
-                    </h3>
+                    </h4>
                 </div>
                 
                 <div className="bg-brand-surface rounded-2xl border border-brand-primary shadow-xl overflow-hidden group">
@@ -232,7 +232,7 @@ const GmNotesView: React.FC = () => {
             {/* SECTION 2: THE WEB OF TRUTH */}
             <div>
                 <div className="mb-6 text-center">
-                    <h2 className="text-brand-text">The Web of Truth</h2>
+                    <h4 className="text-brand-text mb-0">The Web of Truth</h4>
                 </div>
 
                 {/* Input Area */}

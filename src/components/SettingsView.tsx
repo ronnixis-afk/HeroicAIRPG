@@ -274,7 +274,7 @@ const SettingsView: React.FC = () => {
                         </div>
 
                         <div className="pt-8 border-t border-brand-primary/20 space-y-4">
-                            <h2 className="text-center mb-4">Advanced Rules</h2>
+                            <h4 className="mb-0">Advanced Rules</h4>
                             <ToggleSwitch
                                 label="Auto-include Nearby NPCs"
                                 enabled={combatConfig.autoIncludeNearbyNpcs}
@@ -392,7 +392,7 @@ const SettingsView: React.FC = () => {
                         </div>
 
                         <div>
-                            <h2 className="text-center mb-6">Date and Time Override</h2>
+                            <h4 className="mb-0">Date and Time Override</h4>
                             <div className="bg-brand-primary/10 p-6 rounded-3xl border border-brand-surface shadow-inner flex flex-col gap-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -417,7 +417,7 @@ const SettingsView: React.FC = () => {
                         </div>
 
                         <div className="pt-6 border-t border-brand-primary/20">
-                            <h2 className="text-center mb-6">Documentation</h2>
+                            <h4 className="mb-0">Documentation</h4>
                              <div className="grid grid-cols-2 gap-4">
                                 <Button
                                     onClick={() => setIsDocModalOpen(true)}
@@ -439,7 +439,7 @@ const SettingsView: React.FC = () => {
                         <div className="border-t border-brand-primary/20 pt-10">
                             <div className="bg-brand-danger/5 border border-brand-danger/20 rounded-3xl p-6 space-y-6">
                                 <div className="text-center">
-                                    <h2 className="text-brand-danger mb-1 font-black">Danger Zone</h2>
+                                    <h4 className="text-brand-danger mb-0 font-black">Danger Zone</h4>
                                     <p className="text-body-sm text-brand-text-muted italic opacity-70">Irreversible actions that modify your save data.</p>
                                 </div>
                                  <Button
@@ -460,9 +460,9 @@ const SettingsView: React.FC = () => {
                 <div className="space-y-12 py-4 pb-12 custom-scroll max-h-[70vh]">
                     {DOCUMENTATION_FILES.map((doc, idx) => (
                         <section key={idx} className="animate-fade-in border-b border-brand-primary/10 pb-10 last:border-0" style={{ animationDelay: `${idx * 50}ms` }}>
-                            <h2 className="text-brand-accent mb-4">
+                            <h5 className="text-brand-accent mb-4">
                                 {doc.title}
-                            </h2>
+                            </h5>
                             <div className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap font-medium opacity-90">
                                 {doc.content}
                             </div>

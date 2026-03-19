@@ -125,7 +125,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {showHeroicPoints && (
                 <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner group">
                     <div className="flex justify-between items-center">
-                        <h2 className="mb-0 text-brand-text">Heroic Potential</h2>
+                        <h4 className="mb-0">Heroic Potential</h4>
                         <div className="flex flex-wrap gap-2.5">
                             {Array.from({ length: maxHeroic }).map((_, i) => (
                                 <div
@@ -185,7 +185,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Sliders for Player only */}
                 {!isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h2 className="text-brand-text mb-2">Alignment</h2>
+                        <h4 className="text-brand-text mb-2">Alignment</h4>
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
@@ -224,7 +224,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Dropdowns for Companions only */}
                 {isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h3 className="text-brand-text mb-2">Alignment</h3>
+                        <h5 className="mb-0 text-body-lg font-bold">Alignment</h5>
                         <div className="grid grid-cols-2 gap-4">
                             <SelectField
                                 label="Moral Alignment (Good/Evil)"

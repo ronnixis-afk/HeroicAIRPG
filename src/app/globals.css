@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), sans-serif;
-  --font-merriweather: var(--font-merriweather), serif;
+  --font-inter: var(--font-inter), sans-serif;
+  --font-heading: var(--font-inter);
+  --font-serif: var(--font-merriweather), serif;
+
+  --h1-size: 35px;
+  --h2-size: 29px;
+  --h3-size: 23px;
+  --h4-size: 19px;
+  --h5-size: 15px;
+  --heading-weight: 700;
 
   --text-xs: 11px;
   --text-xs--line-height: 15px;
@@ -43,6 +51,7 @@
 @layer base {
   body {
     @apply bg-brand-bg text-brand-text antialiased font-sans h-full overflow-hidden;
+    font-family: var(--font-inter);
   }
 
   html {
@@ -50,24 +59,35 @@
   }
 
   /* Typography System: 5 Header Sizes */
-  h1 {
-    @apply font-merriweather text-4xl font-bold tracking-tight mb-4;
+  h1, h2, h3, h4, h5 {
+    @apply tracking-tight;
+    font-family: var(--font-heading);
+    font-weight: var(--heading-weight);
   }
 
-  h2 {
-    @apply font-sans text-xl font-bold tracking-tight mb-3;
+  h1 { 
+    font-size: var(--h1-size);
+    @apply mb-4; 
   }
 
-  h3 {
-    @apply font-merriweather text-3xl font-bold tracking-tight mb-4;
+  h2 { 
+    font-size: var(--h2-size);
+    @apply mb-3; 
   }
 
-  h4 {
-    @apply font-sans text-lg font-bold tracking-tight mb-2;
+  h3 { 
+    font-size: var(--h3-size);
+    @apply mb-4; 
   }
 
-  h5 {
-    @apply font-sans text-base font-bold mb-1;
+  h4 { 
+    font-size: var(--h4-size);
+    @apply mb-2; 
+  }
+
+  h5 { 
+    font-size: var(--h5-size);
+    @apply mb-1; 
   }
 
   /* Normal Text System: 5 Sizes */

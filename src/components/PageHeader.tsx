@@ -18,10 +18,13 @@ interface PageHeaderProps {
     titleClassName?: string;
     /** Optional additional classes for the subtitle (p) */
     subtitleClassName?: string;
+    /** The heading level to use for the title (default: h3) */
+    titleAs?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5';
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
-    title, 
+    title,
+    titleAs: TitleTag = 'h3',
     subtitle, 
     children, 
     className = "",
@@ -30,9 +33,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
     return (
         <div className={`text-center mb-10 pb-6 border-b border-brand-primary/20 relative ${className}`}>
-            <h3 className={`text-brand-text mb-2 ${titleClassName}`}>
+            <TitleTag className={`text-brand-text mb-2 ${titleClassName}`}>
                 {title}
-            </h3>
+            </TitleTag>
             {subtitle && (
                 <p className={`text-body-sm text-brand-text-muted font-normal italic ${subtitleClassName}`}>
                     {subtitle}

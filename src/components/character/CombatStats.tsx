@@ -275,7 +275,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                     </div>
 
                     <div className="mt-8">
-                        <h3 className="text-brand-text mb-4 px-1">Engagement Summary</h3>
+                        <h5 className="mb-0">Engagement Summary</h5>
 
                         {isUnarmed && hasUnarmedStyle && (
                             <p className="text-body-sm text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20 animate-fade-in">
@@ -371,7 +371,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
             {!hideDefenses && (
                 <div className="space-y-6 pt-2 pb-2">
-                    <h3 className="text-brand-text mb-4 px-1">Resistances & Defenses</h3>
+                    <h5 className="mb-0">Resistances & Defenses</h5>
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 shadow-inner">
                         <div className="mb-6">
                             <label className="block text-body-sm font-black text-brand-text-muted mb-3">Immunities</label>

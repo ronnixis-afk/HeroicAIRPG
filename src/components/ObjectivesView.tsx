@@ -218,7 +218,7 @@ const ObjectivesView: React.FC = () => {
 
     const SectionHeader = ({ title, subtitle }: { title: string, subtitle?: string }) => (
         <div className="text-center mb-10">
-            <h2 className="text-brand-text">{title}</h2>
+            <h4 className="mb-0">{title}</h4>
             {subtitle && <p className="text-body-sm text-brand-text-muted mt-1 font-medium italic">{subtitle}</p>}
         </div>
     );

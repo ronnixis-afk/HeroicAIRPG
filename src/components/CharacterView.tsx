@@ -78,6 +78,7 @@ const CharacterView: React.FC = () => {
                         subtitle="Every great chronicle starts with a single name and a defined spirit." 
                         className="mb-12 border-none"
                         subtitleClassName="max-w-xs mx-auto leading-relaxed"
+                        titleAs="h4"
                     />
                     <button
                         onClick={() => setIsWizardOpen(true)}

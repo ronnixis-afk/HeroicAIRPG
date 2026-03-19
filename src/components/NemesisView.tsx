@@ -223,7 +223,7 @@ const NemesisView: React.FC = () => {
             
             <div className="mt-16 pt-10 border-t border-brand-primary/20">
                 <div className="text-center mb-8">
-                    <h2 className="text-brand-text mb-2">Forge a Rival</h2>
+                    <h4 className="mb-0 text-center">Forge a Rival</h4>
                     <p className="text-body-base text-brand-text-muted italic max-w-sm mx-auto leading-relaxed">
                         Describe the nature of your antagonist. The architect will manifest them within your story context.
                     </p>

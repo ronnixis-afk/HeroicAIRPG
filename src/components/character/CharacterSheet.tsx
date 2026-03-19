@@ -425,14 +425,14 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                             />
                         </div>
                         <div className="space-y-4">
-                            <h3 className="text-brand-text mb-2 px-1">Current status</h3>
+                                <h5 className="mb-0 text-body-lg font-bold">Current status</h5>
                             <StatusEffectsEditor
                                 statusEffects={charData.statusEffects || []}
                                 onStatusEffectsChange={(newEffects) => handleNestedChange(['statusEffects'], newEffects)}
                             />
                         </div>
                         <div className="space-y-4">
-                            <h3 className="text-brand-text mb-2 px-1">Active Buffs</h3>
+                            <h5 className="mb-0 text-body-lg font-bold">Active Buffs</h5>
                             <BuffsEditor
                                 activeBuffs={charData.activeBuffs || []}
                                 onBuffsChange={(newBuffs) => handleNestedChange(['activeBuffs'], newBuffs)}

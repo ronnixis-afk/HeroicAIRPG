@@ -318,7 +318,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-8">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="mb-3 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
+                                        <h4 className="mb-0 truncate">{toTitleCase(name || 'Uncharted Territory')}</h4>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">
                                                 {coordinates}
@@ -345,7 +345,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h4 className="text-brand-text mb-4 border-b border-brand-primary/10 pb-2 font-bold">Points Of Interest</h4>
+                                    <h5 className="mb-0">Points Of Interest</h5>
                                     <div className="space-y-1">
                                         {(isBackfilling || isDiscoveringLocale) && entries.length === 0 ? (
                                             <POIShimmer label={isDiscoveringLocale ? "Synthesizing site data..." : "Identifying landmarks..."} />

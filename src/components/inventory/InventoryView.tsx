@@ -257,7 +257,7 @@ const InventoryView: React.FC = () => {
 
             <div className="mb-10 mt-6 animate-fade-in">
                 <div className="flex flex-col items-center mb-6 px-1">
-                    <h2 className="mb-1 text-center">Equipped</h2>
+                    <h4 className="mb-0">Equipped</h4>
                     <p className="text-body-sm text-brand-text-muted text-center max-w-xs">
                         {isCombatActive ? "Combat is active. Equipment changes are restricted." : "Current equipment and modifications."}
                     </p>
