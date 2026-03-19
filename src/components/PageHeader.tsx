@@ -34,7 +34,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 {title}
             </h3>
             {subtitle && (
-                <p className={`text-body-tiny text-brand-text-muted font-normal italic ${subtitleClassName}`}>
+                <p className={`text-body-sm text-brand-text-muted font-normal italic ${subtitleClassName}`}>
                     {subtitle}
                 </p>
             )}
