@@ -33,17 +33,9 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     isPlayer,
     isShrunk = false
 }) => {
-    const radius = 34;
-    const circumference = 2 * Math.PI * radius;
     const hpRatio = maxHp > 0 ? currentHp / maxHp : 0;
     const hpPercent = Math.max(0, Math.min(1, hpRatio));
-    const strokeDashoffset = circumference * (1 - hpPercent);
-    
-    const tempHpRatio = maxTempHp > 0 ? tempHp / maxTempHp : 0;
-    const tempPercent = Math.max(0, Math.min(1, tempHpRatio));
-    const tempRadius = radius + 3;
-    const tempCircumference = 2 * Math.PI * tempRadius;
-    const tempDashoffset = tempCircumference * (1 - tempPercent);
+    const tempPercent = maxTempHp > 0 ? tempHp / maxTempHp : 0;
 
     const color = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
     const tempColor = '#38bdf8'; // Shield blue
@@ -55,52 +47,55 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
 
     return (
         <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 w-20 ${isShrunk ? 'gap-1' : 'gap-2'}`}>
-            <div className="relative">
+            <div className="relative w-full">
                 <button
                     onClick={onClick}
-                    title={`${name} (${currentHp}/${maxHp} HP)`}
-                    className={`relative flex flex-col items-center justify-center transition-all duration-300 ${
+                    title={`${name} (${currentHp}/${maxHp} Hp)`}
+                    className={`relative flex flex-col items-center justify-center transition-all duration-300 w-full ${
                         isActive ? 'scale-100 z-10' : 'opacity-80 hover:opacity-100 hover:scale-105'
-                    } ${isShrunk ? 'w-10 h-10' : 'w-20 h-20'}`}
+                    }`}
                 >
-                    <div className={`relative transition-all duration-300 ${isShrunk ? 'w-10 h-10' : 'w-20 h-20'}`}>
-                        <svg 
-                            className="absolute top-0 left-0 w-full h-full transform -rotate-90 drop-shadow-md z-10" 
-                            viewBox="0 0 80 80"
-                        >
-                            <circle cx="40" cy="40" r={radius} fill="transparent" stroke="#242424" strokeWidth="4" />
-                            <circle cx="40" cy="40" r={radius} fill="transparent" stroke={color} strokeWidth="4" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" className="transition-all duration-500 ease-out" />
-                            
-                            {/* Shield Ring (Temp HP) */}
-                            {maxTempHp > 0 && (
-                                <circle
-                                    cx="40"
-                                    cy="40"
-                                    r={tempRadius}
-                                    fill="transparent"
-                                    stroke={tempColor}
-                                    strokeWidth={1.5}
-                                    strokeDasharray={tempCircumference}
-                                    strokeDashoffset={tempDashoffset}
-                                    strokeLinecap="round"
-                                    className="transition-all duration-700 ease-out opacity-80"
-                                />
-                            )}
-                        </svg>
-
-                        <div className={`absolute rounded-full overflow-hidden flex items-center justify-center border-2 transition-all duration-300 ${isActive ? 'border-brand-text' : 'border-brand-primary'} bg-brand-surface ${isShrunk ? 'inset-[3px]' : 'inset-[6px]'} ${isDead ? 'grayscale brightness-50' : ''}`}>
-                             {imageUrl ? (
-                                <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-                            ) : (
+                    <div className={`relative transition-all duration-300 w-full aspect-square rounded-xl overflow-hidden border-2 bg-brand-surface ${isActive ? 'border-brand-text' : 'border-brand-primary'} ${isDead ? 'grayscale brightness-50' : ''}`}>
+                         {imageUrl ? (
+                            <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="flex items-center justify-center w-full h-full">
                                 <span className={`font-bold text-brand-text-muted transition-all duration-300 ${isShrunk ? 'text-body-micro' : 'text-xl'}`}>{initials.slice(0, 2)}</span>
-                            )}
-                            
-                            {isLowHp && (
-                                <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
-                            )}
-                        </div>
+                            </div>
+                        )}
+                        
+                        {isLowHp && (
+                            <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
+                        )}
                     </div>
                 </button>
+
+                {/* Health and Shield Bars */}
+                <div className={`mt-1.5 w-full px-1 ${isShrunk ? 'space-y-0.5' : 'space-y-1'}`}>
+                    {/* HP Bar */}
+                    <div className={`${isShrunk ? 'h-1' : 'h-1.5'} w-full bg-black/40 rounded-full overflow-hidden border border-white/5`}>
+                        <div 
+                            className="h-full transition-all duration-500 ease-out"
+                            style={{ 
+                                width: `${hpPercent * 100}%`,
+                                backgroundColor: color
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Shield Bar (Temp HP) */}
+                    {maxTempHp > 0 && (
+                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                style={{ 
+                                    width: `${tempPercent * 100}%`,
+                                    backgroundColor: tempColor
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
 
                 {!isPlayer && onToggleParty && !isShrunk && (
                     <button

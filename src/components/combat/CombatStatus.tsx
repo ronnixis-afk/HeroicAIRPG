@@ -26,18 +26,6 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
     const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
 
     const visualSize = isCurrentTurn ? 50 : 40;
-    const strokeWidth = 3;
-    const containerSize = visualSize + 12; // Increased to fit outer shield ring
-
-    const center = containerSize / 2;
-    const radius = (visualSize - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference * (1 - hpRatio);
-
-    const tempRadius = radius + 4;
-    const tempCircumference = 2 * Math.PI * tempRadius;
-    const tempDashoffset = tempCircumference * (1 - tempHpRatio);
-
     const ringColor = alignment === 'ally' ? '#3ecf8e' : (alignment === 'neutral' ? '#facc15' : '#ef4444');
     const tempColor = '#38bdf8'; // Brand Light Blue
     const initials = name.slice(0, 2);
@@ -51,58 +39,16 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
             className={`flex flex-col items-center justify-center transition-all duration-300 ${isCurrentTurn ? 'opacity-100 scale-100' : 'opacity-40 scale-100'}`}
             title={`${name} (${hp}/${maxHp} Hit Points)${tempHp > 0 ? ` + ${tempHp} Shield` : ''}`}
         >
-            <div className="relative" style={{ width: containerSize, height: containerSize, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {isCurrentTurn && (
-                    <div className="absolute inset-0 rounded-full bg-brand-accent/20 blur-md scale-110" />
-                )}
-
-                <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none" viewBox={`0 0 ${containerSize} ${containerSize}`}>
-                    {/* Health Ring */}
-                    <circle
-                        cx={center}
-                        cy={center}
-                        r={radius}
-                        fill="transparent"
-                        stroke="#242424"
-                        strokeWidth={strokeWidth}
-                    />
-                    <circle
-                        cx={center}
-                        cy={center}
-                        r={radius}
-                        fill="transparent"
-                        stroke={ringColor}
-                        strokeWidth={strokeWidth}
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        strokeLinecap="round"
-                        className="transition-all duration-500 ease-out"
-                    />
-
-                    {/* Outer Shield/Temp HP Ring */}
-                    {maxTempHp > 0 && (
-                        <circle
-                            cx={center}
-                            cy={center}
-                            r={tempRadius}
-                            fill="transparent"
-                            stroke={tempColor}
-                            strokeWidth={2}
-                            strokeDasharray={tempCircumference}
-                            strokeDashoffset={tempDashoffset}
-                            strokeLinecap="round"
-                            className="transition-all duration-700 ease-out opacity-80"
-                        />
+            <div className="relative flex flex-col items-center" style={{ width: visualSize }}>
+                <div className={`
+                    relative rounded-lg overflow-hidden flex items-center justify-center bg-brand-surface border transition-all aspect-square w-full
+                    ${isCurrentTurn ? 'border-brand-accent shadow-[0_0_15px_rgba(62,207,142,0.3)]' : 'border-brand-primary'}
+                    ${isDead ? 'grayscale brightness-50' : ''}
+                `}>
+                    {isCurrentTurn && (
+                        <div className="absolute inset-0 bg-brand-accent/10 animate-pulse pointer-events-none" />
                     )}
-                </svg>
 
-                <div
-                    className={`absolute rounded-full overflow-hidden flex items-center justify-center bg-brand-surface z-0 border border-brand-primary transition-all ${isDead ? 'grayscale brightness-50' : ''}`}
-                    style={{
-                        width: radius * 2,
-                        height: radius * 2
-                    }}
-                >
                     {imageUrl ? (
                         <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                     ) : (
@@ -116,9 +62,36 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
                     )}
                 </div>
 
+                {/* Health and Shield Bars */}
+                <div className="mt-1.5 w-full space-y-0.5">
+                    {/* HP Bar */}
+                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                            className="h-full transition-all duration-500 ease-out"
+                            style={{ 
+                                width: `${hpRatio * 100}%`,
+                                backgroundColor: ringColor
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Shield Bar (Temp HP) */}
+                    {maxTempHp > 0 && (
+                        <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                style={{ 
+                                    width: `${tempHpRatio * 100}%`,
+                                    backgroundColor: tempColor
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+
                 {hasStatus && (
                     <div
-                        className="absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-500 rounded-full border border-brand-bg z-20 shadow-sm"
+                        className="absolute top-[-2px] right-[-2px] w-2.5 h-2.5 bg-yellow-500 rounded-full border border-brand-bg z-20 shadow-sm"
                         title={statusEffects.map(e => e.name).join(', ')}
                     />
                 )}

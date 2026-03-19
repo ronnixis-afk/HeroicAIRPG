@@ -30,46 +30,39 @@ const TargetAvatar: React.FC<{
     isAlly: boolean;
 }> = ({ actor, isSelected, hpPercent, isAlly }) => {
     const size = 48;
-    const strokeWidth = 3;
-    const center = size / 2 + 4;
-    const totalSize = size + 8;
-    const radius = size / 2;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference * (1 - (hpPercent / 100));
-
     const ringColor = isAlly ? '#3ecf8e' : '#ef4444';
     const initials = actor.name.slice(0, 2);
     const imageUrl = (actor as any).imageUrl || (actor as any).image;
 
     return (
-        <div className={`relative transition-all duration-300 ${isSelected ? 'scale-110' : 'scale-100'}`} style={{ width: totalSize, height: totalSize }}>
-            <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90 z-10 pointer-events-none" viewBox={`0 0 ${totalSize} ${totalSize}`}>
-                <circle cx={center} cy={center} r={radius} fill="transparent" stroke="#1a1a1a" strokeWidth={strokeWidth} />
-                <circle
-                    cx={center}
-                    cy={center}
-                    r={radius}
-                    fill="transparent"
-                    stroke={ringColor}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={circumference}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    className="transition-all duration-500 ease-out"
-                />
-            </svg>
-            <div className={`absolute rounded-full overflow-hidden flex items-center justify-center bg-brand-surface border-2 transition-all ${isSelected ? 'border-white' : 'border-brand-primary'}`} style={{ width: size, height: size, top: 4, left: 4 }}>
+        <div className={`relative transition-all duration-300 flex flex-col items-center ${isSelected ? 'scale-110 z-20' : 'scale-100 z-10'}`} style={{ width: size }}>
+            <div className={`
+                relative rounded-xl overflow-hidden flex items-center justify-center bg-brand-surface border-2 transition-all w-full aspect-square
+                ${isSelected ? 'border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'border-brand-primary'}
+            `}>
                 {imageUrl ? (
                     <img src={imageUrl} alt={actor.name} className="w-full h-full object-cover" />
                 ) : (
-                    <span className={`font-black text-[8px] ${isAlly ? 'text-brand-accent' : 'text-brand-danger'}`}>{initials}</span>
+                    <span className={`font-black text-xs ${isAlly ? 'text-brand-accent' : 'text-brand-danger'}`}>{initials}</span>
+                )}
+
+                {isSelected && (
+                    <div className="absolute top-1 right-1 bg-brand-accent rounded-full p-0.5 z-20 shadow-lg border border-brand-bg animate-bounce-in">
+                        <Icon name="check" className="w-2 h-2 text-black" />
+                    </div>
                 )}
             </div>
-            {isSelected && (
-                <div className="absolute -top-1 -right-1 bg-brand-accent rounded-full p-0.5 z-20 shadow-lg border border-brand-bg animate-bounce-in">
-                    <Icon name="check" className="w-2.5 h-2.5 text-black" />
-                </div>
-            )}
+
+            {/* Health Bar */}
+            <div className="mt-1.5 w-full h-1 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                <div 
+                    className="h-full transition-all duration-500 ease-out"
+                    style={{ 
+                        width: `${hpPercent}%`,
+                        backgroundColor: ringColor
+                    }}
+                />
+            </div>
         </div>
     );
 };

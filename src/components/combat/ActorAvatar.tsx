@@ -26,16 +26,6 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
 
     const targetable = canBeTargeted(actor);
 
-    // SVG Calc
-    const radius = 36;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference * (1 - hpPercent);
-    const strokeWidth = 4;
-
-    const tempRadius = radius + 3;
-    const tempCircumference = 2 * Math.PI * tempRadius;
-    const tempDashoffset = tempCircumference * (1 - tempHpRatio);
-
     const ringColor = actor.alignment === 'ally' || actor.isAlly ? '#3ecf8e' : (actor.alignment === 'neutral' ? '#facc15' : '#ef4444');
     const tempColor = '#38bdf8'; // Brand Light Blue
     const initials = actor.name.slice(0, 2);
@@ -54,53 +44,22 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
             title={`${actor.name} (${currentHp}/${maxHp} Hp)${!targetable ? ' [Untargetable]' : ''}`}
         >
             <div className="relative w-20 h-20">
-                <svg className="absolute top-0 left-0 w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 80 80">
-                    <circle
-                        cx="40"
-                        cy="40"
-                        r={radius}
-                        fill="transparent"
-                        stroke="#1e1e1e"
-                        strokeWidth={strokeWidth}
-                    />
-                    <circle
-                        cx="40"
-                        cy="40"
-                        r={radius}
-                        fill="transparent"
-                        stroke={ringColor}
-                        strokeWidth={strokeWidth}
-                        strokeDasharray={circumference}
-                        strokeDashoffset={strokeDashoffset}
-                        strokeLinecap="round"
-                        className="transition-all duration-500 ease-out"
-                    />
-
-                    {/* Outer Shield/Temp HP Ring */}
-                    {maxTempHp > 0 && (
-                        <circle
-                            cx={40}
-                            cy={40}
-                            r={tempRadius}
-                            fill="transparent"
-                            stroke={tempColor}
-                            strokeWidth={2}
-                            strokeDasharray={tempCircumference}
-                            strokeDashoffset={tempDashoffset}
-                            strokeLinecap="round"
-                            className="transition-all duration-700 ease-out opacity-80"
-                        />
-                    )}
-                </svg>
-
                 <div className={`
-                    absolute inset-[6px] rounded-full overflow-hidden flex items-center justify-center border-2 transition-all
+                    absolute inset-0 rounded-xl overflow-hidden flex items-center justify-center border-2 transition-all
                     ${isActive ? 'border-brand-text' : 'border-brand-primary'}
                     bg-brand-surface ${isDefeated ? 'grayscale brightness-50' : ''}
                 `}>
-                    <div className={`text-xl font-black ${actor.alignment === 'ally' || actor.isAlly ? 'text-brand-accent' : (actor.alignment === 'neutral' ? 'text-yellow-400' : 'text-brand-danger')}`}>
-                        {initials}
-                    </div>
+                    {(actor as any).imageUrl || (actor as any).image ? (
+                        <img 
+                            src={(actor as any).imageUrl || (actor as any).image} 
+                            alt={actor.name} 
+                            className="w-full h-full object-cover" 
+                        />
+                    ) : (
+                        <div className={`text-xl font-black ${actor.alignment === 'ally' || actor.isAlly ? 'text-brand-accent' : (actor.alignment === 'neutral' ? 'text-yellow-400' : 'text-brand-danger')}`}>
+                            {initials}
+                        </div>
+                    )}
 
                     {isLowHp && (
                         <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
@@ -108,7 +67,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                 </div>
 
                 {hasStatus && (
-                    <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-500 rounded-full border-2 border-brand-bg shadow-sm z-20" />
+                    <div className="absolute top-[-2px] right-[-2px] w-4 h-4 bg-yellow-500 rounded-full border-2 border-brand-bg shadow-sm z-20" />
                 )}
 
                 {!targetable && (
@@ -118,15 +77,43 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                 )}
 
                 {actor.rank && actor.rank !== 'normal' && (
-                    <div className="absolute bottom-0 right-0 z-20">
+                    <div className="absolute top-[-2px] left-[-2px] z-20">
                         <div className={`w-3 h-3 rotate-45 border border-brand-bg ${actor.rank === 'boss' ? 'bg-brand-danger' : 'bg-blue-400'}`} />
                     </div>
                 )}
             </div>
 
-            <span className={`mt-2 text-body-tiny truncate max-w-[80px] ${isActive ? 'text-brand-text' : 'text-brand-text-muted'} ${!targetable ? 'italic' : ''}`}>
+            {/* Health and Shield Bars */}
+            <div className="mt-2 w-full space-y-1 px-1">
+                {/* HP Bar */}
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                        className="h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]"
+                        style={{ 
+                            width: `${hpPercent * 100}%`,
+                            backgroundColor: ringColor
+                        }}
+                    />
+                </div>
+                
+                {/* Shield Bar (Temp HP) */}
+                {maxTempHp > 0 && (
+                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                            className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(56,189,248,0.4)]"
+                            style={{ 
+                                width: `${tempHpRatio * 100}%`,
+                                backgroundColor: tempColor
+                            }}
+                        />
+                    </div>
+                )}
+            </div>
+
+            <span className={`mt-1 text-body-tiny truncate max-w-[80px] font-bold ${isActive ? 'text-brand-text' : 'text-brand-text-muted'} ${!targetable ? 'italic' : ''}`}>
                 {actor.name}
             </span>
+
         </button>
     );
 };
