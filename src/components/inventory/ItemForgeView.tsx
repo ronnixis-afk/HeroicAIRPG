@@ -44,8 +44,8 @@ const ItemForgeView: React.FC = () => {
     return (
         <div className="p-2 pt-4 max-w-2xl mx-auto pb-12 h-full flex flex-col">
             <div className="text-center mb-6 pb-4 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">Item Forge</h1>
-                <p className="text-body-base text-brand-text-muted font-medium italic">
+                <h3 className="text-brand-text mb-2">Item Forge</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     Create custom equipment infused with system power.
                 </p>
             </div>

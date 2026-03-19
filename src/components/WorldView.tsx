@@ -245,8 +245,8 @@ const WorldView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">Realm Codex</h1>
-                <p className="text-body-base text-brand-text-muted font-medium italic">
+                <h3 className="text-brand-text mb-2">Realm Codex</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     The history, myths, and facts that define this realm.
                 </p>
             </div>

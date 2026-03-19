@@ -1,6 +1,7 @@
 import React from 'react';
 import { GameData, CombatState } from '../../types';
 import { Icon } from '../Icon';
+import Button from '../Button';
 
 interface CombatControlsProps {
     gameData: GameData;
@@ -45,22 +46,26 @@ export const CombatControls: React.FC<CombatControlsProps> = ({ gameData, isLoad
             <div className="flex items-center justify-center gap-4">
                 {isManualTurn ? (
                     <>
-                        <button
+                        <Button
                             onClick={() => onManualAction(isPlayerTurn ? undefined : currentId)}
-                            className="btn-primary btn-md rounded-full px-8 gap-2 shadow-brand-accent/30 font-medium"
+                            variant="primary"
+                            size="md"
+                            className="rounded-full px-8"
+                            icon="sword"
                         >
-                            <Icon name="sword" className="w-5 h-5" />
                             Take Action {isCompanionTurn ? `(${actorName.replace("'s", "")})` : ''}
-                        </button>
+                        </Button>
                         {!isHandsFree && (
-                            <button
+                            <Button
                                 onClick={() => isPlayerTurn ? onAutoResolve() : onNpcTurn(currentId)}
-                                className="btn-secondary btn-md rounded-full px-6 gap-2 font-medium"
+                                variant="secondary"
+                                size="md"
+                                className="rounded-full px-6"
+                                icon="sparkles"
                                 title={isPlayerTurn ? "Auto-Resolve Round" : "Auto-Resolve Companion Turn"}
                             >
-                                <Icon name="sparkles" className="w-4 h-4" />
                                 Auto
-                            </button>
+                            </Button>
                         )}
                     </>
                 ) : (
@@ -71,13 +76,15 @@ export const CombatControls: React.FC<CombatControlsProps> = ({ gameData, isLoad
                             </div>
                         </div>
                     ) : (
-                        <button
+                        <Button
                             onClick={() => onNpcTurn(currentId)}
-                            className="btn-secondary btn-md rounded-full px-6 gap-2 text-brand-text border-brand-primary/50 font-medium"
+                            variant="secondary"
+                            size="md"
+                            className="rounded-full px-6"
+                            icon="play"
                         >
-                            <Icon name="play" className="w-3 h-3 text-brand-accent group-hover:scale-110 transition-transform" />
-                            <span>Play Turn</span>
-                        </button>
+                            Play Turn
+                        </Button>
                     )
                 )}
             </div>

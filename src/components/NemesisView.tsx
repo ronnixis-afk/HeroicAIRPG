@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { GameDataContext } from '../context/GameDataContext';
 import Accordion from './Accordion';
 import { Icon } from './Icon';
+import Button from './Button';
 import AutoResizingTextarea from './AutoResizingTextarea';
 import type { Nemesis } from '../types';
 
@@ -110,23 +111,26 @@ const EditableNemesisContent: React.FC<{
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-brand-primary/10">
-                <button 
+                <Button 
                     onClick={handleDelete}
-                    className="text-brand-danger hover:opacity-80 text-body-sm font-bold flex items-center gap-1.5 px-3 py-1.5 transition-all"
+                    variant="danger"
+                    size="sm"
+                    icon="trash"
                     aria-label={`Delete ${nemesis.title}`}
                 >
-                    <Icon name="trash" className="w-4 h-4" />
                     Delete
-                </button>
+                </Button>
                  <div className="flex items-center">
                     {isDirty && !saveSuccess && (
-                        <button
+                        <Button
                             onClick={handleSave}
-                            disabled={isSaving}
-                            className="btn-primary btn-md min-w-[120px]"
+                            isLoading={isSaving}
+                            variant="primary"
+                            size="md"
+                            className="min-w-[120px]"
                         >
-                            {isSaving ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Save changes'}
-                        </button>
+                            Save Changes
+                        </Button>
                     )}
                     {saveSuccess && (
                         <div className="text-brand-accent text-body-sm font-bold flex items-center gap-1.5">
@@ -180,8 +184,8 @@ const NemesisView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">Nemesis System</h1>
-                <p className="text-body-base text-brand-text-muted font-medium italic">
+                <h3 className="text-brand-text mb-2">Nemesis System</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     Persistent individuals or factions actively working against your party.
                 </p>
             </div>
@@ -238,17 +242,17 @@ const NemesisView: React.FC = () => {
                     </div>
                     
                     <div className="flex flex-col items-center">
-                        <button
+                        <Button
                             onClick={handleGenerate}
-                            disabled={!prompt.trim() || isGenerating}
-                            className="btn-primary btn-lg w-full max-w-xs gap-3 shadow-brand-accent/20"
+                            isLoading={isGenerating}
+                            disabled={!prompt.trim()}
+                            variant="primary"
+                            size="lg"
+                            className="w-full max-w-xs"
+                            icon="sparkles"
                         >
-                            {isGenerating ? (
-                                <><Icon name="spinner" className="w-5 h-5 animate-spin" /> Manifesting...</>
-                            ) : (
-                                <><Icon name="sparkles" className="w-5 h-5" /> Generate Nemesis</>
-                            )}
-                        </button>
+                            {isGenerating ? 'Manifesting...' : 'Generate Nemesis'}
+                        </Button>
                         {error && <p className="text-brand-danger text-[10px] font-bold mt-4 animate-pulse">{error}</p>}
                     </div>
                 </div>

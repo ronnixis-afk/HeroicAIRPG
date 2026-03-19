@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Button from './Button';
 
 const BACKGROUNDS = [
     '/login-bg.png',    // Fantasy
@@ -73,12 +74,15 @@ export default function LandingPage() {
                             Create, Play, Evolve
                         </p>
 
-                        <Link
+                        <Button
+                            as={Link}
                             href="/sign-in"
-                            className="bg-brand-accent hover:bg-brand-accent/80 text-black font-black text-lg py-4 px-10 rounded-full shadow-lg shadow-brand-accent/20 transition-all transform hover:scale-105"
+                            variant="primary"
+                            size="lg"
+                            className="text-lg py-5 px-12 rounded-full transform hover:scale-105 transition-all shadow-xl shadow-brand-accent/20"
                         >
                             Start Your Adventure
-                        </Link>
+                        </Button>
                     </div>
 
                     {/* News Section */}

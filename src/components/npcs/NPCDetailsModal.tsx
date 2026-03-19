@@ -5,6 +5,7 @@ import { type NPC, type CombatActorSize, type ArchetypeName, ARCHETYPE_NAMES, ty
 import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES, toTitleCase, getRaceColor, getGenderColor } from '../../utils/npcUtils';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { Icon } from '../../components/Icon';
+import Button from '../Button';
 import { DEFAULT_TEMPLATES, DEFAULT_AFFINITIES, getDifficultyParams, DifficultyPreset } from '../../utils/mechanics';
 import { GameDataContext } from '../../context/GameDataContext';
 import RelationshipBar from './RelationshipBar';
@@ -208,35 +209,40 @@ const NPCViewContent: React.FC<{
 
             {!npc.companionId && npc.status === 'Alive' && (
                 <div className="pt-8 border-t border-brand-primary/20 flex flex-col gap-6">
-                    <button
+                    <Button
                         onClick={onInvite}
-                        disabled={isRefining}
-                        className="btn-primary btn-lg rounded-2xl w-full shadow-brand-accent/20"
+                        isLoading={isRefining}
+                        variant="primary"
+                        size="lg"
+                        className="w-full"
+                        icon="character"
                     >
-                        <Icon name="character" className="w-5 h-5 mr-3" />
-                        {toTitleCase("Invite to Party")}
-                    </button>
+                        Invite to Party
+                    </Button>
 
-                    <button
+                    <Button
                         onClick={onEdit}
-                        className="btn-secondary btn-lg rounded-2xl w-full"
+                        variant="secondary"
+                        size="lg"
+                        className="w-full"
+                        icon="edit"
                     >
-                        <Icon name="edit" className="w-5 h-5 mr-3" />
-                        {toTitleCase("Edit Profile")}
-                    </button>
+                        Edit Profile
+                    </Button>
 
                     <div className="flex flex-col items-center gap-4">
                         <p className="text-body-sm text-brand-text-muted italic text-center px-4">
                             Incomplete profile? Use the weaver to fill in details based on your current story context.
                         </p>
-                        <button
+                        <Button
                             onClick={onManualRefine}
-                            disabled={isRefining}
-                            className="btn-secondary btn-md rounded-xl w-full max-w-xs text-xs"
+                            isLoading={isRefining}
+                            variant="secondary"
+                            className="w-full max-w-xs"
+                            icon="sparkles"
                         >
-                            {isRefining ? <Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> : <Icon name="sparkles" className="w-4 h-4 mr-2" />}
-                            {toTitleCase("Weave Missing Details")}
-                        </button>
+                            Weave Missing Details
+                        </Button>
                     </div>
                 </div>
             )}
@@ -538,27 +544,30 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                         </div>
                     )}
 
-                    <div className="flex justify-between items-center pt-10 border-t border-brand-primary/20 gap-4">
-                        <button
+                     <div className="flex justify-between items-center pt-10 border-t border-brand-primary/20 gap-4">
+                        <Button
                             onClick={handleDelete}
-                            className="btn-icon-delete px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2"
+                            variant="danger"
+                            icon="trash"
                         >
-                            <Icon name="trash" className="w-4 h-4" /> Purge
-                        </button>
+                            Purge Record
+                        </Button>
                         <div className="flex gap-3 flex-1">
-                            <button
+                            <Button
                                 onClick={() => setIsEditing(false)}
-                                className="btn-tertiary btn-md flex-1 rounded-xl"
+                                variant="tertiary"
+                                className="flex-1"
                             >
-                                {toTitleCase("Cancel")}
-                            </button>
-                            <button
+                                Cancel
+                            </Button>
+                            <Button
                                 onClick={handleSave}
                                 disabled={!isDirty}
-                                className="btn-primary btn-md flex-1 rounded-xl shadow-brand-accent/20"
+                                variant="primary"
+                                className="flex-1"
                             >
-                                {toTitleCase("Commit Changes")}
-                            </button>
+                                Commit Changes
+                            </Button>
                         </div>
                     </div>
                 </div>

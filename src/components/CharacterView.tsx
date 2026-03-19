@@ -72,8 +72,8 @@ const CharacterView: React.FC = () => {
                     <div className="w-32 h-32 rounded-full bg-brand-primary/20 flex items-center justify-center mb-8 border-2 border-dashed border-brand-accent/40 animate-pulse">
                         <Icon name="character" className="w-16 h-16 text-brand-accent opacity-40" />
                     </div>
-                    <h1 className="text-brand-text">Forge Your Legend</h1>
-                    <p className="text-body-base text-brand-text-muted mb-12 max-w-xs italic leading-relaxed">
+                    <h3 className="text-brand-text mb-2">Forge Your Legend</h3>
+                    <p className="text-size-4 text-brand-text-muted mb-12 max-w-xs font-normal italic leading-relaxed">
                         Every great chronicle starts with a single name and a defined spirit.
                     </p>
                     <button
@@ -85,8 +85,8 @@ const CharacterView: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <h2 className="text-brand-text mb-1 text-center">The Party</h2>
-                    <p className="text-center text-brand-text-muted mb-4 text-body-sm font-medium">Manage stats, abilities, and details for your party.</p>
+                    <h3 className="text-brand-text mb-1 text-center">The Party</h3>
+                    <p className="text-center text-brand-text-muted mb-4 text-size-4 font-normal italic">Manage stats, abilities, and details for your party.</p>
 
                     <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-4'}`}>
                         <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-2 pb-2 gap-4 justify-around`}>

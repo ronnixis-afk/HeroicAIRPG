@@ -219,7 +219,7 @@ const InventoryView: React.FC = () => {
     return (
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20 relative">
-                <h1 className="text-brand-text mb-2">Inventory</h1>
+                <h3 className="text-brand-text mb-2">Inventory</h3>
                 {isSelectionMode && (
                     <button
                         onClick={exitSelectionMode}
@@ -229,7 +229,7 @@ const InventoryView: React.FC = () => {
                         <Icon name="close" className="w-5 h-5" />
                     </button>
                 )}
-                <p className="text-body-base text-brand-text-muted font-medium italic">
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     Manage gear for yourself and your companions.
                 </p>
             </div>

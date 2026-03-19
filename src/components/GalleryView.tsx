@@ -163,10 +163,12 @@ const GalleryView: React.FC = () => {
 
     return (
         <div className="p-4 pt-8 max-w-3xl mx-auto pb-24">
-            <h1 className="text-center">Journey Gallery</h1>
-            <p className="text-body-base text-brand-text-muted text-center mb-12">
-                A visual record of your journey's most significant moments.
-            </p>
+            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
+                <h3 className="text-brand-text mb-2">Journey Gallery</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                    A visual record of your journey's most significant moments.
+                </p>
+            </div>
 
             {sortedGallery.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

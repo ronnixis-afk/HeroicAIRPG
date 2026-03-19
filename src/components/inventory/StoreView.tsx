@@ -229,8 +229,12 @@ const StoreView: React.FC = () => {
 
     return (
         <div className="p-4 pt-8 max-w-2xl mx-auto h-full flex flex-col">
-            <h1 className="text-center mb-1">Marketplace</h1>
-            <p className="text-body-base text-brand-text-muted mb-4 text-center font-medium italic">Buy and sell equipment and supplies.</p>
+            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
+                <h3 className="text-brand-text mb-2">Marketplace</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                    Buy and sell equipment and supplies.
+                </p>
+            </div>
 
             <div className="flex justify-center mb-4 bg-brand-surface p-1 rounded-2xl w-full max-w-xs mx-auto border border-brand-primary/30 shadow-sm">
                 <button

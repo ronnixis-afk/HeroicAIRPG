@@ -4,6 +4,7 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../context/GameDataContext';
 import type { NarrationVoice, ImageGenerationStyle } from '../types';
 import { Icon } from './Icon';
+import Button from './Button';
 import { IMAGE_GENERATION_STYLES } from '../constants';
 import { NARRATION_VOICES } from '../types';
 import { parseGameTime, formatGameTime } from '../utils/timeUtils';
@@ -246,8 +247,12 @@ const SettingsView: React.FC = () => {
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <h1 className="text-center mb-2">Settings</h1>
-            <p className="text-center text-brand-text-muted mb-10 text-body-base font-medium italic">Configure your adventure and game system.</p>
+            <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
+                <h3 className="text-brand-text mb-2">Settings</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                    Configure your adventure and game system.
+                </p>
+            </div>
 
             <div className="flex justify-center mb-10 bg-brand-primary p-1 rounded-2xl w-full max-w-xs mx-auto border border-brand-surface shadow-sm">
                 <TabButton label="Gameplay" isActive={activeTab === 'gameplay'} onClick={() => setActiveTab('gameplay')} />
@@ -331,12 +336,17 @@ const SettingsView: React.FC = () => {
                             <textarea value={settings} onChange={(e) => setSettings(e.target.value)} rows={6} className="w-full bg-brand-primary p-4 rounded-2xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-body-base leading-relaxed shadow-inner" />
                             <div className="flex justify-center items-center h-14 mt-4">
                                 {isSettingsDirty && !isSavingSettings && !saveSettingsSuccess && (
-                                    <button onClick={handleSaveSettings} className="btn-primary btn-md w-full rounded-xl shadow-lg shadow-brand-accent/20">
-                                        Save directives
-                                    </button>
+                                    <Button 
+                                        onClick={handleSaveSettings} 
+                                        variant="primary" 
+                                        size="md" 
+                                        className="w-full"
+                                    >
+                                        Save Directives
+                                    </Button>
                                 )}
                                 {isSavingSettings && <Icon name="spinner" className="w-6 h-6 animate-spin text-brand-accent" />}
-                                {saveSettingsSuccess && <div className="text-brand-accent flex items-center font-bold text-body-base animate-fade-in"><Icon name="check" className="w-5 h-5 mr-2" /> Directives saved!</div>}
+                                {saveSettingsSuccess && <div className="text-brand-accent flex items-center font-bold text-body-base animate-fade-in"><Icon name="check" className="w-5 h-5 mr-2" /> Directives Saved!</div>}
                             </div>
                         </div>
                     </div>
@@ -352,13 +362,15 @@ const SettingsView: React.FC = () => {
                                 </div>
                             )}
 
-                            <button
+                             <Button
                                 onClick={handleCloudBackup}
-                                disabled={isSyncingCloud}
-                                className="btn-primary w-full h-11 px-6 rounded-xl shadow-lg shadow-brand-accent/20 text-body-sm font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
+                                isLoading={isSyncingCloud}
+                                variant="primary"
+                                className="w-full"
+                                icon="upload"
                             >
-                                <Icon name="upload" className="w-4 h-4 mr-2" /> Sync to Cloud
-                            </button>
+                                Sync To Cloud
+                            </Button>
 
                             {cloudMessage && !isSyncingCloud && (
                                 <div className="text-center text-body-sm font-bold text-brand-accent animate-fade-in py-1 absolute top-12 left-0 right-0 z-20 pointer-events-none">
@@ -366,12 +378,14 @@ const SettingsView: React.FC = () => {
                                 </div>
                             )}
 
-                            <button
+                            <Button
                                 onClick={handleExportWorld}
-                                className="btn-secondary w-full h-11 rounded-xl shadow-sm border border-brand-primary text-body-sm font-bold flex items-center justify-center hover:bg-brand-primary/50 transition-colors"
+                                variant="secondary"
+                                className="w-full"
+                                icon="download"
                             >
-                                <Icon name="download" className="w-4 h-4 mr-2" /> Export world
-                            </button>
+                                Export World
+                            </Button>
                         </div>
 
                         <div className="pt-6 border-t border-brand-primary/20">
@@ -405,21 +419,21 @@ const SettingsView: React.FC = () => {
 
                         <div className="pt-6 border-t border-brand-primary/20">
                             <h3 className="text-center mb-6">Documentation</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <button
+                             <div className="grid grid-cols-2 gap-4">
+                                <Button
                                     onClick={() => setIsDocModalOpen(true)}
-                                    className="btn-secondary btn-md rounded-xl gap-2 shadow-sm"
+                                    variant="secondary"
+                                    icon="eye"
                                 >
-                                    <Icon name="eye" className="w-4 h-4" />
-                                    View manual
-                                </button>
-                                <button
+                                    View Manual
+                                </Button>
+                                <Button
                                     onClick={downloadAsTxt}
-                                    className="btn-secondary btn-md rounded-xl gap-2 shadow-sm"
+                                    variant="secondary"
+                                    icon="download"
                                 >
-                                    <Icon name="download" className="w-4 h-4" />
-                                    Download txt
-                                </button>
+                                    Download Txt
+                                </Button>
                             </div>
                         </div>
 
@@ -429,13 +443,14 @@ const SettingsView: React.FC = () => {
                                     <h3 className="text-brand-danger mb-1 font-black">Danger Zone</h3>
                                     <p className="text-body-sm text-brand-text-muted italic opacity-70">Irreversible actions that modify your save data.</p>
                                 </div>
-                                <button
+                                 <Button
                                     onClick={handleResetWorld}
-                                    className="btn-md w-full bg-brand-danger/10 border-2 border-brand-danger/30 text-brand-danger font-black rounded-xl hover:bg-brand-danger/20 transition-all active:scale-95"
+                                    variant="danger"
+                                    className="w-full"
                                 >
-                                    Reset world
-                                </button>
-                                {resetSuccess && <p className="text-brand-accent text-center text-body-sm font-bold animate-fade-in">World reset successfully!</p>}
+                                    Reset World
+                                </Button>
+                                {resetSuccess && <p className="text-brand-accent text-center text-body-sm font-bold animate-fade-in">World Reset Successfully!</p>}
                             </div>
                         </div>
                     </div>
@@ -455,14 +470,15 @@ const SettingsView: React.FC = () => {
                         </section>
                     ))}
 
-                    <div className="pt-4 flex justify-center">
-                        <button
+                     <div className="pt-4 flex justify-center">
+                        <Button
                             onClick={downloadAsTxt}
-                            className="btn-primary btn-md rounded-xl gap-2 px-10 shadow-lg shadow-brand-accent/20"
+                            variant="primary"
+                            icon="download"
+                            className="px-10"
                         >
-                            <Icon name="download" className="w-4 h-4" />
-                            Download technical manual
-                        </button>
+                            Download Technical Manual
+                        </Button>
                     </div>
                 </div>
             </Modal>

@@ -212,9 +212,20 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
         ? 'text-brand-danger border-brand-danger/30 bg-brand-danger/5' 
         : isRunning ? 'text-brand-accent border-brand-accent/30 bg-brand-accent/5' : 'text-green-500 border-green-500/30 bg-green-900/10';
 
+    const footer = (
+        <button 
+            onClick={runDiagnostics} 
+            disabled={isRunning}
+            className="btn-primary btn-md gap-2 w-full justify-center shadow-lg shadow-brand-accent/10"
+        >
+            <Icon name="refresh" className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} />
+            Restart Scan
+        </button>
+    );
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Engine Diagnostics">
-            <div className="max-h-[70vh] overflow-y-auto custom-scroll pr-1 space-y-5 pb-6">
+        <Modal isOpen={isOpen} onClose={onClose} title="Engine Diagnostics" footer={footer}>
+            <div className="max-h-[70vh] overflow-y-auto custom-scroll pr-1 space-y-5 pb-2">
                 
                 {/* Summary Banner */}
                 <div className={`text-center text-body-sm font-black py-3 border-y rounded-lg ${overallColor} transition-colors duration-500`}>
@@ -261,17 +272,6 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
                 <div className="text-body-sm text-center text-brand-text-muted italic opacity-40 pt-4 px-6">
                     Diagnostics check internal data structures, Rag retrieval paths, and procedural matrix integrity.
                 </div>
-            </div>
-            
-            <div className="mt-4 flex justify-center">
-                <button 
-                    onClick={runDiagnostics} 
-                    disabled={isRunning}
-                    className="btn-primary btn-md gap-2"
-                >
-                    <Icon name="refresh" className={`w-4 h-4 ${isRunning ? 'animate-spin' : ''}`} />
-                    Restart Scan
-                </button>
             </div>
         </Modal>
     );

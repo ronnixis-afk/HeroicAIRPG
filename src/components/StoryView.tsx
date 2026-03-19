@@ -5,6 +5,7 @@ import Accordion from './Accordion';
 import { GameDataContext } from '../context/GameDataContext';
 import type { StoryLog } from '../types';
 import { Icon } from './Icon';
+import Button from './Button';
 
 const toTitleCase = (str: string) => {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -46,19 +47,22 @@ const StoryEditableContent: React.FC<{ log: StoryLog; onFinish: () => void }> = 
                 autoFocus
             />
             <div className="flex justify-end gap-3">
-                <button
+                <Button
                     onClick={onFinish}
-                    className="btn-tertiary btn-sm"
+                    variant="tertiary"
+                    size="sm"
                 >
                     Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                     onClick={handleSave}
-                    disabled={isSaving}
-                    className="btn-primary btn-md min-w-[100px]"
+                    isLoading={isSaving}
+                    variant="primary"
+                    size="md"
+                    className="min-w-[100px]"
                 >
-                    {isSaving ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : 'Save entry'}
-                </button>
+                    Save Entry
+                </Button>
             </div>
         </div>
     );
@@ -189,8 +193,8 @@ const StoryView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">The Chronicle</h1>
-                <p className="text-body-sm text-brand-text-muted font-medium italic">
+                <h3 className="text-brand-text mb-2">The Chronicle</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     The evolving chronicle of your journey through the realms.
                 </p>
             </div>
@@ -265,16 +269,17 @@ const StoryView: React.FC = () => {
                                         ))}
                                     </div>
 
-                                    {dayLogs.length > 1 && day !== 'Story progress' && (
+                                     {dayLogs.length > 1 && day !== 'Story progress' && (
                                         <div className="mt-6 pt-4 border-t border-brand-primary/10 flex justify-end">
-                                            <button
+                                            <Button
                                                 onClick={() => handleSummarizeDay(day, dayLogs, previousDayLogs)}
-                                                disabled={summarizingDay === day}
-                                                className="btn-tertiary btn-sm gap-2"
+                                                isLoading={summarizingDay === day}
+                                                variant="tertiary"
+                                                size="sm"
+                                                icon="code"
                                             >
-                                                {summarizingDay === day ? <Icon name="spinner" className="w-3.5 h-3.5 animate-spin" /> : <Icon name="code" className="w-3.5 h-3.5" />}
                                                 Seal Chapter
-                                            </button>
+                                            </Button>
                                         </div>
                                     )}
                                 </div>
@@ -290,16 +295,18 @@ const StoryView: React.FC = () => {
                 </div>
             )}
 
-            {canSummarizePast && (
+             {canSummarizePast && (
                 <div className="mt-16 flex justify-center border-t border-brand-primary/10 pt-8">
-                    <button
+                    <Button
                         onClick={handleSummarizePast}
-                        disabled={isSummarizingPast}
-                        className="btn-tertiary btn-sm gap-2 opacity-60 hover:opacity-100"
+                        isLoading={isSummarizingPast}
+                        variant="tertiary"
+                        size="sm"
+                        icon="boxDrawer"
+                        className="opacity-60 hover:opacity-100"
                     >
-                        {isSummarizingPast ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="boxDrawer" className="w-4 h-4" />}
                         Archive Ancient Lore
-                    </button>
+                    </Button>
                 </div>
             )}
         </div>

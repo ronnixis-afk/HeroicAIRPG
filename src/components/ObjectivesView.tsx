@@ -5,6 +5,7 @@ import Accordion from './Accordion';
 import { GameDataContext } from '../context/GameDataContext';
 import { type LoreEntry, LORE_TAGS } from '../types';
 import { Icon } from './Icon';
+import Button from './Button';
 
 const toTitleCase = (str: string) => {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -90,44 +91,48 @@ const EditableObjectiveContent: React.FC<{
             <div className="flex items-center justify-between pt-4 border-t border-brand-primary/10">
                 <div className="flex items-center gap-2">
                     {entry.status === 'active' && (
-                        <button
+                        <Button
                             onClick={() => onTurnIn(entry.id)}
-                            disabled={isTurningIn}
-                            className="btn-primary btn-sm gap-2"
+                            isLoading={isTurningIn}
+                            variant="primary"
+                            size="sm"
+                            icon="check"
                         >
-                            {isTurningIn ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="check" className="w-4 h-4" />}
                             Complete
-                        </button>
+                        </Button>
                     )}
-                     <button 
+                     <Button 
                         onClick={handleDelete}
-                        className="btn-icon p-2 text-brand-text-muted hover:text-brand-danger transition-colors"
-                        title="Abandon quest"
-                    >
-                        <Icon name="trash" className="w-4 h-4" />
-                    </button>
+                        variant="danger"
+                        size="icon"
+                        icon="trash"
+                        title="Abandon Quest"
+                    />
                 </div>
                 
-                <div className="flex items-center gap-2">
+                 <div className="flex items-center gap-2">
                     {entry.status === 'active' && onFollowUp && (
-                        <button
+                        <Button
                             onClick={() => onFollowUp(entry.id)}
-                            disabled={isFollowUpLoading}
-                            className="btn-secondary btn-sm gap-2"
+                            isLoading={isFollowUpLoading}
+                            variant="secondary"
+                            size="sm"
+                            icon="sparkles"
                         >
-                            {isFollowUpLoading ? <Icon name="spinner" className="w-4 h-4 animate-spin" /> : <Icon name="sparkles" className="w-4 h-4" />}
                             Help
-                        </button>
+                        </Button>
                     )}
                     {entry.status === 'active' && (
-                        <button
+                        <Button
                             onClick={handleTrackToggle}
                             disabled={isTracking}
-                            className={`btn-secondary btn-sm gap-2 ${entry.isTracked ? 'bg-brand-accent/5 border-brand-accent/30 text-brand-accent' : ''}`}
+                            variant="secondary"
+                            size="sm"
+                            icon={isTracking ? 'spinner' : undefined}
+                            className={entry.isTracked ? 'bg-brand-accent/5 border-brand-accent/30 text-brand-accent' : ''}
                         >
-                            {isTracking && <Icon name="spinner" className="w-3 h-3 animate-spin" />}
                             {entry.isTracked ? 'Tracked' : 'Track'}
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -234,8 +239,8 @@ const ObjectivesView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-32">
             <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
-                <h1 className="text-brand-text mb-2">Quest Log</h1>
-                <p className="text-body-base text-brand-text-muted font-medium italic leading-relaxed">
+                <h3 className="text-brand-text mb-2">Quest Log</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic leading-relaxed">
                     The chronicle of your journey through the uncharted lands.
                 </p>
             </div>

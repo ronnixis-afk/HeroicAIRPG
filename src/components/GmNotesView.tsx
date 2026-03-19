@@ -4,6 +4,7 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../context/GameDataContext';
 import { useUI } from '../context/UIContext';
 import { Icon } from './Icon';
+import Button from './Button';
 import type { PlotPointType, PlotPoint, NPC } from '../types';
 import AutoResizingTextarea from './AutoResizingTextarea';
 import Modal from './Modal';
@@ -70,12 +71,12 @@ const EditablePlotPoint: React.FC<{
                     autoFocus
                 />
                 <div className="flex justify-end gap-3">
-                    <button onClick={handleCancel} className="btn-tertiary btn-sm">
+                    <Button onClick={handleCancel} variant="tertiary" size="sm">
                         Cancel
-                    </button>
-                    <button onClick={handleSave} className="btn-primary btn-sm rounded-lg">
+                    </Button>
+                    <Button onClick={handleSave} variant="primary" size="sm">
                         Save
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -90,20 +91,20 @@ const EditablePlotPoint: React.FC<{
                         {point.type}
                     </span>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                        <Button 
                             onClick={() => setIsEditing(true)}
-                            className="btn-icon text-brand-text-muted hover:text-brand-accent"
+                            variant="tertiary"
+                            size="icon"
+                            icon="edit"
                             title="Edit"
-                        >
-                            <Icon name="edit" className="w-4 h-4" />
-                        </button>
-                        <button 
+                        />
+                        <Button 
                             onClick={() => onDelete(point.id)}
-                            className="btn-icon text-brand-text-muted hover:text-brand-danger"
+                            variant="danger"
+                            size="icon"
+                            icon="trash"
                             title="Delete"
-                        >
-                            <Icon name="trash" className="w-4 h-4" />
-                        </button>
+                        />
                     </div>
                 </div>
                 <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap">{point.content}</p>
@@ -181,9 +182,9 @@ const GmNotesView: React.FC = () => {
 
     return (
         <div className="p-4 pt-8 max-w-2xl mx-auto pb-32">
-            <div className="text-center mb-12">
-                <h1 className="text-brand-text mb-2">The Narrative Web</h1>
-                <p className="text-body-base text-brand-text-muted italic">
+            <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
+                <h3 className="text-brand-text mb-2">The Narrative Web</h3>
+                <p className="text-size-4 text-brand-text-muted font-normal italic">
                     Interconnect player choices, achievements, and secrets to guide the storyteller.
                 </p>
             </div>
@@ -195,13 +196,13 @@ const GmNotesView: React.FC = () => {
                     <p className="text-body-sm text-brand-text-muted">An generated compass that directs the overall plot.</p>
                 </div>
                 <div className="flex justify-center">
-                    <button 
+                    <Button 
                         onClick={() => setIsGrandDesignModalOpen(true)}
-                        className="btn-secondary btn-md rounded-xl gap-2 shadow-sm"
+                        variant="secondary"
+                        icon="eye"
                     >
-                        <Icon name="eye" className="w-5 h-5" />
-                        View (Spoiler alert)
-                    </button>
+                        View (Spoiler Alert)
+                    </Button>
                 </div>
             </div>
 
@@ -266,13 +267,14 @@ const GmNotesView: React.FC = () => {
                                 </button>
                             ))}
                         </div>
-                        <button
+                        <Button
                             onClick={handleAddPoint}
                             disabled={!newPointText.trim()}
-                            className="btn-primary btn-md w-full sm:w-40 rounded-xl"
+                            variant="primary"
+                            className="w-full sm:w-40"
                         >
                             Add Note
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -368,21 +370,23 @@ const GmNotesView: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
-                        <button 
+                     <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
+                        <Button 
                             onClick={handleManualWeave} 
-                            disabled={isWeaving}
-                            className="btn-secondary btn-md w-full sm:flex-1 rounded-xl gap-2"
+                            isLoading={isWeaving}
+                            variant="secondary"
+                            className="w-full sm:flex-1"
+                            icon="refresh"
                         >
-                            <Icon name="refresh" className={`w-4 h-4 ${isWeaving ? 'animate-spin' : ''}`} />
                             Regenerate
-                        </button>
-                        <button 
+                        </Button>
+                        <Button 
                             onClick={() => setIsGrandDesignModalOpen(false)}
-                            className="btn-primary btn-md w-full sm:flex-1 rounded-xl shadow-lg"
+                            variant="primary"
+                            className="w-full sm:flex-1"
                         >
                             Close
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </Modal>

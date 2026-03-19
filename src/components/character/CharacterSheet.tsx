@@ -11,6 +11,7 @@ import {
 } from '../../types';
 import { generateCharacterImage } from '../../services/imageGenerationService';
 import { Icon } from '../Icon';
+import Button from '../Button';
 import StatusEffectsEditor from '../StatusEffectsEditor';
 import { BuffsEditor } from '../BuffsEditor';
 import { KeywordEditor } from '../KeywordEditor';
@@ -329,13 +330,14 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                     </div>
 
                     <div className="flex-1 flex justify-center">
-                        <button
+                        <Button
                             onClick={handleDelete}
-                            className="text-brand-danger hover:opacity-80 text-body-sm font-bold flex items-center gap-1.5 transition-all p-2"
+                            variant="danger"
+                            size="sm"
+                            icon="trash"
                         >
-                            <Icon name="trash" className="w-4 h-4" />
                             Remove
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
@@ -362,27 +364,24 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                         <div className="absolute inset-0 bg-red-600/20 animate-pulse pointer-events-none" />
                     )}
                 </div>
-                <div className="flex gap-3">
-                    <label className="btn-secondary btn-md cursor-pointer">
-                        Upload
+                 <div className="flex gap-3">
+                    <label className="cursor-pointer">
+                        <Button variant="secondary" size="md" as="div" icon="upload">
+                            Upload
+                        </Button>
                         <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                     </label>
-                    <button
+                    <Button
                         onClick={handleRegenerateImage}
-                        disabled={isGeneratingImage || !charData.appearance || imageCooldown > 0}
-                        className="btn-primary btn-md w-40 flex items-center justify-center gap-2"
+                        isLoading={isGeneratingImage}
+                        disabled={!charData.appearance || imageCooldown > 0}
+                        variant="primary"
+                        size="md"
+                        className="w-40"
+                        icon={imageCooldown > 0 ? undefined : "refresh"}
                     >
-                        {isGeneratingImage ? (
-                            <Icon name="spinner" className="w-4 h-4 animate-spin text-black" />
-                        ) : imageCooldown > 0 ? (
-                            `Wait (${imageCooldown}s)`
-                        ) : (
-                            <>
-                                <Icon name="refresh" className="w-4 h-4" />
-                                Regenerate
-                            </>
-                        )}
-                    </button>
+                        {imageCooldown > 0 ? `Wait (${imageCooldown}s)` : 'Regenerate'}
+                    </Button>
                 </div>
             </div>
 
@@ -523,20 +522,16 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                         <p className="text-body-base text-brand-text font-bold truncate max-w-[200px] mt-1">{charData.name}</p>
                     </div>
 
-                    <div className="w-full flex flex-col items-center gap-2">
-                        <button
+                     <div className="w-full flex flex-col items-center gap-2">
+                        <Button
                             onClick={handleSave}
-                            disabled={isSaving}
-                            className="btn-primary btn-md w-full"
+                            isLoading={isSaving}
+                            variant="primary"
+                            className="w-full"
+                            icon={saveSuccess ? 'check' : undefined}
                         >
-                            {isSaving ? 'Saving...' : 'Save changes'}
-                        </button>
-
-                        {saveSuccess && (
-                            <div className="text-brand-accent text-body-sm font-bold animate-fade-in">
-                                Saved
-                            </div>
-                        )}
+                            {saveSuccess ? 'Changes Saved' : 'Save Changes'}
+                        </Button>
                     </div>
                 </div>
             </div>

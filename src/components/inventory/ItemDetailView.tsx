@@ -5,6 +5,7 @@ import { Item, type Inventory, PlayerCharacter, Companion, type BodySlot, getIte
 import { GameDataContext, GameDataContextType } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { Icon } from '../Icon';
+import Button from '../Button';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import QuantityModal from '../QuantityModal';
 import { TagEditor } from '../TagEditor';
@@ -308,12 +309,13 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     };
 
     const ActionButton: React.FC<{ onClick: () => void, children: React.ReactNode, className?: string }> = ({ onClick, children, className }) => (
-        <button
+        <Button
             onClick={onClick}
-            className={`btn-secondary btn-md ${className || ''}`}
+            variant="secondary"
+            className={className}
         >
             {children}
-        </button>
+        </Button>
     );
 
     const slotLabel = useMemo(() => {
@@ -361,23 +363,25 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     <ItemUsageEditor item={localItem} onChange={handleNestedChange} />
 
                     {!localItem.armorStats && (isArmor || isShield) && (
-                        <button
+                        <Button
                             onClick={() => handleInitializeArmorStats(isShield ? 'shield' : 'armor')}
-                            className="btn-secondary btn-md w-full gap-2"
+                            variant="secondary"
+                            className="w-full"
+                            icon="shield"
                         >
-                            <Icon name="shield" className="w-4 h-4" />
                             Add {isShield ? 'Shield' : 'Armor'} Statistics
-                        </button>
+                        </Button>
                     )}
 
                     {!localItem.weaponStats && isWeapon && (
-                        <button
+                        <Button
                             onClick={handleInitializeWeaponStats}
-                            className="btn-secondary btn-md w-full gap-2"
+                            variant="secondary"
+                            className="w-full"
+                            icon="sword"
                         >
-                            <Icon name="sword" className="w-4 h-4" />
                             Add Weapon Statistics
-                        </button>
+                        </Button>
                     )}
 
                     {isWeapon && localItem.weaponStats && <WeaponStatsEditor stats={localItem.weaponStats} character={character} onChange={handleNestedChange} />}
@@ -385,20 +389,23 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                     {(isWeapon || isArmor || isShield || isBuff) && <ModifierManager item={localItem} onChange={handleNestedChange} />}
                     {isMechanical && localItem.effect && <EffectBuilder effect={localItem.effect} onChange={(newEffect) => handleNestedChange(['effect'], newEffect)} onRemove={() => handleTagsChange(safeLocalTags.filter(t => t !== 'mechanical'))} />}
 
-                    <div className="flex flex-col items-center gap-4 pt-6 border-t border-brand-primary/20">
-                        <button
+                     <div className="flex flex-col items-center gap-4 pt-6 border-t border-brand-primary/20">
+                        <Button
                             onClick={handleSave}
-                            disabled={isSaving}
-                            className="btn-primary btn-md w-full gap-2"
+                            isLoading={isSaving}
+                            variant="primary"
+                            className="w-full"
+                            icon={saveSuccess ? 'check' : undefined}
                         >
-                            {isSaving ? <Icon name="spinner" className="w-5 h-5 animate-spin" /> : saveSuccess ? <Icon name="check" className="w-5 h-5" /> : 'Save Changes'}
-                        </button>
-                        <button
+                            {saveSuccess ? 'Changes Saved' : 'Save Changes'}
+                        </Button>
+                        <Button
                             onClick={() => setIsEditing(false)}
-                            className="btn-tertiary btn-sm"
+                            variant="tertiary"
+                            size="sm"
                         >
                             Cancel Editing
-                        </button>
+                        </Button>
                     </div>
                 </div>
             ) : (
@@ -509,31 +516,41 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         </div>
                     )}
 
-                    {isConsolidatable && (
-                        <button onClick={() => consolidateCurrency(item.id, ownerId)} className="btn-primary btn-md w-full gap-2 relative z-10 mb-6">
-                            <Icon name="plus" className="w-4 h-4" /> Consolidate Balance
-                        </button>
+                     {isConsolidatable && (
+                        <Button
+                            onClick={() => consolidateCurrency(item.id, ownerId)}
+                            variant="primary"
+                            className="w-full mb-6"
+                            icon="plus"
+                        >
+                            Consolidate Balance
+                        </Button>
                     )}
 
                     <div className="pt-8 border-t border-brand-primary/10 relative z-10">
                         <div className="grid grid-cols-2 gap-3 w-full">
-                            {(fromList === 'carried' || fromList === 'equipped') && (
+                             {(fromList === 'carried' || fromList === 'equipped') && (
                                 <div className="relative inline-block" ref={targetDropdownRef}>
-                                    <button
+                                    <Button
                                         onClick={handleUse}
-                                        disabled={isUsingItem || !localItem?.isUsable()}
-                                        className="btn-primary btn-md w-full"
+                                        isLoading={isUsingItem}
+                                        disabled={!localItem?.isUsable()}
+                                        variant="primary"
+                                        className="w-full"
                                     >
-                                        {isUsingItem ? <Icon name="spinner" className="w-4 h-4 animate-spin text-black" /> : 'Use Item'}
-                                    </button>
+                                        Use Item
+                                    </Button>
                                     {isTargetDropdownOpen && (
                                         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 animate-fade-in backdrop-blur-sm">
                                             <div className="w-full max-w-[320px] bg-brand-surface rounded-3xl shadow-2xl border border-brand-primary overflow-hidden flex flex-col max-h-[80vh]">
                                                 <div className="px-6 py-4 border-b border-brand-primary/10 flex justify-between items-center bg-brand-primary/5">
                                                     <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-wider">Select Target</span>
-                                                    <button onClick={() => setIsTargetDropdownOpen(false)} className="text-brand-text-muted hover:text-brand-text transition-colors">
-                                                        <Icon name="x" className="w-4 h-4" />
-                                                    </button>
+                                                     <Button 
+                                                        onClick={() => setIsTargetDropdownOpen(false)} 
+                                                        variant="tertiary" 
+                                                        size="icon"
+                                                        icon="close" 
+                                                    />
                                                 </div>
                                                 <div className="p-2 overflow-y-auto custom-scrollbar flex-1">
                                                     {/* Player Target */}
@@ -612,8 +629,8 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             {canSplit && <ActionButton onClick={() => setIsSplitModalOpen(true)}>Split</ActionButton>}
 
                             <div className="relative inline-block" ref={dropdownRef}>
-                                {fromList !== 'assets' && gameData && gameData.companions.length > 0 && (
-                                    <button onClick={() => setIsTransferDropdownOpen(prev => !prev)} className="btn-secondary btn-md w-full">Transfer</button>
+                                 {fromList !== 'assets' && gameData && gameData.companions.length > 0 && (
+                                    <Button onClick={() => setIsTransferDropdownOpen(prev => !prev)} variant="secondary" className="w-full">Transfer</Button>
                                 )}
                                 {isTransferDropdownOpen && (
                                     <div className="absolute bottom-full mb-2 w-[240px] sm:w-[280px] left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 bg-brand-surface rounded-2xl shadow-2xl z-[110] border border-brand-primary overflow-hidden animate-fade-in py-2">
@@ -660,17 +677,23 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             </div>
                         </div>
 
-                        <button
+                         <Button
                             onClick={() => setIsEditing(true)}
-                            className="btn-secondary btn-md w-full mt-6 gap-2"
+                            variant="secondary"
+                            className="w-full mt-6"
+                            icon="edit"
                         >
-                            <Icon name="edit" className="w-4 h-4" /> Edit Item
-                        </button>
+                            Edit Item
+                        </Button>
 
-                        <button onClick={() => setIsDropModalOpen(true)} className="w-full mt-8 flex items-center justify-center gap-2 group transition-all">
-                            <Icon name="trash" className="w-4 h-4 text-brand-danger group-hover:scale-110 transition-transform" />
-                            <span className="text-body-sm font-bold text-brand-danger hover:underline">Discard Item</span>
-                        </button>
+                        <Button 
+                            onClick={() => setIsDropModalOpen(true)} 
+                            variant="danger" 
+                            className="w-full mt-8"
+                            icon="trash"
+                        >
+                            Discard Item
+                        </Button>
                     </div>
                 </div>
             )
