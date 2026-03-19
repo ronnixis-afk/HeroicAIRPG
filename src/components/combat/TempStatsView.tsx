@@ -123,7 +123,7 @@ const TempStatsView: React.FC = () => {
                             <Icon name="settings" className="w-5 h-5" />
                         </button>
                     </div>
-                    <p className="text-size-4 text-brand-text-muted font-normal italic">
+                    <p className="text-body-tiny text-brand-text-muted font-normal italic">
                         {isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
                     </p>
                 </div>

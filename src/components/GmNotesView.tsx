@@ -184,7 +184,7 @@ const GmNotesView: React.FC = () => {
         <div className="p-4 pt-8 max-w-2xl mx-auto pb-32">
             <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
                 <h3 className="text-brand-text mb-2">The Narrative Web</h3>
-                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                <p className="text-body-tiny text-brand-text-muted font-normal italic">
                     Interconnect player choices, achievements, and secrets to guide the storyteller.
                 </p>
             </div>

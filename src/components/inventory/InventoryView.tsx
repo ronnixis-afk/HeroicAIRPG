@@ -229,7 +229,7 @@ const InventoryView: React.FC = () => {
                         <Icon name="close" className="w-5 h-5" />
                     </button>
                 )}
-                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                <p className="text-body-tiny text-brand-text-muted font-normal italic">
                     Manage gear for yourself and your companions.
                 </p>
             </div>

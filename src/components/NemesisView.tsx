@@ -185,7 +185,7 @@ const NemesisView: React.FC = () => {
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <div className="text-center mb-10 pb-6 border-b border-brand-primary/20">
                 <h3 className="text-brand-text mb-2">Nemesis System</h3>
-                <p className="text-size-4 text-brand-text-muted font-normal italic">
+                <p className="text-body-tiny text-brand-text-muted font-normal italic">
                     Persistent individuals or factions actively working against your party.
                 </p>
             </div>

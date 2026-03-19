@@ -240,7 +240,7 @@ const ObjectivesView: React.FC = () => {
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-32">
             <div className="text-center mb-12 pb-6 border-b border-brand-primary/20">
                 <h3 className="text-brand-text mb-2">Quest Log</h3>
-                <p className="text-size-4 text-brand-text-muted font-normal italic leading-relaxed">
+                <p className="text-body-tiny text-brand-text-muted font-normal italic leading-relaxed">
                     The chronicle of your journey through the uncharted lands.
                 </p>
             </div>
