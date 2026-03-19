@@ -106,7 +106,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
           <div className="w-20 h-20 rounded-full bg-brand-accent/20 flex items-center justify-center mb-8 border-2 border-brand-accent animate-bounce">
             <Icon name="check" className="w-10 h-10 text-brand-accent" />
           </div>
-          <p className="text-xl font-bold text-brand-text font-merriweather">{action} Successful</p>
+          <h3 className="text-brand-text">{action} Successful</h3>
         </div>
       </Modal>
     );
@@ -169,7 +169,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-brand-text font-merriweather text-2xl leading-tight mb-2">{item.name}</h2>
+          <h3 className="text-brand-text leading-tight mb-2">{item.name}</h3>
 
           {(weaponTags.length > 0 || slotLabel) && (
             <div className="flex flex-wrap gap-2 mb-4">

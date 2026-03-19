@@ -411,7 +411,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
             <header className="flex flex-row items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
-                <h1 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none">Heroic AI <span className="text-brand-accent">RPG</span></h1>
+                <h1 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h1>
                 <button
                     onClick={() => setIsDrawerOpen(true)}
                     className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"

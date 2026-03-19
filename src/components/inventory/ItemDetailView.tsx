@@ -414,7 +414,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         {/* Name + inline edit */}
                         {!hideName && (
                             <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-brand-text font-merriweather leading-tight flex-1 min-w-0">{item.name}</h3>
+                                <h3 className="text-brand-text leading-tight flex-1 min-w-0">{item.name}</h3>
                             </div>
                         )}
 
