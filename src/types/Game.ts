@@ -106,7 +106,10 @@ export interface AIUpdatePayload {
 export interface AIResponse {
   location_update: LocationUpdate;
   npc_resolution: NPCResolution[];
-  narration: string;
+  narration: {
+    paragraph1: string;
+    paragraph2: string;
+  };
   turnSummary: string;
   adventure_brief: string;
   // Metadata for internal plumbing

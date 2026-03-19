@@ -21,6 +21,7 @@ export const performHousekeeping = async (
   inventoryUpdates: any[];
   userAlignmentShift: string;
   npcMemories: { npcId: string, memory: string }[];
+  recruitedNpcIds: string[];
 }> => {
 
   // Create a unified, deduplicated social registry for the Housekeeper
@@ -126,6 +127,11 @@ export const performHousekeeping = async (
      2. Output this single string into the 'userAlignmentShift' field.
     `}
 
+    [NPC RECRUITMENT RULES]
+    1. **JOINING THE PARTY**: Detect if an NPC has explicitly agreed to join the player's party, quest, or team.
+    2. **VALID VERBS**: "I will join you", "Let's go together", "I'm with you", "Count me in", "I'll follow your lead".
+    3. **OUTPUT**: Return the 'id' of the NPC from the SOCIAL REGISTRY in the 'recruitedNpcIds' array.
+
     [NPC MEMORY INSTRUCTIONS]
     1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
 
@@ -153,7 +159,8 @@ export const performHousekeeping = async (
       "userAlignmentShift": "Good|Evil|Lawful|Chaotic|Neutral",
       "npcMemories": [
         { "npcId": "string", "memory": "string" }
-      ]
+      ],
+      "recruitedNpcIds": ["string"]
     }
     `;
 
@@ -173,10 +180,11 @@ export const performHousekeeping = async (
     return {
       inventoryUpdates: result.inventoryUpdates || [],
       userAlignmentShift: result.userAlignmentShift || "Neutral",
-      npcMemories: result.npcMemories || []
+      npcMemories: result.npcMemories || [],
+      recruitedNpcIds: result.recruitedNpcIds || []
     };
   } catch (e) {
     console.error("Housekeeper failed:", e);
-    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [] };
+    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [], recruitedNpcIds: [] };
   }
 };

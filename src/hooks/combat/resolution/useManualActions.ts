@@ -190,7 +190,21 @@ export const useManualActions = (
                     summary,
                     wasHeroic
                 );
-                dispatch({ type: 'ADD_MESSAGE', payload: { id: `ai-${Date.now()}`, sender: 'ai', content: aiRes.narration, combatInfo: { attackerName: actorInstance.name, nextCombatantName: 'Next' }, rolls: rolls } });
+                const narrationText = aiRes.narration 
+                    ? `${aiRes.narration.paragraph1}\n\n${aiRes.narration.paragraph2}`
+                    : "The action unfolds...";
+
+                dispatch({ 
+                    type: 'ADD_MESSAGE', 
+                    payload: { 
+                        id: `ai-${Date.now()}`, 
+                        sender: 'ai', 
+                        content: narrationText, 
+                        combatInfo: { attackerName: actorInstance.name, nextCombatantName: 'Next' }, 
+                        rolls: rolls,
+                        alignmentOptions: aiRes.alignmentOptions
+                    } 
+                });
                 dispatch({ type: 'ADVANCE_TURN' });
             } catch (e) {
                 dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-atk-${Date.now()}`, sender: 'system', content: `${actorInstance.name} used ${source.name} (Narrative generation failed).`, rolls: rolls, type: 'neutral' } });

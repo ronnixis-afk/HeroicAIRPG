@@ -250,7 +250,25 @@ export const useNarrativeRound = (
 
         try {
             const cinematicRes = await generateNarrativeRoundResponse(gameData, mechanicalSummaries.join('\n\n'), playerFlavor, "Context", "Overview", isHeroic);
-            dispatch({ type: 'ADD_MESSAGE', payload: { id: `ai-round-${Date.now()}`, sender: 'ai', content: cinematicRes.narration, rolls: allRolls } });
+            
+            const narrationText = cinematicRes.narration 
+                ? `${cinematicRes.narration.paragraph1}\n\n${cinematicRes.narration.paragraph2}`
+                : "The fray erupts in a chaotic blur of steel and magic!";
+
+            dispatch({ 
+                type: 'ADD_MESSAGE', 
+                payload: { 
+                    id: `ai-round-${Date.now()}`, 
+                    sender: 'ai', 
+                    content: narrationText, 
+                    rolls: allRolls,
+                    alignmentOptions: cinematicRes.alignmentOptions 
+                } 
+            });
+
+            if (cinematicRes.updates) {
+                dispatch({ type: 'AI_UPDATE', payload: cinematicRes.updates });
+            }
 
             if (finalVictory) {
                 const { defeatedEnemies, lootPlan, totalXP } = finalVictory;

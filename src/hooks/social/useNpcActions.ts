@@ -151,71 +151,67 @@ export const useNpcActions = (
         setIsLoading(false);
     }, [gameData, combatActions, dispatch, setIsLoading]);
 
-    const inviteNpcToParty = useCallback(async (npc: NPC) => {
+    const inviteNpcToParty = useCallback(async (npc: NPC, options?: { skipNarrative?: boolean }) => {
         if (!gameData) return;
 
         // Corpses can't join parties
         if (npc.status === 'Dead') {
-            dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-invite-dead-${Date.now()}`, sender: 'system', content: `${npc.name} is deceased and cannot join your party.`, type: 'negative' } });
+            if (!options?.skipNarrative) {
+                dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-invite-dead-${Date.now()}`, sender: 'system', content: `${npc.name} is deceased and cannot join your party.`, type: 'negative' } });
+            }
             return;
         }
 
         setIsLoading(true);
         const rel = npc.relationship;
 
-        // Relationship-based DC
+        // Relationship-based narrative guidance
         const dc = rel >= 50 ? 5 : rel >= 30 ? 10 : rel >= 10 ? 12 : rel >= -10 ? 15 : rel >= -30 ? 20 : 25;
 
-        const request: DiceRollRequest = {
-            rollerName: gameData.playerCharacter.name,
-            rollType: 'Skill Check',
-            checkName: 'Persuasion',
-            dc: dc,
-            targetName: npc.name
-        };
-
-        const { rolls, groupOutcomes } = combatActions.processDiceRolls([request]);
-        const groupResult = groupOutcomes.find((g: any) => g.checkName === 'Persuasion');
-        const isSuccess = groupResult ? groupResult.isGroupSuccess : (rolls[0].outcome === 'Success' || rolls[0].outcome === 'Critical Success');
-
-        const systemPrompt: ChatMessage = {
-            id: `sys-invite-${Date.now()}`,
-            sender: 'system',
-            mode: 'OOC',
-            content: `[SYSTEM] The player attempts to invite ${npc.name} to join their party.
-            CURRENT STANDING: ${rel} points.
-            PERSUASION DC: ${dc}
-            DICE RESULT: ${isSuccess ? 'SUCCESS' : 'FAILURE'}
-            
-            [INSTRUCTIONS]
-            1. Narrate the dialogue response of ${npc.name} in PLAIN TEXT.
-            2. If success: They agree to join the quest.
-            3. If failure: They politely or rudely decline based on standing.
-            
-            Return JSON: { "narration": "string" }`
-        };
+        // Requirement: Remove persuasion checks for party recruitment. Recruitment is now automatic.
+        const isSuccess = true;
+        const rolls: any[] = [];
 
         try {
-            // Speed Update: Explicitly override to gemini-3.1-flash-lite for recruitment dialogue.
-            const aiRes = await generateResponse(
-                systemPrompt,
-                { ...gameData, messages: [...gameData.messages, systemPrompt] },
-                undefined,
-                undefined,
-                'gemini-3.1-flash-lite-preview'
-            );
+            if (!options?.skipNarrative) {
+                const systemPrompt: ChatMessage = {
+                    id: `sys-invite-${Date.now()}`,
+                    sender: 'system',
+                    mode: 'OOC',
+                    content: `[SYSTEM] The player has invited ${npc.name} to join their party.
+                    CURRENT STANDING: ${rel} points.
+                    RECRUITMENT POLICY: Automatic success.
+                    
+                    [INSTRUCTIONS]
+                    1. Narrate exactly HOW ${npc.name} decides to join the party.
+                    2. They should focus on common goals, mutual benefits, or seasonal logic that makes sense for the character.
+                    3. They agree to join the quest and become a loyal companion.
+                    
+                    Return JSON: { "narration": "string" }`
+                };
 
-            const aiMessage: ChatMessage = {
-                id: `ai-invite-res-${Date.now()}`,
-                sender: 'ai',
-                content: aiRes.narration || (isSuccess ? `${npc.name} agrees to join you!` : `${npc.name} declines the offer.`),
-                location: gameData.currentLocale || 'Current Area',
-                rolls: rolls
-            };
-            dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
+                // Speed Update: Explicitly override to gemini-3.1-flash-lite for recruitment dialogue.
+                const aiRes = await generateResponse(
+                    systemPrompt,
+                    { ...gameData, messages: [...gameData.messages, systemPrompt] },
+                    undefined,
+                    undefined,
+                    'gemini-3.1-flash-lite-preview'
+                );
+
+                const aiMessage: ChatMessage = {
+                    id: `ai-invite-res-${Date.now()}`,
+                    sender: 'ai',
+                    content: aiRes.narration || `${npc.name} agrees to join you!`,
+                    location: gameData.currentLocale || 'Current Area',
+                    rolls: rolls
+                };
+                dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
+            }
 
             if (isSuccess) {
                 setCreationProgress({ isActive: true, step: `Welcoming ${npc.name}...`, progress: 10 });
+                // ... (rest of the companion weaving logic)
 
                 // Blueprint Selection: Select a mechanical template based on the NPC's profile
                 const templateKey = npc.template || 'Brute';

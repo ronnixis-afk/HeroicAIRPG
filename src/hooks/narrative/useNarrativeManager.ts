@@ -29,7 +29,7 @@ export const useNarrativeManager = (
     dispatch: React.Dispatch<GameAction>,
     deps: NarrativeDependencies
 ) => {
-    const { combatActions, setIsAiGenerating, processUserInitiatedTravel, weaveGrandDesign } = deps;
+    const { combatActions, setIsAiGenerating, processUserInitiatedTravel, weaveGrandDesign, npcActions } = deps;
     const {
         setIsAuditing,
         setIsAssessing,
@@ -70,7 +70,7 @@ export const useNarrativeManager = (
         });
     }, [gameData, dispatch]);
 
-    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions, { setIsAuditing, setIsHousekeeping });
+    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions, { setIsAuditing, setIsHousekeeping }, npcActions);
 
     /**
      * UNIFIED PIPELINE RUNNER
@@ -145,11 +145,15 @@ export const useNarrativeManager = (
 
             setIsAiGenerating(false);
 
-            // Commit Narrator Result to Chat
+            // Committ Narrator Result to Chat
+            const narrationText = aiResponse.narration 
+                ? `${aiResponse.narration.paragraph1}\n\n${aiResponse.narration.paragraph2}`
+                : "...";
+
             const aiMessage: ChatMessage = {
                 id: `ai-${Date.now()}`,
                 sender: 'ai',
-                content: aiResponse.narration || "...",
+                content: narrationText,
                 location: aiResponse.location_update?.site_name || gameData.currentLocale,
                 rolls: resolution.diceRolls || [],
                 alignmentOptions: Array.isArray(aiResponse.alignmentOptions) ? aiResponse.alignmentOptions : undefined,
@@ -162,7 +166,7 @@ export const useNarrativeManager = (
             // We trigger this without 'await' to allow the UI to unlock for the player
             setIsAuditing(true);
             setIsHousekeeping(true);
-            const aiNarrative = aiResponse.narration || "";
+            const aiNarrative = narrationText;
             processConsequences(
                 userMessage.content,
                 aiNarrative || "",
@@ -181,7 +185,7 @@ export const useNarrativeManager = (
 
                 if (shouldForceCombat) {
                     const finalSuggestions = Array.isArray(aiResponse.suggestedActors) ? aiResponse.suggestedActors : [];
-                    combatActions.initiateCombatSequence(aiResponse.narration || '', finalSuggestions as ActorSuggestion[], 'Narrative');
+                    combatActions.initiateCombatSequence(narrationText, finalSuggestions as ActorSuggestion[], 'Narrative');
                 }
             }).catch(err => {
                 console.error("Background state sync failed", err);
@@ -354,4 +358,5 @@ interface NarrativeDependencies {
     setIsAiGenerating: (isGenerating: boolean) => void;
     processUserInitiatedTravel?: (content: string, intent?: { destination: string, method: string }) => Promise<void>;
     weaveGrandDesign?: () => Promise<void>;
+    npcActions?: any;
 }

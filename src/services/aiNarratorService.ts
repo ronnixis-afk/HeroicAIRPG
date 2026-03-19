@@ -116,8 +116,12 @@ export const generateNarrativeResponse = async (
                 }
             },
             narration: {
-                type: Type.STRING,
-                description: "Vivid 2-paragraph second-person 'You' narration. Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood). Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)."
+                type: Type.OBJECT,
+                properties: {
+                    paragraph1: { type: Type.STRING, description: "Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + banter)." },
+                    paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." }
+                },
+                required: ["paragraph1", "paragraph2"]
             },
             turnSummary: { type: Type.STRING },
             adventure_brief: { type: Type.STRING },
@@ -206,7 +210,10 @@ export const generateNarrativeResponse = async (
     } catch (e) {
         console.error("Failed to parse GM response:", e);
         return {
-            narration: "The Game Master is gathering their thoughts...",
+            narration: {
+                paragraph1: "The Game Master is gathering their thoughts...",
+                paragraph2: "Wait for it..."
+            },
             turnSummary: "System error occurred.",
             adventure_brief: gameData.adventureBrief || "Continue investigation.",
             active_engagement: false,
@@ -263,21 +270,32 @@ The player has expended a HEROIC POINT this round.
     ${previously}
     [Actor Logic]: ${partyOverview || 'Standard party.'}
     [Rules]:
-    1. Write a cohesive narration summary.
+    1. Write a cohesive narration summary split into paragraph1 and paragraph2.
     2. DO NOT use numbers. 
     3. Translate results (Hit, Miss, Defeated) into action descriptions.
     4. The Dice Truth: You are forbidden from changing any mechanical outcome provided.
+    5. ALIGNMENT ACTIONS: Provide 4 logical next steps for the player based on their moral alignment (Good, Evil, Lawful, Chaotic).
     
     [Output Schema (Json)]:
     {
-      "narration": "string",
+      "narration": {
+          "paragraph1": "string",
+          "paragraph2": "string"
+      },
       "turnSummary": "string",
       "adventure_brief": "string",
       "active_engagement": true,
       "location_update": { 
           "sector": "string", "zone": "string", "site_name": "string", "site_id": "string", "is_new_site": false 
       },
-      "npc_resolution": []
+      "npc_resolution": [],
+      "alignmentOptions": [
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic" }
+      ],
+      "updates": {
+          "gmNotes": "string",
+          "objectives": []
+      }
     }
     `;
 
@@ -298,7 +316,10 @@ The player has expended a HEROIC POINT this round.
         return parsed;
     } catch (e) {
         return {
-            narration: "The fray erupts in a chaotic blur of steel and magic!",
+            narration: {
+                paragraph1: "The fray erupts in a chaotic blur of steel and magic!",
+                paragraph2: "Dust settles over the field of battle."
+            },
             turnSummary: "Chaos of battle.",
             adventure_brief: gameData.adventureBrief || "Survive the encounter.",
             active_engagement: true,
@@ -307,7 +328,8 @@ The player has expended a HEROIC POINT this round.
                 site_name: gameData.current_site_name || "Unknown", site_id: gameData.current_site_id || "unknown",
                 is_new_site: false
             },
-            npc_resolution: []
+            npc_resolution: [],
+            alignmentOptions: []
         };
     }
 };

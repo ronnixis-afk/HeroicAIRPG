@@ -13,7 +13,8 @@ export const useExtractionStep = (
     dispatch: React.Dispatch<GameAction>,
     notifyInventoryChanges: (updates: any[]) => void,
     combatActions: any,
-    uiSetters?: { setIsAuditing: (val: boolean) => void, setIsHousekeeping: (val: boolean) => void }
+    uiSetters?: { setIsAuditing: (val: boolean) => void, setIsHousekeeping: (val: boolean) => void },
+    npcActions?: any
 ) => {
     const processConsequences = useCallback(async (
         userContent: string,
@@ -60,7 +61,8 @@ export const useExtractionStep = (
             : Promise.resolve({
                 inventoryUpdates: [],
                 userAlignmentShift: "Neutral",
-                npcMemories: []
+                npcMemories: [],
+                recruitedNpcIds: []
             });
 
         const [auditResult, housekeepingResult] = await Promise.all([auditPromise, housekeepingPromise]);
@@ -297,6 +299,17 @@ export const useExtractionStep = (
                         }
                     });
                 });
+            });
+        }
+
+        // 2.5 Resolve Recruitment (NEW)
+        if (housekeepingResult.recruitedNpcIds?.length > 0 && npcActions) {
+            housekeepingResult.recruitedNpcIds.forEach((id: string) => {
+                const npc = gameData.npcs?.find(n => n.id === id);
+                if (npc && !npc.companionId) {
+                    // Logic Gate: Ensure recursion safety by checking if they are already companions
+                    npcActions.inviteNpcToParty(npc, { skipNarrative: true });
+                }
             });
         }
 

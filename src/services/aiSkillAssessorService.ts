@@ -48,6 +48,7 @@ export const assessSkillIntent = async (
     3. "travel": User is expressing intent to move to a new location.
        - IMPORTANT: If the intent is travel, attempt to map the destination to one of the following Known Zones/Hubs: ${knownZones.join(', ') || 'None established'}. If no match, formulate a logical destination name from the user's prompt.
     4. "narrative": User is talking, observing, or preparing. No immediate mechanics needed.
+       - RECRUITMENT POLICY: If a user is inviting an NPC to join their party, classify as "narrative". No Persuasion check is required for recruitment.
 
     [DATA MODULE MENU]
     - "core_stats": HP, AC, Stats, Abilities, Skills. Needed for checks/saves.

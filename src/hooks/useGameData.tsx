@@ -80,6 +80,7 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
 
     // Core Managers (Pre-declared for Hook dependencies)
     const systemSettings = useSystemSettings(gameData, dispatch);
+    const npcActions = useNpcActions(gameData, dispatch, ui, combatActions, characterActions.integrateCharacter);
 
     const {
         submitUserMessage,
@@ -93,13 +94,13 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         combatActions,
         setIsAiGenerating,
         processUserInitiatedTravel: (content: string, intent?: any) => worldActions.processUserInitiatedTravel(content, intent),
-        weaveGrandDesign
+        weaveGrandDesign,
+        npcActions
     });
 
     // World Actions (Now depends on submitAutomatedEvent)
     const worldActions = useWorldActions(gameData, dispatch, combatActions.initiateCombatSequence, setIsAiGenerating, submitAutomatedEvent);
     const loreActions = useLoreActions(dispatch);
-    const npcActions = useNpcActions(gameData, dispatch, ui, combatActions, characterActions.integrateCharacter);
     const notificationActions = useNotificationActions(gameData, dispatch);
 
     const attemptObjectiveTurnIn = useCallback(async (objectiveId: string) => {
