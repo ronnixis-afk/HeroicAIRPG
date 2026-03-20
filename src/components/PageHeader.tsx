@@ -32,7 +32,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     subtitleClassName = ""
 }) => {
     return (
-        <div className={`text-center mb-10 pb-6 border-b border-brand-primary/20 relative ${className}`}>
+        <div className={`text-center mb-5 pb-3 border-b border-brand-primary/20 relative ${className}`}>
             <TitleTag className={`text-brand-text mb-2 ${titleClassName}`}>
                 {title}
             </TitleTag>
