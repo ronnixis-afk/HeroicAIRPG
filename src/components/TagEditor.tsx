@@ -5,11 +5,13 @@ interface TagEditorProps {
     onTagsChange: (newTags: string[]) => void;
     options?: readonly string[];
     label?: string;
+    readOnly?: boolean;
 }
 
-export const TagEditor: React.FC<TagEditorProps> = ({ tags, onTagsChange, options = [], label = "Tags" }) => {
+export const TagEditor: React.FC<TagEditorProps> = ({ tags, onTagsChange, options = [], label = "Tags", readOnly = false }) => {
 
     const handleToggleTag = (tagToToggle: string) => {
+        if (readOnly) return;
         if (tags.includes(tagToToggle)) {
             onTagsChange(tags.filter(t => t !== tagToToggle));
         } else {

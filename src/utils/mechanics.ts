@@ -467,6 +467,15 @@ export const recalculateCombatActorStats = (actor: CombatActor, templates: Recor
         });
     }
 
+    // --- AFFINITY ENFORCEMENT ---
+    // If an affinity is set, ensure DR/DI/DV strictly match the affinity definition.
+    if (updatedActor.affinity && updatedActor.affinity !== 'None' && DEFAULT_AFFINITIES[updatedActor.affinity]) {
+        const affDef = DEFAULT_AFFINITIES[updatedActor.affinity];
+        updatedActor.resistances = [...(affDef.resistances || [])];
+        updatedActor.immunities = [...(affDef.immunities || [])];
+        updatedActor.vulnerabilities = [...(affDef.vulnerabilities || [])];
+    }
+
     return updatedActor;
 };
 

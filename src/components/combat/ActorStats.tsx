@@ -84,23 +84,38 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
             </Accordion>
 
             <div className="mt-8 pt-6 border-t border-brand-primary/20 space-y-8">
+                {actor.affinity && actor.affinity !== 'None' && (
+                    <div className="bg-brand-accent/5 p-4 rounded-2xl border border-dashed border-brand-accent/30 flex items-start gap-4 animate-fade-in group">
+                        <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center shrink-0 border border-brand-accent/20 group-hover:scale-110 transition-transform">
+                            <Icon name="sparkles" className="w-5 h-5 text-brand-accent" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-body-sm font-bold text-brand-accent tracking-normal">Affinity Bonds Active: {actor.affinity}</p>
+                            <p className="text-[10px] text-brand-text-muted italic opacity-70 leading-relaxed">External damage resistances, immunities, and vulnerabilities are currently dictated by this entity's fundamental nature and cannot be modified independently.</p>
+                        </div>
+                    </div>
+                )}
+
                 <TagEditor
                     label="Damage Resistances"
                     tags={actor.resistances || []}
                     onTagsChange={(newTags) => onChange(['resistances'], newTags)}
                     options={DAMAGE_TYPES}
+                    readOnly={!!(actor.affinity && actor.affinity !== 'None')}
                 />
                 <TagEditor
                     label="Damage Immunities"
                     tags={actor.immunities || []}
                     onTagsChange={(newTags) => onChange(['immunities'], newTags)}
                     options={DAMAGE_TYPES}
+                    readOnly={!!(actor.affinity && actor.affinity !== 'None')}
                 />
                 <TagEditor
                     label="Damage Vulnerabilities"
                     tags={actor.vulnerabilities || []}
                     onTagsChange={(newTags) => onChange(['vulnerabilities'], newTags)}
                     options={DAMAGE_TYPES}
+                    readOnly={!!(actor.affinity && actor.affinity !== 'None')}
                 />
             </div>
         </div>

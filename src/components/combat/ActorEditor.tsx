@@ -50,6 +50,12 @@ export const ActorEditor: React.FC<ActorEditorProps> = ({
                 currentLevel = currentLevel[keys[i]];
             }
             const changedKey = keys[keys.length - 1];
+
+            // --- AFFINITY LOCK ---
+            // Prevent manual modification of damage properties if an affinity is active.
+            if (prev.affinity && prev.affinity !== 'None' && ['resistances', 'immunities', 'vulnerabilities'].includes(changedKey as string)) {
+                return prev;
+            }
             
             if (value === undefined) {
                 delete currentLevel[changedKey];
