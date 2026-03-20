@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({
       aria-labelledby="modal-title"
     >
       <div
-        className={`bg-brand-surface border border-white/10 rounded-[2rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] w-full ${maxWidthClasses[maxWidth]} flex flex-col max-h-[90vh] animate-modal overflow-hidden relative glass-effect`}
+        className={`bg-brand-surface border border-white/10 rounded-3xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] w-full ${maxWidthClasses[maxWidth]} flex flex-col max-h-[90vh] animate-modal overflow-hidden relative glass-effect`}
         onClick={e => e.stopPropagation()} // Prevent closing when clicking inside
       >
         <div className="absolute inset-0 bg-gradient-to-b from-brand-accent/5 to-transparent pointer-events-none" />
