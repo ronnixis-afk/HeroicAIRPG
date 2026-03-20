@@ -277,6 +277,7 @@ export const PartyQuickStatus: React.FC = () => {
                         char={playerCharacter}
                         size={40}
                         isPlayer={true}
+                        showName={false}
                         tempHp={playerCharacter.temporaryHitPoints}
                         maxTempHp={playerCharacter.getMaxTemporaryHitPoints(gameData.playerInventory)}
                         onClick={() => handleCharacterClick(playerCharacter.id)}
@@ -291,6 +292,7 @@ export const PartyQuickStatus: React.FC = () => {
                         <StatusAvatar
                             char={companion}
                             size={30}
+                            showName={false}
                             tempHp={companion.temporaryHitPoints}
                             maxTempHp={companion.getMaxTemporaryHitPoints(gameData.companionInventories[companion.id] || { equipped: [], carried: [], storage: [], assets: [] })}
                             onClick={() => handleCharacterClick(companion.id)}

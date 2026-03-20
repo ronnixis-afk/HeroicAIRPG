@@ -13,6 +13,7 @@ interface StatusAvatarProps {
     isStealthed?: boolean;
     isEnriching?: boolean;
     className?: string;
+    showName?: boolean;
     // For NPCs and companions that aren't the main player
     tempHp?: number;
     maxTempHp?: number;
@@ -28,16 +29,18 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     isStealthed,
     isEnriching,
     className = "",
+    showName = true,
     tempHp = 0,
     maxTempHp = 0
 }) => {
     // Determine stats from various possible character types
     const currentHp = (char as any).currentHitPoints;
     const maxHp = (char as any).maxHitPoints;
-    const hasHp = currentHp !== undefined && maxHp !== undefined;
-
-    const displayCurrentHp = hasHp ? currentHp : 1;
-    const displayMaxHp = hasHp ? maxHp : 1;
+    
+    // HP Detection fallback: If ring is requested, we should show a bar even if stats are missing (common for nearby NPCs)
+    const hasHp = showRing && (currentHp !== undefined && maxHp !== undefined);
+    const displayCurrentHp = currentHp !== undefined ? currentHp : 1;
+    const displayMaxHp = maxHp !== undefined ? maxHp : 1;
 
     // PC/Companion specific temp HP detection if not provided via props
     const actualTempHp = tempHp || (char as any).temporaryHitPoints || 0;
@@ -53,8 +56,8 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     const tempColor = '#38bdf8'; // Shield blue
     const initials = char.name.slice(0, 2);
 
-    const isDead = (char as any).status === 'Dead' || (hasHp && currentHp <= 0);
-    const isLowHp = showRing && hasHp && !isDead && hpRatio <= 0.25;
+    const isDead = (char as any).status === 'Dead' || (currentHp !== undefined && currentHp <= 0);
+    const isLowHp = showRing && (currentHp !== undefined) && !isDead && hpRatio <= 0.25;
 
     // If the character is dead, force the ring to show empty (red or gray)
     const finalHpPercent = isDead ? 0 : hpPercent;
@@ -112,12 +115,14 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
             {/* Name and Health/Shield Bars */}
             <div className="mt-1.5 w-full flex flex-col items-center">
                 {/* Name */}
-                <span className={`text-[9px] font-bold text-center truncate w-full mb-0.5 ${isTargeted ? 'text-brand-text' : 'text-brand-text-muted opacity-80'}`}>
-                    {char.name}
-                </span>
+                {showName && (
+                    <span className={`text-[9px] font-bold text-center truncate w-full mb-0.5 ${isTargeted ? 'text-brand-text' : 'text-brand-text-muted opacity-80'}`}>
+                        {char.name}
+                    </span>
+                )}
 
                 {/* Bars Container */}
-                {showRing && hasHp && (
+                {showRing && (
                     <div className="w-full space-y-0.5">
                         {/* HP Bar */}
                         <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">

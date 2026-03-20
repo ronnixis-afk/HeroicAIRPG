@@ -239,6 +239,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                             <StatusAvatar
                                 char={npc}
                                 size={30}
+                                showName={false}
                                 showRing={true}
                                 tempHp={npc.temporaryHitPoints}
                                 maxTempHp={npc.maxTemporaryHitPoints}
