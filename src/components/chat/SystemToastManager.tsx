@@ -53,79 +53,126 @@ export const SystemToastManager: React.FC = () => {
         const content = msg.content || '';
         const lowerContent = content.toLowerCase();
 
-        // Check if this is a dual-update message from ChatView.tsx
-        // Format: "**Alignment Shift**: *+X Good* (Morality axis).\n**Reactions**: NPC (+Y)..."
-        if (lowerContent.includes('alignment shift') || lowerContent.includes('alignment detected')) {
-            const hasReactions = lowerContent.includes('reactions:');
-            
-            if (hasReactions) {
-                // Split multi-part messages
-                const sections = content.split('\n');
-                sections.forEach(section => {
-                    const lowerSection = section.toLowerCase();
-                    if (lowerSection.includes('alignment shift') || lowerSection.includes('alignment detected')) {
-                        addToast('Alignment Update', section, 'alignment');
-                    } else if (lowerSection.includes('reactions:')) {
-                        addToast('Relationship Update', section, 'relationship');
-                    }
-                });
-                return;
-            }
+        // 1. Relationship Updates
+        // Format: "**Reactions**: NPC (+Y), NPC2 (-Z)"
+        if (lowerContent.includes('reactions:')) {
+            const reactionText = content.replace(/\*\*Reactions\*\*:\s*/i, '').replace(/Reactions:\s*/i, '');
+            // Multi-reaction support
+            const reactions = reactionText.split(',');
+            reactions.forEach(r => {
+                const trimmed = r.trim();
+                if (trimmed) addToast('Relationship Updates', trimmed, 'relationship');
+            });
+            // Don't return yet if there's other info, though usually these are separate
+            if (!lowerContent.includes('alignment')) return;
         }
 
-        // Standard single categorization
-        let type: Toast['type'] = 'general';
-        let title = 'System Update';
-        
-        if (msg.rolls && msg.rolls.length > 0) {
-            type = 'roll';
-            title = 'Action Check';
-        } else if (lowerContent.includes('level up') || lowerContent.includes('leveled up')) {
-            type = 'level';
-            title = 'Level Up';
-        } else if (lowerContent.includes('alignment shift') || lowerContent.includes('alignment detected')) {
-            type = 'alignment';
-            title = 'Alignment Update';
-        } else if (lowerContent.includes('reactions:')) {
-            type = 'relationship';
-            title = 'Relationship Update';
-        } else if (lowerContent.includes('experience') || lowerContent.includes('xp')) {
-            type = 'xp';
-            title = 'Experience Gained';
-        } else if (
+        // 2. Alignment Updates
+        if (lowerContent.includes('alignment shift') || lowerContent.includes('alignment detected')) {
+            const sections = content.split('\n');
+            const alignmentSection = sections.find(s => s.toLowerCase().includes('alignment'));
+            if (alignmentSection) addToast('Alignment Updates', alignmentSection, 'alignment');
+            return;
+        }
+
+        // 3. Level Up & XP
+        if (lowerContent.includes('level up') || lowerContent.includes('leveled up')) {
+            addToast('Level Up', content, 'level');
+            return;
+        }
+        if (lowerContent.includes('experience') || lowerContent.includes('xp')) {
+            addToast('Experience Gained', content, 'xp');
+            return;
+        }
+
+        // 4. Inventory & Loot (Specific keyword check to avoid false positives for "item")
+        const isInventory = 
             lowerContent.includes('inventory') || 
             lowerContent.includes('loot') || 
-            lowerContent.includes('item') || 
-            lowerContent.includes('added') ||
-            lowerContent.includes('removed') ||
-            lowerContent.includes('equipped')
-        ) {
-            type = 'inventory';
-            title = 'Inventory Update';
-        } else if (lowerContent.includes('sneak') || lowerContent.includes('hide') || lowerContent.includes('pickpocket')) {
-            type = 'roll';
-            title = 'Skill Check';
-        } else if (lowerContent.includes('damage') || lowerContent.includes('attack') || lowerContent.includes('initiative')) {
-            type = 'combat';
-            title = 'Combat Log';
+            (lowerContent.includes('item') && (lowerContent.includes('added') || lowerContent.includes('removed') || lowerContent.includes('equipped')));
+        
+        if (isInventory) {
+            addToast('Inventory Updates', content, 'inventory');
+            return;
         }
 
-        addToast(title, content, type);
+        // 5. Action Rolls (Specific labels based on roll type)
+        if (msg.rolls && msg.rolls.length > 0) {
+            const firstRoll = msg.rolls[0];
+            let rollTitle = 'Action Check';
+            if (firstRoll.rollType === 'Skill Check') rollTitle = 'Skill Check';
+            else if (firstRoll.rollType === 'Saving Throw') rollTitle = 'Saving Throw';
+            else if (firstRoll.rollType === 'Attack Roll') rollTitle = 'Attack Roll';
+            else if (firstRoll.rollType === 'Damage Roll') rollTitle = 'Damage Roll';
+            else if (firstRoll.rollType === 'Encounter Check') rollTitle = 'Encounter Check';
+            else if (firstRoll.rollType === 'Healing Roll') rollTitle = 'Healing Roll';
+
+            addToast(rollTitle, content, 'roll');
+            return;
+        }
+
+        // 6. Skill Checks (fallback for non-roll skill logs)
+        if (lowerContent.includes('sneak') || lowerContent.includes('hide') || lowerContent.includes('pickpocket')) {
+            addToast('Skill Check', content, 'roll');
+            return;
+        }
+
+        // 7. Combat Log
+        if (lowerContent.includes('damage') || lowerContent.includes('attack') || lowerContent.includes('initiative')) {
+            addToast('Combat Log', content, 'combat');
+            return;
+        }
+
+        // Default
+        addToast('System Update', content, 'general');
     };
 
     const addToast = (title: string, rawMessage: string, type: Toast['type']) => {
         // Clean up markdown bold/italic tags
         let cleanContent = rawMessage.replace(/(\*\*|\*)/g, '').trim();
         
-        // Remove "Reactions: " prefix for cleaner relationship toasts
-        if (type === 'relationship' && cleanContent.toLowerCase().startsWith('reactions:')) {
-            cleanContent = cleanContent.slice(10).trim();
+        // RPG Flavor Transformations
+        if (type === 'relationship') {
+            // Remove "Reactions: " prefix if still there
+            if (cleanContent.toLowerCase().startsWith('reactions:')) {
+                cleanContent = cleanContent.slice(10).trim();
+            }
+
+            // Parse: "NPC (+Y)" -> "NPC liked/disliked that (+Y)"
+            const relMatch = cleanContent.match(/^(.+?)\s*\(([+-]?\d+)\)$/);
+            if (relMatch) {
+                const name = relMatch[1].trim();
+                const value = parseInt(relMatch[2]);
+                const verb = value > 0 ? 'liked' : 'disliked';
+                const sign = value > 0 ? '+' : '';
+                cleanContent = `${name} ${verb} that (${sign}${value})`;
+            }
+        } 
+        else if (type === 'alignment') {
+            // Parse: "+X Lawful" or "-Y Evil"
+            const alignMatch = cleanContent.match(/([+-]\d+)\s+(\w+)/);
+            if (alignMatch) {
+                const value = alignMatch[1];
+                const alignType = alignMatch[2]; // Lawful, Chaotic, Good, Evil
+                cleanContent = `You have performed a ${alignType} act (${value})`;
+            }
+        }
+        else if (type === 'inventory') {
+            // "Item added to inventory" -> "You acquired: Item"
+            if (cleanContent.toLowerCase().includes('added')) {
+                const itemMatch = cleanContent.match(/^(.+?)\s+added/i);
+                if (itemMatch) cleanContent = `You acquired: ${itemMatch[1].trim()}`;
+                else if (cleanContent.includes('to your inventory')) {
+                    cleanContent = `Item added to your inventory`;
+                }
+            } else if (cleanContent.toLowerCase().includes('removed')) {
+                const itemMatch = cleanContent.match(/^(.+?)\s+removed/i);
+                if (itemMatch) cleanContent = `Lost: ${itemMatch[1].trim()}`;
+            }
         }
 
-        // Enforce sentence case: Capitalize first letter, lower the rest (unless it's a known name or title)
-        // But for many system messages, just ensuring first letter is capped and avoiding ALL CAPS is enough.
+        // Enforce sentence case: Capitalize first letter
         if (cleanContent.length > 0) {
-            // First check if it's already basically okay
             cleanContent = cleanContent.charAt(0).toUpperCase() + cleanContent.slice(1);
         }
 
