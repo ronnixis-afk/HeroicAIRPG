@@ -206,6 +206,38 @@ export const PartyQuickStatus: React.FC = () => {
                         {char.race}
                     </div>
                 </div>
+
+                {/* Health and Shield Stats in Context Menu */}
+                {(char.currentHitPoints !== undefined && char.maxHitPoints !== undefined) && (
+                    <div className="px-4 py-2 border-b border-brand-primary/30 mb-1 space-y-1.5">
+                        <div className="flex justify-between items-center text-[10px] font-bold">
+                            <span className="text-brand-text-muted uppercase tracking-wider">Condition</span>
+                            <span className="text-brand-text">{Math.round((char.currentHitPoints / char.maxHitPoints) * 100)}%</span>
+                        </div>
+                        {/* HP Bar */}
+                        <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div 
+                                className="h-full transition-all duration-500 ease-out"
+                                style={{ 
+                                    width: `${(char.currentHitPoints / char.maxHitPoints) * 100}%`,
+                                    backgroundColor: (char.currentHitPoints / char.maxHitPoints) > 0.5 ? '#3ecf8e' : (char.currentHitPoints / char.maxHitPoints) > 0.25 ? '#f59e0b' : '#ef4444'
+                                }}
+                            />
+                        </div>
+                        {/* Shield Bar (if exists) */}
+                        {(char.temporaryHitPoints !== undefined && char.getMaxTemporaryHitPoints && char.getMaxTemporaryHitPoints(char.id === playerCharacter.id ? gameData.playerInventory : (gameData.companionInventories?.[char.id] || { equipped: [], carried: [], storage: [], assets: [] })) > 0) && (
+                            <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                <div 
+                                    className="h-full transition-all duration-700 ease-out opacity-90"
+                                    style={{ 
+                                        width: `${(char.temporaryHitPoints / char.getMaxTemporaryHitPoints(char.id === playerCharacter.id ? gameData.playerInventory : (gameData.companionInventories?.[char.id] || { equipped: [], carried: [], storage: [], assets: [] }))) * 100}%`,
+                                        backgroundColor: '#38bdf8'
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
                 <button onClick={() => navigateToView('character', charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
                     <Icon name="character" className="w-4 h-4 text-brand-accent" />
                     <span>View Profile</span>

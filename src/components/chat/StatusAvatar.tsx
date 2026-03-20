@@ -109,34 +109,42 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                 )}
             </button>
 
-            {/* Health and Shield Bars */}
-            {showRing && hasHp && (
-                <div className="mt-1.5 w-full space-y-0.5">
-                    {/* HP Bar */}
-                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full transition-all duration-500 ease-out"
-                            style={{ 
-                                width: `${finalHpPercent * 100}%`,
-                                backgroundColor: finalRingColor
-                            }}
-                        />
-                    </div>
-                    
-                    {/* Shield Bar (Temp HP) */}
-                    {actualMaxTempHp > 0 && (
+            {/* Name and Health/Shield Bars */}
+            <div className="mt-1.5 w-full flex flex-col items-center">
+                {/* Name */}
+                <span className={`text-[9px] font-bold text-center truncate w-full mb-0.5 ${isTargeted ? 'text-brand-text' : 'text-brand-text-muted opacity-80'}`}>
+                    {char.name}
+                </span>
+
+                {/* Bars Container */}
+                {showRing && hasHp && (
+                    <div className="w-full space-y-0.5">
+                        {/* HP Bar */}
                         <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
                             <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                className="h-full transition-all duration-500 ease-out"
                                 style={{ 
-                                    width: `${tempPercent * 100}%`,
-                                    backgroundColor: tempColor
+                                    width: `${finalHpPercent * 100}%`,
+                                    backgroundColor: finalRingColor
                                 }}
                             />
                         </div>
-                    )}
-                </div>
-            )}
+                        
+                        {/* Shield Bar (Temp HP) */}
+                        {actualMaxTempHp > 0 && (
+                            <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                <div 
+                                    className="h-full transition-all duration-700 ease-out opacity-90"
+                                    style={{ 
+                                        width: `${tempPercent * 100}%`,
+                                        backgroundColor: tempColor
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
