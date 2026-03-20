@@ -50,6 +50,14 @@ export const assessSkillIntent = async (
     4. "narrative": User is talking, observing, or preparing. No immediate mechanics needed.
        - RECRUITMENT POLICY: If a user is inviting an NPC to join their party, classify as "narrative". No Persuasion check is required for recruitment.
 
+    [DIFFICULTY CLASS (DC) GUIDELINES]
+    Select a DC based on the narrative situation:
+    - 10 (Easy): Routine tasks under slight pressure.
+    - 15 (Medium): Challenging tasks requiring professional skill.
+    - 20 (Hard): Exceptional feats that push your limits.
+    - 25 (Heroic): Tasks that are nearly impossible for ordinary people.
+    - 30 (Impossible): Tasks that defy the natural laws e.g. swimming up a waterfall.
+
     [DATA MODULE MENU]
     - "core_stats": HP, AC, Stats, Abilities, Skills. Needed for checks/saves.
     - "inventory": Items. Needed for combat, trading, using items.
