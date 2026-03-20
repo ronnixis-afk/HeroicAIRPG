@@ -165,7 +165,7 @@ const GalleryView: React.FC = () => {
     return (
         <div className="p-4 pt-8 max-w-3xl mx-auto pb-24">
             <PageHeader 
-                title="Journey Gallery" 
+                title="Gallery" 
                 subtitle="A visual record of your journey's most significant moments." 
             />
 

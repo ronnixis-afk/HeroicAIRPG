@@ -141,7 +141,7 @@ const NPCsView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <PageHeader 
-                title="Social Ledger" 
+                title="People" 
                 subtitle="Allies, informants, and rivals encountered across the realms." 
             />
 

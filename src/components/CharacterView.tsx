@@ -90,7 +90,7 @@ const CharacterView: React.FC = () => {
             ) : (
                 <>
                     <PageHeader 
-                        title="The Party" 
+                        title="Heroes" 
                         subtitle="Manage stats, abilities, and details for your party." 
                     />
 

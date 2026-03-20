@@ -219,7 +219,10 @@ const InventoryView: React.FC = () => {
 
     return (
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
-            <PageHeader title="Inventory" subtitle="Manage gear for yourself and your companions.">
+            <PageHeader
+                title="Backpack"
+                subtitle="Manage your equipment, wealth, and stored assets."
+            >
                 {isSelectionMode && (
                     <button
                         onClick={exitSelectionMode}

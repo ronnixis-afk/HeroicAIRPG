@@ -154,37 +154,6 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 </div>
             </div>
 
-            {/* Health and Shield Stats in Context Menu */}
-            {(npc.currentHitPoints !== undefined && npc.maxHitPoints !== undefined) && (
-                <div className="px-4 py-2 border-b border-brand-primary/30 mb-1 space-y-1.5">
-                    <div className="flex justify-between items-center text-[10px] font-bold">
-                        <span className="text-brand-text-muted uppercase tracking-wider">Condition</span>
-                        <span className="text-brand-text">{Math.round((npc.currentHitPoints / npc.maxHitPoints) * 100)}%</span>
-                    </div>
-                    {/* HP Bar */}
-                    <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                        <div 
-                            className="h-full transition-all duration-500 ease-out"
-                            style={{ 
-                                width: `${(npc.currentHitPoints / npc.maxHitPoints) * 100}%`,
-                                backgroundColor: (npc.currentHitPoints / npc.maxHitPoints) > 0.5 ? '#3ecf8e' : (npc.currentHitPoints / npc.maxHitPoints) > 0.25 ? '#f59e0b' : '#ef4444'
-                            }}
-                        />
-                    </div>
-                    {/* Shield Bar (if exists) */}
-                    {(npc.temporaryHitPoints !== undefined && npc.maxTemporaryHitPoints !== undefined && npc.maxTemporaryHitPoints > 0) && (
-                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${(npc.temporaryHitPoints / npc.maxTemporaryHitPoints) * 100}%`,
-                                    backgroundColor: '#38bdf8'
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
-            )}
             <button
                 onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"

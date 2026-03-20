@@ -240,8 +240,8 @@ const ObjectivesView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-32">
             <PageHeader 
-                title="Quest Log" 
-                subtitle="The chronicle of your journey through the uncharted lands." 
+                title="Quests" 
+                subtitle="Active pursuits and goals that drive your story forward." 
             />
 
             {trackedObjective && (

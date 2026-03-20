@@ -185,7 +185,7 @@ const NemesisView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <PageHeader 
-                title="Nemesis System" 
+                title="Nemesis" 
                 subtitle="Persistent individuals or factions actively working against your party." 
             />
 

@@ -194,8 +194,8 @@ const StoryView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <PageHeader 
-                title="The Chronicle" 
-                subtitle="The evolving chronicle of your journey through the realms." 
+                title="Chronicle" 
+                subtitle="The recorded journey of your party across the ages." 
             />
 
             {sortedDays.length > 0 ? (

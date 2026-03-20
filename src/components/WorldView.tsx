@@ -247,7 +247,7 @@ const WorldView: React.FC = () => {
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
             <PageHeader 
-                title="Realm Codex" 
+                title="Lore" 
                 subtitle="The history, myths, and facts that define this realm." 
             />
 

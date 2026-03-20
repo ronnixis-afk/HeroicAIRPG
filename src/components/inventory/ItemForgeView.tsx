@@ -45,7 +45,7 @@ const ItemForgeView: React.FC = () => {
     return (
         <div className="p-2 pt-4 max-w-2xl mx-auto pb-12 h-full flex flex-col">
             <PageHeader 
-                title="Item Forge" 
+                title="Forge" 
                 subtitle="Create custom equipment infused with system power." 
                 className="mb-6 pb-4"
             />

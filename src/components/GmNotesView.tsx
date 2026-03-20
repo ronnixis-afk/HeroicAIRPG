@@ -184,7 +184,7 @@ const GmNotesView: React.FC = () => {
     return (
         <div className="p-4 pt-8 max-w-2xl mx-auto pb-32">
             <PageHeader 
-                title="The Narrative Web" 
+                title="GM Notes" 
                 subtitle="Interconnect player choices, achievements, and secrets to guide the storyteller." 
             />
 

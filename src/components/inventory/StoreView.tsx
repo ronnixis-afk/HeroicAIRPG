@@ -231,7 +231,7 @@ const StoreView: React.FC = () => {
     return (
         <div className="p-4 pt-8 max-w-2xl mx-auto h-full flex flex-col">
             <PageHeader 
-                title="Marketplace" 
+                title="Merchant" 
                 subtitle="Buy and sell equipment and supplies." 
             />
 

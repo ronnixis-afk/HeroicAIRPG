@@ -58,13 +58,13 @@ const BottomNav: React.FC<BottomNavProps> = ({
   return (
     <nav className="h-[72px] bg-brand-bg/95 backdrop-blur-sm flex-shrink-0 flex items-center justify-around px-2 border-t border-brand-primary/10 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
       <NavButton 
-        label="Character" 
+        label="Heroes" 
         iconName="character" 
         onClick={onCharacterClick} 
         isActive={activeView === 'character'} 
       />
       <NavButton 
-        label="Inventory" 
+        label="Backpack" 
         iconName="inventory" 
         onClick={onInventoryClick} 
         isActive={activeView === 'inventory'} 

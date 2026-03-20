@@ -111,7 +111,7 @@ const TempStatsView: React.FC = () => {
             <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
                 {/* Header */}
                 <PageHeader 
-                    title={isActive ? 'Combat Manager' : 'Scene Manager'}
+                    title="Scene"
                     subtitle={isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
                 >
                     <div className="absolute right-0 top-1 flex gap-1">
