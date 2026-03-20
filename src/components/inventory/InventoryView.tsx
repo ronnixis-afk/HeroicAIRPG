@@ -480,7 +480,7 @@ const InventoryView: React.FC = () => {
                         <div className="flex flex-col gap-2">
                             {activeOwner !== 'player' && (
                                 <button onClick={() => handleBatchTransfer('player')} className="w-full p-4 bg-brand-primary rounded-xl text-brand-text font-bold text-sm hover:bg-brand-surface transition-all border border-brand-surface flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-bg border border-brand-primary flex-shrink-0 shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-bg border border-brand-primary flex-shrink-0 shadow-sm">
                                         {gameData.playerCharacter.imageUrl ? (
                                             <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
                                         ) : (
@@ -498,7 +498,7 @@ const InventoryView: React.FC = () => {
                             )}
                             {companions.filter(c => c.id !== activeOwner).map(c => (
                                 <button key={c.id} onClick={() => handleBatchTransfer(c.id)} className="w-full p-4 bg-brand-primary rounded-xl text-brand-text font-bold text-sm hover:bg-brand-surface transition-all border border-brand-surface flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-bg border border-brand-primary flex-shrink-0 shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-bg border border-brand-primary flex-shrink-0 shadow-sm">
                                         {c.imageUrl ? (
                                             <img src={c.imageUrl} className="w-full h-full object-cover" />
                                         ) : (

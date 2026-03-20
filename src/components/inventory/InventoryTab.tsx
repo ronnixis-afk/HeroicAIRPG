@@ -22,7 +22,7 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ name, initials, imag
                     isActive ? 'scale-100 z-10' : 'opacity-80 hover:opacity-100 hover:scale-105'
                 } ${isShrunk ? 'w-10 h-10' : 'w-20 h-20'}`}
             >
-                <div className={`rounded-full overflow-hidden flex items-center justify-center border-2 transition-all duration-300 ${isActive ? 'border-brand-text' : 'border-brand-primary'} bg-brand-surface shadow-lg w-full h-full`}>
+                <div className={`rounded-xl overflow-hidden flex items-center justify-center border-2 transition-all duration-300 ${isActive ? 'border-brand-text' : 'border-brand-primary'} bg-brand-surface shadow-lg w-full h-full`}>
                         {imageUrl ? (
                         <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                     ) : (

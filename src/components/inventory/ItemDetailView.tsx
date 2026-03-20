@@ -555,7 +555,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                 <div className="p-2 overflow-y-auto custom-scrollbar flex-1">
                                                     {/* Player Target */}
                                                     <button onClick={() => handleTargetSelect(gameData?.playerCharacter.id || 'player')} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
-                                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
                                                             {gameData?.playerCharacter.imageUrl ? (
                                                                 <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
                                                             ) : (
@@ -574,7 +574,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                     {/* Companion Targets */}
                                                     {gameData?.companions.map(companion => (
                                                         <button key={companion.id} onClick={() => handleTargetSelect(companion.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
-                                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
                                                                 {companion.imageUrl ? (
                                                                     <img src={companion.imageUrl} className="w-full h-full object-cover" />
                                                                 ) : (
@@ -598,7 +598,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                         .filter(npc => !gameData?.companions.some(c => c.id === (npc.companionId || npc.id.replace('npc-', ''))))
                                                         .map(npc => (
                                                             <button key={npc.id} onClick={() => handleTargetSelect(npc.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-2xl group">
-                                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
+                                                                <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-md">
                                                                     {npc.image ? (
                                                                         <img src={npc.image} className="w-full h-full object-cover" />
                                                                     ) : (
@@ -637,7 +637,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                         <div className="p-1 space-y-1">
                                             {ownerId !== 'player' && gameData?.playerCharacter && (
                                                 <button onClick={() => handleTransfer('player')} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-xl group">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
+                                                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
                                                         {gameData.playerCharacter.imageUrl ? (
                                                             <img src={gameData.playerCharacter.imageUrl} className="w-full h-full object-cover" />
                                                         ) : (
@@ -654,7 +654,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                             )}
                                             {gameData?.companions.filter(c => c.id !== ownerId).map(companion => (
                                                 <button key={companion.id} onClick={() => handleTransfer(companion.id)} className="w-full text-left px-4 py-3 hover:bg-brand-primary transition-all flex items-center gap-3 rounded-xl group">
-                                                    <div className="w-10 h-10 rounded-full overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
+                                                    <div className="w-10 h-10 rounded-xl overflow-hidden bg-brand-primary border border-brand-surface flex-shrink-0 group-hover:border-brand-accent transition-colors shadow-sm">
                                                         {companion.imageUrl ? (
                                                             <img src={companion.imageUrl} className="w-full h-full object-cover" />
                                                         ) : (
