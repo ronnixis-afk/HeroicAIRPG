@@ -112,7 +112,7 @@ const CombatConsensusPanel: React.FC = () => {
             </button>
             <button 
                 onClick={handleCancel}
-                className="text-[10px] font-bold text-brand-text-muted hover:text-brand-danger transition-colors uppercase tracking-widest text-center"
+                className="text-[10px] font-bold text-brand-text-muted hover:text-brand-danger transition-colors text-center"
             >
                 Dismiss Encounter
             </button>
@@ -151,7 +151,7 @@ const CombatConsensusPanel: React.FC = () => {
                             <Icon name="ghost" className="w-6 h-6 text-brand-accent/60 group-hover:text-brand-accent" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-brand-accent uppercase tracking-widest text-center">Stealth</span>
+                            <span className="text-[10px] font-black text-brand-accent text-center">Stealth</span>
                             <span className="text-body-sm text-brand-text font-bold">Distract & Hide</span>
                         </div>
                     </button>
@@ -165,7 +165,7 @@ const CombatConsensusPanel: React.FC = () => {
                             <Icon name="sparkles" className="w-6 h-6 text-brand-accent/60 group-hover:text-brand-accent" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-brand-accent uppercase tracking-widest text-center">Social</span>
+                            <span className="text-[10px] font-black text-brand-accent text-center">Social</span>
                             <span className="text-body-sm text-brand-text font-bold">Charm Your Way</span>
                         </div>
                     </button>

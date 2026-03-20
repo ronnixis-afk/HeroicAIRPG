@@ -316,8 +316,8 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
             <div className="space-y-8 py-2 animate-fade-in">
                 {sourceActorId && sourceActorId !== gameData.playerCharacter.id && (
                     <div className="flex items-center gap-2 px-1">
-                        <span className="text-[10px] text-brand-accent font-bold uppercase tracking-wider bg-brand-accent/10 py-1 px-3 rounded-full border border-brand-accent/20">
-                            Acting as: {actor.name}
+                        <span className="text-[10px] text-brand-accent font-bold bg-brand-accent/10 py-1 px-3 rounded-full border border-brand-accent/20">
+                            Acting As: {actor.name}
                         </span>
                     </div>
                 )}
@@ -343,7 +343,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                 {mode === 'weapon' ? (
                     <div className="animate-fade-in bg-brand-primary/20 p-5 rounded-3xl border border-brand-surface shadow-inner flex justify-between items-center group">
                         <div className="flex-1 min-w-0">
-                            <label className="block text-[8px] font-bold text-brand-accent uppercase tracking-wider mb-2">Standard Strike</label>
+                            <label className="block text-[8px] font-bold text-brand-accent mb-2">Standard Strike</label>
                             <p className="text-body-lg font-bold text-brand-text truncate mb-3">
                                 {mainHandWeapon ? mainHandWeapon.name : 'Unarmed Strike'}
                                 {offHandWeapon ? ` & ${offHandWeapon.name}` : ''}
@@ -391,7 +391,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                                     </div>
                                                     <div className="flex flex-col truncate">
                                                         <span className={`text-body-base font-bold truncate ${isSelected ? 'text-brand-accent' : 'text-brand-text'}`}>{source.name}</span>
-                                                        <span className={`text-[8px] font-bold ${rarityColorClass} uppercase tracking-wider opacity-80`}>{rarity || 'Core'}</span>
+                                                        <span className={`text-[8px] font-bold ${rarityColorClass} opacity-80`}>{toTitleCase(rarity || 'Core')}</span>
                                                     </div>
                                                 </div>
                                                 {isSelected && <Icon name="check" className="w-5 h-5 text-brand-accent shrink-0" />}
@@ -404,7 +404,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                             {effect && (
                                                 <div className="mt-2 pt-3 border-t border-brand-primary/10 flex items-center gap-3">
                                                     <Icon name="sparkles" className="w-4 h-4 text-brand-accent/50" />
-                                                    <span className="text-[10px] font-bold text-brand-accent uppercase tracking-wider">
+                                                    <span className="text-[10px] font-bold text-brand-accent">
                                                         {formatEffectString(effect, actor, inventory)}
                                                     </span>
                                                 </div>
@@ -421,7 +421,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                     <div className="animate-fade-in space-y-3">
                         <div className="flex justify-between items-center px-1">
                             <label className="block text-xs font-bold text-brand-text-muted mb-2">Heroic Action</label>
-                            <span className="text-[8px] font-bold text-brand-text-muted uppercase tracking-wider opacity-60">Spend 1 Point For A Legendary Outcome</span>
+                            <span className="text-[8px] font-bold text-brand-text-muted opacity-60">Spend 1 Point For A Legendary Outcome</span>
                         </div>
                         <button
                             onClick={() => { if (heroicPoints > 0) setIsHeroicModeActive(!isHeroicModeActive); }}
@@ -439,7 +439,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                     <span className={`text-body-base font-bold ${isHeroicModeActive ? 'text-brand-accent' : 'text-brand-text'}`}>
                                         {isHeroicModeActive ? 'Heroic Strike Enabled' : 'Activate Heroic Point'}
                                     </span>
-                                    <span className="text-[9px] font-bold text-brand-text-muted uppercase tracking-wider opacity-70">
+                                    <span className="text-[9px] font-bold text-brand-text-muted opacity-70">
                                         {heroicPoints} Point{heroicPoints !== 1 ? 's' : ''} Available
                                     </span>
                                 </div>
@@ -453,7 +453,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                     <div className="animate-fade-in space-y-5">
                         <div className="flex justify-between items-end px-1">
                             <label className="text-xs font-bold text-brand-text-muted mb-2">Target Selection {sourceType === 'Heal' ? '(Allies)' : ''}</label>
-                            <span className="text-[10px] font-bold text-brand-accent uppercase tracking-wider bg-brand-accent/10 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm leading-none">
+                            <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm leading-none">
                                 {isMultiTargetAbility ? 'Entire Team' : `Slots: ${totalAssigned}/${maxTotalAttacks}`}
                             </span>
                         </div>
@@ -486,7 +486,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                         <button key={target.id} onClick={() => handleTargetClick(target.id)} className="flex flex-col items-center group transition-all">
                                             <TargetAvatar actor={target} isSelected={isSelected} hpPercent={hpPercent} isAlly={!isEnemy} />
                                             <span className={`text-[10px] font-bold mt-3 truncate w-full text-center transition-colors px-1 ${isSelected ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>{target.name}</span>
-                                            {displayLabel && <span className="text-[9px] font-bold text-brand-accent mt-1 uppercase tracking-wider">{displayLabel}</span>}
+                                            {displayLabel && <span className="text-[9px] font-bold text-brand-accent mt-1">{displayLabel}</span>}
                                         </button>
                                     );
                                 })
