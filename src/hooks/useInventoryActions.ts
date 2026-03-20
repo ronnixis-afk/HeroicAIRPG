@@ -37,7 +37,8 @@ const getShopRarityCounts = (level: number, totalCount: number = 10): Record<str
 
 export const useInventoryActions = (
     gameData: GameData | null, 
-    dispatch: React.Dispatch<GameAction>
+    dispatch: React.Dispatch<GameAction>,
+    submitUserMessage?: (message: any, isHeroic?: boolean) => Promise<void>
 ) => {
 
     const updateItem = useCallback(async (item: Item, ownerId: string) => {
@@ -156,6 +157,8 @@ export const useInventoryActions = (
     const useItem = useCallback(async (itemId: string, list: keyof Inventory, ownerId: string, buffTargetId?: string) => {
         let itemName = 'Item';
         let activatedBuffs: ActiveBuff[] = [];
+        let isDescriptive = false;
+        let itemDescription = '';
 
         if (gameData) {
             const inv = ownerId === 'player' ? gameData.playerInventory : gameData.companionInventories[ownerId];
@@ -163,6 +166,11 @@ export const useInventoryActions = (
                 const item = inv[list].find(i => i.id === itemId);
                 if (item) {
                     itemName = item.name;
+                    itemDescription = item.description || item.details || '';
+
+                    // NARRATIVE INJECTION FOR DESCRIPTIVE ITEMS
+                    // If the item has no mechanical stats, treat it as a narrative action
+                    isDescriptive = !item.weaponStats && !item.armorStats && (!item.buffs || item.buffs.length === 0) && !item.effect;
 
                     // Phase 5: Filter and process only 'Active' buffs or all buffs if it's a consumable
                     if (item.buffs) {
@@ -190,6 +198,19 @@ export const useInventoryActions = (
 
         // Always consume the item from the item owner's inventory
         dispatch({ type: 'USE_ITEM', payload: { itemId, list, ownerId } });
+
+        // Trigger narrative injection for descriptive items
+        if (isDescriptive && submitUserMessage && gameData) {
+            const content = `[Action]: Use ${itemName}${itemDescription ? `: ${itemDescription}` : ''}`;
+            
+            await submitUserMessage({
+                id: `use-item-${Date.now()}`,
+                sender: 'user',
+                mode: 'CHAR',
+                content: content
+            });
+            return; // Skip standard system message
+        }
         
         // Resolve the target name for the system message
         let targetName = '';
@@ -214,7 +235,7 @@ export const useInventoryActions = (
                 type: 'neutral' 
             } 
         });
-    }, [dispatch, gameData]);
+    }, [dispatch, gameData, submitUserMessage]);
 
     const consolidateCurrency = useCallback((itemIdToConsolidate: string, ownerId: string) => {
         dispatch({ type: 'CONSOLIDATE_CURRENCY', payload: { itemId: itemIdToConsolidate, ownerId } });

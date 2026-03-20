@@ -75,7 +75,6 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
     }, [gameData, dispatch, setIsAiGenerating]);
 
     const characterActions = useCharacterActions(gameData, dispatch, ui, weaveGrandDesign);
-    const inventoryActions = useInventoryActions(gameData, dispatch);
     const combatActions = useCombatActions(gameData, dispatch, ui, weaveGrandDesign);
 
     // Core Managers (Pre-declared for Hook dependencies)
@@ -97,6 +96,8 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         weaveGrandDesign,
         npcActions
     });
+
+    const inventoryActions = useInventoryActions(gameData, dispatch, submitUserMessage);
 
     // World Actions (Now depends on submitAutomatedEvent)
     const worldActions = useWorldActions(gameData, dispatch, combatActions.initiateCombatSequence, setIsAiGenerating, submitAutomatedEvent);
