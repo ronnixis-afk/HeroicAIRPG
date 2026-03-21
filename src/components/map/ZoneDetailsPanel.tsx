@@ -60,8 +60,17 @@ const POIListItem: React.FC<{
     isPlayerHere?: boolean;
     populationLevel?: string;
 }> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, populationLevel }) => {
+    const { updateKnowledge } = useContext(GameDataContext);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState(entry.title);
+    const [editContent, setEditContent] = useState(entry.content);
+    const [editTags, setEditTags] = useState<string[]>(entry.tags || []);
+    const [editImage, setEditImage] = useState<string>(entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
+
     const tags = entry.tags || [];
     const isPopCenter = tags.includes('population-center');
+    const imageUrl = entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '';
+    
     let popIcon = null;
     let popLevelLabel = null;
 
@@ -74,8 +83,15 @@ const POIListItem: React.FC<{
         const iconName = lv === 'village' ? 'settlement' : 
                          possibleLevels.includes(lv) ? lv : 'settlement';
         
-        popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-20 h-20 object-contain" />;
         popLevelLabel = toTitleCase(lv);
+
+        if (imageUrl) {
+            popIcon = <img src={imageUrl} alt={entry.title} className="w-full h-full object-cover" />;
+        } else {
+            popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-20 h-20 object-contain" />;
+        }
+    } else if (imageUrl) {
+        popIcon = <img src={imageUrl} alt={entry.title} className="w-full h-full object-cover" />;
     }
 
     const handleDelete = (e: React.MouseEvent) => {
@@ -94,6 +110,46 @@ const POIListItem: React.FC<{
         e.stopPropagation();
         onInvestigate(entry);
     };
+
+    const handleStartEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsEditing(true);
+        setEditTitle(entry.title);
+        setEditContent(entry.content);
+        setEditTags(entry.tags || []);
+        setEditImage(entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
+    };
+
+    const handleSaveEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const updatedEntry: LoreEntry = {
+            ...entry,
+            title: editTitle,
+            content: editContent,
+            tags: editTags,
+            keywords: [
+                ...(entry.keywords || []).filter(k => !k.startsWith('image:')),
+                ...(editImage ? [`image:${editImage}`] : [])
+            ]
+        };
+        updateKnowledge(updatedEntry);
+        setIsEditing(false);
+    };
+
+    const toggleTag = (tag: string) => {
+        setEditTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+    };
+
+    const setPopLevel = (level: string) => {
+        const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
+        setEditTags(prev => {
+            const base = prev.filter(t => !possibleLevels.includes(t) && t !== 'population-center');
+            if (level === 'none') return base;
+            return [...base, 'population-center', level];
+        });
+    };
+
+    const currentPopLevel = editTags.find(t => ['village', 'settlement', 'town', 'city', 'capital'].includes(t)) || 'none';
 
     return (
         <div 
@@ -115,37 +171,78 @@ const POIListItem: React.FC<{
 
                 {/* Content Area */}
                 <div className="flex-1 p-4 flex flex-col justify-center relative">
-                    <button
-                        onClick={handleDelete}
-                        className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-all bg-brand-bg/80 rounded-lg hover:text-brand-danger z-20"
-                    >
-                        <Icon name="trash" className="w-3 h-3" />
-                    </button>
-                    <div className="pr-6">
-                        <h5 className={`text-[15px] leading-tight mb-1 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
-                            {toTitleCase(entry.title)}
-                        </h5>
-                        {popLevelLabel && (
-                            <div className="mb-2">
-                                <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 tracking-tight">
-                                    {popLevelLabel}
-                                </span>
+                    {isEditing ? (
+                        <div className="space-y-3 pr-2" onClick={e => e.stopPropagation()}>
+                            <input 
+                                value={editTitle} 
+                                onChange={e => setEditTitle(e.target.value)}
+                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-sm font-bold focus:border-brand-accent outline-none"
+                                placeholder="POI Name"
+                            />
+                            <select 
+                                value={currentPopLevel}
+                                onChange={e => setPopLevel(e.target.value)}
+                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-xs font-bold focus:border-brand-accent outline-none"
+                            >
+                                <option value="none">Not a Population Center</option>
+                                <option value="village">Village</option>
+                                <option value="settlement">Settlement</option>
+                                <option value="town">Town</option>
+                                <option value="city">City</option>
+                                <option value="capital">Capital</option>
+                            </select>
+                            <input 
+                                value={editImage} 
+                                onChange={e => setEditImage(e.target.value)}
+                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-xs focus:border-brand-accent outline-none"
+                                placeholder="Image URL (optional)"
+                            />
+                            <AutoResizingTextarea 
+                                value={editContent}
+                                onChange={e => setEditContent(e.target.value)}
+                                className="w-full bg-brand-primary p-2 rounded-lg border border-brand-surface text-xs focus:border-brand-accent outline-none min-h-[60px]"
+                                placeholder="Description"
+                            />
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsEditing(false)} className="btn-secondary h-8 flex-1 text-[10px] rounded-lg">Cancel</button>
+                                <button onClick={handleSaveEdit} className="btn-primary h-8 flex-1 text-[10px] rounded-lg">Save</button>
                             </div>
-                        )}
-                        <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
-                            {entry.content}
-                        </p>
-                        
-                        {isExpanded && entry.tags && entry.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-3">
-                                {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
-                                    <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
-                                        {toTitleCase(tag.replace(/-/g, ' '))}
-                                    </span>
-                                ))}
+                        </div>
+                    ) : (
+                        <>
+                            <button
+                                onClick={handleDelete}
+                                className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-all bg-brand-bg/80 rounded-lg hover:text-brand-danger z-20"
+                            >
+                                <Icon name="trash" className="w-3 h-3" />
+                            </button>
+                            <div className="pr-6">
+                                <h6 className={`text-[15px] leading-tight mb-1 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
+                                    {toTitleCase(entry.title)}
+                                </h6>
+                                {popLevelLabel && (
+                                    <div className="mb-2">
+                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 tracking-tight">
+                                            {popLevelLabel}
+                                        </span>
+                                    </div>
+                                )}
+                                <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                                    {entry.content}
+                                </p>
+                                
+                                {isExpanded && entry.tags && entry.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 mt-3">
+                                        {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
+                                            <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
+                                                {toTitleCase(tag.replace(/-/g, ' '))}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -153,14 +250,14 @@ const POIListItem: React.FC<{
             <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
                     <button
-                        onClick={handleEdit}
+                        onClick={handleStartEdit}
                         className="btn-secondary h-10 flex-1 text-[12px] rounded-xl gap-2 font-bold"
                     >
                         <Icon name="edit" className="w-4 h-4" />
                         {toTitleCase('Edit')}
                     </button>
                     {isPlayerHere ? (
-                        <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest uppercase opacity-80 bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                        <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest bg-brand-accent/10 rounded-xl border border-brand-accent/20">
                             {toTitleCase('You Are Here')}
                         </div>
                     ) : (
