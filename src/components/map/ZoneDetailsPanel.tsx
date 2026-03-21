@@ -67,16 +67,16 @@ const POIListItem: React.FC<{
     const [editTags, setEditTags] = useState<string[]>(entry.tags || []);
     const [editImage, setEditImage] = useState<string>(entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
 
-    const tags = entry.tags || [];
-    const isPopCenter = tags.includes('population-center');
-    const imageUrl = entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '';
+    const activeTags = isEditing ? editTags : (entry.tags || []);
+    const activeIsPopCenter = activeTags.includes('population-center');
+    const activeImageUrl = isEditing ? editImage : (entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
     
     let popIcon = null;
     let popLevelLabel = null;
 
-    if (isPopCenter) {
+    if (activeIsPopCenter) {
         const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
-        const levelFromTags = tags.find(t => possibleLevels.includes(t.toLowerCase()));
+        const levelFromTags = activeTags.find(t => possibleLevels.includes(t.toLowerCase()));
         const lv = (levelFromTags || populationLevel || 'settlement').toLowerCase();
         
         // Map village to settlement if no native village icon
@@ -85,13 +85,13 @@ const POIListItem: React.FC<{
         
         popLevelLabel = toTitleCase(lv);
 
-        if (imageUrl) {
-            popIcon = <img src={imageUrl} alt={entry.title} className="w-full h-full object-cover" />;
+        if (activeImageUrl) {
+            popIcon = <img src={activeImageUrl} alt={editTitle} className="w-full h-full object-cover" />;
         } else {
             popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-20 h-20 object-contain" />;
         }
-    } else if (imageUrl) {
-        popIcon = <img src={imageUrl} alt={entry.title} className="w-full h-full object-cover" />;
+    } else if (activeImageUrl) {
+        popIcon = <img src={activeImageUrl} alt={editTitle} className="w-full h-full object-cover" />;
     }
 
     const handleDelete = (e: React.MouseEvent) => {
