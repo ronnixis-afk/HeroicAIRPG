@@ -146,31 +146,36 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                     </div>
                 )}
 
-                {/* Target Indicator */}
-                {isTargeted && (
+                {/* Target Indicator - Only for non-allies */}
+                {isTargeted && alignment !== 'ally' && (
                     <div className="absolute top-1 right-1 bg-brand-accent rounded-full p-1 z-30 shadow-lg border border-brand-bg animate-bounce-in">
                         <Icon name="check" className="w-2 h-2 text-black" />
                     </div>
                 )}
 
-                {/* Slot for Status/Buff Indicators on Upper Right */}
-                {((hasStatus || (a.statusEffects && a.statusEffects.length > 0)) || (a.activeBuffs && a.activeBuffs.length > 0)) && (
-                    <div 
-                        className="absolute -top-1 -right-1 z-50 flex items-center justify-center gap-0.5"
-                        title={[
-                            ...(a.statusEffects || []).map((s: any) => s.name),
-                            ...(a.activeBuffs || []).map((b: any) => b.name)
-                        ].join(', ')}
-                    >
-                        {a.statusEffects && a.statusEffects.length > 0 && (
-                            <div className="w-3 h-3 bg-yellow-500 rounded-full border border-brand-bg shadow-sm" />
-                        )}
-                        {a.activeBuffs && a.activeBuffs.length > 0 && (
-                            <div className="w-3 h-3 bg-brand-accent rounded-full border border-brand-bg shadow-sm animate-pulse" />
-                        )}
-                    </div>
-                )}
             </button>
+
+            {/* Status and Buff Indicators (Outside overflow-hidden) */}
+            {((hasStatus || (a.statusEffects && a.statusEffects.length > 0)) || (a.activeBuffs && a.activeBuffs.length > 0)) && (
+                <div 
+                    className="absolute -top-1 -right-1 z-50 flex flex-col items-center gap-0.5"
+                    title={[
+                        ...(a.statusEffects || []).map((s: any) => s.name),
+                        ...(a.activeBuffs || []).map((b: any) => b.name)
+                    ].join(', ')}
+                >
+                    {a.activeBuffs && a.activeBuffs.length > 0 && (
+                        <div className="w-4 h-4 bg-brand-accent rounded-full border border-brand-bg shadow-lg flex items-center justify-center animate-pulse">
+                            <Icon name="chevronUp" className="w-3 h-3 text-black" />
+                        </div>
+                    )}
+                    {a.statusEffects && a.statusEffects.length > 0 && (
+                        <div className="w-4 h-4 bg-brand-danger rounded-full border border-brand-bg shadow-lg flex items-center justify-center">
+                            <Icon name="chevronDown" className="w-3 h-3 text-white" />
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Name and Status Bars */}
             <div className={`w-full flex flex-col items-center ${showBars ? 'mt-1.5' : 'mt-1'}`}>
