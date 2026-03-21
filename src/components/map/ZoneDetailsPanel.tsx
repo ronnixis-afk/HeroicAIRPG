@@ -93,14 +93,13 @@ const POIListItem: React.FC<{
     if (isPopCenter && populationLevel) {
         const lv = populationLevel.toLowerCase();
         if (['settlement', 'town', 'city', 'capital'].includes(lv)) {
-            popIcon = <img src={`/icons/${lv}.png`} alt={lv} className="w-5 h-5 object-contain flex-shrink-0" />;
+            popIcon = <img src={`/icons/${lv}.png`} alt={lv} className="w-7 h-7 object-contain flex-shrink-0" />;
         }
     }
 
     const title = (
         <div className="flex items-center gap-3">
             {popIcon}
-            <div className={`w-2 h-2 rounded-full shrink-0 ${isPlayerHere ? 'bg-brand-accent shadow-[0_0_8px_rgba(62,207,142,0.6)] animate-pulse' : entry.visited ? 'bg-brand-text-muted opacity-30' : 'bg-brand-accent shadow-[0_0_8px_rgba(62,207,142,0.4)]'}`} />
             <span className={`text-body-base font-bold truncate transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-brand-text-muted' : 'text-brand-text'}`}>
                 {entry.title}
             </span>
