@@ -198,7 +198,6 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         updateMapZoneAction: worldActions.updateMapZone,
         movePlayerOnMapAction: worldActions.movePlayerOnMap,
         updateBaseScoreAction: combatActions.updateBaseScore,
-        generateMapFromLoreAction: worldActions.generateMapFromLore,
         fetchActionSuggestions,
         saveWorldProgress,
         integrateRefinedCharacter: characterActions.integrateRefinedCharacter,
