@@ -39,10 +39,13 @@ const ShimmerOverlay: React.FC = () => (
 const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, standardDC, standardDice, disabledReason }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
-    const formatUsage = (usage: AbilityUsage | undefined): string => {
-        if (!usage || usage.type === 'passive') return 'Passive';
-        const type = usage.type === 'per_short_rest' ? 'Short rest' : 'Long rest';
-        return `${usage.currentUses}/${usage.maxUses} ${type}`;
+    const formatUsage = (ability: Ability): string => {
+        const effectType = ability.effect?.type;
+        const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+        const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+        if (cost > 0) return `${cost} Stamina`;
+        return 'Passive';
     };
 
     const hasEffect = !!ability.effect;
@@ -76,7 +79,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                         )}
                     </div>
                     <span className="text-body-sm font-bold text-brand-accent/80 mt-1 tracking-normal">
-                        {formatUsage(ability.usage)}
+                        {formatUsage(ability)}
                     </span>
                 </div>
                 {!isRefining && (
@@ -363,10 +366,14 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     const originalIndex = character.abilities.findIndex(a => a.id === ability.id);
 
                     let disabledReason = undefined;
+                    const effectType = ability.effect?.type;
+                    const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+                    const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
                     if (ability.name === "Flurry of Blows" && !isStrictlyUnarmed) {
                         disabledReason = "Must be Unarmed";
-                    } else if (ability.usage && ability.usage.type !== 'passive' && ability.usage.currentUses === 0) {
-                        disabledReason = "0 Charges";
+                    } else if (cost > 0 && (character.stamina || 0) < cost) {
+                        disabledReason = "Not enough stamina";
                     }
 
                     return (
@@ -532,62 +539,18 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
                         <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-surface space-y-5">
                             <label className="block text-xs font-bold text-brand-text-muted ml-1 tracking-normal">Activation & Usage</label>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Type</label>
-                                    <select
-                                        value={editingAbility.usage?.type || 'passive'}
-                                        onChange={(e) => {
-                                            const newType = e.target.value as AbilityUsage['type'];
-                                            const newMaxUses = newType === 'passive' ? 0 : (editingAbility.usage?.maxUses || 1);
-                                            handleAbilityChange(editingIndex!, 'usage', {
-                                                type: newType,
-                                                maxUses: newMaxUses,
-                                                currentUses: newMaxUses,
-                                            });
-                                        }}
-                                        className="w-full input-md text-xs font-bold appearance-none transition-all cursor-pointer"
-                                    >
-                                        <option value="passive">Passive</option>
-                                        <option value="per_short_rest">Short rest</option>
-                                        <option value="per_long_rest">Long rest</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Limit</label>
-                                    <input
-                                        type="number"
-                                        value={editingAbility.usage?.maxUses || 0}
-                                        onChange={(e) => {
-                                            const newMaxUses = parseInt(e.target.value) || 0;
-                                            handleAbilityChange(editingIndex!, 'usage', {
-                                                ...(editingAbility.usage || { type: 'passive' }),
-                                                maxUses: newMaxUses,
-                                                currentUses: newMaxUses,
-                                            });
-                                        }}
-                                        disabled={editingAbility.usage?.type === 'passive'}
-                                        className="w-full input-md text-sm font-black text-center disabled:opacity-20"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Current</label>
-                                    <input
-                                        type="number"
-                                        value={editingAbility.usage?.currentUses ?? 0}
-                                        onChange={(e) => {
-                                            const newCurrentUses = parseInt(e.target.value) || 0;
-                                            const maxUses = editingAbility.usage?.maxUses ?? newCurrentUses;
-                                            const cappedCurrentUses = Math.max(0, Math.min(newCurrentUses, maxUses));
-                                            handleAbilityChange(editingIndex!, 'usage', {
-                                                ...(editingAbility.usage || { type: 'passive', maxUses: 0 }),
-                                                currentUses: cappedCurrentUses,
-                                            });
-                                        }}
-                                        disabled={editingAbility.usage?.type === 'passive'}
-                                        className="w-full input-md text-sm font-black text-center disabled:opacity-20"
-                                    />
-                                </div>
+                            <div>
+                                <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Stamina Cost</label>
+                                <input
+                                    type="number"
+                                    value={editingAbility.staminaCost !== undefined ? editingAbility.staminaCost : ((editingAbility.effect?.type && ['Heal', 'Damage', 'Status'].includes(editingAbility.effect.type)) ? 1 : 0)}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value) || 0;
+                                        handleAbilityChange(editingIndex!, 'staminaCost', Math.max(0, val));
+                                    }}
+                                    className="w-full input-md text-sm font-black text-center"
+                                    min="0"
+                                />
                             </div>
                         </div>
 

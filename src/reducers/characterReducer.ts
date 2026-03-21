@@ -104,34 +104,46 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             const { abilityId, ownerId } = action.payload;
             const newState = { ...state };
             
+            let staminaCost = 0;
+
             const decrementUsage = (abilities: any[]) => {
                 return abilities.map(a => {
-                    if (a.id === abilityId && a.usage && a.usage.type !== 'passive') {
-                        return {
-                            ...a,
-                            usage: {
-                                ...a.usage,
-                                currentUses: Math.max(0, a.usage.currentUses - 1)
-                            }
-                        };
+                    if (a.id === abilityId) {
+                        const effectType = a.effect?.type;
+                        const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+                        staminaCost = a.staminaCost !== undefined ? a.staminaCost : implicitCost;
+
+                        if (a.usage && a.usage.type !== 'passive' && staminaCost === 0) {
+                            return {
+                                ...a,
+                                usage: {
+                                    ...a.usage,
+                                    currentUses: Math.max(0, a.usage.currentUses - 1)
+                                }
+                            };
+                        }
                     }
                     return a;
                 });
             };
 
             if (ownerId === 'player' || ownerId === state.playerCharacter.id) {
-                newState.playerCharacter = new PlayerCharacter({
+                const updatedAbilities = decrementUsage(state.playerCharacter.abilities);
+                const pc = new PlayerCharacter({
                     ...state.playerCharacter,
-                    abilities: decrementUsage(state.playerCharacter.abilities)
+                    abilities: updatedAbilities,
+                    stamina: Math.max(0, (state.playerCharacter.stamina || 0) - staminaCost)
                 });
                 // Re-apply item context
-                newState.playerCharacter.maxHeroicPoints = newState.playerCharacter.getMaxHeroicPoints(state.playerInventory);
+                pc.maxHeroicPoints = pc.getMaxHeroicPoints(state.playerInventory);
+                newState.playerCharacter = pc;
             } else {
                 newState.companions = state.companions.map(c => {
                     if (c.id === ownerId) {
                         const updated = new Companion({
                             ...c,
-                            abilities: decrementUsage(c.abilities)
+                            abilities: decrementUsage(c.abilities),
+                            stamina: Math.max(0, (c.stamina || 0) - staminaCost)
                         });
                         updated.maxHeroicPoints = updated.getMaxHeroicPoints(state.companionInventories[ownerId]);
                         return updated;

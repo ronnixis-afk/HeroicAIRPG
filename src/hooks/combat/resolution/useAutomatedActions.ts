@@ -28,7 +28,17 @@ export const useAutomatedActions = (
         const combatStats = player.getCombatStats(inv);
         const maxAttacksFromSheet = combatStats.numberOfAttacks || 1;
 
-        const isAvailable = (a: any) => !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+        const isAvailable = (a: any) => {
+            const hasUsage = !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+            if (!hasUsage) return false;
+            
+            let staminaCost = 0;
+            if (a.staminaCost !== undefined) staminaCost = a.staminaCost;
+            else if (a.effect && ['Heal', 'Damage', 'Status'].includes(a.effect.type)) staminaCost = 1;
+
+            if (staminaCost > 0 && (player.stamina || 0) < staminaCost) return false;
+            return true;
+        };
         const useSpecialChance = Math.random() < 0.30;
         let selectedAction: any = null;
 
@@ -118,7 +128,17 @@ export const useAutomatedActions = (
             }
 
             let selectedAction: any = null;
-            const isAvailable = (a: any) => !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+            const isAvailable = (a: any) => {
+                const hasUsage = !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+                if (!hasUsage) return false;
+
+                let staminaCost = 0;
+                if (a.staminaCost !== undefined) staminaCost = a.staminaCost;
+                else if (a.effect && ['Heal', 'Damage', 'Status'].includes(a.effect.type)) staminaCost = 1;
+
+                if (staminaCost > 0 && ((actor as any).stamina || 0) < staminaCost) return false;
+                return true;
+            };
             const isAutomatedActor = gameData.companions.some(c => c.id === actorId) || actorId === gameData.playerCharacter.id;
             const useSpecialChance = Math.random() < 0.30;
 

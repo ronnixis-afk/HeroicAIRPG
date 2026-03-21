@@ -414,20 +414,50 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                     const rarityColorClass = getItemRarityColor(rarity);
                                     const effect = 'effect' in source ? source.effect : undefined;
 
+                                    let disabledReason = undefined;
+                                    let costDisplay = '';
+
+                                    if (!('rarity' in source) && mode === 'ability') {
+                                        // It's an Ability (Trait)
+                                        const ability = source as Ability;
+                                        const implicitCost = (effect && ['Heal', 'Damage', 'Status'].includes(effect.type)) ? 1 : 0;
+                                        const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+                                        if (cost > 0) {
+                                            costDisplay = `${cost} Stamina`;
+                                            if ((actor as any).stamina < cost) disabledReason = "Not enough stamina";
+                                        } else if (ability.usage && ability.usage.type !== 'passive' && ability.usage.currentUses === 0) {
+                                            disabledReason = "0 Charges";
+                                            costDisplay = "0 Charges";
+                                        }
+                                    } else if (mode === 'item' && 'usage' in source) {
+                                        // Item usages
+                                        const item = source as Item;
+                                        if (item.usage && item.usage.type !== 'passive' && item.usage.currentUses === 0 && (!item.quantity || item.quantity <= 1)) {
+                                            disabledReason = "0 Charges";
+                                            costDisplay = "0 Charges";
+                                        }
+                                    }
+
                                     return (
                                         <button
                                             key={source.id}
                                             onClick={() => { setSelectedSourceId(source.id); setTargetCounts({}); }}
-                                            className={`w-full text-left bg-brand-primary/10 rounded-3xl p-5 border-2 transition-all flex flex-col gap-2 relative overflow-hidden group shadow-sm ${isSelected ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20' : 'border-brand-surface hover:border-brand-primary/50'}`}
+                                            disabled={!!disabledReason}
+                                            className={`w-full text-left bg-brand-primary/10 rounded-3xl p-5 border-2 transition-all flex flex-col gap-2 relative overflow-hidden group shadow-sm ${isSelected ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20' : 'border-brand-surface hover:border-brand-primary/50'} ${disabledReason ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                                         >
                                             <div className="flex justify-between items-center">
-                                                <div className="flex items-center gap-4 overflow-hidden">
+                                                <div className="flex items-center gap-4 overflow-hidden flex-1">
                                                     <div className={`shrink-0 flex items-center justify-center p-3 bg-brand-surface rounded-2xl border border-brand-primary shadow-inner group-hover:scale-105 transition-transform ${isSelected ? 'border-brand-accent/30' : ''}`}>
                                                         <Icon name={getIconName(source)} className={`w-5 h-5 ${rarityColorClass}`} />
                                                     </div>
-                                                    <div className="flex flex-col truncate">
+                                                    <div className="flex flex-col truncate flex-1 min-w-0 pr-2">
                                                         <span className={`text-body-base font-bold truncate ${isSelected ? 'text-brand-accent' : 'text-brand-text'}`}>{source.name}</span>
-                                                        <span className={`text-[8px] font-bold ${rarityColorClass} opacity-80`}>{toTitleCase(rarity || 'Core')}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            {rarity && <span className={`text-[8px] font-bold ${rarityColorClass} opacity-80`}>{toTitleCase(rarity || 'Core')}</span>}
+                                                            {costDisplay && <span className="text-[8px] font-bold text-brand-accent bg-brand-accent/10 px-1.5 py-0.5 rounded border border-brand-accent/20 tracking-normal">{costDisplay}</span>}
+                                                            {disabledReason && <span className="text-[8px] font-bold text-brand-danger bg-brand-danger/10 px-1.5 py-0.5 rounded border border-brand-danger/20 tracking-normal">{disabledReason}</span>}
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 {isSelected && <Icon name="check" className="w-5 h-5 text-brand-accent shrink-0" />}

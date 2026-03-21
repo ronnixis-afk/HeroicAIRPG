@@ -13,6 +13,7 @@ export interface Ability {
     usage?: AbilityUsage;
     effect?: AbilityEffect;
     buffs?: Buff[];
+    staminaCost?: number; // Added for stamina-based trait system
     isRefining?: boolean; // Track when AI is skinning the trait
     /* Fix: Added isLevelUpTrait to Ability interface to resolve property missing error in FeaturesList */
     isLevelUpTrait?: boolean;

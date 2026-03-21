@@ -20,18 +20,31 @@ export const useManualActions = (
     const { isHeroicModeActive, setIsHeroicModeActive } = useUI();
 
     const performPlayerAttack = useCallback(async (source: Item | Ability, targetIds: string[], flavorText?: string, mode: RollMode = 'normal', sourceActorId?: string) => {
-        // Guard: Check if it's an ability with zero charges
-        if ('usage' in source && source.usage && source.usage.type !== 'passive' && source.usage.currentUses <= 0) {
-            dispatch({
-                type: 'ADD_MESSAGE',
-                payload: {
-                    id: `sys-no-charges-${Date.now()}`,
-                    sender: 'system',
-                    content: `${source.name} has no charges remaining! You must rest to recharge it.`,
-                    type: 'neutral'
-                }
-            });
-            return;
+        if (!gameData) return;
+        // Guard: Check if it's an ability with zero charges or insufficient stamina
+        if (!('tags' in source)) {
+            const ability = source as Ability;
+            const effect = ability.effect;
+            const implicitCost = (effect && ['Heal', 'Damage', 'Status'].includes(effect.type)) ? 1 : 0;
+            const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+            const currentStamina = sourceActorId && sourceActorId !== gameData.playerCharacter.id
+                ? (gameData.companions.find(c => c.id === sourceActorId) as any)?.stamina || 0
+                : (gameData.playerCharacter as any).stamina || 0;
+
+            if (cost > 0 && currentStamina < cost) {
+                dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-no-stam-${Date.now()}`, sender: 'system', content: `Not enough stamina to use ${source.name}!`, type: 'neutral' } });
+                return;
+            } else if (cost === 0 && ability.usage && ability.usage.type !== 'passive' && ability.usage.currentUses <= 0) {
+                dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-no-charges-${Date.now()}`, sender: 'system', content: `${source.name} has no charges remaining! You must rest to recharge it.`, type: 'neutral' } });
+                return;
+            }
+        } else {
+            const item = source as Item;
+            if (item.usage && item.usage.type !== 'passive' && item.usage.currentUses <= 0 && (!item.quantity || item.quantity <= 1)) {
+                dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-no-charges-${Date.now()}`, sender: 'system', content: `${source.name} has no charges remaining!`, type: 'neutral' } });
+                return;
+            }
         }
 
         // Phase 2: Capture and consume Heroic state immediately to anchor the async flow.
@@ -43,7 +56,7 @@ export const useManualActions = (
             setIsHeroicModeActive(false);
         }
 
-        if (!gameData || targetIds.length === 0) return;
+        if (targetIds.length === 0) return;
 
         if (gameData.combatConfiguration?.narrativeCombat) {
             // Future compatibility: Ensure narrative rounds can eventually receive the heroic intent
@@ -164,12 +177,10 @@ export const useManualActions = (
         } else {
             // It's an ABILITY
             const ability = source as Ability;
-            if (ability.usage && ability.usage.type !== 'passive') {
-                dispatch({ 
-                    type: 'USE_ABILITY', 
-                    payload: { abilityId: ability.id, ownerId: effectiveOwnerId } 
-                });
-            }
+            dispatch({ 
+                type: 'USE_ABILITY', 
+                payload: { abilityId: ability.id, ownerId: effectiveOwnerId } 
+            });
         }
 
         const aiNarrates = gameData.combatConfiguration?.aiNarratesTurns ?? true;
