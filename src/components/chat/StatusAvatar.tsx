@@ -129,9 +129,9 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
 
                 {/* Bars Container */}
                 {showBars && (
-                    <div className="w-full space-y-0.5">
+                    <div className="w-full bg-black/40 rounded-full overflow-hidden border border-white/5 flex flex-col">
                         {/* HP Bar */}
-                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div className="h-1 w-full relative">
                             <div 
                                 className="h-full transition-all duration-500 ease-out"
                                 style={{ 
@@ -143,7 +143,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                         
                         {/* Shield Bar (Temp HP) */}
                         {actualMaxTempHp > 0 && (
-                            <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div className="h-1 w-full relative border-t border-white/5">
                                 <div 
                                     className="h-full transition-all duration-700 ease-out opacity-90"
                                     style={{ 
@@ -156,7 +156,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
 
                         {/* Stamina Bar */}
                         {maxStamina > 0 && (
-                            <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div className="h-1 w-full relative border-t border-white/5">
                                 <div 
                                     className="h-full transition-all duration-700 ease-out opacity-90"
                                     style={{ 

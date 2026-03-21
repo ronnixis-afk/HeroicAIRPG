@@ -90,43 +90,45 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
             </div>
 
             {/* Health and Shield Bars */}
-            <div className="mt-2 w-full space-y-1 px-1">
-                {/* HP Bar */}
-                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                    <div 
-                        className="h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]"
-                        style={{ 
-                            width: `${hpPercent * 100}%`,
-                            backgroundColor: hpColor
-                        }}
-                    />
+            <div className="mt-2 w-full px-1">
+                <div className="w-full bg-black/40 rounded-full overflow-hidden border border-white/5 flex flex-col shadow-[0_0_10px_rgba(0,0,0,0.5)]">
+                    {/* HP Bar */}
+                    <div className="h-1.5 w-full relative">
+                        <div 
+                            className="h-full transition-all duration-500 ease-out"
+                            style={{ 
+                                width: `${hpPercent * 100}%`,
+                                backgroundColor: hpColor
+                            }}
+                        />
+                    </div>
+                    
+                    {/* Shield Bar (Temp HP) */}
+                    {maxTempHp > 0 && (
+                        <div className="h-1.5 w-full relative border-t border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(56,189,248,0.4)]"
+                                style={{ 
+                                    width: `${tempHpRatio * 100}%`,
+                                    backgroundColor: tempColor
+                                }}
+                            />
+                        </div>
+                    )}
+                    
+                    {/* Stamina Bar */}
+                    {maxStamina > 0 && (
+                        <div className="h-1.5 w-full relative border-t border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                                style={{ 
+                                    width: `${staminaRatio * 100}%`,
+                                    backgroundColor: staminaColor
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
-                
-                {/* Shield Bar (Temp HP) */}
-                {maxTempHp > 0 && (
-                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(56,189,248,0.4)]"
-                            style={{ 
-                                width: `${tempHpRatio * 100}%`,
-                                backgroundColor: tempColor
-                            }}
-                        />
-                    </div>
-                )}
-                
-                {/* Stamina Bar */}
-                {maxStamina > 0 && (
-                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                            style={{ 
-                                width: `${staminaRatio * 100}%`,
-                                backgroundColor: staminaColor
-                            }}
-                        />
-                    </div>
-                )}
             </div>
 
             <span className={`mt-1 text-body-tiny truncate max-w-[80px] font-bold ${isActive ? 'text-brand-text' : 'text-brand-text-muted'} ${!targetable ? 'italic' : ''}`}>

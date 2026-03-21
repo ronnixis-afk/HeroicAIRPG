@@ -67,43 +67,45 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
                 </div>
 
                 {/* Health and Shield Bars */}
-                <div className="mt-1.5 w-full space-y-0.5">
-                    {/* HP Bar */}
-                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                            className="h-full transition-all duration-500 ease-out"
-                            style={{ 
-                                width: `${hpRatio * 100}%`,
-                                backgroundColor: hpColor
-                            }}
-                        />
-                    </div>
-                    
-                    {/* Shield Bar (Temp HP) */}
-                    {maxTempHp > 0 && (
-                        <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                <div className="mt-1.5 w-full">
+                    <div className="w-full bg-black/40 rounded-full overflow-hidden border border-white/5 flex flex-col">
+                        {/* HP Bar */}
+                        <div className="h-1 w-full relative">
                             <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                className="h-full transition-all duration-500 ease-out"
                                 style={{ 
-                                    width: `${tempHpRatio * 100}%`,
-                                    backgroundColor: tempColor
+                                    width: `${hpRatio * 100}%`,
+                                    backgroundColor: hpColor
                                 }}
                             />
                         </div>
-                    )}
+                        
+                        {/* Shield Bar (Temp HP) */}
+                        {maxTempHp > 0 && (
+                            <div className="h-1 w-full relative border-t border-white/5">
+                                <div 
+                                    className="h-full transition-all duration-700 ease-out opacity-90"
+                                    style={{ 
+                                        width: `${tempHpRatio * 100}%`,
+                                        backgroundColor: tempColor
+                                    }}
+                                />
+                            </div>
+                        )}
 
-                    {/* Stamina Bar */}
-                    {maxStamina > 0 && (
-                        <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${staminaRatio * 100}%`,
-                                    backgroundColor: staminaColor
-                                }}
-                            />
-                        </div>
-                    )}
+                        {/* Stamina Bar */}
+                        {maxStamina > 0 && (
+                            <div className="h-1 w-full relative border-t border-white/5">
+                                <div 
+                                    className="h-full transition-all duration-700 ease-out opacity-90"
+                                    style={{ 
+                                        width: `${staminaRatio * 100}%`,
+                                        backgroundColor: staminaColor
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {hasStatus && (
