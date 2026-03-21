@@ -185,7 +185,7 @@ const StoreView: React.FC = () => {
     const currencyName = gameData.mapSettings?.style === 'sci-fi' ? 'Credits' : 'Gold';
 
     const currentZone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
-    const hasShipyard = currentZone?.zoneFeatures?.includes('Shipyard') || false;
+    const hasShipyard = currentZone?.zoneFeatures?.includes('Shipyard') || currentZone?.populationLevel === 'Capital';
 
     // Reset active scale if user had Ship selected but Shipyard is no longer available
     useEffect(() => {

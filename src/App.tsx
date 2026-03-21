@@ -209,6 +209,12 @@ const GameInterface: React.FC = () => {
     return zone?.zoneFeatures || [];
   }, [gameData?.playerCoordinates, gameData?.mapZones]);
 
+  const currentPopulationLevel = useMemo(() => {
+    if (!gameData || !gameData.playerCoordinates) return undefined;
+    const zone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
+    return zone?.populationLevel;
+  }, [gameData?.playerCoordinates, gameData?.mapZones]);
+
   const handleLocationSubmit = (prompt: string) => {
     submitUserMessage({
       id: `user-travel-${Date.now()}`,
@@ -410,8 +416,9 @@ const GameInterface: React.FC = () => {
             setActiveView={setActiveView}
             onTimeManagementClick={() => setIsTimeModalOpen(true)}
             isCombatActive={isCombatActive}
-            badges={menuBadges}
+             badges={menuBadges}
             zoneFeatures={currentZoneFeatures}
+            populationLevel={currentPopulationLevel}
           />
           <PlayerAttackModal
             isOpen={activePanel === 'abilities'}

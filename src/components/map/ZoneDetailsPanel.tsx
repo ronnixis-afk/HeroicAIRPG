@@ -63,6 +63,7 @@ const POIListItem: React.FC<{
     const tags = entry.tags || [];
     const isPopCenter = tags.includes('population-center');
     let popIcon = null;
+    let popLevelLabel = null;
 
     if (isPopCenter) {
         const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
@@ -73,7 +74,8 @@ const POIListItem: React.FC<{
         const iconName = lv === 'village' ? 'settlement' : 
                          possibleLevels.includes(lv) ? lv : 'settlement';
         
-        popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-7 h-7 object-contain" />;
+        popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-20 h-20 object-contain" />;
+        popLevelLabel = toTitleCase(lv);
     }
 
     const handleDelete = (e: React.MouseEvent) => {
@@ -96,68 +98,79 @@ const POIListItem: React.FC<{
     return (
         <div 
             onClick={onToggleExpand}
-            className={`card-base flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-500 cursor-pointer ${isExpanded ? 'col-span-2' : 'aspect-[2/3]'}`}
+            className={`card-base flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-300 cursor-pointer w-full`}
         >
-            {/* Image/Icon Placeholder */}
-            <div className={`${isExpanded ? 'h-40' : 'h-[45%]'} bg-brand-primary/10 flex items-center justify-center relative overflow-hidden p-4 transition-all duration-500`}>
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
-                {popIcon ? (
-                    <div className="relative z-10 drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-110">
-                        {popIcon}
-                    </div>
-                ) : (
-                    <Icon name="map" className="w-12 h-12 text-brand-text-muted/20 relative z-10" />
-                )}
-                <button
-                    onClick={handleDelete}
-                    className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-all bg-black/40 rounded-lg hover:text-brand-danger z-20"
-                >
-                    <Icon name="trash" className="w-3 h-3" />
-                </button>
-                {isExpanded && (
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-brand-accent/20 border border-brand-accent/30 rounded text-[8px] font-bold text-brand-accent uppercase tracking-widest z-20">
-                        Details
-                    </div>
-                )}
-            </div>
-
-            {/* Content Area */}
-            <div className="flex-1 p-4 flex flex-col">
-                <div className="flex-1">
-                    <h5 className={`text-[14px] leading-tight mb-2 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
-                        {toTitleCase(entry.title)}
-                    </h5>
-                    <p className={`text-[11px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-4'}`}>
-                        {entry.content}
-                    </p>
-                    
-                    {isExpanded && entry.tags && entry.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-4">
-                            {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
-                                <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
-                                    {toTitleCase(tag.replace(/-/g, ' '))}
-                                </span>
-                            ))}
+            <div className="flex flex-row items-stretch min-h-[100px]">
+                {/* Image/Icon Placeholder */}
+                <div className={`w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden py-4 px-2 transition-all duration-300 flex-shrink-0`}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
+                    {popIcon ? (
+                        <div className="relative z-10 drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-110">
+                            {popIcon}
                         </div>
+                    ) : (
+                        <Icon name="map" className="w-12 h-12 text-brand-text-muted/20 relative z-10" />
                     )}
                 </div>
 
-                <div className="flex gap-2 mt-4 flex-shrink-0">
-                    {isExpanded && (
+                {/* Content Area */}
+                <div className="flex-1 p-4 flex flex-col justify-center relative">
+                    <button
+                        onClick={handleDelete}
+                        className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-all bg-brand-bg/80 rounded-lg hover:text-brand-danger z-20"
+                    >
+                        <Icon name="trash" className="w-3 h-3" />
+                    </button>
+                    <div className="pr-6">
+                        <h5 className={`text-[15px] leading-tight mb-1 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
+                            {toTitleCase(entry.title)}
+                        </h5>
+                        {popLevelLabel && (
+                            <div className="mb-2">
+                                <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 tracking-tight">
+                                    {popLevelLabel}
+                                </span>
+                            </div>
+                        )}
+                        <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                            {entry.content}
+                        </p>
+                        
+                        {isExpanded && entry.tags && entry.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-3">
+                                {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
+                                    <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
+                                        {toTitleCase(tag.replace(/-/g, ' '))}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Expanded Actions */}
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
+                    <button
+                        onClick={handleEdit}
+                        className="btn-secondary h-10 flex-1 text-[12px] rounded-xl gap-2 font-bold"
+                    >
+                        <Icon name="edit" className="w-4 h-4" />
+                        {toTitleCase('Edit')}
+                    </button>
+                    {isPlayerHere ? (
+                        <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest uppercase opacity-80 bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                            {toTitleCase('You Are Here')}
+                        </div>
+                    ) : (
                         <button
-                            onClick={handleEdit}
-                            className="btn-secondary h-8 flex-1 text-[10px] rounded-lg gap-2"
+                            onClick={handleInvestigate}
+                            className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold"
                         >
-                            <Icon name="edit" className="w-3 h-3" />
-                            {toTitleCase('Edit')}
+                            {toTitleCase('Enter')}
                         </button>
                     )}
-                    <button
-                        onClick={handleInvestigate}
-                        className="btn-primary h-8 flex-1 text-[10px] rounded-lg"
-                    >
-                        {toTitleCase('Enter')}
-                    </button>
                 </div>
             </div>
         </div>
@@ -338,7 +351,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-8">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="mb-0 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
+                                        <h3 className="mb-2 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">
                                                 {coordinates}
@@ -365,8 +378,8 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                 </div>
 
                                 <div className="space-y-4">
-                                    <h5 className="mb-0">Points Of Interest</h5>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <h5 className="mb-2">Points Of Interest</h5>
+                                    <div className="grid grid-cols-1 gap-3">
                                         {(isBackfilling || isDiscoveringLocale) && entries.length === 0 ? (
                                             <>
                                                 <POIShimmer />

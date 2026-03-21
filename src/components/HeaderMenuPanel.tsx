@@ -23,6 +23,7 @@ interface HeaderMenuPanelProps {
   isCombatActive?: boolean;
   badges?: Record<string, number>;
   zoneFeatures?: string[];
+  populationLevel?: string;
 }
 
 const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
@@ -75,7 +76,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   onTimeManagementClick,
   isCombatActive = false,
   badges = {} as Record<string, number>,
-  zoneFeatures = []
+  zoneFeatures = [],
+  populationLevel = ''
 }) => {
   const formattedWorldName = useMemo(() => {
     if (!worldName) return 'Details';
@@ -144,7 +146,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     label="Merchant"
                     imageUrl="/icons/merchant.png"
                     onClick={() => handleAction('store')}
-                    disabled={isCombatActive || !zoneFeatures.includes('Market')}
+                    disabled={isCombatActive || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
                     warning={isCombatActive ? "The Merchant is hiding during combat." : "No Market available in this zone."}
                   />
 
@@ -153,7 +155,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     label="Forge" 
                     imageUrl="/icons/forge.png" 
                     onClick={() => handleAction('item-forge')} 
-                    disabled={isCombatActive || !zoneFeatures.includes('Item Forge')}
+                    disabled={isCombatActive || (!zoneFeatures.includes('Item Forge') && !['City', 'Capital'].includes(populationLevel || ''))}
                     warning={isCombatActive ? "The Forge is unsafe during combat." : "No Forge available in this zone."}
                   />
                   <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} />
