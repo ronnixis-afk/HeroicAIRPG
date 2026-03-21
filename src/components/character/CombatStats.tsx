@@ -272,6 +272,33 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                 </div>
                             </div>
                         </div>
+
+                        {/* Stamina Section */}
+                        <div className="col-span-4">
+                            <label className="block text-body-sm font-bold text-brand-text-muted mb-1 px-1">Stamina</label>
+                            <div className="flex items-center gap-2 bg-brand-primary/20 p-2 rounded-xl border border-brand-primary/50">
+                                <input
+                                    type="number"
+                                    value={character.stamina ?? 0}
+                                    onChange={e => onChange(['stamina'], parseInt(e.target.value) || 0)}
+                                    className="w-full input-md text-center font-black text-2xl text-[#f59e0b]"
+                                    aria-label="Current Stamina"
+                                />
+                                <span className="text-brand-text-muted text-xl font-black">/</span>
+                                <div className="relative w-full">
+                                    <input
+                                        type="number"
+                                        value={character.maxStamina ?? 0}
+                                        readOnly
+                                        className="w-full input-md bg-brand-primary/50 text-center font-black text-2xl text-brand-text-muted cursor-not-allowed"
+                                        aria-label="Maximum Stamina"
+                                    />
+                                    <div className="absolute inset-y-0 right-2 flex items-center text-brand-text-muted" title="Calculated based on Level and Con">
+                                        <Icon name="check" className="w-4 h-4 opacity-30" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="mt-8">

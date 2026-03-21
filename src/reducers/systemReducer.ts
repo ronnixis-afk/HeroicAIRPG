@@ -124,6 +124,12 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     ? state.playerCharacter.maxHitPoints
                     : Math.min(state.playerCharacter.maxHitPoints, (state.playerCharacter.currentHitPoints || 0) + playerHeal),
                 temporaryHitPoints: newPlayerMaxTempHP,
+                stamina: type === 'long'
+                    ? playerInstance.getMaxStamina(state.playerInventory)
+                    : Math.min(
+                        playerInstance.getMaxStamina(state.playerInventory),
+                        (state.playerCharacter.stamina || 0) + Math.floor(playerInstance.getMaxStamina(state.playerInventory) * 0.25)
+                    ),
                 heroicPoints: type === 'long'
                     ? currentMaxHeroic
                     : Math.min(state.playerCharacter.heroicPoints || 0, currentMaxHeroic)
@@ -191,7 +197,13 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     currentHitPoints: type === 'long'
                         ? c.maxHitPoints
                         : Math.min(c.maxHitPoints, (c.currentHitPoints || 0) + heal),
-                    temporaryHitPoints: newCompMaxTempHP
+                    temporaryHitPoints: newCompMaxTempHP,
+                    stamina: type === 'long'
+                        ? compInstance.getMaxStamina(compInventory)
+                        : Math.min(
+                            compInstance.getMaxStamina(compInventory),
+                            (c.stamina || 0) + Math.floor(compInstance.getMaxStamina(compInventory) * 0.25)
+                        )
                 });
 
                 if (type === 'short') {

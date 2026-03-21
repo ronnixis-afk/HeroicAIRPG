@@ -23,11 +23,17 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
     const tempHp = actor.temporaryHitPoints || 0;
     const maxTempHp = actor.maxTemporaryHitPoints || 0;
     const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
+    
+    // Add stamina properties for ActorAvatar
+    const currentStamina = (actor as any).stamina || 0;
+    const maxStamina = (actor as any).maxStamina || 0;
+    const staminaRatio = maxStamina > 0 ? Math.max(0, Math.min(1, currentStamina / maxStamina)) : 0;
 
     const targetable = canBeTargeted(actor);
 
-    const ringColor = actor.alignment === 'ally' || actor.isAlly ? '#3ecf8e' : (actor.alignment === 'neutral' ? '#facc15' : '#ef4444');
+    const hpColor = actor.alignment === 'ally' || actor.isAlly ? '#3ecf8e' : (actor.alignment === 'neutral' ? '#facc15' : '#ef4444');
     const tempColor = '#38bdf8'; // Brand Light Blue
+    const staminaColor = '#f59e0b'; // Brand gold/yellow
     const initials = actor.name.slice(0, 2);
 
     const hasStatus = (actor.statusEffects?.length || 0) > 0;
@@ -91,7 +97,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                         className="h-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(0,0,0,0.5)]"
                         style={{ 
                             width: `${hpPercent * 100}%`,
-                            backgroundColor: ringColor
+                            backgroundColor: hpColor
                         }}
                     />
                 </div>
@@ -104,6 +110,19 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({ actor, isActive, onCli
                             style={{ 
                                 width: `${tempHpRatio * 100}%`,
                                 backgroundColor: tempColor
+                            }}
+                        />
+                    </div>
+                )}
+                
+                {/* Stamina Bar */}
+                {maxStamina > 0 && (
+                    <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                            className="h-full transition-all duration-700 ease-out opacity-90 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
+                            style={{ 
+                                width: `${staminaRatio * 100}%`,
+                                backgroundColor: staminaColor
                             }}
                         />
                     </div>

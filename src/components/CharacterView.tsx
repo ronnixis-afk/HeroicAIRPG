@@ -110,6 +110,8 @@ const CharacterView: React.FC = () => {
                                 maxHp={playerCharacter.maxHitPoints}
                                 tempHp={playerCharacter.temporaryHitPoints}
                                 maxTempHp={playerCharacter.getMaxTemporaryHitPoints(gameData.playerInventory)}
+                                stamina={playerCharacter.stamina}
+                                maxStamina={playerCharacter.maxStamina}
                                 isPlayer={true}
                                 isInParty={true}
                                 isShrunk={isScrolled}
@@ -127,6 +129,8 @@ const CharacterView: React.FC = () => {
                                     maxHp={comp.maxHitPoints}
                                     tempHp={comp.temporaryHitPoints}
                                     maxTempHp={comp.getMaxTemporaryHitPoints(gameData.companionInventories?.[comp.id] || { equipped: [], carried: [], storage: [], assets: [] })}
+                                    stamina={comp.stamina}
+                                    maxStamina={comp.maxStamina}
                                     isInParty={comp.isInParty !== false}
                                     onToggleParty={() => toggleCompanionParty(comp.id)}
                                     isShrunk={isScrolled}

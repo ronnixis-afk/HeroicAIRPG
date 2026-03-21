@@ -31,6 +31,8 @@ const defaultGameData: GameData = {
     maxHitPoints: 12,
     currentHitPoints: 12,
     temporaryHitPoints: 0,
+    stamina: 3,
+    maxStamina: 3,
     heroicPoints: 1, // UPDATED: 1 point baseline
     maxHeroicPoints: 1, // NEW: Standard maximum
     abilityScores: {
@@ -143,6 +145,8 @@ export const getNewDndCharacter = (): PlayerCharacter => new PlayerCharacter({
   maxHitPoints: 10,
   currentHitPoints: 10,
   temporaryHitPoints: 0,
+  stamina: 3,
+  maxStamina: 3,
   heroicPoints: 1, // UPDATED: 1 point baseline
   maxHeroicPoints: 1, // NEW: Standard maximum
   abilityScores: {

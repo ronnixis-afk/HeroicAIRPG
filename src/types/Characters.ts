@@ -87,6 +87,8 @@ export class PlayerCharacter {
     maxHitPoints: number;
     currentHitPoints: number;
     temporaryHitPoints: number;
+    stamina: number;
+    maxStamina: number;
     heroicPoints: number;
     maxHeroicPoints: number; // FOUNDATION: Support for traits increasing capacity
     abilityScores: Record<AbilityScoreName, AbilityScore>;
@@ -134,6 +136,9 @@ export class PlayerCharacter {
         this.maxHeroicPoints = this.getMaxHeroicPoints();
         this.heroicPoints = data.heroicPoints !== undefined ? Math.min(Number(data.heroicPoints), this.maxHeroicPoints) : this.maxHeroicPoints;
 
+        this.maxStamina = this.getMaxStamina();
+        this.stamina = data.stamina !== undefined ? Math.min(Number(data.stamina), this.maxStamina) : this.maxStamina;
+
         // Derived Vitality
         this.maxHitPoints = Number(data.maxHitPoints) || 10;
         this.currentHitPoints = data.currentHitPoints !== undefined ? Number(data.currentHitPoints) : this.maxHitPoints;
@@ -178,6 +183,12 @@ export class PlayerCharacter {
         });
 
         return base + extraBonus;
+    }
+
+    getMaxStamina(inventory?: Inventory): number {
+        const conScore = inventory ? this.getBuffedScore('constitution', inventory) : (this.abilityScores?.constitution?.score || 10);
+        const conMod = calculateModifier(conScore);
+        return Math.max(1, this.level * (conMod + 3));
     }
 
     getCombatStats(inventory: Inventory): CalculatedCombatStats {

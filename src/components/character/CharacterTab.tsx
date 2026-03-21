@@ -12,6 +12,8 @@ interface CharacterTabProps {
     maxHp: number;
     tempHp?: number;
     maxTempHp?: number;
+    stamina?: number;
+    maxStamina?: number;
     isInParty?: boolean;
     onToggleParty?: () => void;
     isPlayer?: boolean;
@@ -28,6 +30,8 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     maxHp, 
     tempHp = 0,
     maxTempHp = 0,
+    stamina = 0,
+    maxStamina = 0,
     isInParty, 
     onToggleParty, 
     isPlayer,
@@ -36,9 +40,11 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     const hpRatio = maxHp > 0 ? currentHp / maxHp : 0;
     const hpPercent = Math.max(0, Math.min(1, hpRatio));
     const tempPercent = maxTempHp > 0 ? tempHp / maxTempHp : 0;
+    const staminaPercent = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
 
     const color = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
     const tempColor = '#38bdf8'; // Shield blue
+    const staminaColor = '#f59e0b'; // Stamina Gold
 
     const isDead = currentHp <= 0;
     const isLowHp = !isDead && hpRatio <= 0.25;
@@ -91,6 +97,19 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
                                 style={{ 
                                     width: `${tempPercent * 100}%`,
                                     backgroundColor: tempColor
+                                }}
+                            />
+                        </div>
+                    )}
+                    
+                    {/* Stamina Bar */}
+                    {maxStamina > 0 && (
+                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                style={{ 
+                                    width: `${staminaPercent * 100}%`,
+                                    backgroundColor: staminaColor
                                 }}
                             />
                         </div>

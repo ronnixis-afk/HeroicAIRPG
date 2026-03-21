@@ -14,6 +14,8 @@ interface CombatAvatarProps {
     maxHp: number;
     tempHp: number;
     maxTempHp: number;
+    stamina?: number;
+    maxStamina?: number;
     isAlly: boolean;
     alignment: string;
     isCurrentTurn: boolean;
@@ -21,13 +23,15 @@ interface CombatAvatarProps {
     imageUrl?: string;
 }
 
-const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, maxTempHp, isAlly, alignment, isCurrentTurn, statusEffects, imageUrl }) => {
+const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, maxTempHp, stamina = 0, maxStamina = 0, isAlly, alignment, isCurrentTurn, statusEffects, imageUrl }) => {
     const hpRatio = maxHp > 0 ? Math.max(0, Math.min(1, hp / maxHp)) : 0;
     const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
+    const staminaRatio = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
 
     const visualSize = isCurrentTurn ? 50 : 40;
-    const ringColor = alignment === 'ally' ? '#3ecf8e' : (alignment === 'neutral' ? '#facc15' : '#ef4444');
+    const hpColor = alignment === 'ally' ? '#3ecf8e' : (alignment === 'neutral' ? '#facc15' : '#ef4444');
     const tempColor = '#38bdf8'; // Brand Light Blue
+    const staminaColor = '#f59e0b'; // Brand gold/yellow
     const initials = name.slice(0, 2);
 
     const hasStatus = statusEffects && statusEffects.length > 0;
@@ -70,7 +74,7 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
                             className="h-full transition-all duration-500 ease-out"
                             style={{ 
                                 width: `${hpRatio * 100}%`,
-                                backgroundColor: ringColor
+                                backgroundColor: hpColor
                             }}
                         />
                     </div>
@@ -83,6 +87,19 @@ const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, ma
                                 style={{ 
                                     width: `${tempHpRatio * 100}%`,
                                     backgroundColor: tempColor
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {/* Stamina Bar */}
+                    {maxStamina > 0 && (
+                        <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                            <div 
+                                className="h-full transition-all duration-700 ease-out opacity-90"
+                                style={{ 
+                                    width: `${staminaRatio * 100}%`,
+                                    backgroundColor: staminaColor
                                 }}
                             />
                         </div>
@@ -123,7 +140,9 @@ const CombatStatusDisplay: React.FC = () => {
             imageUrl: playerCharacter.imageUrl,
             rank: 'player',
             temporaryHitPoints: playerCharacter.temporaryHitPoints,
-            maxTemporaryHitPoints: playerCharacter.getMaxTemporaryHitPoints(playerInventory || { equipped: [], carried: [], storage: [], assets: [] })
+            maxTemporaryHitPoints: playerCharacter.getMaxTemporaryHitPoints(playerInventory || { equipped: [], carried: [], storage: [], assets: [] }),
+            stamina: playerCharacter.stamina,
+            maxStamina: playerCharacter.maxStamina
         },
         ...(companions || []).map(c => ({
             ...c,
@@ -132,7 +151,9 @@ const CombatStatusDisplay: React.FC = () => {
             imageUrl: c.imageUrl,
             rank: 'companion',
             temporaryHitPoints: c.temporaryHitPoints,
-            maxTemporaryHitPoints: c.getMaxTemporaryHitPoints(companionInventories?.[c.id] || { equipped: [], carried: [], storage: [], assets: [] })
+            maxTemporaryHitPoints: c.getMaxTemporaryHitPoints(companionInventories?.[c.id] || { equipped: [], carried: [], storage: [], assets: [] }),
+            stamina: c.stamina,
+            maxStamina: c.maxStamina
         })),
         ...combatState.enemies.map(e => ({ ...e, isAlly: e.alignment === 'ally', imageUrl: undefined })),
     ];
@@ -192,6 +213,8 @@ const CombatStatusDisplay: React.FC = () => {
                                     // Fix: Explicitly cast combatant to any to safely access normalized temporary HP properties
                                     tempHp={(combatant as any).temporaryHitPoints ?? 0}
                                     maxTempHp={(combatant as any).maxTemporaryHitPoints ?? 0}
+                                    stamina={(combatant as any).stamina ?? 0}
+                                    maxStamina={(combatant as any).maxStamina ?? 0}
                                     isAlly={combatant.isAlly}
                                     alignment={(combatant.alignment as string) || (combatant.isAlly ? 'ally' : 'enemy')}
                                     isCurrentTurn={combatant.id === currentTurnDisplayId}
@@ -245,6 +268,11 @@ const CombatStatusDisplay: React.FC = () => {
                                                         {tempHpLabel}: {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
                                                     </span>
                                                 )}
+                                                {((actor as any).stamina !== undefined && ((actor as any).maxStamina || 0) > 0) && (
+                                                    <span className="font-bold text-[#f59e0b]">
+                                                        Stamina: {(actor as any).stamina}/{(actor as any).maxStamina}
+                                                    </span>
+                                                )}
                                                 {actor.statusEffects && actor.statusEffects.length > 0 && (
                                                     <div className="flex gap-1">
                                                         {actor.statusEffects.map((ef, i) => (
@@ -268,6 +296,11 @@ const CombatStatusDisplay: React.FC = () => {
                                                 {((actor as any).temporaryHitPoints !== undefined && ((actor as any).temporaryHitPoints > 0 || ((actor as any).maxTemporaryHitPoints || 0) > 0)) && (
                                                     <span className="font-bold text-sky-400">
                                                         {tempHpLabel}: {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
+                                                    </span>
+                                                )}
+                                                {((actor as any).stamina !== undefined && ((actor as any).maxStamina || 0) > 0) && (
+                                                    <span className="font-bold text-[#f59e0b]">
+                                                        Stamina: {(actor as any).stamina}/{(actor as any).maxStamina}
                                                     </span>
                                                 )}
                                                 {actor.statusEffects && actor.statusEffects.length > 0 && (

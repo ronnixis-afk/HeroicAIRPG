@@ -78,7 +78,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
         if (initialData && charData) {
             const pruneForComparison = (d: any) => {
                 // Derived fields that shouldn't trigger "Unsaved Changes"
-                const { proficiencyBonus, maxHitPoints, numberOfAttacks, ...rest } = d;
+                const { proficiencyBonus, maxHitPoints, maxStamina, numberOfAttacks, ...rest } = d;
                 return JSON.stringify(rest);
             };
 
@@ -136,16 +136,22 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
             newMaxHp = calculateCharacterMaxHp(charData.level, conScore);
         }
 
-        if (charData.maxHitPoints !== newMaxHp) {
+        const conMod = calculateModifier(conScore);
+        const newMaxStamina = Math.max(1, charData.level * (conMod + 3));
+
+        if (charData.maxHitPoints !== newMaxHp || charData.maxStamina !== newMaxStamina) {
             setCharData(prev => {
-                const updatedData = { ...prev, maxHitPoints: newMaxHp };
+                const updatedData = { ...prev, maxHitPoints: newMaxHp, maxStamina: newMaxStamina };
                 if (updatedData.currentHitPoints > newMaxHp) {
                     updatedData.currentHitPoints = newMaxHp;
+                }
+                if ((updatedData.stamina || 0) > newMaxStamina) {
+                    updatedData.stamina = newMaxStamina;
                 }
                 return type === 'player' ? new PlayerCharacter(updatedData) : new Companion(updatedData);
             });
         }
-    }, [charData.level, charData.abilityScores, charData.activeBuffs, charData.abilities, inventoryForStats, charData.maxHitPoints, charData.currentHitPoints, type]);
+    }, [charData.level, charData.abilityScores, charData.activeBuffs, charData.abilities, inventoryForStats, charData.maxHitPoints, charData.maxStamina, charData.currentHitPoints, type]);
 
     useEffect(() => {
         if (imageCooldown > 0) {

@@ -7,7 +7,7 @@ interface StatusAvatarProps {
     char: PlayerCharacter | Companion | NPC;
     size: number;
     isPlayer?: boolean;
-    showRing?: boolean;
+    showBars?: boolean;
     onClick?: () => void;
     isTargeted?: boolean;
     isStealthed?: boolean;
@@ -23,7 +23,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     char,
     size,
     isPlayer,
-    showRing = true,
+    showBars = true,
     onClick,
     isTargeted,
     isStealthed,
@@ -37,8 +37,8 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     const currentHp = (char as any).currentHitPoints;
     const maxHp = (char as any).maxHitPoints;
     
-    // HP Detection fallback: If ring is requested, we should show a bar even if stats are missing (common for nearby NPCs)
-    const hasHp = showRing && (currentHp !== undefined && maxHp !== undefined);
+    // HP Detection fallback: If bars are requested, we should show a bar even if stats are missing (common for nearby NPCs)
+    const hasHp = showBars && (currentHp !== undefined && maxHp !== undefined);
     const displayCurrentHp = currentHp !== undefined ? currentHp : 1;
     const displayMaxHp = maxHp !== undefined ? maxHp : 1;
 
@@ -52,16 +52,22 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
     const tempHpRatio = actualMaxTempHp > 0 ? actualTempHp / actualMaxTempHp : 0;
     const tempPercent = Math.max(0, Math.min(1, tempHpRatio));
 
-    const ringColor = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
+    const currentStamina = (char as any).stamina || 0;
+    const maxStamina = (char as any).maxStamina || 0;
+    const staminaRatio = maxStamina > 0 ? currentStamina / maxStamina : 0;
+    const staminaPercent = Math.max(0, Math.min(1, staminaRatio));
+
+    const hpColor = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
     const tempColor = '#38bdf8'; // Shield blue
+    const staminaColor = '#f59e0b'; // Brand gold/yellow
     const initials = char.name.slice(0, 2);
 
     const isDead = (char as any).status === 'Dead' || (currentHp !== undefined && currentHp <= 0);
-    const isLowHp = showRing && (currentHp !== undefined) && !isDead && hpRatio <= 0.25;
+    const isLowHp = showBars && (currentHp !== undefined) && !isDead && hpRatio <= 0.25;
 
-    // If the character is dead, force the ring to show empty (red or gray)
+    // If the character is dead, force the bar to show empty (red or gray)
     const finalHpPercent = isDead ? 0 : hpPercent;
-    const finalRingColor = isDead ? '#ef4444' : ringColor;
+    const finalHpColor = isDead ? '#ef4444' : hpColor;
 
     return (
         <div
@@ -73,7 +79,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                 className={`relative rounded-xl overflow-hidden flex items-center justify-center bg-brand-surface border transition-all duration-300 w-full aspect-square
                     ${isTargeted
                         ? 'border-white ring-4 ring-brand-accent/30 shadow-[0_0_25px_rgba(62,207,142,0.8)] z-30'
-                        : (showRing ? 'border-brand-primary' : 'border-brand-primary/40')
+                        : (showBars ? 'border-brand-primary' : 'border-brand-primary/40')
                     } 
                     ${isDead ? 'grayscale brightness-50' : ''}
                     ${isStealthed ? 'brightness-50' : ''}
@@ -122,7 +128,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                 )}
 
                 {/* Bars Container */}
-                {showRing && (
+                {showBars && (
                     <div className="w-full space-y-0.5">
                         {/* HP Bar */}
                         <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
@@ -130,7 +136,7 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                                 className="h-full transition-all duration-500 ease-out"
                                 style={{ 
                                     width: `${finalHpPercent * 100}%`,
-                                    backgroundColor: finalRingColor
+                                    backgroundColor: finalHpColor
                                 }}
                             />
                         </div>
@@ -143,6 +149,19 @@ export const StatusAvatar: React.FC<StatusAvatarProps> = ({
                                     style={{ 
                                         width: `${tempPercent * 100}%`,
                                         backgroundColor: tempColor
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Stamina Bar */}
+                        {maxStamina > 0 && (
+                            <div className="h-0.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                <div 
+                                    className="h-full transition-all duration-700 ease-out opacity-90"
+                                    style={{ 
+                                        width: `${staminaPercent * 100}%`,
+                                        backgroundColor: staminaColor
                                     }}
                                 />
                             </div>
