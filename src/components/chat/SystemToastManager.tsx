@@ -242,10 +242,10 @@ export const SystemToastManager: React.FC = () => {
                 if (alignmentType === 'Lawful') return '/icons/lawful-alignment.png';
                 if (alignmentType === 'Chaotic') return '/icons/chaotic-alignment.png';
                 return '/icons/heroes.png';
-            case 'roll': return <Icon name="dice" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_5px_rgba(62,207,142,0.6)]" />;
+            case 'roll': return <Icon name="dice" className="w-10 h-10 text-brand-accent drop-shadow-[0_0_5px_rgba(62,207,142,0.6)]" />;
             case 'level': return '/icons/heroes.png';
             case 'xp': return '/icons/experience-gained.png';
-            case 'combat': return <Icon name="sword" className="w-8 h-8 text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.6)]" />;
+            case 'combat': return <Icon name="sword" className="w-10 h-10 text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.6)]" />;
             default: return '/icons/chronicle.png';
         }
     };
@@ -280,7 +280,7 @@ export const SystemToastManager: React.FC = () => {
                     
                     <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden z-10">
                          {typeof getTypeIcon(toast.type, toast.alignmentType) === 'string' ? (
-                            <img src={getTypeIcon(toast.type, toast.alignmentType) as string} alt="" className="w-10 h-10 object-contain" />
+                            <img src={getTypeIcon(toast.type, toast.alignmentType) as string} alt="" className="w-12 h-12 object-contain" />
                          ) : (
                              getTypeIcon(toast.type, toast.alignmentType)
                          )}
