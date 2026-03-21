@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-inter: var(--font-inter), sans-serif;
-  --font-heading: var(--font-inter);
+  --font-sans: var(--font-sans), sans-serif;
+  --font-heading: var(--font-sans);
   --font-serif: var(--font-merriweather), serif;
 
   --h1-size: 35px;
@@ -51,7 +51,7 @@
 @layer base {
   body {
     @apply bg-brand-bg text-brand-text antialiased font-sans h-full overflow-hidden;
-    font-family: var(--font-inter);
+    font-family: var(--font-sans);
   }
 
   html {

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import { Merriweather_Sans, Merriweather } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const merriweatherSans = Merriweather_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className={`${inter.variable} ${merriweather.variable} h-full`}>
+      <html lang="en" className={`${merriweatherSans.variable} ${merriweather.variable} h-full`}>
         <body className="h-full overflow-hidden font-sans">
           {children}
         </body>
