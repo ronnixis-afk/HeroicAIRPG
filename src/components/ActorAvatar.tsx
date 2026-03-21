@@ -146,12 +146,6 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                     </div>
                 )}
 
-                {/* Target Indicator - Only for non-allies */}
-                {isTargeted && alignment !== 'ally' && (
-                    <div className="absolute top-1 right-1 bg-brand-accent rounded-full p-1 z-30 shadow-lg border border-brand-bg animate-bounce-in">
-                        <Icon name="check" className="w-2 h-2 text-black" />
-                    </div>
-                )}
 
             </button>
 
