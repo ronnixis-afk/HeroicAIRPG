@@ -158,14 +158,14 @@ const POIListItem: React.FC<{
         >
             <div className="flex flex-row items-stretch min-h-[100px]">
                 {/* Image/Icon Placeholder */}
-                <div className={`w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden py-4 px-2 transition-all duration-300 flex-shrink-0`}>
+                <div className="w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden transition-all duration-300 flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
                     {popIcon ? (
-                        <div className="relative z-10 drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-110">
+                        <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110`}>
                             {popIcon}
                         </div>
                     ) : (
-                        <Icon name="map" className="w-12 h-12 text-brand-text-muted/20 relative z-10" />
+                        <Icon name="map" className="w-10 h-10 text-brand-text-muted/20 relative z-10" />
                     )}
                 </div>
 
