@@ -322,28 +322,29 @@ const POIListItem: React.FC<{
             {/* Expanded Actions */}
             {!isEditing && (
                 <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
-                    <button
-                        onClick={handleStartEdit}
-                        className="btn-secondary h-10 flex-1 text-[12px] rounded-xl gap-2 font-bold"
-                    >
-                        <Icon name="edit" className="w-4 h-4" />
-                        {toTitleCase('Edit')}
-                    </button>
-                    {isPlayerHere ? (
-                        <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest bg-brand-accent/10 rounded-xl border border-brand-accent/20">
-                            {toTitleCase('You Are Here')}
-                        </div>
-                    ) : (
+                    <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
                         <button
-                            onClick={handleInvestigate}
-                            className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold"
+                            onClick={handleStartEdit}
+                            className="btn-secondary h-10 flex-1 text-[12px] rounded-xl gap-2 font-bold"
                         >
-                            {toTitleCase('Enter')}
+                            <Icon name="edit" className="w-4 h-4" />
+                            {toTitleCase('Edit')}
                         </button>
-                    )}
+                        {isPlayerHere ? (
+                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                                {toTitleCase('You Are Here')}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleInvestigate}
+                                className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold"
+                            >
+                                {toTitleCase('Enter')}
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
