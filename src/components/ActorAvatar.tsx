@@ -155,25 +155,27 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
 
             </button>
 
-            {/* Status and Buff Indicators (Outside overflow-hidden) */}
-            {((hasStatus || (a.statusEffects && a.statusEffects.length > 0)) || (a.activeBuffs && a.activeBuffs.length > 0)) && (
+            {/* Buff Indicators (Upper Right) */}
+            {a.activeBuffs && a.activeBuffs.length > 0 && (
                 <div 
-                    className="absolute -top-1 -right-1 z-50 flex flex-col items-center gap-0.5"
-                    title={[
-                        ...(a.statusEffects || []).map((s: any) => s.name),
-                        ...(a.activeBuffs || []).map((b: any) => b.name)
-                    ].join(', ')}
+                    className="absolute -top-1 -right-1 z-50"
+                    title={(a.activeBuffs || []).map((b: any) => b.name).join(', ')}
                 >
-                    {a.activeBuffs && a.activeBuffs.length > 0 && (
-                        <div className="w-4 h-4 bg-brand-accent rounded-full border border-brand-bg shadow-lg flex items-center justify-center animate-pulse">
-                            <Icon name="chevronUp" className="w-3 h-3 text-black" />
-                        </div>
-                    )}
-                    {a.statusEffects && a.statusEffects.length > 0 && (
-                        <div className="w-4 h-4 bg-brand-danger rounded-full border border-brand-bg shadow-lg flex items-center justify-center">
-                            <Icon name="chevronDown" className="w-3 h-3 text-white" />
-                        </div>
-                    )}
+                    <div className="w-4 h-4 bg-brand-accent rounded-full border border-brand-bg shadow-lg flex items-center justify-center animate-pulse">
+                        <Icon name="chevronUp" className="w-3 h-3 text-black" />
+                    </div>
+                </div>
+            )}
+
+            {/* Status/Debuff Indicators (Upper Left) */}
+            {hasStatus && (
+                <div 
+                    className="absolute -top-1 -left-1 z-50"
+                    title={(a.statusEffects || []).map((s: any) => s.name).join(', ')}
+                >
+                    <div className="w-4 h-4 bg-brand-danger rounded-full border border-brand-bg shadow-lg flex items-center justify-center">
+                        <Icon name="chevronDown" className="w-3 h-3 text-white" />
+                    </div>
                 </div>
             )}
 
