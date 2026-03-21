@@ -347,7 +347,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         content: `The immediate arrival area of ${zone.name}. ${zone.description || "A localized region in the world."}`
     };
 
-    return [openArea, popCenterPoi, ...finalPois];
+    return [openArea, { ...popCenterPoi, isPopulationCenter: true }, ...finalPois];
 };
 
 /**
@@ -596,7 +596,7 @@ export const preloadAdjacentZones = async (
                             title: p.title,
                             content: p.content,
                             coordinates: newZone.coordinates,
-                            tags: ['location'],
+                            tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
                             isNew: true,
                             visited: p.title.toLowerCase().includes('open area')
                         }));

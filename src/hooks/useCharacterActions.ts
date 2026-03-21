@@ -147,13 +147,15 @@ export const useCharacterActions = (
 
                     if (pz.pois) {
                         pz.pois.forEach((poi: any, j: number) => {
+                            const tags = poi.isBackgroundRelated ? ['location', 'background'] : ['location'];
+                            if (poi.isPopulationCenter) tags.push('population-center');
                             knowledgeUpdates.push({
                                 id: `know-pers-${Date.now()}-${i}-${j}`,
                                 title: poi.title,
                                 content: poi.content,
                                 coordinates: pz.coordinates,
                                 visited: poi.isBackgroundRelated === true,
-                                tags: poi.isBackgroundRelated ? ['location', 'background'] : ['location'],
+                                tags: tags,
                                 isNew: true
                             } as LoreEntry);
                         });
@@ -237,13 +239,15 @@ export const useCharacterActions = (
                 else mapZonesUpdate.push(startingZone);
 
                 scenario.startingZone.knowledge.forEach((k: any, i: number) => {
+                    const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
+                    if (k.isPopulationCenter) tags.push('population-center');
                     knowledgeUpdates.push({
                         id: `know-start-${Date.now()}-${i}`,
                         title: k.title,
                         content: k.content,
                         coordinates: coords,
                         visited: k.isBackgroundRelated === true,
-                        tags: k.isBackgroundRelated ? ['location', 'background'] : ['location'],
+                        tags: tags,
                         isNew: true
                     } as LoreEntry);
                 });

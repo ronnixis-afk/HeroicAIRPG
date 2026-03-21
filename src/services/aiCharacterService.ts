@@ -440,6 +440,10 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
             // Filter out any AI-generated "Open Area" to avoid duplicates
             const filteredPois = (z.pois || []).filter((p: any) => !p.title?.toLowerCase().includes("open area"));
             
+            if (filteredPois.length > 0) {
+                 filteredPois[0].isPopulationCenter = true;
+            }
+
             const isFirstZone = index === 0;
 
             return {
@@ -540,6 +544,10 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             // Filter out any AI-generated "Open Area"
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
+            if (filteredKnowledge.length > 0) {
+                 filteredKnowledge[0].isPopulationCenter = true;
+            }
+
             data.startingZone.knowledge = [systemOpenArea, ...filteredKnowledge];
             data.startingZone.populationLevel = popLevel;
             data.startingZone.zoneFeatures = features;
