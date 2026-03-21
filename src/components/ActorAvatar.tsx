@@ -66,21 +66,8 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
     const hasStatus = (a.statusEffects?.length || 0) > 0;
     const initials = a.name ? a.name.slice(0, 2).toUpperCase() : '??';
     
-    // Support for alignment-based HP colors
-    // Default to 'ally' for player character or companions
-    const alignment = a.alignment || (a.isAlly || a.isInParty !== undefined ? 'ally' : 'enemy');
-    
-    const hpColor = alignment === 'ally' 
-        ? 'var(--color-status-hp)' 
-        : (alignment === 'neutral' ? 'var(--color-status-hp-warn)' : 'var(--color-status-hp-danger)');
-
-    // For non-combat actors without explicit alignment, use threshold-based color
-    const chatHpColor = hpRatio > 0.5 
-        ? 'var(--color-status-hp)' 
-        : hpRatio > 0.25 ? 'var(--color-status-hp-warn)' : 'var(--color-status-hp-danger)';
-
-    // Final HP color: Prefer alignment-based if available/inferred
-    const finalHpColor = (a.alignment || a.isAlly !== undefined) ? hpColor : chatHpColor;
+    // Health bar always uses the green brand accent
+    const finalHpColor = 'var(--color-status-hp)';
 
     return (
         <div 
