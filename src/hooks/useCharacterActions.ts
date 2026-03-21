@@ -135,6 +135,8 @@ export const useCharacterActions = (
                         description: pz.description || "A thematic location.",
                         hostility: pz.hostility || 0,
                         sectorId: pz.sectorId,
+                        populationLevel: pz.populationLevel,
+                        zoneFeatures: pz.zoneFeatures,
                         visited: true,
                         tags: ['location', 'origin'],
                         keywords: pz.keywords || []
@@ -225,6 +227,8 @@ export const useCharacterActions = (
                     description: scenario.startingZone.description,
                     hostility: scenario.startingZone.hostility,
                     sectorId: sector?.id,
+                    populationLevel: scenario.startingZone.populationLevel,
+                    zoneFeatures: scenario.startingZone.zoneFeatures,
                     visited: true,
                     tags: ['location', 'safe', 'start'],
                 };

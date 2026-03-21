@@ -31,7 +31,10 @@ const CharacterView: React.FC = () => {
 
     if (!gameData) return <div className="text-center p-8">Loading Character...</div>;
 
-    const { playerCharacter, companions } = gameData;
+    const { playerCharacter, companions, mapZones, playerCoordinates } = gameData;
+
+    const currentZone = mapZones?.find(z => z.coordinates === playerCoordinates);
+    const hasTavern = currentZone?.zoneFeatures?.includes('Tavern');
 
     // Fallback logic if selectedCharacterId points to nothing
     const activeCharacter = selectedCharacterId === 'player'
@@ -131,13 +134,17 @@ const CharacterView: React.FC = () => {
 
                             <div className={`flex flex-col items-center gap-2 group flex-shrink-0 transition-all duration-300 w-20 ${isScrolled ? 'hidden' : 'flex'}`}>
                                 <button
-                                    onClick={handleAddCompanion}
-                                    className="w-20 h-20 flex items-center justify-center rounded-full bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary transition-colors shrink-0 border-2 border-dashed border-brand-primary/50 hover:border-brand-accent"
-                                    title="Add Companion"
+                                    onClick={hasTavern ? handleAddCompanion : undefined}
+                                    disabled={!hasTavern}
+                                    className={`w-20 h-20 flex items-center justify-center rounded-full transition-colors shrink-0 border-2 border-dashed 
+                                        ${hasTavern 
+                                            ? 'bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary border-brand-primary/50 hover:border-brand-accent cursor-pointer' 
+                                            : 'bg-brand-surface/50 text-brand-text-muted/30 border-brand-primary/20 cursor-not-allowed'}`}
+                                    title={hasTavern ? "Recruit Companion" : "No Tavern available in this zone to recruit companions."}
                                 >
                                     <Icon name="plus" className="w-8 h-8" />
                                 </button>
-                                <span className="font-bold truncate text-[10px] text-brand-text-muted opacity-100">
+                                <span className={`font-bold truncate text-[10px] ${hasTavern ? 'text-brand-text-muted' : 'text-brand-text-muted/50'} opacity-100`}>
                                     Recruit
                                 </span>
                             </div>

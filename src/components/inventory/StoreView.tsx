@@ -184,6 +184,16 @@ const StoreView: React.FC = () => {
     const playerGold = gameData.playerInventory.carried.find(i => i.tags?.includes('currency'))?.quantity || 0;
     const currencyName = gameData.mapSettings?.style === 'sci-fi' ? 'Credits' : 'Gold';
 
+    const currentZone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
+    const hasShipyard = currentZone?.zoneFeatures?.includes('Shipyard') || false;
+
+    // Reset active scale if user had Ship selected but Shipyard is no longer available
+    useEffect(() => {
+        if (!hasShipyard && activeScale === 'Ship') {
+            setActiveScale('Person');
+        }
+    }, [hasShipyard, activeScale]);
+
     // Filter sellable items (must have price, not be currency)
     const allItemsForSale = [
         ...gameData.playerInventory.carried.map(i => Object.assign(i.clone(), { _sourceList: 'Carried' })),
@@ -260,7 +270,9 @@ const StoreView: React.FC = () => {
                 <div className="flex justify-center gap-8 mb-3 animate-fade-in border-b border-brand-primary/20 pb-2">
                     <ScaleRadio label="Person" isActive={activeScale === 'Person'} onClick={() => setActiveScale('Person')} />
                     <ScaleRadio label="Mount" isActive={activeScale === 'Mount'} onClick={() => setActiveScale('Mount')} />
-                    <ScaleRadio label="Ship" isActive={activeScale === 'Ship'} onClick={() => setActiveScale('Ship')} />
+                    {hasShipyard && (
+                        <ScaleRadio label="Ship" isActive={activeScale === 'Ship'} onClick={() => setActiveScale('Ship')} />
+                    )}
                 </div>
             )}
 

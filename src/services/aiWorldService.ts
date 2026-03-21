@@ -264,13 +264,50 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     const ai = getAi();
     const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
     const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
+    
+    // 1. Generate Population Center POI (or Barren Landmark)
+    const popLevel = zone.populationLevel || 'Barren';
+    const popPrompt = `Generate a specific, thematic Point of Interest that represents the Population Center (or a solitary landmark if barren) for the zone "${zone.name}" (${zone.description}).
+    World: ${worldSummary}
+    ${hostilityDesc}
+    Population Scale: ${popLevel}. Make sure the scale of this POI matches this density.
+    [STRICT CONSTRAINTS]
+    - title: MAX 3 WORDS.
+    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
+    - title: MUST be a distinct name for a settlement (if populated) or a wilderness landmark (if Barren).
+    - content: MAX 30 WORDS.
+    Return JSON: { "title": "string", "content": "string" }`;
+
+    let popCenterPoi = { title: "Desolate Marker", content: "A mysterious standing stone in the middle of nowhere." };
+    let popAttempts = 0;
+    while (popAttempts <= 2) {
+        const popRes = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: popPrompt + (popAttempts > 0 ? `\n\n[RETRY ATTEMPT ${popAttempts}] The previous title was too similar to existing locations: [${existingNames.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
+            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+        });
+        const result = JSON.parse(cleanJson(popRes.text || '{}'));
+        if (result.title) {
+            popCenterPoi = result;
+            if (!isNameTooSimilar(result.title, existingNames) && !isNameTooSimilar(result.title, [zone.name])) {
+                break;
+            }
+        }
+        popAttempts++;
+    }
+
+    // Update existing names to include the new pop center so we don't repeat it
+    const updatedExistingNames = [...existingNames, popCenterPoi.title];
+
+    // 2. Generate 3 generic POIs using the pop center as context
     const input = `Generate 3 specific POIs for the zone "${zone.name}" (${zone.description}).
     World: ${worldSummary}
     ${hostilityDesc}
     ${keywordsDesc}
+    [MAIN CONTEXT]: The central landmark of this area is "${popCenterPoi.title}" - ${popCenterPoi.content}. The new POIs should thematically connect to or exist around this main feature.
     [STRICT CONSTRAINTS]
     - title: MAX 3 WORDS.
-    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
+    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}" or the main landmark "${popCenterPoi.title}".
     - title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
     - content: MAX 30 WORDS.
     - Generate EXACTLY 3 POIs.
@@ -283,20 +320,18 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     while (attempts <= maxRetries) {
         const response = await ai.models.generateContent({
             model: 'gemini-3.1-flash-lite-preview',
-            contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] Some generated titles were too similar to existing locations: [${existingNames.join(', ')}]. Choose DIFFERENT, DISTINCT nouns or adjectives.` : ''),
+            contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] Some generated titles were too similar to existing locations: [${updatedExistingNames.join(', ')}]. Choose DIFFERENT, DISTINCT nouns or adjectives.` : ''),
             config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
         });
 
         const result = JSON.parse(cleanJson(response.text || '[]'));
         const pois = Array.isArray(result) ? result : [];
         
-        // If it's the first attempt, we keep it as a fallback
         if (attempts === 0) finalPois = pois;
 
-        // Validate uniqueness
         const hasCollision = pois.some(p => {
             const title = p.title || "";
-            return isNameTooSimilar(title, existingNames) || isNameTooSimilar(title, [zone.name]);
+            return isNameTooSimilar(title, updatedExistingNames) || isNameTooSimilar(title, [zone.name]);
         });
 
         if (!hasCollision && pois.length > 0) {
@@ -312,7 +347,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         content: `The immediate arrival area of ${zone.name}. ${zone.description || "A localized region in the world."}`
     };
 
-    return [openArea, ...finalPois];
+    return [openArea, popCenterPoi, ...finalPois];
 };
 
 /**
@@ -484,6 +519,17 @@ export const preloadAdjacentZones = async (
                 ? `Adjacent to: ${neighborNames.join(', ')}.`
                 : '';
 
+            // D20 Pop Roll
+            const popRoll = Math.floor(Math.random() * 20) + 1;
+            let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
+            let features: string[] = [];
+
+            if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
+            else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
+            else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
+            else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
+            else { popLevel = 'Barren'; features = []; }
+
             // Emit Shimmer UI Zone immediately
             const shimmerZone: MapZone = {
                 id: `zone-${targetCoords}-loading`,
@@ -508,7 +554,7 @@ export const preloadAdjacentZones = async (
                 Additionally, the name must fit the thematic tone of the world summary: ${gameData.worldSummary || 'Fantasy'}.
                 `;
 
-                const completeContext = `${contextStr}\n${validationContext}`;
+                const completeContext = `${contextStr}\n${validationContext}\nThis zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.`;
 
                 const details = await generateZoneDetails(
                     targetCoords,
@@ -527,6 +573,8 @@ export const preloadAdjacentZones = async (
                     description: details.description,
                     hostility: typeof details.hostility === 'number' ? details.hostility : 0,
                     sectorId: sector?.id,
+                    populationLevel: popLevel,
+                    zoneFeatures: features,
                     visited: false,
                     isNew: false,
                     isLoading: false,

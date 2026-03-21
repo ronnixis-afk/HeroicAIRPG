@@ -203,6 +203,12 @@ const GameInterface: React.FC = () => {
     return sector?.name;
   }, [gameData?.playerCoordinates, gameData?.mapSectors]);
 
+  const currentZoneFeatures = useMemo(() => {
+    if (!gameData || !gameData.playerCoordinates) return [];
+    const zone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
+    return zone?.zoneFeatures || [];
+  }, [gameData?.playerCoordinates, gameData?.mapZones]);
+
   const handleLocationSubmit = (prompt: string) => {
     submitUserMessage({
       id: `user-travel-${Date.now()}`,
@@ -405,6 +411,7 @@ const GameInterface: React.FC = () => {
             onTimeManagementClick={() => setIsTimeModalOpen(true)}
             isCombatActive={isCombatActive}
             badges={menuBadges}
+            zoneFeatures={currentZoneFeatures}
           />
           <PlayerAttackModal
             isOpen={activePanel === 'abilities'}

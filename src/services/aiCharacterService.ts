@@ -374,6 +374,24 @@ export const generateNemesis = async (prompt: string, gameData: GameData) => {
 export const generatePersonalDiscoveries = async (character: any, gameData: GameData) => {
     const worldContext = getWorldContext(gameData);
 
+    const popRoll1 = Math.floor(Math.random() * 20) + 1;
+    let popLevel1: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
+    let features1: string[] = [];
+    if (popRoll1 >= 20) { popLevel1 = 'Capital'; features1 = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
+    else if (popRoll1 >= 18) { popLevel1 = 'City'; features1 = ['Tavern', 'Market', 'Shipyard']; }
+    else if (popRoll1 >= 15) { popLevel1 = 'Town'; features1 = ['Tavern', 'Market']; }
+    else if (popRoll1 >= 10) { popLevel1 = 'Settlement'; features1 = ['Tavern']; }
+    else { popLevel1 = 'Barren'; features1 = []; }
+
+    const popRoll2 = Math.floor(Math.random() * 20) + 1;
+    let popLevel2: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
+    let features2: string[] = [];
+    if (popRoll2 >= 20) { popLevel2 = 'Capital'; features2 = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
+    else if (popRoll2 >= 18) { popLevel2 = 'City'; features2 = ['Tavern', 'Market', 'Shipyard']; }
+    else if (popRoll2 >= 15) { popLevel2 = 'Town'; features2 = ['Tavern', 'Market']; }
+    else if (popRoll2 >= 10) { popLevel2 = 'Settlement'; features2 = ['Tavern']; }
+    else { popLevel2 = 'Barren'; features2 = []; }
+
     const prompt = `Establish 2 new geographical locations significant to ${character.name}'s past.
     These locations MUST be anchored immediately around the starting coordinates (0-0).
     
@@ -388,10 +406,16 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     ${worldContext}
     
     [INSTRUCTIONS]
-    1. Provide 2 Zones.
+    1. Provide exactly 2 Zones.
+       - Zone 1 MUST have a Population Scale of ${popLevel1}.
+       - Zone 2 MUST have a Population Scale of ${popLevel2}.
+       Ensure the zone description logically accounts for its Population Scale.
     2. 'hostility' MUST be an INTEGER between -10 and 10 (as these are known home-territory or past locations).
     3. 'sectorId': If a sector exists that covers these coordinates, assign it. Otherwise assign to the sector containing (0-0).
     4. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
+    5. 'pois': You MUST generate exactly 4 entries per zone.
+       - The first entry MUST be a thematic Population Center landmark (or wilderness landmark for Barren scales).
+       - The remaining 3 entries MUST be specific locations surrounding that center.
     
     Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "sectorId", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
 
@@ -406,8 +430,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
         const data = JSON.parse(cleanJson(response.text || '{}'));
         const rawZones = Array.isArray(data.zones) ? data.zones : [];
 
-        // SYSTEM MANAGED: Inject Open Area for each discovery zone
-        const processedZones = rawZones.map((z: any) => {
+        const processedZones = rawZones.map((z: any, index: number) => {
             const systemOpenArea = {
                 title: "Open Area",
                 content: `Open area of ${z.name}. ${z.description || "A location from your past."}`,
@@ -417,8 +440,12 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
             // Filter out any AI-generated "Open Area" to avoid duplicates
             const filteredPois = (z.pois || []).filter((p: any) => !p.title?.toLowerCase().includes("open area"));
             
+            const isFirstZone = index === 0;
+
             return {
                 ...z,
+                populationLevel: isFirstZone ? popLevel1 : popLevel2,
+                zoneFeatures: isFirstZone ? features1 : features2,
                 pois: [systemOpenArea, ...filteredPois]
             };
         });
@@ -434,6 +461,16 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 export const generateStartingScenario = async (character: any, gameData: GameData, hookIndex: number) => {
     const worldContext = getWorldContext(gameData);
     const selectedHook = STORY_HOOKS[hookIndex - 1] || STORY_HOOKS[0];
+
+    const popRoll = Math.floor(Math.random() * 20) + 1;
+    let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
+    let features: string[] = [];
+
+    if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
+    else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
+    else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
+    else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
+    else { popLevel = 'Barren'; features = []; }
 
     const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
 
@@ -459,6 +496,10 @@ You MUST base the catalyst of this adventure on the following scenario:
 2. introSummary: A 2-sentence tactical plot brief.
 3. startingObjective: A primary quest to guide the player immediately.
 4. startingZone: Create a safe haven or starting area with unique points of interest.
+   - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
+   - You MUST generate exactly 4 'knowledge' entries (POIs).
+     - The first entry MUST be a thematic Population Center landmark (or a solitary wilderness landmark if Barren).
+     - The remaining 3 entries MUST be specific locations surrounding or connected to that Population Center.
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
 5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
    - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
@@ -500,6 +541,8 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
             data.startingZone.knowledge = [systemOpenArea, ...filteredKnowledge];
+            data.startingZone.populationLevel = popLevel;
+            data.startingZone.zoneFeatures = features;
         }
 
         return data;
@@ -517,6 +560,8 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
                 name: "The Gateway",
                 description: "A bustling safe haven where travelers gather before heading into the wilds.",
                 hostility: 0,
+                populationLevel: popLevel,
+                zoneFeatures: features,
                 knowledge: [
                     { title: "The Local Inn", content: "A place to gather rumors and rest.", isBackgroundRelated: false }
                 ]

@@ -338,6 +338,8 @@ export interface MapZone {
   isLoading?: boolean; // NEW: Indicates background generation
   tags?: string[];
   keywords?: string[];
+  populationLevel?: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital';
+  zoneFeatures?: string[];
   isMajorHub?: boolean; // New: Explicitly identifies Faction Seats of Power
 }
 

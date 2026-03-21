@@ -22,6 +22,7 @@ interface HeaderMenuPanelProps {
   onTimeManagementClick: () => void;
   isCombatActive?: boolean;
   badges?: Record<string, number>;
+  zoneFeatures?: string[];
 }
 
 const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
@@ -73,7 +74,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   setActiveView,
   onTimeManagementClick,
   isCombatActive = false,
-  badges = {} as Record<string, number>
+  badges = {} as Record<string, number>,
+  zoneFeatures = []
 }) => {
   const formattedWorldName = useMemo(() => {
     if (!worldName) return 'Details';
@@ -142,12 +144,18 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     label="Merchant"
                     imageUrl="/icons/merchant.png"
                     onClick={() => handleAction('store')}
-                    disabled={isCombatActive}
-                    warning="The Merchant is hiding during combat."
+                    disabled={isCombatActive || !zoneFeatures.includes('Market')}
+                    warning={isCombatActive ? "The Merchant is hiding during combat." : "No Market available in this zone."}
                   />
 
                   <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
-                  <MenuItem label="Forge" imageUrl="/icons/forge.png" onClick={() => handleAction('item-forge')} />
+                  <MenuItem 
+                    label="Forge" 
+                    imageUrl="/icons/forge.png" 
+                    onClick={() => handleAction('item-forge')} 
+                    disabled={isCombatActive || !zoneFeatures.includes('Item Forge')}
+                    warning={isCombatActive ? "The Forge is unsafe during combat." : "No Forge available in this zone."}
+                  />
                   <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} />
                   <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} />
 
