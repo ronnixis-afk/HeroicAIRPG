@@ -136,6 +136,29 @@ const POIListItem: React.FC<{
         setIsEditing(false);
     };
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 500;
+                canvas.height = 500;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, 500, 500);
+                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    setEditImage(base64);
+                }
+            };
+            img.src = event.target?.result as string;
+        };
+        reader.readAsDataURL(file);
+    };
+
     const toggleTag = (tag: string) => {
         setEditTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
     };
@@ -158,54 +181,104 @@ const POIListItem: React.FC<{
         >
             <div className="flex flex-row items-stretch min-h-[100px]">
                 {/* Image/Icon Placeholder */}
-                <div className="w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden transition-all duration-300 flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
-                    {popIcon ? (
-                        <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110`}>
-                            {popIcon}
-                        </div>
-                    ) : (
-                        <Icon name="map" className="w-10 h-10 text-brand-text-muted/20 relative z-10" />
-                    )}
-                </div>
+                {!isEditing && (
+                    <div className="w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden transition-all duration-300 flex-shrink-0">
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
+                        {popIcon ? (
+                            <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110`}>
+                                {popIcon}
+                            </div>
+                        ) : (
+                            <Icon name="map" className="w-10 h-10 text-brand-text-muted/20 relative z-10" />
+                        )}
+                    </div>
+                )}
 
                 {/* Content Area */}
                 <div className="flex-1 p-4 flex flex-col justify-center relative">
                     {isEditing ? (
-                        <div className="space-y-3 pr-2" onClick={e => e.stopPropagation()}>
-                            <input 
-                                value={editTitle} 
-                                onChange={e => setEditTitle(e.target.value)}
-                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-sm font-bold focus:border-brand-accent outline-none"
-                                placeholder="POI Name"
-                            />
-                            <select 
-                                value={currentPopLevel}
-                                onChange={e => setPopLevel(e.target.value)}
-                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-xs font-bold focus:border-brand-accent outline-none"
-                            >
-                                <option value="none">Not a Population Center</option>
-                                <option value="village">Village</option>
-                                <option value="settlement">Settlement</option>
-                                <option value="town">Town</option>
-                                <option value="city">City</option>
-                                <option value="capital">Capital</option>
-                            </select>
-                            <input 
-                                value={editImage} 
-                                onChange={e => setEditImage(e.target.value)}
-                                className="w-full bg-brand-primary h-8 px-2 rounded-lg border border-brand-surface text-xs focus:border-brand-accent outline-none"
-                                placeholder="Image URL (optional)"
-                            />
-                            <AutoResizingTextarea 
-                                value={editContent}
-                                onChange={e => setEditContent(e.target.value)}
-                                className="w-full bg-brand-primary p-2 rounded-lg border border-brand-surface text-xs focus:border-brand-accent outline-none min-h-[60px]"
-                                placeholder="Description"
-                            />
-                            <div className="flex gap-2">
-                                <button onClick={() => setIsEditing(false)} className="btn-secondary h-8 flex-1 text-[10px] rounded-lg">Cancel</button>
-                                <button onClick={handleSaveEdit} className="btn-primary h-8 flex-1 text-[10px] rounded-lg">Save</button>
+                        <div className="space-y-4 pr-1 animate-page" onClick={e => e.stopPropagation()}>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-brand-text-muted ml-1">POI Name</label>
+                                    <input 
+                                        value={editTitle} 
+                                        onChange={e => setEditTitle(e.target.value)}
+                                        className="w-full bg-brand-primary h-9 px-3 rounded-xl border border-brand-surface text-sm font-bold focus:border-brand-accent outline-none"
+                                        placeholder="Enter name..."
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-brand-text-muted ml-1">Population Level</label>
+                                    <select 
+                                        value={currentPopLevel}
+                                        onChange={e => setPopLevel(e.target.value)}
+                                        className="w-full bg-brand-primary h-9 px-3 rounded-xl border border-brand-surface text-xs font-bold focus:border-brand-accent outline-none appearance-none"
+                                    >
+                                        <option value="none">None (Wilderness)</option>
+                                        <option value="village">Village</option>
+                                        <option value="settlement">Settlement</option>
+                                        <option value="town">Town</option>
+                                        <option value="city">City</option>
+                                        <option value="capital">Capital</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-brand-text-muted ml-1">Upload Image (Auto-resize to 500px)</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="hidden"
+                                        id={`poi-image-upload-${entry.id}`}
+                                    />
+                                    <label 
+                                        htmlFor={`poi-image-upload-${entry.id}`}
+                                        className="flex-1 bg-brand-primary h-9 px-4 rounded-xl border border-brand-surface flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors overflow-hidden"
+                                    >
+                                        <Icon name="upload" className="w-3 h-3 text-brand-accent" />
+                                        <span className="text-[11px] text-brand-text-muted truncate">
+                                            {editImage.startsWith('data:image') ? 'Custom Image Loaded' : 'Click to Upload Image'}
+                                        </span>
+                                    </label>
+                                    {editImage && (
+                                        <button 
+                                            onClick={() => setEditImage('')}
+                                            className="bg-brand-danger/10 text-brand-danger h-9 px-3 rounded-xl border border-brand-danger/20 hover:bg-brand-danger/20 transition-colors"
+                                            title="Clear Image"
+                                        >
+                                            <Icon name="trash" className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-brand-text-muted ml-1">Or Image URL</label>
+                                <input 
+                                    value={editImage.startsWith('data:image') ? '' : editImage} 
+                                    onChange={e => setEditImage(e.target.value)}
+                                    className="w-full bg-brand-primary h-9 px-3 rounded-xl border border-brand-surface text-xs focus:border-brand-accent outline-none"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-brand-text-muted ml-1">Description</label>
+                                <AutoResizingTextarea 
+                                    value={editContent}
+                                    onChange={e => setEditContent(e.target.value)}
+                                    className="w-full bg-brand-primary p-3 rounded-xl border border-brand-surface text-xs focus:border-brand-accent outline-none min-h-[80px]"
+                                    placeholder="Describe this location..."
+                                />
+                            </div>
+
+                            <div className="flex gap-2 pt-2">
+                                <button onClick={() => setIsEditing(false)} className="btn-secondary h-10 flex-1 text-xs rounded-xl font-bold">Cancel</button>
+                                <button onClick={handleSaveEdit} className="btn-primary h-10 flex-1 text-xs rounded-xl font-bold">Save Changes</button>
                             </div>
                         </div>
                     ) : (
@@ -247,7 +320,8 @@ const POIListItem: React.FC<{
             </div>
 
             {/* Expanded Actions */}
-            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
+            {!isEditing && (
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
                     <button
                         onClick={handleStartEdit}
