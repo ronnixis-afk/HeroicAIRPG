@@ -404,7 +404,26 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
                 thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
         });
         const data = JSON.parse(cleanJson(response.text || '{}'));
-        return Array.isArray(data.zones) ? data.zones : [];
+        const rawZones = Array.isArray(data.zones) ? data.zones : [];
+
+        // SYSTEM MANAGED: Inject Open Area for each discovery zone
+        const processedZones = rawZones.map((z: any) => {
+            const systemOpenArea = {
+                title: "Open Area",
+                content: `Open area of ${z.name}. ${z.description || "A location from your past."}`,
+                isBackgroundRelated: true
+            };
+            
+            // Filter out any AI-generated "Open Area" to avoid duplicates
+            const filteredPois = (z.pois || []).filter((p: any) => !p.title?.toLowerCase().includes("open area"));
+            
+            return {
+                ...z,
+                pois: [systemOpenArea, ...filteredPois]
+            };
+        });
+
+        return processedZones;
     } catch (e) {
         console.error("Personal discoveries generation failed", e);
         return [];
@@ -468,6 +487,19 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
         } else if (data.introNarrative && !data.introNarrative.includes('\n\n')) {
             // Fallback for unexpected model output format
             console.warn("AI failed to provide structured narrative parts; falling back to unstructured narrative.");
+        }
+
+        if (data.startingZone) {
+            const systemOpenArea = {
+                title: "Open Area",
+                content: `Open area of ${data.startingZone.name}. ${data.startingZone.description || "The beginning of your journey."}`,
+                isBackgroundRelated: true
+            };
+            
+            // Filter out any AI-generated "Open Area"
+            const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
+            
+            data.startingZone.knowledge = [systemOpenArea, ...filteredKnowledge];
         }
 
         return data;

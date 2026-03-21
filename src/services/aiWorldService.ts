@@ -264,7 +264,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     const ai = getAi();
     const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
     const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
-    const input = `Generate 4 specific POIs for the zone "${zone.name}" (${zone.description}).
+    const input = `Generate 3 specific POIs for the zone "${zone.name}" (${zone.description}).
     World: ${worldSummary}
     ${hostilityDesc}
     ${keywordsDesc}
@@ -272,9 +272,8 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     - title: MAX 3 WORDS.
     - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
     - title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
-    - One POI MUST be titled "Open Area", which serves as the generic entry point for visitors.
     - content: MAX 30 WORDS.
-    - Generate EXACTLY 4 POIs.
+    - Generate EXACTLY 3 POIs.
     Return JSON array: [{ "title": "string", "content": "string" }]`;
 
     const maxRetries = 2;
@@ -294,10 +293,9 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         // If it's the first attempt, we keep it as a fallback
         if (attempts === 0) finalPois = pois;
 
-        // Validate uniqueness (excluding "Open Area")
+        // Validate uniqueness
         const hasCollision = pois.some(p => {
             const title = p.title || "";
-            if (title.toLowerCase().includes("open area")) return false;
             return isNameTooSimilar(title, existingNames) || isNameTooSimilar(title, [zone.name]);
         });
 
@@ -308,7 +306,13 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         attempts++;
     }
 
-    return finalPois;
+    // SYSTEM MANAGED: Always inject the "Open Area" as the 4th/primary POI
+    const openArea = {
+        title: "Open Area",
+        content: `The immediate arrival area of ${zone.name}. ${zone.description || "A localized region in the world."}`
+    };
+
+    return [openArea, ...finalPois];
 };
 
 /**
@@ -372,6 +376,8 @@ export const generateZoneDetails = async (
     [STRICT CONSTRAINTS]
     - name: MAX 3 WORDS.
     - description: MAX 30 WORDS.
+    - keywords: You MUST return EXACTLY ${randomProperties.length} items.
+    - keywords: Each item MUST use the format "Property Name: Chosen Variant" based on the provided [ZONE PROPERTIES].
     
     Return JSON: { "name": "string", "description": "string", "hostility": number, "keywords": ["string"] }`;
 
@@ -396,6 +402,11 @@ export const generateZoneDetails = async (
         // If even the first attempt fails validation, we still save it as a fallback but keep trying
         if (attempts === 0) finalDetails = details;
         attempts++;
+    }
+
+    // Safety cap: Ensure we never exceed the rolled number of properties
+    if (finalDetails.keywords && finalDetails.keywords.length > randomProperties.length) {
+        finalDetails.keywords = finalDetails.keywords.slice(0, randomProperties.length);
     }
 
     return finalDetails as { name: string, description: string, hostility: number, keywords: string[] };
