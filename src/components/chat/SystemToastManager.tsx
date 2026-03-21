@@ -9,6 +9,7 @@ interface Toast {
     title: string;
     message: string;
     type: 'inventory' | 'roll' | 'level' | 'xp' | 'general' | 'combat' | 'alignment' | 'relationship';
+    alignmentType?: string;
 }
 
 export const SystemToastManager: React.FC = () => {
@@ -130,6 +131,7 @@ export const SystemToastManager: React.FC = () => {
     const addToast = (title: string, rawMessage: string, type: Toast['type']) => {
         // Clean up markdown bold/italic tags
         let cleanContent = rawMessage.replace(/(\*\*|\*)/g, '').trim();
+        let alignmentType;
         
         // RPG Flavor Transformations
         if (type === 'relationship') {
@@ -155,6 +157,7 @@ export const SystemToastManager: React.FC = () => {
                 const value = alignMatch[1];
                 const alignType = alignMatch[2]; // Lawful, Chaotic, Good, Evil
                 cleanContent = `You have performed a ${alignType} act (${value})`;
+                alignmentType = alignType;
             }
         }
         else if (type === 'inventory') {
@@ -182,6 +185,7 @@ export const SystemToastManager: React.FC = () => {
             title,
             message: cleanContent,
             type,
+            alignmentType,
         };
 
         // Add to queue instead of active toasts
@@ -228,14 +232,19 @@ export const SystemToastManager: React.FC = () => {
         setToasts(prev => prev.filter(t => t.id !== toast.id));
     };
 
-    const getTypeIcon = (type: string) => {
+    const getTypeIcon = (type: string, alignmentType?: string) => {
         switch (type) {
             case 'inventory': return '/icons/backpack.png';
             case 'relationship': return '/icons/people.png';
-            case 'alignment': return '/icons/heroes.png';
+            case 'alignment': 
+                if (alignmentType === 'Good') return '/icons/good-alignment.png';
+                if (alignmentType === 'Evil') return '/icons/evil-alignment.png';
+                if (alignmentType === 'Lawful') return '/icons/lawful-alignment.png';
+                if (alignmentType === 'Chaotic') return '/icons/chaotic-alignment.png';
+                return '/icons/heroes.png';
             case 'roll': return <Icon name="dice" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_5px_rgba(62,207,142,0.6)]" />;
             case 'level': return '/icons/heroes.png';
-            case 'xp': return '/icons/quests.png';
+            case 'xp': return '/icons/experience-gained.png';
             case 'combat': return <Icon name="sword" className="w-8 h-8 text-rose-400 drop-shadow-[0_0_5px_rgba(244,63,94,0.6)]" />;
             default: return '/icons/chronicle.png';
         }
@@ -270,10 +279,10 @@ export const SystemToastManager: React.FC = () => {
                 >
                     
                     <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center overflow-hidden z-10">
-                         {typeof getTypeIcon(toast.type) === 'string' ? (
-                            <img src={getTypeIcon(toast.type) as string} alt="" className="w-10 h-10 object-contain" />
+                         {typeof getTypeIcon(toast.type, toast.alignmentType) === 'string' ? (
+                            <img src={getTypeIcon(toast.type, toast.alignmentType) as string} alt="" className="w-10 h-10 object-contain" />
                          ) : (
-                             getTypeIcon(toast.type)
+                             getTypeIcon(toast.type, toast.alignmentType)
                          )}
                     </div>
                     

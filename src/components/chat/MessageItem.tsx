@@ -55,11 +55,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                         {showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-4 animate-fade-in">
                                 {msg.alignmentOptions.map((opt, idx) => {
-                                    let colorClass = "border-brand-text-muted text-brand-text-muted hover:bg-brand-text-muted/10";
-                                    if (opt.alignment === 'Good') colorClass = "border-blue-500 text-blue-500 hover:bg-blue-500/10";
-                                    if (opt.alignment === 'Evil') colorClass = "border-red-500 text-red-500 hover:bg-red-500/10";
-                                    if (opt.alignment === 'Lawful') colorClass = "border-yellow-500 text-yellow-500 hover:bg-yellow-500/10";
-                                    if (opt.alignment === 'Chaotic') colorClass = "border-purple-500 text-purple-500 hover:bg-purple-500/10";
+                                    let iconFile = '';
+                                    if (opt.alignment === 'Good') iconFile = '/icons/good-alignment.png';
+                                    else if (opt.alignment === 'Evil') iconFile = '/icons/evil-alignment.png';
+                                    else if (opt.alignment === 'Lawful') iconFile = '/icons/lawful-alignment.png';
+                                    else if (opt.alignment === 'Chaotic') iconFile = '/icons/chaotic-alignment.png';
 
                                     return (
                                         <button
@@ -70,8 +70,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                                 });
                                                 window.dispatchEvent(event);
                                             }}
-                                            className={`px-3 py-1.5 text-xs font-bold rounded-full border bg-transparent transition-colors ${colorClass}`}
+                                            className="px-4 py-2 text-xs font-bold rounded-full transition-all flex items-center gap-2 text-white bg-[#36454F] border border-[#2b373f] hover:bg-[#4a5d6b] shadow-sm"
                                         >
+                                            {iconFile && (
+                                                <img src={iconFile} alt={opt.alignment} className="w-5 h-5 object-contain drop-shadow-md" />
+                                            )}
                                             {opt.label}
                                         </button>
                                     );
