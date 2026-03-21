@@ -70,6 +70,7 @@ const POIListItem: React.FC<{
     const activeTags = isEditing ? editTags : (entry.tags || []);
     const activeIsPopCenter = activeTags.includes('population-center');
     const activeImageUrl = isEditing ? editImage : (entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
+    const activeTitle = isEditing ? editTitle : entry.title;
     
     let popIcon = null;
     let popLevelLabel = null;
@@ -86,12 +87,12 @@ const POIListItem: React.FC<{
         popLevelLabel = toTitleCase(lv);
 
         if (activeImageUrl) {
-            popIcon = <img src={activeImageUrl} alt={editTitle} className="w-full h-full object-cover" />;
+            popIcon = <img src={activeImageUrl} alt={activeTitle} className="w-full h-full object-cover" />;
         } else {
             popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-20 h-20 object-contain" />;
         }
     } else if (activeImageUrl) {
-        popIcon = <img src={activeImageUrl} alt={editTitle} className="w-full h-full object-cover" />;
+        popIcon = <img src={activeImageUrl} alt={activeTitle} className="w-full h-full object-cover" />;
     }
 
     const handleDelete = (e: React.MouseEvent) => {
