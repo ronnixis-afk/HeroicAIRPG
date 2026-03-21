@@ -149,8 +149,15 @@ const POIListItem: React.FC<{
                 canvas.height = 500;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    ctx.drawImage(img, 0, 0, 500, 500);
-                    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                    // Calculate center crop
+                    const minDim = Math.min(img.width, img.height);
+                    const sourceX = (img.width - minDim) / 2;
+                    const sourceY = (img.height - minDim) / 2;
+                    
+                    // Center-crop and scale to 500x500
+                    ctx.drawImage(img, sourceX, sourceY, minDim, minDim, 0, 0, 500, 500);
+                    
+                    const base64 = canvas.toDataURL('image/jpeg', 0.82);
                     setEditImage(base64);
                 }
             };
