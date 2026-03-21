@@ -32,16 +32,19 @@ const getPropertyColor = (prop: string): string => {
     return 'text-brand-accent bg-brand-accent/10 border-brand-accent/20';
 };
 
-const POIShimmer: React.FC<{ label?: string }> = ({ label }) => (
-    <div className="space-y-0 animate-pulse">
-        <div className="border-b border-brand-surface py-6 px-4 bg-brand-accent/5">
-            <div className="flex items-center gap-2 mb-3">
-                <Icon name="sparkles" className="w-4 h-4 text-brand-accent animate-spin" />
-                <div className="h-4 bg-brand-accent/20 rounded w-1/3"></div>
+const POIShimmer: React.FC = () => (
+    <div className="card-base aspect-[2/3] animate-pulse bg-brand-primary/5 border-brand-primary/20 flex flex-col overflow-hidden">
+        <div className="h-[45%] bg-brand-primary/10 flex items-center justify-center">
+            <Icon name="map" className="w-8 h-8 text-brand-text-muted/10" />
+        </div>
+        <div className="flex-1 p-3 flex flex-col gap-2">
+            <div className="h-3.5 bg-brand-primary/20 rounded w-3/4 mb-1" />
+            <div className="space-y-1.5">
+                <div className="h-2 bg-brand-primary/10 rounded w-full" />
+                <div className="h-2 bg-brand-primary/10 rounded w-full" />
+                <div className="h-2 bg-brand-primary/10 rounded w-2/3" />
             </div>
-            <div className="h-2.5 bg-brand-primary/40 rounded w-full mb-1"></div>
-            <div className="h-2.5 bg-brand-primary/40 rounded w-3/4"></div>
-            {label && <p className="text-[10px] text-brand-accent font-bold mt-4 tracking-normal">{label}</p>}
+            <div className="h-8 bg-brand-primary/30 rounded-lg w-full mt-auto" />
         </div>
     </div>
 );
@@ -49,37 +52,23 @@ const POIShimmer: React.FC<{ label?: string }> = ({ label }) => (
 const POIListItem: React.FC<{
     entry: LoreEntry;
     zoneName: string;
-    allLogs: StoryLog[];
     onDelete: (id: string) => void;
     onInvestigate: (entry: LoreEntry) => void;
     isPlayerHere?: boolean;
     populationLevel?: string;
-}> = ({ entry, zoneName, allLogs, onDelete, onInvestigate, isPlayerHere, populationLevel }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const relatedLogs = useMemo(() => {
-        const poiTerms = entry.title.toLowerCase().split(' ').filter(t => t.length > 3);
-        return allLogs
-            .filter(log => log.location === zoneName)
-            .filter(log => {
-                const content = (log.summary || log.content).toLowerCase();
-                return poiTerms.some(term => content.includes(term)) || content.includes(entry.title.toLowerCase());
-            })
-            .slice(-2);
-    }, [allLogs, zoneName, entry.title]);
-
-    const truncate = (text: string) => {
-        const words = text.split(' ');
-        if (words.length <= 10) return text;
-        return words.slice(0, 10).join(' ') + '...';
-    };
-
-    const getTimeOnly = (timestamp: string) => {
-        const date = new Date(timestamp);
-        return !isNaN(date.getTime())
-            ? date.toLocaleDateString([], { month: 'short', day: 'numeric' })
-            : timestamp.split(',')[0].trim();
-    };
+}> = ({ entry, zoneName, onDelete, onInvestigate, isPlayerHere, populationLevel }) => {
+    const isPopCenter = entry.tags?.includes('population-center');
+    let popIcon = null;
+    if (isPopCenter && populationLevel) {
+        const lv = populationLevel.toLowerCase();
+        // Map village to settlement if no native village icon
+        const iconName = lv === 'village' ? 'settlement' : 
+                         ['settlement', 'town', 'city', 'capital'].includes(lv) ? lv : null;
+        
+        if (iconName) {
+            popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-16 h-16 object-contain" />;
+        }
+    }
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -88,70 +77,45 @@ const POIListItem: React.FC<{
         }
     };
 
-    const isPopCenter = entry.tags?.includes('population-center');
-    let popIcon = null;
-    if (isPopCenter && populationLevel) {
-        const lv = populationLevel.toLowerCase();
-        if (['settlement', 'town', 'city', 'capital'].includes(lv)) {
-            popIcon = <img src={`/icons/${lv}.png`} alt={lv} className="w-7 h-7 object-contain flex-shrink-0" />;
-        }
-    }
-
-    const title = (
-        <div className="flex items-center gap-3">
-            {popIcon}
-            <span className={`text-body-base font-bold truncate transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-brand-text-muted' : 'text-brand-text'}`}>
-                {entry.title}
-            </span>
-        </div>
-    );
-
     return (
-        <Accordion
-            title={title}
-            isOpen={isOpen}
-            onToggle={() => setIsOpen(!isOpen)}
-        >
-            <div className="pt-2 pb-4">
-                <div className="mb-6 pl-4 border-l-2 border-brand-primary/50">
-                    <p className="text-body-sm text-brand-text leading-relaxed opacity-90 italic">{entry.content}</p>
-                </div>
-
-                {relatedLogs.length > 0 && (
-                    <div className="mb-6 pl-4">
-                        <label className="text-[10px] font-bold text-brand-accent block mb-3 opacity-60 tracking-normal">Chronicle Echoes</label>
-                        <div className="space-y-4">
-                            {relatedLogs.map(log => (
-                                <div key={log.id} className="relative group/log">
-                                    <div className="text-[9px] text-brand-text-muted font-mono mb-1 opacity-70 tracking-normal">{getTimeOnly(log.timestamp)}</div>
-                                    <div className="text-body-sm text-brand-text leading-snug">{truncate(log.summary || log.content)}</div>
-                                </div>
-                            ))}
-                        </div>
+        <div className="card-base aspect-[2/3] flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-300">
+            {/* Image/Icon Placeholder */}
+            <div className="h-[45%] bg-brand-primary/10 flex items-center justify-center relative overflow-hidden p-4">
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
+                {popIcon ? (
+                    <div className="relative z-10 drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-110">
+                        {popIcon}
                     </div>
+                ) : (
+                    <Icon name="map" className="w-12 h-12 text-brand-text-muted/20 relative z-10" />
                 )}
-
-                <div className="flex justify-between items-center pt-3 border-t border-brand-primary/10">
-                    <button
-                        onClick={handleDelete}
-                        className="text-brand-danger hover:opacity-80 text-xs font-bold flex items-center gap-1.5 px-2 py-1 transition-all"
-                    >
-                        <Icon name="trash" className="w-4 h-4" />
-                        Delete
-                    </button>
-                    <button
-                        onClick={() => onInvestigate(entry)}
-                        className={`btn-sm rounded-lg flex items-center gap-2 ${entry.visited
-                            ? 'btn-secondary'
-                            : 'btn-primary'
-                            }`}
-                    >
-                        <Icon name={entry.visited ? "refresh" : "play"} className="w-3.5 h-3.5" />
-                        {entry.visited ? "Enter Locale" : "Investigate Site"}
-                    </button>
-                </div>
+                <button
+                    onClick={handleDelete}
+                    className="absolute top-2 right-2 p-1.5 opacity-0 group-hover:opacity-100 transition-all bg-black/40 rounded-lg hover:text-brand-danger z-20"
+                >
+                    <Icon name="trash" className="w-3 h-3" />
+                </button>
             </div>
-        </Accordion>
+
+            {/* Content Area */}
+            <div className="flex-1 p-3 flex flex-col">
+                <div className="flex-1">
+                    <h5 className={`text-[13px] leading-tight mb-1.5 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
+                        {toTitleCase(entry.title)}
+                    </h5>
+                    <p className="text-[10px] leading-[1.3] text-brand-text-muted line-clamp-4 italic opacity-80">
+                        {entry.content}
+                    </p>
+                </div>
+
+                <button
+                    onClick={() => onInvestigate(entry)}
+                    className="btn-primary h-8 w-full text-[10px] rounded-lg mt-2 flex-shrink-0"
+                >
+                    {toTitleCase('Enter')}
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -356,16 +320,18 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
 
                                 <div className="space-y-4">
                                     <h5 className="mb-0">Points Of Interest</h5>
-                                    <div className="space-y-1">
+                                    <div className="grid grid-cols-2 gap-3">
                                         {(isBackfilling || isDiscoveringLocale) && entries.length === 0 ? (
-                                            <POIShimmer label={isDiscoveringLocale ? "Synthesizing site data..." : "Identifying landmarks..."} />
+                                            <>
+                                                <POIShimmer />
+                                                <POIShimmer />
+                                            </>
                                         ) : entries.length > 0 ? (
                                             entries.map(entry => (
                                                 <POIListItem
                                                     key={entry.id}
                                                     entry={entry}
                                                     zoneName={name}
-                                                    allLogs={story}
                                                     onDelete={deleteKnowledge}
                                                     onInvestigate={handleInvestigate}
                                                     isPlayerHere={isPlayerHere && currentLocale === entry.title}
@@ -373,7 +339,9 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                 />
                                             ))
                                         ) : (
-                                            <p className="text-center text-body-sm text-brand-text-muted italic py-6">No specific sites identified here yet.</p>
+                                            <div className="col-span-2 text-center text-body-sm text-brand-text-muted italic py-6">
+                                                No specific sites identified here yet.
+                                            </div>
                                         )}
                                     </div>
                                 </div>
