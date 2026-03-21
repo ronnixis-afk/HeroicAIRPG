@@ -1,12 +1,12 @@
 // hooks/world/useWorldActions.ts
 
 import React, { useCallback } from 'react';
-import { GameAction, GameData, ActorSuggestion, MapZone, MapSector, MapSettings, LoreEntry } from '../../types';
+import { GameAction, GameData, ActorSuggestion, MapZone, MapSettings, LoreEntry } from '../../types';
 import { useWorldSelectors } from './useWorldSelectors';
 import { useTravel } from './useTravel';
 import { useTime } from './useTime';
 import { useExploration } from './useExploration';
-import { generateMapSectorDetails, generatePoisForZone, generatePoiDetail, generateMapLayoutFromLore } from '../../services/geminiService';
+import { generatePoisForZone, generatePoiDetail } from '../../services/geminiService';
 import { getDiscoveryXP } from '../../utils/mechanics';
 import { useUI } from '../../context/UIContext';
 
@@ -45,18 +45,8 @@ export const useWorldActions = (
     const updateMapZone = useCallback((zone: MapZone) => { dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone }); }, [dispatch]);
     const movePlayerOnMap = useCallback((coordinates: string) => { dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: coordinates }); }, [dispatch]);
     const updateMapSettings = useCallback((settings: MapSettings) => { dispatch({ type: 'UPDATE_MAP_SETTINGS', payload: settings }); }, [dispatch]);
-    const updateSector = useCallback((sector: MapSector) => { dispatch({ type: 'UPDATE_SECTOR', payload: sector }); }, [dispatch]);
-    const deleteSector = useCallback((id: string) => { dispatch({ type: 'DELETE_SECTOR', payload: id }); }, [dispatch]);
 
-    const generateAndAddSector = useCallback(async () => {
-        if (!gameData) return;
-        setMapGenerationProgress({ isActive: true, step: 'Generating sector...', progress: 50 });
-        try {
-            const sectorData = await generateMapSectorDetails(gameData);
-            const newSector: MapSector = { id: `sector-${Date.now()}`, name: sectorData.name || 'Unknown Sector', description: sectorData.description || '', color: sectorData.color || '#cccccc', coordinates: [], keywords: sectorData.keywords || [] };
-            dispatch({ type: 'ADD_SECTOR', payload: newSector });
-        } finally { setMapGenerationProgress({ isActive: false, step: '', progress: 0 }); }
-    }, [gameData, dispatch, setMapGenerationProgress]);
+
 
     const lazyLoadPois = useCallback(async (zone: MapZone) => {
         if (!gameData) return;
@@ -95,25 +85,13 @@ export const useWorldActions = (
         }
     }, [gameData, dispatch]);
 
-    const generateMapFromLore = useCallback(async () => {
-        if (!gameData) return;
-        setMapGenerationProgress({ isActive: true, step: 'Analyzing lore...', progress: 30 });
-        try {
-            await generateMapLayoutFromLore(gameData.world, gameData.mapSettings!);
-        } catch (e) {
-            console.error("Map generation from lore failed", e);
-        } finally {
-            setMapGenerationProgress({ isActive: false, step: '', progress: 0 });
-        }
-    }, [gameData, setMapGenerationProgress]);
+
 
     return {
         // Simple Setters
         updateMapZone,
         movePlayerOnMap,
         updateMapSettings,
-        updateSector,
-        deleteSector,
 
         // Core functionality
         getCurrentZoneHostility,
@@ -125,9 +103,7 @@ export const useWorldActions = (
         investigateDiscovery,
 
         // Complex Generation
-        generateAndAddSector,
         lazyLoadPois,
-        syncCurrentLocaleToPoi,
-        generateMapFromLore
+        syncCurrentLocaleToPoi
     };
 };

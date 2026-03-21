@@ -92,7 +92,7 @@ export const generateNarrativeResponse = async (
             location_update: {
                 type: Type.OBJECT,
                 properties: {
-                    sector: { type: Type.STRING },
+                    coordinates: { type: Type.STRING },
                     zone: { type: Type.STRING },
                     site_name: { type: Type.STRING, description: "Physical location name ONLY (e.g. 'The Iron Forge'). NEVER use event names like 'Death of X' or 'Aftermath of Y'. If no move occurred, return the current site_name unchanged." },
                     site_id: { type: Type.STRING },
@@ -100,7 +100,7 @@ export const generateNarrativeResponse = async (
                     transition_type: { type: Type.STRING, description: "staying | returning | exploring_new | zone_change. 'staying' if no movement occurred. 'returning' if visiting a previously established POI. 'exploring_new' if moving to an entirely unestablished area in the current zone. 'zone_change' if moving across the world map to a new region/zone." },
                     destination_zone_hint: { type: Type.STRING, description: "Required ONLY if transition_type is 'zone_change'. Provide the name or a short description of the new zone being traveled to." }
                 },
-                required: ["sector", "zone", "site_name", "site_id", "is_new_site", "transition_type"]
+                required: ["coordinates", "zone", "site_name", "site_id", "is_new_site", "transition_type"]
             },
             npc_resolution: {
                 type: Type.ARRAY,
@@ -218,7 +218,7 @@ export const generateNarrativeResponse = async (
             adventure_brief: gameData.adventureBrief || "Continue investigation.",
             active_engagement: false,
             location_update: {
-                sector: gameData.playerCoordinates || "0-0",
+                coordinates: gameData.playerCoordinates || "0-0",
                 zone: gameData.currentLocale || "The Wilds",
                 site_name: gameData.current_site_name || "The Wilds",
                 site_id: gameData.current_site_id || "the-wilds",
@@ -286,7 +286,7 @@ The player has expended a HEROIC POINT this round.
       "adventure_brief": "string",
       "active_engagement": true,
       "location_update": { 
-          "sector": "string", "zone": "string", "site_name": "string", "site_id": "string", "is_new_site": false 
+          "coordinates": "string", "zone": "string", "site_name": "string", "site_id": "string", "is_new_site": false 
       },
       "npc_resolution": [],
       "alignmentOptions": [
@@ -324,7 +324,7 @@ The player has expended a HEROIC POINT this round.
             adventure_brief: gameData.adventureBrief || "Survive the encounter.",
             active_engagement: true,
             location_update: {
-                sector: gameData.playerCoordinates || "Unknown", zone: gameData.currentLocale || "Unknown",
+                coordinates: gameData.playerCoordinates || "Unknown", zone: gameData.currentLocale || "Unknown",
                 site_name: gameData.current_site_name || "Unknown", site_id: gameData.current_site_id || "unknown",
                 is_new_site: false
             },

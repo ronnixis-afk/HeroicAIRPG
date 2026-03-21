@@ -38,7 +38,7 @@ export const ZONE_PROPERTIES = {
         "Anomalous Phenomenon: A sci-fi mystery for the AI to exploit. (Variants: Time dilation field, Psionic echo chamber, Derelict Dyson Sphere)"
     ],
     Magitech: [
-        "Aetheric Resonance: The frequency of the magical field in the sector. (Variants: Harmonic/Empowering, Dissonant/Damaging, Null-Magic Void)",
+        "Aetheric Resonance: The frequency of the magical field in the zone. (Variants: Harmonic/Empowering, Dissonant/Damaging, Null-Magic Void)",
         "Technomantic Infrastructure: The scale of magical engineering. (Variants: Clockwork Solar System, Rune-gate Hub, Continental Mana-forges)",
         "Power Source: What fuels the planets and space stations. (Variants: Captured Dying Star, Mass Soul Engines, Churned Ley-crystal Cores)",
         "Ruling Caste: Who holds the reigns of the magitech. (Variants: Arch-Mage Syndicate, Cyber-Lich Dynasty, Artificer Guilds, Inquisition of the Gear)",

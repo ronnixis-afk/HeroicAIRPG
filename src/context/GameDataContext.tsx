@@ -3,7 +3,7 @@
 import React, { createContext, ReactNode, useContext } from 'react';
 // FIX: Imported GroupCheckResult for process DiceRolls return type definition
 import { GroupCheckResult } from '../utils/diceRolls';
-import type { GameData, PlayerCharacter, StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, AIUpdatePayload, Item, Companion, NarrationTone, Inventory, NarrationVoice, ImageGenerationStyle, StoreItem, CombatActor, Difficulty, Nemesis, EnemyTemplate, CombatActorSize, Ability, PlotPoint, MapZone, MapSettings, MapSector, ActorSuggestion, AffinityDefinition, RollMode, BodySlot, SkillConfiguration, NPC, ArchetypeName, CombatConfiguration, StatusEffect, DiceRoll, DiceRollRequest, GameAction } from '../types';
+import type { GameData, PlayerCharacter, StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, AIUpdatePayload, Item, Companion, NarrationTone, Inventory, NarrationVoice, ImageGenerationStyle, StoreItem, CombatActor, Difficulty, Nemesis, EnemyTemplate, CombatActorSize, Ability, PlotPoint, MapZone, MapSettings, ActorSuggestion, AffinityDefinition, RollMode, BodySlot, SkillConfiguration, NPC, ArchetypeName, CombatConfiguration, StatusEffect, DiceRoll, DiceRollRequest, GameAction } from '../types';
 import { useGameData } from '../hooks/useGameData';
 // FIX: Imported CombatTriggerSource for initiateCombatSequence signature
 import { useUI, CombatTriggerSource } from './UIContext';
@@ -135,11 +135,6 @@ export interface GameDataContextType {
   updateMapZone: (zone: MapZone) => void;
   movePlayerOnMap: (coordinates: string) => void;
   updateMapSettings: (settings: MapSettings) => void;
-  generateAndAddSector: () => Promise<void>;
-  updateSector: (sector: MapSector) => void;
-  deleteSector: (id: string) => void;
-  generateMapFromLore: () => Promise<void>;
-  generateMapFromLoreAction: () => Promise<void>;
   fetchActionSuggestions: () => Promise<string[]>;
   investigateDiscovery: (entry: LoreEntry, locationName: string) => Promise<void>;
   addNPC: (npc: NPC) => void;
@@ -149,7 +144,6 @@ export interface GameDataContextType {
   /* Fix: Added performPickpocket to GameDataContextType to resolve compilation error in PickpocketModal */
   performPickpocket: (npc: NPC, intendedItem: string) => Promise<void>;
   lazyLoadPois: (zone: MapZone) => Promise<void>;
-  // FIX: Added missing syncCurrentLocaleToPoi to the context interface
   syncCurrentLocaleToPoi: (zone: MapZone, localeName: string) => Promise<void>;
   // Gallery Actions
   addGalleryEntry: (entry: Omit<GalleryEntry, 'worldId'>) => Promise<void>;

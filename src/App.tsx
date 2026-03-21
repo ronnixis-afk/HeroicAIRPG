@@ -29,8 +29,6 @@ import Modal from './components/Modal';
 import TimeManagementModalContent from './components/TimeManagementModalContent';
 import TravelModalContent from './components/map/TravelModalContent';
 import CombatStatusDisplay from './components/combat/CombatStatus';
-// Fix: MapSector is a named export in types/World, not a default export.
-import type { MapSector } from './types/World';
 import LootPanel from './components/inventory/LootPanel';
 import { Icon } from './components/Icon';
 import ZoneDetailsPanel from './components/map/ZoneDetailsPanel';
@@ -196,12 +194,6 @@ const GameInterface: React.FC = () => {
     }
     return 'Uncharted Lands';
   }, [gameData?.playerCoordinates, gameData?.mapZones]);
-
-  const currentSectorName = useMemo(() => {
-    if (!gameData || !gameData.playerCoordinates) return undefined;
-    const sector = gameData.mapSectors?.find(s => s.coordinates.includes(gameData.playerCoordinates!));
-    return sector?.name;
-  }, [gameData?.playerCoordinates, gameData?.mapSectors]);
 
   const currentZoneFeatures = useMemo(() => {
     if (!gameData || !gameData.playerCoordinates) return [];
@@ -403,7 +395,6 @@ const GameInterface: React.FC = () => {
             isOpen={isHeaderMenuOpen}
             onClose={() => setIsHeaderMenuOpen(false)}
             worldName={worldName}
-            sector={currentSectorName}
             location={currentLocation}
             locale={gameData?.currentLocale}
             onLocationClick={() => setIsZonePanelOpen(true)}

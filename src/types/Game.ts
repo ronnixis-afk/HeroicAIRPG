@@ -3,7 +3,7 @@
 
 import { PlayerCharacter, Companion } from './Characters';
 import { Inventory, Item, StoreItem, InventoryUpdatePayload } from './Items';
-import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessage, PlotPoint, CombatState, MapZone, MapSector, MapSector as MapSectorType, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution } from './World';
+import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution } from './World';
 import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillConfiguration, BodySlot, CombatActorSize, StatusEffect, ArchetypeName, ActiveBuff } from './Core';
 
 export interface CombatConfiguration {
@@ -59,7 +59,6 @@ export interface GameData {
   current_site_id?: string; // NEW: Machine-readable spatial anchor
   current_site_name?: string; // NEW: Canonical site name
   mapZones?: MapZone[];
-  mapSectors?: MapSector[];
   mapSettings?: MapSettings;
   skillConfiguration: SkillConfiguration;
   isPartyHidden?: boolean;
@@ -165,9 +164,6 @@ export type GameAction =
   | { type: 'UPDATE_MAP_ZONE'; payload: MapZone }
   | { type: 'MOVE_PLAYER_ON_MAP'; payload: string }
   | { type: 'UPDATE_MAP_SETTINGS'; payload: MapSettings }
-  | { type: 'ADD_SECTOR'; payload: MapSectorType }
-  | { type: 'UPDATE_SECTOR'; payload: MapSectorType }
-  | { type: 'DELETE_SECTOR'; payload: string }
   | { type: 'MARK_ALL_MAP_ZONES_SEEN' }
   | { type: 'ADD_MESSAGE'; payload: ChatMessage }
   | { type: 'SET_MESSAGES'; payload: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[]) }

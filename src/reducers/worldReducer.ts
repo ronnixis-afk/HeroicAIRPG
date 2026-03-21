@@ -17,30 +17,6 @@ export const worldReducer = (state: GameData, action: GameAction): GameData => {
         case 'UPDATE_MAP_SETTINGS':
             return { ...state, mapSettings: action.payload };
 
-        case 'ADD_SECTOR': {
-            const mapSectors = state.mapSectors ? [...state.mapSectors] : [];
-            mapSectors.push(action.payload);
-            return { ...state, mapSectors };
-        }
-
-        case 'UPDATE_SECTOR':
-            if (state.mapSectors) {
-                return {
-                    ...state,
-                    mapSectors: state.mapSectors.map(s => s.id === action.payload.id ? action.payload : s)
-                };
-            }
-            return state;
-
-        case 'DELETE_SECTOR':
-            if (state.mapSectors) {
-                return {
-                    ...state,
-                    mapSectors: state.mapSectors.filter(s => s.id !== action.payload)
-                };
-            }
-            return state;
-
         case 'MARK_ALL_MAP_ZONES_SEEN':
             return { ...state, mapZones: (state.mapZones || []).map(z => ({ ...z, isNew: false })) };
 

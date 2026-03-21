@@ -18,7 +18,7 @@ export const STORY_HOOKS = [
     "Summoned to inspect a strange phenomenon that begins reacting to your presence as a SENTIENT weapon.",
     "A stranger pursued by a dominant power crashes through your window, offering a massive bribe for escort.",
     "Winning a private auction for a legendary asset, only for a bystander to scream that the item is a fake.",
-    "Finding a glowing beacon in your gear that makes you the most wanted person in the sector.",
+    "Finding a glowing beacon in your gear that makes you the most wanted person in the region.",
     "Stopped by a blockade where an officer recognizes your gear as belonging to a hero who vanished decades ago.",
     "Hired as a decoy for a shipment, only to discover your \"decoy\" cargo is the real, priceless objective.",
     "Following a vision to a contact who claims your arrival was prophesied and your wealth is a \"key.\""

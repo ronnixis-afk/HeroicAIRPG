@@ -313,7 +313,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 ...state,
                 playerCharacter: pcData,
                 world: state.world,
-                mapSectors: state.mapSectors || [],
                 mapSettings: state.mapSettings,
                 gmSettings: state.gmSettings,
                 playerInventory: playerInv,
@@ -393,8 +392,8 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 newState.currentLocale = loc.site_name; // Legacy compatibility
 
                 // Update coordinates if pattern matches
-                if (loc.sector && /^-?\d+--?\d+$/.test(loc.sector)) {
-                    newState.playerCoordinates = loc.sector;
+                if (loc.coordinates && /^-?\d+--?\d+$/.test(loc.coordinates)) {
+                    newState.playerCoordinates = loc.coordinates;
                 }
 
                 // TRIGGER SITE TRANSITION: Clear non-allied scene actors when moving to a new physical container
@@ -616,12 +615,10 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     if (existingIdx > -1) {
                         newState.mapZones![existingIdx] = { ...newState.mapZones![existingIdx], ...zone };
                     } else {
-                        const sector = (newState.mapSectors || []).find(s => s.coordinates.includes(zone.coordinates as string));
                         newState.mapZones!.push({
                             ...zone,
                             id: zone.id || `zone-${zone.coordinates}-${Date.now()}`,
                             visited: zone.visited !== undefined ? zone.visited : false,
-                            sectorId: sector?.id,
                             isNew: true
                         } as MapZone);
                     }

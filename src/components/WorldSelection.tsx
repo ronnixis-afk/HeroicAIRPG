@@ -5,10 +5,9 @@ import { worldService } from '../services/worldService';
 import { cloudSaveService, CloudSaveMetadata } from '../services/cloudSaveService';
 import {
     generateWorldPreview,
-    generateWorldSectors,
     generateGlobalWorldSummary
 } from '../services/aiWorldService';
-import type { World, LoreEntry, GameData, WorldPreview, MapSettings, MapSector, MapZone, SkillConfiguration } from '../types';
+import type { World, LoreEntry, GameData, WorldPreview, MapSettings, MapZone, SkillConfiguration } from '../types';
 import { Icon } from './Icon';
 import Modal from './Modal';
 import CharacterCreationLoader from './CharacterCreationLoader';
@@ -242,46 +241,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 zoneLabel: setting === 'Sci-Fi' ? 'System' : (setting === 'Modern' ? 'District' : 'Region')
             };
 
-            // 2. Sector Generation
-            setGenerationStep('Surveying Sectors...');
-            setProgress(30);
-            const sectorBlueprints = await generateWorldSectors(loreEntries as LoreEntry[], mapSettings);
-
-            const mapSectors: MapSector[] = sectorBlueprints.map((bp, i) => ({
-                id: `sector-${i}-${Date.now()}`,
-                name: bp.name,
-                description: bp.description,
-                color: bp.color,
-                coordinates: [],
-                keywords: bp.keywords || []
-            }));
-
-            const getDist = (x1: number, y1: number, x2: number, y2: number) => Math.hypot(x2 - x1, y2 - y1);
-
-            // Sector placement logic (Voronoi)
-            for (let x = -INITIAL_GEN_RADIUS; x <= INITIAL_GEN_RADIUS; x++) {
-                for (let y = -INITIAL_GEN_RADIUS; y <= INITIAL_GEN_RADIUS; y++) {
-                    const coords = formatCoordinates(x, y);
-                    let closestSectorIndex = 0;
-                    let minDist = Infinity;
-
-                    sectorBlueprints.forEach((bp, index) => {
-                        const adjX = bp.centerX - INITIAL_GEN_RADIUS;
-                        const adjY = bp.centerY - INITIAL_GEN_RADIUS;
-                        const d = getDist(x, y, adjX, adjY);
-                        if (d < minDist) {
-                            minDist = d;
-                            closestSectorIndex = index;
-                        }
-                    });
-
-                    if (mapSectors[closestSectorIndex]) {
-                        mapSectors[closestSectorIndex].coordinates.push(coords);
-                    }
-                }
-            }
-
-            // 3. Weave Global Overview (New Final Step)
+            // 2. Weave Global Overview (New Final Step)
             setGenerationStep('Weaving World Overview...');
             setProgress(60);
             const worldOverviewText = await generateGlobalWorldSummary(loreEntries as LoreEntry[]);
@@ -297,15 +257,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             setProgress(85);
 
             // Create starting zone at origin (0,0)
-            const startingSector = mapSectors.find(s => s.coordinates.includes("0-0")) || mapSectors[0];
             const startingZone: MapZone = {
                 id: `zone-start-${Date.now()}`,
-                name: `${startingSector.name} Gateway`,
-                description: `The central crossing of the ${startingSector.name}. Discovery begins here.`,
+                name: `${worldName} Entrance`,
+                description: `A central arrival point in the world of ${worldName}. Discovery begins here.`,
                 hostility: 0,
                 coordinates: "0-0",
-                keywords: startingSector.keywords || [],
-                sectorId: startingSector.id,
                 visited: true,
                 tags: ['location', 'safe', 'start']
             };
@@ -335,7 +292,6 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 worldSummary: worldOverviewText, // Populate gameData field
                 gmSettings: `Setting: ${setting}. Themes: ${selectedThemes.join(', ')}. Additional context: ${additionalContext}.`,
                 mapSettings: mapSettings,
-                mapSectors: mapSectors,
                 mapZones: mapZones,
                 messages: [
                     {

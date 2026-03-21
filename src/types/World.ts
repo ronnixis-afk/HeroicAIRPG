@@ -5,7 +5,7 @@ import { AbilityScoreName, AbilityEffect, StatusEffect, RollMode, CombatActorSiz
 
 // Fix: Added LocationUpdate interface to support structured AI spatial transition responses
 export interface LocationUpdate {
-  sector: string;
+  coordinates: string;
   zone: string;
   site_name: string;
   site_id: string;
@@ -110,7 +110,7 @@ export interface NPC {
   deathTimestamp?: string; // In-game time of death
   isBodyCleared?: boolean; // True if the corpse was removed
   location?: string; // The Zone name
-  currentPOI?: string; // The specific site/locale name (replaces 'sector')
+  currentPOI?: string; // The specific site/locale name
   // Fix: Added site_id to NPC interface to support machine-readable spatial anchoring
   site_id?: string;
   gender?: string;
@@ -332,7 +332,6 @@ export interface MapZone {
   name: string;
   hostility: number;
   description?: string;
-  sectorId?: string;
   visited?: boolean;
   isNew?: boolean; // Notification flag
   isLoading?: boolean; // NEW: Indicates background generation
@@ -343,14 +342,6 @@ export interface MapZone {
   isMajorHub?: boolean; // New: Explicitly identifies Faction Seats of Power
 }
 
-export interface MapSector {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  coordinates: string[];
-  keywords?: string[];
-}
 
 export interface MapSettings {
   style: string;

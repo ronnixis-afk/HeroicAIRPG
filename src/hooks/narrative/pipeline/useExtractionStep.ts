@@ -112,7 +112,7 @@ export const useExtractionStep = (
                     newCoords = targetZone.coordinates;
                     finalUpdates.location_update = {
                         ...narratorLoc,
-                        sector: newCoords,
+                        coordinates: newCoords,
                         zone: targetZone.name,
                         is_new_site: true,
                         transition_type: 'zone_change'
@@ -130,7 +130,7 @@ export const useExtractionStep = (
 
                     try {
                         const existingZoneNames = (gameData.mapZones || []).map(z => z.name);
-                        const details = await generateZoneDetails(newCoords, destHint, undefined, undefined, gameData.mapSettings, gameData.worldSummary, existingZoneNames);
+                        const details = await generateZoneDetails(newCoords, destHint, undefined, gameData.mapSettings, gameData.worldSummary, existingZoneNames);
                         const newZone: MapZone = {
                             id: `zone-${newCoords}-${Date.now()}`,
                             coordinates: newCoords,
@@ -145,7 +145,7 @@ export const useExtractionStep = (
 
                         finalUpdates.location_update = {
                             ...narratorLoc,
-                            sector: newCoords,
+                            coordinates: newCoords,
                             zone: details.name || destHint,
                             site_name: narratorLoc.site_name || 'Open Area',
                             site_id: `open-area-${newCoords}`,
@@ -155,7 +155,7 @@ export const useExtractionStep = (
                     } catch (e) {
                         finalUpdates.location_update = {
                             ...narratorLoc,
-                            sector: newCoords,
+                            coordinates: newCoords,
                             zone: destHint,
                             site_name: narratorLoc.site_name || 'Open Area',
                             site_id: `open-area-${newCoords}`,
@@ -170,7 +170,7 @@ export const useExtractionStep = (
                 const snapCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
                 finalUpdates.location_update = {
                     ...narratorLoc,
-                    sector: snapCoords,
+                    coordinates: snapCoords,
                     zone: gameData.current_site_name || 'The Wilds',
                     site_name: gameData.current_site_name || 'Open Area',
                     site_id: gameData.current_site_id || `open-area-${snapCoords}`,
@@ -198,7 +198,7 @@ export const useExtractionStep = (
                     // Snap to the known POI
                     finalUpdates.location_update = {
                         ...narratorLoc,
-                        sector: lookupCoords || '0-0',
+                        coordinates: lookupCoords || '0-0',
                         zone: gameData.current_site_name || 'The Wilds',
                         site_name: knownLocation.title,
                         site_id: knownLocation.id,
@@ -223,7 +223,7 @@ export const useExtractionStep = (
                     if (!validationResult.validation_passed) {
                         finalUpdates.location_update = {
                             ...narratorLoc,
-                            sector: gameData.playerCoordinates || '0-0',
+                            coordinates: gameData.playerCoordinates || '0-0',
                             zone: gameData.current_site_name || 'The Wilds',
                             site_name: gameData.current_site_name || 'Open Area',
                             site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
@@ -246,7 +246,7 @@ export const useExtractionStep = (
                             const newEntry: Omit<LoreEntry, 'id'> = {
                                 title: validationResult.name,
                                 content: validationResult.content,
-                                coordinates: narratorLoc.sector || gameData.playerCoordinates,
+                                coordinates: narratorLoc.coordinates || gameData.playerCoordinates,
                                 tags: ['location'],
                                 isNew: true,
                                 visited: true

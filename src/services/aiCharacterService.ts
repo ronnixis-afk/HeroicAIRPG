@@ -411,13 +411,12 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
        - Zone 2 MUST have a Population Scale of ${popLevel2}.
        Ensure the zone description logically accounts for its Population Scale.
     2. 'hostility' MUST be an INTEGER between -10 and 10 (as these are known home-territory or past locations).
-    3. 'sectorId': If a sector exists that covers these coordinates, assign it. Otherwise assign to the sector containing (0-0).
-    4. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
-    5. 'pois': You MUST generate exactly 4 entries per zone.
+    3. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
+    4. 'pois': You MUST generate exactly 4 entries per zone.
        - The first entry MUST be a thematic Population Center landmark (or wilderness landmark for Barren scales).
        - The remaining 3 entries MUST be specific locations surrounding that center.
     
-    Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "sectorId", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
+    Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
 
     try {
         const ai = getAi();

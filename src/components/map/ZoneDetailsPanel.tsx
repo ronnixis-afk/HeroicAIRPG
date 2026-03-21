@@ -388,11 +388,11 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
 
     if (!gameData) return null;
 
-    const { mapZones = [], mapSectors = [], knowledge = [], mapSettings, playerCoordinates, playerInventory, companions, combatState, story = [], currentLocale } = gameData;
+    const { mapZones = [], knowledge = [], mapSettings, playerCoordinates, playerInventory, companions, combatState, story = [], currentLocale } = gameData;
     const isCombatActive = combatState?.isActive || false;
 
     const zone = useMemo(() => mapZones.find(z => z.coordinates === coordinates) || null, [mapZones, coordinates]);
-    const currentSector = useMemo(() => mapSectors.find(s => s.coordinates.includes(coordinates)), [mapSectors, coordinates]);
+
     const entries = useMemo(() => knowledge.filter(k => k.coordinates === coordinates && k.tags?.includes('location')), [knowledge, coordinates]);
 
     const isPlayerHere = coordinates === playerCoordinates;
@@ -450,8 +450,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
             description,
             keywords,
             coordinates,
-            visited: true,
-            sectorId: currentSector?.id
+            visited: true
         };
         updateMapZone(updatedZone);
         setIsEditing(false);
@@ -544,11 +543,6 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     {toTitleCase(kw.split(':')[0].trim())}
                                                 </span>
                                             ))}
-                                            {currentSector && (
-                                                <span className="text-body-sm font-bold text-brand-text-muted ml-1">
-                                                    Sector: <span style={{ color: currentSector.color }}>{currentSector.name}</span>
-                                                </span>
-                                            )}
                                         </div>
                                     </div>
                                 </div>

@@ -3,7 +3,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
-import { GameData, MapSector } from '../types';
+import { GameData } from '../types';
 import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 
 /**
@@ -26,7 +26,6 @@ export const resolveLocaleCreation = async (
 }> => {
     const currentCoords = gameData.playerCoordinates || '0-0';
     const currentZone = gameData.mapZones?.find(z => z.coordinates === currentCoords);
-    const currentSector = gameData.mapSectors?.find(s => s.coordinates.includes(currentCoords));
     const currentZoneName = currentZone?.name || 'Unknown';
 
     const localPOIs = gameData.knowledge

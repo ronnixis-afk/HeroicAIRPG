@@ -134,7 +134,6 @@ export const useCharacterActions = (
                         name: pz.name || "A Discovery",
                         description: pz.description || "A thematic location.",
                         hostility: pz.hostility || 0,
-                        sectorId: pz.sectorId,
                         populationLevel: pz.populationLevel,
                         zoneFeatures: pz.zoneFeatures,
                         visited: true,
@@ -221,14 +220,12 @@ export const useCharacterActions = (
                 const hookIndex = getFairSystemRandom(1, 20, 'starting_hook', 10);
                 scenario = await generateStartingScenario(character, gameData, hookIndex);
 
-                const sector = gameData.mapSectors?.find(s => s.coordinates.includes(coords));
                 const startingZone: MapZone = {
                     id: `zone-start-${Date.now()}`,
                     coordinates: coords,
                     name: scenario.startingZone.name,
                     description: scenario.startingZone.description,
                     hostility: scenario.startingZone.hostility,
-                    sectorId: sector?.id,
                     populationLevel: scenario.startingZone.populationLevel,
                     zoneFeatures: scenario.startingZone.zoneFeatures,
                     visited: true,

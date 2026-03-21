@@ -95,7 +95,6 @@ const hydrateWorldData = (savedGameData: any): GameData => {
     mergedData.npcs = Array.isArray(mergedData.npcs) ? mergedData.npcs : [];
     mergedData.plotPoints = Array.isArray(mergedData.plotPoints) ? mergedData.plotPoints : [];
     mergedData.mapZones = Array.isArray(mergedData.mapZones) ? mergedData.mapZones : [];
-    mergedData.mapSectors = Array.isArray(mergedData.mapSectors) ? mergedData.mapSectors : [];
     mergedData.knowledge = Array.isArray(mergedData.knowledge) ? mergedData.knowledge : [];
     mergedData.objectives = Array.isArray(mergedData.objectives) ? mergedData.objectives : [];
     mergedData.story = Array.isArray(mergedData.story) ? mergedData.story : [];

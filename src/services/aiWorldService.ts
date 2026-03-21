@@ -3,7 +3,7 @@
 import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { Type } from "@google/genai";
-import { MapSettings, GameData, StoryLog, WorldPreview, MapSector, MapZone, ChatMessage, LoreEntry } from '../types';
+import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
 import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 
@@ -141,35 +141,6 @@ export const generateWorldPreview = async (
 };
 
 /**
- * GENERATE WORLD SECTORS
- * Switched to gemini-flash-lite-latest for efficient macro-geography mapping.
- */
-export const generateWorldSectors = async (lore: any[], settings: MapSettings): Promise<any[]> => {
-    const prompt = `Generate 5-8 distinct geographical sectors based on this lore.
-    Map Settings: ${JSON.stringify(settings)}
-    Lore Context: ${JSON.stringify(lore.slice(0, 3))}
-    
-    [STRICT CONSTRAINTS]
-    - name: MAX 3 WORDS.
-    - description: MAX 30 WORDS.
-    
-    Return JSON array of objects: { name, description (plain text), color (hex), keywords[], centerX (0-26), centerY (0-26) }`;
-
-    const ai = getAi();
-    const response = await ai.models.generateContent({
-        model: AI_MODELS.DEFAULT,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
-        }
-    });
-
-    const data = JSON.parse(cleanJson(response.text || '[]')) || [];
-    return Array.isArray(data) ? data : (data.sectors || []);
-};
-
-/**
  * Generates additional lore based on a user prompt.
  */
 export const generateAdditionalLore = async (prompt: string, existingLore: LoreEntry[]): Promise<LoreEntry> => {
@@ -216,45 +187,6 @@ export const generateGlobalWorldSummary = async (lore: LoreEntry[]): Promise<str
         }
     });
     return response.text?.trim() || "A vast and unexplored world.";
-};
-
-/**
- * Generates details for a new map sector.
- */
-export const generateMapSectorDetails = async (gameData: GameData): Promise<Partial<MapSector>> => {
-    const ai = getAi();
-    const input = `Based on the world context, generate a new geographical sector.
-    World Context: ${gameData.worldSummary || 'Standard RPG setting.'}
-    [STRICT CONSTRAINTS]
-    - name: MAX 3 WORDS.
-    - description: MAX 30 WORDS.
-    Return JSON: { "name": "string", "description": "string", "color": "hex string", "keywords": ["string"] }`;
-
-    const response = await ai.models.generateContent({
-        model: AI_MODELS.DEFAULT,
-        contents: input,
-        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
-    });
-    return JSON.parse(cleanJson(response.text || '{}'));
-};
-
-/**
- * Generates a full map layout from existing lore.
- */
-export const generateMapLayoutFromLore = async (lore: LoreEntry[], settings: MapSettings): Promise<any> => {
-    const ai = getAi();
-    const input = `Based on this lore, generate a complete map layout including sectors and major zones.
-    Lore: ${JSON.stringify(lore.slice(0, 10))}
-    Settings: ${JSON.stringify(settings)}
-    Return JSON: { "sectors": [], "zones": [] }`;
-
-    const response = await ai.models.generateContent({
-        model: AI_MODELS.DEFAULT,
-        contents: input,
-        config: {
-                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
-    });
-    return JSON.parse(cleanJson(response.text || '{}'));
 };
 
 /**
@@ -377,7 +309,6 @@ import { getRandomZoneProperties } from '../constants/zoneProperties';
 export const generateZoneDetails = async (
     coords: string,
     nameHint: string,
-    sector?: MapSector,
     additionalContext?: string,
     mapSettings?: MapSettings,
     worldSummary?: string,
@@ -403,7 +334,6 @@ export const generateZoneDetails = async (
     const ai = getAi();
     const input = `Generate details for a new map zone at coordinates ${coords}.
     Name hint: ${nameHint}
-    Sector: ${sector?.name || 'The Wilds'}
     World context: ${worldSummary || ''}
     Additional context: ${additionalContext || ''}
     ${propertiesContext}
@@ -504,7 +434,6 @@ export const preloadAdjacentZones = async (
         const existing = existingZones.find(z => z.coordinates === targetCoords);
         if (!existing) {
             // Uncharted zone. Preload it.
-            const sector = gameData.mapSectors?.find(s => s.coordinates.includes(targetCoords));
 
             // Gather immediate neighbor names for context
             const neighborNames = existingZones
@@ -536,7 +465,6 @@ export const preloadAdjacentZones = async (
                 coordinates: targetCoords,
                 name: "...", // Placeholder
                 hostility: 0,
-                sectorId: sector?.id,
                 visited: false,
                 isNew: false,
                 isLoading: true
@@ -559,7 +487,6 @@ export const preloadAdjacentZones = async (
                 const details = await generateZoneDetails(
                     targetCoords,
                     "Uncharted Lands",
-                    sector,
                     completeContext,
                     gameData.mapSettings,
                     gameData.worldSummary,
@@ -572,7 +499,6 @@ export const preloadAdjacentZones = async (
                     name: details.name || "Uncharted Lands",
                     description: details.description,
                     hostility: typeof details.hostility === 'number' ? details.hostility : 0,
-                    sectorId: sector?.id,
                     populationLevel: popLevel,
                     zoneFeatures: features,
                     visited: false,

@@ -72,9 +72,6 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'UPDATE_MAP_ZONE':
         case 'MOVE_PLAYER_ON_MAP':
         case 'UPDATE_MAP_SETTINGS':
-        case 'ADD_SECTOR':
-        case 'UPDATE_SECTOR':
-        case 'DELETE_SECTOR':
         case 'MARK_ALL_MAP_ZONES_SEEN':
             return worldReducer(state, action);
 

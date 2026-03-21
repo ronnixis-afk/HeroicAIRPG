@@ -4,7 +4,7 @@ import { GameDataContext } from '../../context/GameDataContext';
 import Modal from '../Modal';
 import { ItemDetailView } from '../inventory/ItemDetailView';
 import NPCDetailsModal from '../npcs/NPCDetailsModal';
-import { LoreEntry, NPC, Item, MapZone, MapSector, Companion } from '../../types';
+import { LoreEntry, NPC, Item, MapZone, Companion } from '../../types';
 import { companionToNPC } from '../../utils/npcUtils';
 
 const getHostilityLabel = (value: number): { label: string, color: string } => {
@@ -129,38 +129,7 @@ export const EntityLightbox: React.FC = () => {
                         </div>
                     );
                 }
-
-                const sector = data as MapSector;
-                return (
-                    <div className="space-y-4 p-2">
-                        <div className="flex items-center gap-3">
-                            <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: sector.color }} />
-                        </div>
-                        <p className="text-body-sm text-brand-text-muted font-bold opacity-60">
-                            Classification: Sector
-                        </p>
-                        <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-primary/50">
-                            <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap">
-                                {sector.description}
-                            </p>
-                        </div>
-                        {sector.keywords && sector.keywords.length > 0 && (
-                            <div className="flex flex-wrap gap-2 pt-2">
-                                {sector.keywords?.map(k => (
-                                    <span key={k} className="px-2 py-1 bg-brand-primary rounded text-body-sm font-mono text-brand-text-muted">#{k}</span>
-                                ))}
-                            </div>
-                        )}
-                        <div className="pt-4 border-t border-brand-primary/10 flex justify-center">
-                            <button
-                                onClick={onClose}
-                                className="btn-primary btn-md px-10"
-                            >
-                                Dismiss
-                            </button>
-                        </div>
-                    </div>
-                );
+                return null;
             case 'lore':
             case 'objective':
                 const entry = data as LoreEntry;

@@ -42,12 +42,11 @@ export const useTravel = (
             // 1. Resolve Geography and Discovery Status
             if (!zone) {
                 isDiscovery = true;
-                const sector = gameData.mapSectors?.find(s => s.coordinates.includes(coordinates));
 
                 const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
                 const effectiveHint = directions.includes(locationName.toLowerCase()) ? "Uncharted Lands" : locationName;
 
-                const details = await generateZoneDetails(coordinates, effectiveHint, sector, "", gameData.mapSettings, gameData.worldSummary);
+                const details = await generateZoneDetails(coordinates, effectiveHint, "", gameData.mapSettings, gameData.worldSummary);
                 generatedDescription = details.description;
                 const newZone: MapZone = {
                     id: `zone-${coordinates}-${Date.now()}`,
@@ -55,7 +54,6 @@ export const useTravel = (
                     name: details.name || effectiveHint,
                     description: details.description,
                     hostility: parseHostility(details.hostility),
-                    sectorId: sector?.id,
                     visited: true,
                     tags: ['location'],
                     keywords: details.keywords || []

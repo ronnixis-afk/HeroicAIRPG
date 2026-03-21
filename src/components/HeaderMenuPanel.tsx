@@ -6,7 +6,7 @@ interface HeaderMenuPanelProps {
   isOpen: boolean;
   onClose: () => void;
   worldName?: string;
-  sector?: string;
+
   location: string;
   locale?: string;
   siteDetail?: string;
@@ -65,7 +65,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   isOpen,
   onClose,
   worldName,
-  sector,
+
   location,
   locale,
   siteDetail,
@@ -123,7 +123,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                   <Icon name="location" className="w-5 h-5 text-brand-accent shrink-0 group-hover:scale-110 transition-transform" />
                   <div className="flex flex-col gap-0">
                     <div className="text-body-sm font-normal leading-tight text-brand-text">
-                      {[siteDetail || locale, location, sector].filter(Boolean).join(', ') || 'The Wilds'}
+                      {[siteDetail || locale, location].filter(Boolean).join(', ') || 'The Wilds'}
                     </div>
                     <span className="text-[8px] text-brand-text-muted font-normal opacity-60">Tap to open details</span>
                   </div>

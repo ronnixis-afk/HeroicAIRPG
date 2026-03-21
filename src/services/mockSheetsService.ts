@@ -107,10 +107,7 @@ const defaultGameData: GameData = {
   combatBaseScore: 8,
   playerCoordinates: '0-0',
   mapZones: [
-    { id: 'zone-start', coordinates: '0-0', name: 'Silvercreek', hostility: -5, sectorId: 'sector-start', visited: true, keywords: ['silvercreek', 'town', 'safe'] }
-  ],
-  mapSectors: [
-    { id: 'sector-start', name: 'The Borderlands', description: 'The edge of the civilized world, bordering the great unknown.', color: '#3ecf8e', coordinates: ['0-0'], keywords: ['borderlands', 'wilds'] }
+    { id: 'zone-start', coordinates: '0-0', name: 'Silvercreek', hostility: -5, visited: true, keywords: ['silvercreek', 'town', 'safe'] }
   ],
   mapSettings: {
     style: 'fantasy',
@@ -218,7 +215,6 @@ export const getNewGameData = (): GameData => {
     combatBaseScore: 8,
     playerCoordinates: '0-0',
     mapZones: [],
-    mapSectors: [],
     mapSettings: {
       style: 'fantasy',
       gridUnit: 'Miles',

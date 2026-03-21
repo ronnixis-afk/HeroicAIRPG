@@ -97,9 +97,6 @@ export const useEntityDictionary = () => {
             if (z.visited) addIfValid(z.name, 'location', z);
         });
 
-        // 5. Locations (Map Sectors)
-        (gameData.mapSectors || []).forEach(s => addIfValid(s.name, 'location', s));
-
         // 6. Lore Entries
         (gameData.world || []).forEach(l => addIfValid(l.title, 'lore', l));
         (gameData.knowledge || []).forEach(k => {
