@@ -67,7 +67,7 @@ export const useWorldActions = (
                 title: p.title,
                 content: p.content,
                 coordinates: zone.coordinates,
-                tags: ['location'],
+                tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
                 isNew: true,
                 visited: p.title.toLowerCase().includes('open area')
             }));

@@ -69,7 +69,7 @@ export const useTravel = (
                     title: p.title,
                     content: p.content,
                     coordinates: newZone.coordinates,
-                    tags: ['location'],
+                    tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
                     isNew: true,
                     visited: p.title.toLowerCase().includes('open area')
                 }));
