@@ -54,20 +54,26 @@ const POIListItem: React.FC<{
     zoneName: string;
     onDelete: (id: string) => void;
     onInvestigate: (entry: LoreEntry) => void;
+    onEdit?: (entry: LoreEntry) => void;
+    isExpanded: boolean;
+    onToggleExpand: () => void;
     isPlayerHere?: boolean;
     populationLevel?: string;
-}> = ({ entry, zoneName, onDelete, onInvestigate, isPlayerHere, populationLevel }) => {
-    const isPopCenter = entry.tags?.includes('population-center');
+}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, populationLevel }) => {
+    const tags = entry.tags || [];
+    const isPopCenter = tags.includes('population-center');
     let popIcon = null;
-    if (isPopCenter && populationLevel) {
-        const lv = populationLevel.toLowerCase();
+
+    if (isPopCenter) {
+        const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
+        const levelFromTags = tags.find(t => possibleLevels.includes(t.toLowerCase()));
+        const lv = (levelFromTags || populationLevel || 'settlement').toLowerCase();
+        
         // Map village to settlement if no native village icon
         const iconName = lv === 'village' ? 'settlement' : 
-                         ['settlement', 'town', 'city', 'capital'].includes(lv) ? lv : null;
+                         possibleLevels.includes(lv) ? lv : 'settlement';
         
-        if (iconName) {
-            popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-16 h-16 object-contain" />;
-        }
+        popIcon = <img src={`/icons/${iconName}.png`} alt={lv} className="w-7 h-7 object-contain" />;
     }
 
     const handleDelete = (e: React.MouseEvent) => {
@@ -77,10 +83,23 @@ const POIListItem: React.FC<{
         }
     };
 
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onEdit?.(entry);
+    };
+
+    const handleInvestigate = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onInvestigate(entry);
+    };
+
     return (
-        <div className="card-base aspect-[2/3] flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-300">
+        <div 
+            onClick={onToggleExpand}
+            className={`card-base flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-500 cursor-pointer ${isExpanded ? 'col-span-2' : 'aspect-[2/3]'}`}
+        >
             {/* Image/Icon Placeholder */}
-            <div className="h-[45%] bg-brand-primary/10 flex items-center justify-center relative overflow-hidden p-4">
+            <div className={`${isExpanded ? 'h-40' : 'h-[45%]'} bg-brand-primary/10 flex items-center justify-center relative overflow-hidden p-4 transition-all duration-500`}>
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
                 {popIcon ? (
                     <div className="relative z-10 drop-shadow-2xl transform transition-transform duration-500 group-hover:scale-110">
@@ -95,25 +114,51 @@ const POIListItem: React.FC<{
                 >
                     <Icon name="trash" className="w-3 h-3" />
                 </button>
+                {isExpanded && (
+                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-brand-accent/20 border border-brand-accent/30 rounded text-[8px] font-bold text-brand-accent uppercase tracking-widest z-20">
+                        Details
+                    </div>
+                )}
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 p-3 flex flex-col">
+            <div className="flex-1 p-4 flex flex-col">
                 <div className="flex-1">
-                    <h5 className={`text-[13px] leading-tight mb-1.5 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
+                    <h5 className={`text-[14px] leading-tight mb-2 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
                         {toTitleCase(entry.title)}
                     </h5>
-                    <p className="text-[10px] leading-[1.3] text-brand-text-muted line-clamp-4 italic opacity-80">
+                    <p className={`text-[11px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-4'}`}>
                         {entry.content}
                     </p>
+                    
+                    {isExpanded && entry.tags && entry.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-4">
+                            {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
+                                <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
+                                    {toTitleCase(tag.replace(/-/g, ' '))}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <button
-                    onClick={() => onInvestigate(entry)}
-                    className="btn-primary h-8 w-full text-[10px] rounded-lg mt-2 flex-shrink-0"
-                >
-                    {toTitleCase('Enter')}
-                </button>
+                <div className="flex gap-2 mt-4 flex-shrink-0">
+                    {isExpanded && (
+                        <button
+                            onClick={handleEdit}
+                            className="btn-secondary h-8 flex-1 text-[10px] rounded-lg gap-2"
+                        >
+                            <Icon name="edit" className="w-3 h-3" />
+                            {toTitleCase('Edit')}
+                        </button>
+                    )}
+                    <button
+                        onClick={handleInvestigate}
+                        className="btn-primary h-8 flex-1 text-[10px] rounded-lg"
+                    >
+                        {toTitleCase('Enter')}
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -146,6 +191,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
     const [travelMethod, setTravelMethod] = useState('');
     const [isBackfilling, setIsBackfilling] = useState(false);
     const [isDiscoveringLocale, setIsDiscoveringLocale] = useState(false);
+    const [expandedPoiId, setExpandedPoiId] = useState<string | null>(null);
 
     if (!gameData) return null;
 
@@ -334,6 +380,13 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     zoneName={name}
                                                     onDelete={deleteKnowledge}
                                                     onInvestigate={handleInvestigate}
+                                                    onEdit={(e) => {
+                                                        // Handle edit - maybe use existing KeywordEditor logic or similar
+                                                        // For now, let's just log or implement a simple edit flow if possible
+                                                        console.log('Edit POI:', e);
+                                                    }}
+                                                    isExpanded={expandedPoiId === entry.id}
+                                                    onToggleExpand={() => setExpandedPoiId(expandedPoiId === entry.id ? null : entry.id)}
                                                     isPlayerHere={isPlayerHere && currentLocale === entry.title}
                                                     populationLevel={zone?.populationLevel}
                                                 />
