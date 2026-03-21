@@ -4,12 +4,13 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext, GameDataContextType } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { Icon } from '../Icon';
-import { Item, Ability, PlayerCharacter, Companion, CombatActor, RollMode, Inventory, getItemRarityColor, AbilityEffect } from '../../types';
+import { Item, Ability, PlayerCharacter, Companion, CombatActor, RollMode, Inventory, getItemRarityColor, AbilityEffect, type StatusEffect } from '../../types';
 import { toTitleCase } from '../../utils/npcUtils';
 import { formatAbilityEffect } from '../../services/ItemGeneratorService';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { canBeTargeted } from '../../utils/resolution/StatusRules';
 import Modal from '../Modal';
+import { ActorAvatar } from '../ActorAvatar';
 
 interface PlayerAttackModalProps {
     isOpen: boolean;
@@ -22,88 +23,6 @@ interface TargetAssignment {
     targetId: string;
     hand: 'main' | 'off';
 }
-
-const TargetAvatar: React.FC<{
-    actor: CombatActor | PlayerCharacter | Companion;
-    isSelected: boolean;
-    hpPercent: number;
-    isAlly: boolean;
-}> = ({ actor, isSelected, hpPercent, isAlly }) => {
-    const size = 48;
-    const hpColor = isAlly ? '#3ecf8e' : '#ef4444';
-    const tempColor = '#38bdf8';
-    const staminaColor = '#f59e0b';
-    const initials = actor.name.slice(0, 2);
-    const imageUrl = (actor as any).imageUrl || (actor as any).image;
-
-    const tempHp = (actor as any).temporaryHitPoints || 0;
-    const maxTempHp = (actor as any).maxTemporaryHitPoints || 0;
-    const tempPercent = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
-
-    const stamina = (actor as any).stamina || 0;
-    const maxStamina = (actor as any).maxStamina || 0;
-    const staminaPercent = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
-
-    return (
-        <div className={`relative transition-all duration-300 flex flex-col items-center ${isSelected ? 'scale-110 z-20' : 'scale-100 z-10'}`} style={{ width: size }}>
-            <div className={`
-                relative rounded-xl overflow-hidden flex items-center justify-center bg-brand-surface border-2 transition-all w-full aspect-square
-                ${isSelected ? 'border-white shadow-[0_0_15px_rgba(255,255,255,0.4)]' : 'border-brand-primary'}
-            `}>
-                {imageUrl ? (
-                    <img src={imageUrl} alt={actor.name} className="w-full h-full object-cover" />
-                ) : (
-                    <span className={`font-black text-xs ${isAlly ? 'text-brand-accent' : 'text-brand-danger'}`}>{initials}</span>
-                )}
-
-                {isSelected && (
-                    <div className="absolute top-1 right-1 bg-brand-accent rounded-full p-0.5 z-20 shadow-lg border border-brand-bg animate-bounce-in">
-                        <Icon name="check" className="w-2 h-2 text-black" />
-                    </div>
-                )}
-            </div>
-
-            {/* Health Bar */}
-            <div className="mt-1.5 w-full">
-                <div className="w-full bg-black/40 rounded-full overflow-hidden border border-white/5 flex flex-col">
-                    <div className="h-1 w-full relative">
-                        <div 
-                            className="h-full transition-all duration-500 ease-out"
-                            style={{ 
-                                width: `${hpPercent}%`,
-                                backgroundColor: hpColor
-                            }}
-                        />
-                    </div>
-                    
-                    {maxTempHp > 0 && (
-                        <div className="h-1 w-full relative border-t border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${tempPercent * 100}%`,
-                                    backgroundColor: tempColor
-                                }}
-                            />
-                        </div>
-                    )}
-                    
-                    {maxStamina > 0 && (
-                        <div className="h-1 w-full relative border-t border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${staminaPercent * 100}%`,
-                                    backgroundColor: staminaColor
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const formatEffectString = (effect: AbilityEffect, actor?: PlayerCharacter | Companion, inventory?: Inventory | null): string => {
     const dc = actor ? actor.getStandardAbilityDC(inventory || undefined) : effect.dc;
@@ -547,12 +466,14 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                         isSelected = count > 0;
                                         displayLabel = isMultiTargetAbility && isSelected ? 'Entire Team' : (count > 1 ? `x${count}` : '');
                                     }
-                                    const hpPercent = Math.round(((target.currentHitPoints || 0) / (target.maxHitPoints || (target as any).maxHp || 1)) * 100);
-                                    const isEnemy = !('isInParty' in target) && !(target as any).isAlly;
 
                                     return (
                                         <button key={target.id} onClick={() => handleTargetClick(target.id)} className="flex flex-col items-center group transition-all">
-                                            <TargetAvatar actor={target} isSelected={isSelected} hpPercent={hpPercent} isAlly={!isEnemy} />
+                                            <ActorAvatar 
+                                                actor={target} 
+                                                isTargeted={isSelected} 
+                                                size={48}
+                                            />
                                             <span className={`text-[10px] font-bold mt-3 truncate w-full text-center transition-colors px-1 ${isSelected ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>{target.name}</span>
                                             {displayLabel && <span className="text-[9px] font-bold text-brand-accent mt-1">{displayLabel}</span>}
                                         </button>
@@ -580,4 +501,3 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 };
 
 export default PlayerAttackModal;
-

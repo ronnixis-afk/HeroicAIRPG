@@ -5,6 +5,7 @@ import React, { useContext, useRef, useEffect, useState } from 'react';
 import { GameDataContext, GameDataContextType } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { type StatusEffect, type CombatActor, PlayerCharacter, Companion } from '../../types';
+import { ActorAvatar } from '../ActorAvatar';
 import { Icon } from '../Icon';
 import { getTempHpLabel } from '../../utils/itemModifiers';
 
@@ -24,100 +25,22 @@ interface CombatAvatarProps {
 }
 
 const CombatAvatar: React.FC<CombatAvatarProps> = ({ name, hp, maxHp, tempHp, maxTempHp, stamina = 0, maxStamina = 0, isAlly, alignment, isCurrentTurn, statusEffects, imageUrl }) => {
-    const hpRatio = maxHp > 0 ? Math.max(0, Math.min(1, hp / maxHp)) : 0;
-    const tempHpRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
-    const staminaRatio = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
-
-    const visualSize = isCurrentTurn ? 50 : 40;
-    const hpColor = alignment === 'ally' ? '#3ecf8e' : (alignment === 'neutral' ? '#facc15' : '#ef4444');
-    const tempColor = '#38bdf8'; // Brand Light Blue
-    const staminaColor = '#f59e0b'; // Brand gold/yellow
-    const initials = name.slice(0, 2);
-
-    const hasStatus = statusEffects && statusEffects.length > 0;
-    const isDead = hp <= 0;
-    const isLowHp = !isDead && hpRatio <= 0.25;
-
     return (
-        <div
-            className={`flex flex-col items-center justify-center transition-all duration-300 ${isCurrentTurn ? 'opacity-100 scale-100' : 'opacity-40 scale-100'}`}
-            title={`${name} (${hp}/${maxHp} Hit Points)${tempHp > 0 ? ` + ${tempHp} Shield` : ''}`}
-        >
-            <div className="relative flex flex-col items-center" style={{ width: visualSize }}>
-                <div className={`
-                    relative rounded-lg overflow-hidden flex items-center justify-center bg-brand-surface border transition-all aspect-square w-full
-                    ${isCurrentTurn ? 'border-brand-accent shadow-[0_0_15px_rgba(62,207,142,0.3)]' : 'border-brand-primary'}
-                    ${isDead ? 'grayscale brightness-50' : ''}
-                `}>
-                    {isCurrentTurn && (
-                        <div className="absolute inset-0 bg-brand-accent/10 animate-pulse pointer-events-none" />
-                    )}
-
-                    {imageUrl ? (
-                        <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
-                    ) : (
-                        <span className={`font-bold ${alignment === 'ally' ? 'text-brand-accent' : (alignment === 'neutral' ? 'text-yellow-400' : 'text-brand-danger')}`} style={{ fontSize: isCurrentTurn ? '14px' : '12px' }}>
-                            {initials}
-                        </span>
-                    )}
-
-                    {isLowHp && (
-                        <div className="absolute inset-0 bg-brand-danger/20 animate-pulse pointer-events-none" />
-                    )}
-                </div>
-
-                {/* Health and Shield Bars */}
-                <div className="mt-1.5 w-full">
-                    <div className="w-full bg-black/40 rounded-full overflow-hidden border border-white/5 flex flex-col">
-                        {/* HP Bar */}
-                        <div className="h-1 w-full relative">
-                            <div 
-                                className="h-full transition-all duration-500 ease-out"
-                                style={{ 
-                                    width: `${hpRatio * 100}%`,
-                                    backgroundColor: hpColor
-                                }}
-                            />
-                        </div>
-                        
-                        {/* Shield Bar (Temp HP) */}
-                        {maxTempHp > 0 && (
-                            <div className="h-1 w-full relative border-t border-white/5">
-                                <div 
-                                    className="h-full transition-all duration-700 ease-out opacity-90"
-                                    style={{ 
-                                        width: `${tempHpRatio * 100}%`,
-                                        backgroundColor: tempColor
-                                    }}
-                                />
-                            </div>
-                        )}
-
-                        {/* Stamina Bar */}
-                        {maxStamina > 0 && (
-                            <div className="h-1 w-full relative border-t border-white/5">
-                                <div 
-                                    className="h-full transition-all duration-700 ease-out opacity-90"
-                                    style={{ 
-                                        width: `${staminaRatio * 100}%`,
-                                        backgroundColor: staminaColor
-                                    }}
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {hasStatus && (
-                    <div
-                        className="absolute top-[-2px] right-[-2px] w-2.5 h-2.5 bg-yellow-500 rounded-full border border-brand-bg z-20 shadow-sm"
-                        title={statusEffects.map(e => e.name).join(', ')}
-                    />
-                )}
-            </div>
-        </div>
+        <ActorAvatar 
+            actor={{ name, imageUrl, alignment, statusEffects, isAlly } as any}
+            size={isCurrentTurn ? 50 : 40}
+            isActive={isCurrentTurn}
+            hpOverride={hp}
+            maxHpOverride={maxHp}
+            tempHpOverride={tempHp}
+            maxTempHpOverride={maxTempHp}
+            staminaOverride={stamina}
+            maxStaminaOverride={maxStamina}
+            showBars={true}
+        />
     );
 };
+
 
 
 const CombatStatusDisplay: React.FC = () => {
