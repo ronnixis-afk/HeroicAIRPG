@@ -112,9 +112,15 @@ export const useNarrativeRound = (
                 }
             }
 
-            if ('id' in playerSource && (playerSource as Ability).usage && (playerSource as Ability).usage?.type !== 'passive') {
-                dispatch({ type: 'USE_ABILITY', payload: { abilityId: playerSource.id, ownerId } });
-            } else if ('tags' in playerSource && playerSource.tags?.includes('consumable')) {
+            if ('id' in playerSource) {
+                const ability = playerSource as Ability;
+                const implicitCost = (ability.effect && ['Heal', 'Damage', 'Status'].includes(ability.effect.type)) ? 1 : 0;
+                const staminaCost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+                if (staminaCost > 0 || (ability.usage && ability.usage.type !== 'passive')) {
+                    dispatch({ type: 'USE_ABILITY', payload: { abilityId: ability.id, ownerId } });
+                }
+            } else if ('keywords' in playerSource && (playerSource as Item).tags?.includes('consumable')) {
                 const listName = actorInventory.equipped.some(i => i.id === (playerSource as Item).id) ? 'equipped' : 'carried';
                 dispatch({ type: 'USE_ITEM', payload: { itemId: (playerSource as Item).id, list: listName, ownerId } });
             }
@@ -165,7 +171,17 @@ export const useNarrativeRound = (
                             const currentTeam = isNpcHostile ? hostileTeam : friendlyTeam;
 
                             let selectedAction: any = null;
-                            const isAvailable = (a: any) => !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+                            const isAvailable = (a: any) => {
+                                const hasUsage = !a.usage || a.usage.type === 'passive' || a.usage.currentUses > 0;
+                                if (!hasUsage) return false;
+                                
+                                let staminaCost = 0;
+                                if (a.staminaCost !== undefined) staminaCost = a.staminaCost;
+                                else if (a.effect && ['Heal', 'Damage', 'Status'].includes(a.effect.type)) staminaCost = 1;
+
+                                if (staminaCost > 0 && ((actor as any).stamina || 0) < staminaCost) return false;
+                                return true;
+                            };
                             const useSpecialChance = Math.random() < 0.30;
                             const isPCorCompanion = actorId === gameData.playerCharacter.id || gameData.companions.some(c => c.id === actorId);
 
@@ -203,6 +219,17 @@ export const useNarrativeRound = (
                             if (validTargets.length > 0) {
                                 const target = validTargets[0];
                                 const isWeaponAction = selectedAction.name === 'Attack' || 'weaponStats' in selectedAction;
+
+                                // USE DEDUCTION for Automated Turns
+                                if (selectedAction.id) {
+                                    if ('keywords' in selectedAction) {
+                                        const inv = (gameData.companionInventories[actorId] || (actorId === gameData.playerCharacter.id ? gameData.playerInventory : null));
+                                        const listName = inv?.equipped.some(i => i.id === selectedAction.id) ? 'equipped' : 'carried';
+                                        dispatch({ type: 'USE_ITEM', payload: { itemId: selectedAction.id, list: listName, ownerId: actorId } });
+                                    } else {
+                                        dispatch({ type: 'USE_ABILITY', payload: { abilityId: selectedAction.id, ownerId: actorId } });
+                                    }
+                                }
 
                                 const npcRequests = [];
                                 if (isHealAction) {

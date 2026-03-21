@@ -22,7 +22,7 @@ export const useManualActions = (
     const performPlayerAttack = useCallback(async (source: Item | Ability, targetIds: string[], flavorText?: string, mode: RollMode = 'normal', sourceActorId?: string) => {
         if (!gameData) return;
         // Guard: Check if it's an ability with zero charges or insufficient stamina
-        if (!('tags' in source)) {
+        if (!('keywords' in source)) {
             const ability = source as Ability;
             const effect = ability.effect;
             const implicitCost = (effect && ['Heal', 'Damage', 'Status'].includes(effect.type)) ? 1 : 0;
@@ -91,7 +91,6 @@ export const useManualActions = (
             validTargetIds = targetIds.filter(id => {
                 const target = allPotentialTargets.find(t => t.id === id);
                 // Exclude allies/neutrals from being valid attack targets by default unless they were explicitly passed
-                // But if they ARE targeted, we will flip them to enemy below.
                 // For now, just ensure they are alive.
                 return target && (target.currentHitPoints || 0) > 0;
             });
@@ -111,7 +110,7 @@ export const useManualActions = (
         }
 
         const requests: DiceRollRequest[] = [];
-        const isWeaponAttack = 'tags' in source && source.tags?.some(t => t.toLowerCase().includes('weapon'));
+        const isWeaponAttack = 'keywords' in source && source.tags?.some(t => t.toLowerCase().includes('weapon'));
 
         // General Multi-Target Detection (AoE/Chain/Burst)
         const isMultiTargetAction = effect?.targetType === 'Multiple';
@@ -160,7 +159,7 @@ export const useManualActions = (
         const { rolls, summary } = processDiceRolls(requests, { isHeroic: wasHeroic });
 
         // --- USAGE DEDUCTION ---
-        if ('tags' in source) {
+        if ('keywords' in source) {
             // It's an ITEM
             const item = source as Item;
             const isConsumable = item.tags?.some(t => t.toLowerCase().includes('consumable'));

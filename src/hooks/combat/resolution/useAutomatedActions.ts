@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import { GameData, GameAction } from '../../../types/Game';
 import { Item } from '../../../types/Items';
 import { ChatMessage, DiceRollRequest } from '../../../types/World';
-import { PlayerCharacter, Companion } from '../../../types/Characters';
+import { PlayerCharacter, Companion, Ability } from '../../../types/Characters';
 import { generateResponse } from '../../../services/geminiService';
 import { canBeTargeted } from '../../../utils/resolution/StatusRules';
 import { acquireTacticalTarget } from '../../../utils/resolution/TargetingLogic';
@@ -174,13 +174,19 @@ export const useAutomatedActions = (
                 }
             }
 
-            if (selectedAction?.id && selectedAction.usage && selectedAction.usage.type !== 'passive') {
-                if ('weaponStats' in selectedAction) {
-                    const inv = (gameData.companionInventories[actorId] || (actorId === gameData.playerCharacter.id ? gameData.playerInventory : null));
-                    const listName = inv?.equipped.some(i => i.id === selectedAction.id) ? 'equipped' : 'carried';
-                    dispatch({ type: 'USE_ITEM', payload: { itemId: selectedAction.id, list: listName, ownerId: actorId } });
-                } else {
-                    dispatch({ type: 'USE_ABILITY', payload: { abilityId: selectedAction.id, ownerId: actorId } });
+            if (selectedAction?.id) {
+                const ability = selectedAction as Ability;
+                const implicitCost = (ability.effect && ['Heal', 'Damage', 'Status'].includes(ability.effect.type)) ? 1 : 0;
+                const staminaCost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+                if (staminaCost > 0 || (ability.usage && ability.usage.type !== 'passive')) {
+                    if ('keywords' in selectedAction) {
+                        const inv = (gameData.companionInventories[actorId] || (actorId === gameData.playerCharacter.id ? gameData.playerInventory : null));
+                        const listName = inv?.equipped.some(i => i.id === selectedAction.id) ? 'equipped' : 'carried';
+                        dispatch({ type: 'USE_ITEM', payload: { itemId: selectedAction.id, list: listName, ownerId: actorId } });
+                    } else {
+                        dispatch({ type: 'USE_ABILITY', payload: { abilityId: selectedAction.id, ownerId: actorId } });
+                    }
                 }
             }
 

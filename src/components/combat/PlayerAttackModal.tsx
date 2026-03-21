@@ -108,10 +108,14 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
     const abilities = useMemo(() => {
         if (!actor) return [];
-        const activeAbilities = (actor.abilities || []).filter(a => a.usage?.type !== 'passive');
+        const activeAbilities = (actor.abilities || []).filter(a => {
+            const hasUsage = a.usage && a.usage.type !== 'passive';
+            const hasStaminaCost = a.staminaCost !== undefined ? a.staminaCost > 0 : 
+                                   (a.effect && ['Heal', 'Damage', 'Status'].includes(a.effect.type));
+            return hasUsage || hasStaminaCost || a.tags?.includes('offensive') || a.tags?.includes('attack');
+        });
 
-        if (isQuickAction) return activeAbilities;
-        return activeAbilities.filter(a => (a.effect && (a.effect.type === 'Damage' || a.effect.type === 'Status' || a.effect.type === 'Heal')) || a.tags?.includes('offensive') || a.tags?.includes('attack'));
+        return activeAbilities;
     }, [actor, isQuickAction]);
 
     const items = useMemo(() => {
