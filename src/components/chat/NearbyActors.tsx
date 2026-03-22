@@ -158,14 +158,14 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
-                <img src="/icons/heroes.png" alt="Profile" className="w-4 h-4 object-contain" />
+                <img src="/icons/people.png" alt="Profile" className="w-8 h-8 object-contain" />
                 <span>View Profile</span>
             </button>
             <button
                 onClick={() => { setSelectedCharacterId(npc.id); setActiveView('temp-stats'); setOpenMenuId(null); }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
-                <Icon name="clipboardList" className="w-4 h-4 text-brand-accent" />
+                <img src="/icons/scene.png" alt="Stats" className="w-8 h-8 object-contain" />
                 <span>View Stats</span>
             </button>
             <button

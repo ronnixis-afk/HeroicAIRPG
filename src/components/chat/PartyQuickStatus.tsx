@@ -208,11 +208,11 @@ export const PartyQuickStatus: React.FC = () => {
                 </div>
 
                 <button onClick={() => navigateToView('character', charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
-                    <img src="/icons/heroes.png" alt="Profile" className="w-4 h-4 object-contain" />
+                    <img src="/icons/heroes.png" alt="Profile" className="w-8 h-8 object-contain" />
                     <span>View Profile</span>
                 </button>
                 <button onClick={() => navigateToView('inventory', charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
-                    <img src="/icons/backpack.png" alt="Inventory" className="w-4 h-4 object-contain" />
+                    <img src="/icons/backpack.png" alt="Inventory" className="w-8 h-8 object-contain" />
                     <span>Inventory</span>
                 </button>
                 <button onClick={() => openQuickActions(charId)} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
