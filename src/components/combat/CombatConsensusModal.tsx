@@ -148,7 +148,7 @@ const CombatConsensusPanel: React.FC = () => {
                         className="flex flex-col items-center py-6 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-3 shadow-inner"
                     >
                         <div className="p-3 bg-brand-surface rounded-2xl border border-brand-primary group-hover:scale-110 transition-transform shadow-md">
-                            <Icon name="ghost" className="w-6 h-6 text-brand-accent/60 group-hover:text-brand-accent" />
+                            <img src="/icons/sneak.png" alt="Stealth" className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-brand-accent text-center">Stealth</span>
@@ -162,7 +162,7 @@ const CombatConsensusPanel: React.FC = () => {
                         className="flex flex-col items-center py-6 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-3 shadow-inner"
                     >
                         <div className="p-3 bg-brand-surface rounded-2xl border border-brand-primary group-hover:scale-110 transition-transform shadow-md">
-                            <Icon name="sparkles" className="w-6 h-6 text-brand-accent/60 group-hover:text-brand-accent" />
+                            <img src="/icons/persuade.png" alt="Persuade" className="w-6 h-6 object-contain" />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-brand-accent text-center">Social</span>

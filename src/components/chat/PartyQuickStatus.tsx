@@ -220,7 +220,11 @@ export const PartyQuickStatus: React.FC = () => {
                     <span>Quick Actions</span>
                 </button>
                 <button onClick={handleStealthToggle} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
-                    <Icon name={isPartyHidden ? "close" : "eye"} className="w-4 h-4 text-brand-accent" />
+                    {isPartyHidden ? (
+                        <Icon name="close" className="w-4 h-4 text-brand-accent" />
+                    ) : (
+                        <img src="/icons/sneak.png" alt="Sneak" className="w-4 h-4 object-contain" />
+                    )}
                     <span>{isPartyHidden ? 'Disable Stealth' : 'Hide & Sneak'}</span>
                 </button>
             </div>

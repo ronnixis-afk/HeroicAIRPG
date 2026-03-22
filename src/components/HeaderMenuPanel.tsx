@@ -180,14 +180,14 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               onClick={() => handleAction('settings')}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
-              <Icon name="settings" className="w-5 h-5 text-brand-accent shrink-0 group-hover:rotate-180 transition-transform duration-500" />
+              <img src="/icons/settings.png" alt="Settings" className="w-5 h-5 object-contain shrink-0 group-hover:rotate-180 transition-transform duration-500" />
               <span className="text-body-sm font-bold text-brand-text">Settings</span>
             </button>
             <button
               onClick={() => { onSwitchWorldClick(); onClose(); }}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
-              <Icon name="refresh" className="w-5 h-5 text-brand-accent shrink-0 group-hover:rotate-180 transition-transform duration-500" />
+              <img src="/icons/change-realm.png" alt="Change Realm" className="w-5 h-5 object-contain shrink-0 group-hover:rotate-180 transition-transform duration-500" />
               <span className="text-body-sm font-bold text-brand-text">Change Realm</span>
             </button>
           </div>

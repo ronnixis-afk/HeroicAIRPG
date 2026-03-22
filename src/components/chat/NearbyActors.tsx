@@ -172,7 +172,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 onClick={() => handleAttack(npc)}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
-                <Icon name="sword" className="w-4 h-4 text-brand-accent" />
+                <img src="/icons/attack.png" alt="Attack" className="w-4 h-4 object-contain" />
                 <span>Attack</span>
             </button>
             <button
@@ -183,7 +183,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
                 }}
                 className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
             >
-                <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
+                <img src="/icons/pickpocket.png" alt="Pickpocket" className="w-4 h-4 object-contain" />
                 <span>Pickpocket</span>
             </button>
 
