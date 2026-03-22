@@ -7,6 +7,7 @@ import Modal from '../Modal';
 import CharacterCreationLoader from '../CharacterCreationLoader';
 import { KeywordEditor } from '../KeywordEditor';
 import ZoneDetailsPanel from './ZoneDetailsPanel';
+import { ActorAvatar } from '../ActorAvatar';
 import { parseCoords } from '../../utils/mapUtils';
 
 const CELL_SIZE = 60; // px
@@ -240,9 +241,15 @@ const MapView: React.FC = () => {
                         {content}
 
                         {isPlayerHere && (
-                            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-                                <div className={`w-4 h-4 rounded-full shadow-lg animate-pulse ring-2 ring-white flex items-center justify-center ${isCombatActive ? 'bg-red-600 shadow-red-500/50' : 'bg-brand-accent shadow-[0_0_10px_#3ecf8e]'}`}>
-                                    <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
+                            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none drop-shadow-lg">
+                                <div className={`${isCombatActive ? 'animate-pulse ring-2 ring-red-500 rounded-[var(--avatar-radius)]' : 'ring-2 ring-brand-accent/50 rounded-[var(--avatar-radius)]'} transition-all duration-300`}>
+                                    <ActorAvatar 
+                                        actor={gameData.playerCharacter} 
+                                        size={40} 
+                                        showBars={false} 
+                                        showName={false}
+                                        className="!scale-100" // Ensure it doesn't scale on hover etc unless we want it to
+                                    />
                                 </div>
                             </div>
                         )}
