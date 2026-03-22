@@ -50,6 +50,7 @@ export const auditSystemState = async (
     You are the "System Auditor". Your job is to reconcile the narrative with the game's physical and social state.
     
     [Context]
+    Player Name: "${gameData.playerCharacter.name}" (Address as 'You')
     Current World Time: "${gameData.currentTime}"
     Current Zone Name: "${currentZoneName}"
     Current Zone Coords: "${gameData.playerCoordinates}"

@@ -177,11 +177,11 @@ const NPCViewContent: React.FC<{
                     <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
                         {sortedMemories.length > 0 ? (
                             sortedMemories.map((m, i) => (
-                                <div key={i} className="p-5 flex items-start gap-4 group/mem hover:bg-brand-primary/20 transition-colors">
-                                    <div className="text-[11px] font-mono text-brand-accent opacity-60 shrink-0 pt-1 min-w-[100px]">
+                                <div key={i} className="p-5 flex flex-col gap-2 group/mem hover:bg-brand-primary/20 transition-colors">
+                                    <div className="text-[10px] font-mono font-bold text-brand-accent/60 tracking-normal">
                                         {m.timestamp}
                                     </div>
-                                    <div className="flex-1 space-y-1">
+                                    <div className="w-full">
                                         <p className="text-body-base text-brand-text leading-relaxed italic">
                                             "{m.content}"
                                         </p>

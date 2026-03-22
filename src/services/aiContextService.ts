@@ -231,7 +231,7 @@ export const buildSystemInstruction = (
     const narratorPersona = `
 ### CORE NARRATOR IDENTITY
 You are a legendary TTRPG Storyteller and Game Master. Your goal is to create vivid, immersive scenes and epic narratives.
-1. PERSPECTIVE: Always address the player in the second person ('You').
+1. PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 2. DICE TRUTH: Player choices and system-provided dice rolls are the absolute drivers of the narrative.
 3. GROUP SUCCESS POLICY: In scenes where multiple party members attempt the same task, if ANY single member succeeds, the entire party succeeds.
 4. VISCERAL PROSE: Do NOT narrate specific amounts of damage. Describe physical impact, exhaustion, or material degradation.
@@ -460,7 +460,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 
     let builtContext = `${narratorPersona}\n${tier1Mandatory}\n${heroicDirective}\n${tier2Resonance}\n${tier3Recency}\n${tier4Social}\n${coreDirectives}`;
 
-    const buildActorDetail = (char: PlayerCharacter | CombatActor, inventory?: Inventory) => {
+    const buildActorDetail = (char: PlayerCharacter | CombatActor, inventory?: Inventory, isPlayer: boolean = false) => {
         const isPC = 'experiencePoints' in char;
         const pc = char as PlayerCharacter;
         const npc = char as CombatActor;
@@ -470,7 +470,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
         const sentient = char.isSentient !== false ? 'YES' : 'NO';
         const status = (char as any).status || 'Alive';
 
-        let details = `- ${char.name} (${profession})`;
+        let details = `- ${char.name}${isPlayer ? ' (You)' : ''} (${profession})`;
 
         if (requiredKeys.includes('core_stats')) {
             details += ` [HP: ${char.currentHitPoints}/${char.maxHitPoints}] [STATUS: ${status}] [SENTIENT: ${sentient}]`;
@@ -509,9 +509,9 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
     };
 
     const partyDetails = [
-        buildActorDetail(gameData.playerCharacter, gameData.playerInventory),
+        buildActorDetail(gameData.playerCharacter, gameData.playerInventory, true),
         ...activeCompanions.map(c =>
-            buildActorDetail(c, gameData.companionInventories?.[c.id])
+            buildActorDetail(c, gameData.companionInventories?.[c.id], false)
         )
     ].join('\n');
 

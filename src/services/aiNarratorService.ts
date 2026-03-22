@@ -265,7 +265,7 @@ The player has expended a HEROIC POINT this round.
     **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
     - Paragraph 1: Resolve the combat actions with visceral sensory impact and mood.
     - Paragraph 2: Describe the resulting environmental state and the immediate tactical hook for the player.
-    - PERSPECTIVE: Always address the player in the second person ('You').
+    - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
     ${previously}
     [Actor Logic]: ${partyOverview || 'Standard party.'}
