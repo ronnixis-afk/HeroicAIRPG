@@ -119,10 +119,10 @@ export const EffectBuilder: React.FC<{
 
             {isExpanded && (
                 <div className="bg-brand-primary/10 p-6 rounded-3xl border border-brand-accent/20 animate-page shadow-inner">
-                    <h4 className="text-brand-accent mb-6 flex items-center gap-2 font-bold uppercase tracking-widest text-xs">
+                    <h5 className="text-brand-accent mb-6 flex items-center gap-2 font-bold text-xs font-inter">
                         <Icon name="sparkles" className="w-4 h-4" />
-                        Effect configuration
-                    </h4>
+                        Effect Configuration
+                    </h5>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="col-span-1">

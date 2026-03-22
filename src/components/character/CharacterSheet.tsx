@@ -431,7 +431,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                             />
                         </div>
                         <div className="space-y-4">
-                                <h5 className="mb-0 text-body-lg font-bold">Current status</h5>
+                                <h5 className="mb-0 text-body-lg font-bold">Current Status</h5>
                             <StatusEffectsEditor
                                 statusEffects={charData.statusEffects || []}
                                 onStatusEffectsChange={(newEffects) => handleNestedChange(['statusEffects'], newEffects)}
@@ -524,7 +524,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
             >
                 <div className="bg-brand-surface border border-brand-accent/20 rounded-2xl p-5 shadow-2xl flex flex-col items-center gap-4 backdrop-blur-xl">
                     <div className="text-center">
-                        <span className="text-body-sm font-bold text-brand-accent tracking-normal">Unsaved Changes</span>
+                        <span className="text-body-sm font-bold text-brand-accent">Unsaved Changes</span>
                         <p className="text-body-base text-brand-text font-bold truncate max-w-[200px] mt-1">{charData.name}</p>
                     </div>
 

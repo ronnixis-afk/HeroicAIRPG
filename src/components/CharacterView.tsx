@@ -87,7 +87,7 @@ const CharacterView: React.FC = () => {
                             <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
                         </div>
                         <div className="text-center space-y-3 w-full max-w-xs px-6">
-                            <h3 className="text-lg font-bold text-brand-text">{creationProgress.step || "Consulting The Fates..."}</h3>
+                            <h5 className="font-bold text-brand-text">{creationProgress.step || "Consulting The Fates..."}</h5>
                             <p className="text-xs text-brand-text-muted italic animate-pulse">
                                 The Architect Is Weaving Your Legend Into The World...
                             </p>
@@ -103,7 +103,7 @@ const CharacterView: React.FC = () => {
                             subtitle="Every great chronicle starts with a capable crew." 
                             className="mb-8 border-none"
                             subtitleClassName="max-w-xs mx-auto leading-relaxed"
-                            titleAs="h4"
+                            titleAs="h3"
                         />
                         
                         <div className="flex flex-col gap-4 w-full max-w-xl mb-12">
@@ -125,7 +125,7 @@ const CharacterView: React.FC = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <div className="text-sm font-semibold text-brand-accent uppercase tracking-wider mb-1">Main Hero</div>
+                                            <div className="text-sm font-bold text-brand-accent mb-1">Main Hero</div>
                                             <div className="text-xl font-bold text-brand-text truncate">{playerCharacter.name}</div>
                                         </div>
                                         <div className="px-4">
@@ -138,7 +138,7 @@ const CharacterView: React.FC = () => {
                                             <Icon name="plus" className="w-8 h-8 text-brand-accent opacity-60" />
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <div className="text-sm font-semibold text-brand-text-muted uppercase tracking-wider mb-1">Slot 1</div>
+                                            <div className="text-sm font-bold text-brand-text-muted mb-1">Slot 1</div>
                                             <div className="text-lg font-bold text-brand-text/50">Add Main Hero</div>
                                         </div>
                                     </>
@@ -164,7 +164,7 @@ const CharacterView: React.FC = () => {
                                                 )}
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <div className="text-sm font-semibold text-brand-accent/70 uppercase tracking-wider mb-1">{companion.profession || 'Companion'}</div>
+                                                <div className="text-sm font-bold text-brand-accent/70 mb-1">{companion.profession || 'Companion'}</div>
                                                 <div className="text-xl font-bold text-brand-text truncate">{companion.name}</div>
                                             </div>
                                         </div>
@@ -180,7 +180,7 @@ const CharacterView: React.FC = () => {
                                                 <Icon name="plus" className="w-8 h-8 text-brand-accent opacity-60" />
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <div className="text-sm font-semibold text-brand-text-muted uppercase tracking-wider mb-1">Slot {index + 2}</div>
+                                                <div className="text-sm font-bold text-brand-text-muted mb-1">Slot {index + 2}</div>
                                                 <div className="text-lg font-bold text-brand-text/50">Add a Hero</div>
                                             </div>
                                         </div>
@@ -203,7 +203,7 @@ const CharacterView: React.FC = () => {
                     <PageHeader 
                         title="Heroes" 
                         subtitle="Manage stats, abilities, and details for your party." 
-                    />
+                        titleAs="h5"                    />
 
                     <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-2'}`}>
                         <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-1 pb-1 gap-4 justify-around`}>

@@ -391,19 +391,19 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-16 h-16 rounded-full" } }} />
                     </div>
                     <div className="text-center">
-                        <span className={`text-xs font-black uppercase tracking-widest ${tierInfo.color} mb-1 block`}>{isTierLoading ? 'Syncing...' : tierInfo.label}</span>
+                        <span className={`text-xs font-black ${tierInfo.color} mb-1 block`}>{isTierLoading ? 'Syncing...' : tierInfo.label}</span>
                         <span className="text-sm font-medium text-brand-text break-all">{userEmail || 'Loading...'}</span>
                     </div>
                 </div>
                 <div className="mt-auto p-6 text-center">
-                    <p className="text-[10px] text-brand-text-muted uppercase tracking-wider opacity-50">Powered by Gemini 3</p>
+                    <p className="text-[10px] text-brand-text-muted font-medium opacity-50">Powered By Gemini 3</p>
                 </div>
             </div>
 
             <main className="flex-1 pb-20 mt-2">
                 {/* Local Worlds Horizontal Scroll (Netflix Style) */}
                 <section className="mb-10">
-                    <h2 className="text-lg font-bold text-brand-text px-6 mb-4">Your Realms</h2>
+                    <h5 className="text-lg font-bold text-brand-text px-6 mb-4">Your Realms</h5>
                     <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar">
                         {/* Forge New Realm Card */}
                         <button
@@ -428,7 +428,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     </button>
                                 </div>
                                 <div className="mt-auto p-4 z-10 w-full flex flex-col relative">
-                                    <h2 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {world.name}</h2>
+                                    <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {world.name}</h5>
                                     <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">Saved {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
                                     <div className="w-full bg-brand-accent text-black font-black text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
                                         <Icon name="play" className="w-3 h-3" /> Play
@@ -442,11 +442,11 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 {/* Cloud Load Section Horizontal Scroll */}
                 <section className="mb-6">
                     <div className="flex items-center justify-between px-6 mb-4">
-                        <h2 className="text-lg font-bold text-brand-text">Archives</h2>
+                        <h5 className="text-lg font-bold text-brand-text">Archives</h5>
                         <button
                             onClick={handleFetchCloudSaves}
                             disabled={isLoadingCloud}
-                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold uppercase py-1 px-3 rounded-full tracking-wider flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
+                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1 px-3 rounded-full flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
                         >
                             {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
                             Sync
@@ -464,11 +464,11 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             cloudSaves.map(save => (
                                 <div key={save.id} className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden shadow-lg bg-brand-surface/40 border border-brand-primary/20 hover:border-brand-accent/50 transition-all flex flex-col">
                                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/50 to-[#0a0f12] z-0 mix-blend-multiply border border-brand-accent/10"></div>
-                                    <div className="absolute top-3 left-3 z-10 bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase text-brand-text/70 border border-brand-surface shadow-sm">
+                                    <div className="absolute top-3 left-3 z-10 bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black text-brand-text/70 border border-brand-surface shadow-sm">
                                         Cloud
                                     </div>
                                     <div className="mt-auto p-4 z-10 w-full flex flex-col items-start text-left">
-                                        <h2 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md"> {save.name}</h2>
+                                        <h5 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md"> {save.name}</h5>
                                         <p className="text-[9px] text-brand-text-muted mb-4 opacity-70 border-b border-brand-primary/30 pb-2 w-full shadow-black drop-shadow-md">{new Date(save.updatedAt).toLocaleDateString()}</p>
                                         <button
                                             onClick={() => handleRestoreCloudSave(save)}
@@ -493,12 +493,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 ) : previewData ? (
                     <div className="space-y-8 animate-page py-2">
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                            <h2 className="text-brand-text mb-2"> The World of {worldName}</h2>
+                            <h5 className="text-brand-text mb-2 font-bold inter"> The World of {worldName}</h5>
                             <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap font-medium opacity-90">{previewData.context}</p>
                         </div>
 
                         <div>
-                            <h2 className="px-1 mb-4"> Ancestry Registry</h2>
+                            <h5 className="px-1 mb-4 font-bold inter"> Ancestry Registry</h5>
                             <div className="space-y-3">
                                 {previewData.races.map((race, i) => (
                                     <div key={i} className="bg-brand-surface/40 p-4 rounded-xl border border-brand-primary/50">
@@ -513,7 +513,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         </div>
 
                         <div>
-                            <h2 className="px-1 mb-4"> Major Factions</h2>
+                            <h5 className="px-1 mb-4 font-bold inter"> Major Factions</h5>
                             <div className="space-y-4">
                                 {previewData.factions.map((faction, i) => (
                                     <div key={i} className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface">

@@ -17,20 +17,27 @@ interface BottomNavProps {
 
 const NavButton: React.FC<{
   label: string;
-  iconName: string;
+  iconName?: string;
+  imageUrl?: string;
   onClick: () => void;
   isActive: boolean;
   colorClass?: string;
   iconClassName?: string;
   badgeCount?: number;
-}> = ({ label, iconName, onClick, isActive, colorClass, iconClassName, badgeCount }) => (
+}> = ({ label, iconName, imageUrl, onClick, isActive, colorClass, iconClassName, badgeCount }) => (
   <button 
     onClick={onClick} 
     className={`flex flex-col items-center justify-center pt-2 pb-1 px-1 transition-all duration-200 relative min-w-[64px] ${isActive ? (colorClass || 'text-brand-accent') : 'text-brand-text-muted hover:text-brand-text'}`} 
     aria-label={label}
   >
     <div className="relative">
-        <Icon name={iconName} className={`w-6 h-6 ${iconClassName || ''}`} />
+        <div className="relative w-7 h-7 flex items-center justify-center">
+            {imageUrl ? (
+                <img src={imageUrl} alt={label} className={`w-full h-full object-contain ${iconClassName || ''} ${isActive ? '' : 'grayscale opacity-60'}`} />
+            ) : iconName ? (
+                <Icon name={iconName} className={`w-6 h-6 ${iconClassName || ''}`} />
+            ) : null}
+        </div>
         {badgeCount !== undefined && badgeCount > 0 && (
           <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-50 pointer-events-none shadow-sm animate-pulse">
             {badgeCount > 9 ? '9+' : badgeCount}
@@ -59,13 +66,13 @@ const BottomNav: React.FC<BottomNavProps> = ({
     <nav className="h-[72px] bg-brand-bg/95 backdrop-blur-sm flex-shrink-0 flex items-center justify-around px-2 border-t border-brand-primary/10 shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
       <NavButton 
         label="Heroes" 
-        iconName="character" 
+        imageUrl="/icons/heroes.png" 
         onClick={onCharacterClick} 
         isActive={activeView === 'character'} 
       />
       <NavButton 
         label="Backpack" 
-        iconName="inventory" 
+        imageUrl="/icons/backpack.png" 
         onClick={onInventoryClick} 
         isActive={activeView === 'inventory'} 
         badgeCount={inventoryBadgeCount}
@@ -80,7 +87,7 @@ const BottomNav: React.FC<BottomNavProps> = ({
       />
       <NavButton 
         label="Map" 
-        iconName="map" 
+        imageUrl="/icons/map.png"
         onClick={onMapClick} 
         isActive={activeView === 'knowledge'} 
       />

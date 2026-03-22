@@ -73,12 +73,12 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                             <span className="inline-flex items-center bg-brand-accent/10 text-brand-accent text-body-sm font-bold px-1.5 py-0.5 rounded border border-brand-accent/20">Trait Point</span>
                         )}
                         {disabledReason && !isRefining && (
-                            <span className="inline-flex items-center bg-brand-danger/10 text-brand-danger text-body-sm font-bold px-2 py-0.5 rounded border border-brand-danger/20 tracking-normal animate-pulse">
+                            <span className="inline-flex items-center bg-brand-danger/10 text-brand-danger text-body-sm font-bold px-2 py-0.5 rounded border border-brand-danger/20 animate-pulse">
                                 Disabled: {disabledReason}
                             </span>
                         )}
                     </div>
-                    <span className="text-body-sm font-bold text-brand-accent/80 mt-1 tracking-normal">
+                    <span className="text-body-sm font-bold text-brand-accent/80 mt-1">
                         {formatUsage(ability)}
                     </span>
                 </div>
@@ -148,7 +148,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
             {isRefining && (
                 <div className="mt-4 flex items-center gap-3 px-1">
                     <Icon name="sparkles" className="w-4 h-4 text-brand-accent animate-spin" />
-                    <span className="text-[8px] font-bold text-brand-accent tracking-normal">Personalizing Ability...</span>
+                    <span className="text-[8px] font-bold text-brand-accent">Personalizing Ability...</span>
                 </div>
             )}
         </div>
@@ -346,7 +346,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 <div className="flex flex-col">
                     <h5 className="text-brand-text mb-0">Class Features & Traits</h5>
                     {metrics.total > 0 && (
-                        <span className="text-body-sm font-bold text-brand-accent mt-1 tracking-normal">
+                        <span className="text-body-sm font-bold text-brand-accent mt-1">
                             Trait Points: {metrics.used} / {metrics.total}
                         </span>
                     )}
@@ -411,7 +411,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-colors mt-2"
                 >
                     <Icon name="plus" className="w-3.5 h-3.5" />
-                    <span className="text-body-sm font-bold tracking-normal opacity-60">Custom Feature</span>
+                    <span className="text-body-sm font-bold opacity-60">Custom Feature</span>
                 </button>
 
                 {sortedAbilities.length === 0 && metrics.available === 0 && (
@@ -517,7 +517,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 {editingAbility && (
                     <div className="space-y-8 animate-fade-in max-h-[75vh] overflow-y-auto custom-scroll pr-1 pb-4">
                         <div>
-                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1 tracking-normal">Ability Identity</label>
+                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Ability Identity</label>
                             <input
                                 type="text"
                                 value={editingAbility.name}
@@ -528,7 +528,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                         </div>
 
                         <div>
-                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1 tracking-normal">Function & Lore</label>
+                            <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Function & Lore</label>
                             <AutoResizingTextarea
                                 value={editingAbility.description}
                                 onChange={(e) => handleAbilityChange(editingIndex!, 'description', e.target.value)}
@@ -538,7 +538,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                         </div>
 
                         <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-surface space-y-5">
-                            <label className="block text-xs font-bold text-brand-text-muted ml-1 tracking-normal">Activation & Usage</label>
+                            <label className="block text-xs font-bold text-brand-text-muted ml-1">Activation & Usage</label>
                             <div>
                                 <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">Stamina Cost</label>
                                 <input

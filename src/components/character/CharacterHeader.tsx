@@ -108,7 +108,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {/* XP Bar */}
             <div className="w-full mb-8">
                 <div className="flex justify-between items-end mb-2 px-1">
-                    <label className="text-body-sm font-bold text-brand-text-muted tracking-normal">Experience</label>
+                    <label className="text-body-sm font-bold text-brand-text-muted">Experience</label>
                     <span className="text-body-sm font-bold text-brand-text-muted">
                         <span className="text-brand-text">{currentXP.toLocaleString()}</span> <span className="opacity-40">/</span> {nextLevelXP.toLocaleString()} Xp
                     </span>
@@ -125,7 +125,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             {showHeroicPoints && (
                 <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner group">
                     <div className="flex justify-between items-center">
-                        <h4 className="mb-0">Heroic Potential</h4>
+                        <h5 className="mb-0 font-bold">Heroic Potential</h5>
                         <div className="flex flex-wrap gap-2.5">
                             {Array.from({ length: maxHeroic }).map((_, i) => (
                                 <div
@@ -185,7 +185,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                 {/* Alignment Sliders for Player only */}
                 {!isCompanion && (
                     <div className="mb-8 animate-fade-in bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner space-y-6">
-                        <h4 className="text-brand-text mb-2">Alignment</h4>
+                        <h5 className="text-brand-text mb-2 font-bold">Alignment</h5>
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">

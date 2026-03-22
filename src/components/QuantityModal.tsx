@@ -118,7 +118,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       <div className="flex items-center justify-center h-10">
         {action === 'Buy' && (
           <div className="flex items-center gap-3">
-            <span className="text-[10px] text-brand-text-muted font-bold tracking-tight uppercase opacity-60">Total Cost</span>
+            <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Total Cost</span>
             <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-inner ${canAfford ? 'bg-brand-accent/5 border-brand-accent/20' : 'bg-brand-danger/5 border-brand-danger/20'}`}>
               <Icon name="currencyCoins" className={`w-4 h-4 ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`} />
               <span className={`text-sm font-bold tabular-nums ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`}>{totalPrice}</span>
@@ -127,7 +127,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
         )}
         {action === 'Sell' && (
           <div className="flex items-center gap-3">
-            <span className="text-[10px] text-brand-text-muted font-bold tracking-tight uppercase opacity-60">Return Value</span>
+            <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Return Value</span>
             <div className="flex items-center gap-2 bg-brand-accent/5 px-4 py-1.5 rounded-full border border-brand-accent/20 shadow-inner">
               <Icon name="currencyCoins" className="w-4 h-4 text-brand-accent" />
               <span className="text-sm font-bold text-brand-accent tabular-nums">{Math.floor((('price' in item ? item.price : 0) || 0) / 2) * quantity}</span>
@@ -241,7 +241,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
 
         {/* Stepper Controls */}
         <div className="bg-white/5 p-8 rounded-3xl border border-white/5 shadow-inner flex flex-col items-center">
-          <label className="text-[10px] font-bold text-brand-text-muted mb-6 uppercase tracking-widest opacity-60 text-center">Select amount</label>
+          <label className="text-[10px] font-bold text-brand-text-muted mb-6 opacity-60 text-center">Select Amount</label>
           <div className="flex items-center justify-center gap-8">
             <button
               onClick={() => setQuantity(q => Math.max(1, q - 1))}
@@ -252,7 +252,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
             </button>
             <div className="flex flex-col items-center min-w-[100px]">
               <h2 className="text-brand-text text-6xl font-bold tabular-nums mb-0 tracking-tighter">{quantity}</h2>
-              <span className="text-[10px] font-bold text-brand-text-muted mt-1 opacity-40 uppercase">units</span>
+              <span className="text-[10px] font-bold text-brand-text-muted mt-1 opacity-40">Units</span>
             </div>
             <button
               onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}

@@ -70,7 +70,7 @@ export default function LandingPage() {
                         <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text tracking-tight mb-2 drop-shadow-xl">
                             Heroic AI <span className="text-brand-accent">RPG</span>
                         </h3>
-                        <p className="text-lg md:text-2xl text-brand-text-muted font-medium mb-10 tracking-widest drop-shadow-md">
+                        <p className="text-lg md:text-2xl text-brand-text-muted font-medium mb-10 drop-shadow-md">
                             Create, Play, Evolve
                         </p>
 
@@ -87,7 +87,7 @@ export default function LandingPage() {
 
                     {/* News Section */}
                     <div className="w-full max-w-4xl mx-auto px-4 py-16 pb-24">
-                        <h2 className="text-brand-accent font-bold mb-8 text-xl text-center md:text-left tracking-wide">
+                        <h2 className="text-brand-accent font-bold mb-8 text-xl text-center md:text-left">
                             Recent Updates
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -96,8 +96,8 @@ export default function LandingPage() {
                                     key={i}
                                     className="bg-brand-surface/60 backdrop-blur-md p-6 rounded-2xl border border-brand-primary/30 hover:border-brand-primary/60 transition-colors"
                                 >
-                                    <span className="text-xs text-brand-accent font-bold tracking-wider block mb-2">{item.date}</span>
-                                    <h2 className="text-brand-text font-bold text-lg mb-2"> {item.title}</h2>
+                                    <span className="text-xs text-brand-accent font-bold block mb-2">{item.date}</span>
+                                    <h5 className="text-brand-text font-bold text-lg mb-2 inter"> {item.title}</h5>
                                     <p className="text-sm text-brand-text-muted leading-relaxed">{item.content}</p>
                                 </div>
                             ))}
