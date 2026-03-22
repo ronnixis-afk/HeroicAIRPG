@@ -11,7 +11,7 @@ import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
     const { gameData, updateCompanion, startJourney } = useContext(GameDataContext);
-    const { selectedCharacterId, setSelectedCharacterId } = useUI();
+    const { selectedCharacterId, setSelectedCharacterId, creationProgress } = useUI();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardType, setWizardType] = useState<'player' | 'companion'>('player');
@@ -81,86 +81,123 @@ const CharacterView: React.FC = () => {
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
 
             {isPreGame ? (
-                <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 animate-fade-in bg-brand-bg">
-                    <PageHeader 
-                        title="Forge Your Party" 
-                        subtitle="Every great chronicle starts with a capable crew." 
-                        className="mb-8 border-none"
-                        subtitleClassName="max-w-xs mx-auto leading-relaxed"
-                        titleAs="h4"
-                    />
-                    
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl mb-12">
-                        {/* Main Character Slot */}
-                        <div 
-                            className={`relative aspect-square rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer 
-                                ${hasPlayer ? 'border-brand-primary bg-brand-surface' : 'border-brand-primary/40 border-dashed bg-brand-primary/5 hover:border-brand-accent hover:bg-brand-primary/10'}`}
-                            onClick={() => !hasPlayer && handleAddHero('player')}
-                        >
-                            {hasPlayer ? (
-                                <>
-                                    {playerCharacter.imageUrl ? (
-                                        <img src={playerCharacter.imageUrl} alt={playerCharacter.name} className="w-full h-full object-cover rounded-2xl opacity-80" />
-                                    ) : (
-                                        <div className="w-20 h-20 rounded-full bg-brand-primary/20 flex items-center justify-center mb-2">
-                                            <span className="text-2xl font-bold text-brand-text">{getInitials(playerCharacter.name)}</span>
+                creationProgress.isActive ? (
+                    <div className="flex-1 flex flex-col items-center justify-center animate-fade-in py-12 min-h-[70vh]">
+                        <div className="w-20 h-20 text-brand-accent animate-dice mb-10">
+                            <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
+                        </div>
+                        <div className="text-center space-y-3 w-full max-w-xs px-6">
+                            <h3 className="text-lg font-bold text-brand-text">{creationProgress.step || "Consulting The Fates..."}</h3>
+                            <p className="text-xs text-brand-text-muted italic animate-pulse">
+                                The Architect Is Weaving Your Legend Into The World...
+                            </p>
+                            <div className="w-full mt-8 bg-brand-primary/30 h-1.5 rounded-full overflow-hidden border border-brand-surface">
+                                <div className="bg-brand-accent h-full transition-all duration-1000 ease-out" style={{ width: `${creationProgress.progress}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 animate-fade-in bg-brand-bg">
+                        <PageHeader 
+                            title="Forge Your Party" 
+                            subtitle="Every great chronicle starts with a capable crew." 
+                            className="mb-8 border-none"
+                            subtitleClassName="max-w-xs mx-auto leading-relaxed"
+                            titleAs="h4"
+                        />
+                        
+                        <div className="flex flex-col gap-4 w-full max-w-xl mb-12">
+                            {/* Main Character Slot */}
+                            <div 
+                                className={`relative h-28 rounded-2xl border-2 flex items-center p-4 gap-6 transition-all cursor-pointer 
+                                    ${hasPlayer ? 'border-brand-primary bg-brand-surface shadow-lg' : 'border-brand-primary/40 border-dashed bg-brand-primary/5 hover:border-brand-accent hover:bg-brand-primary/10'}`}
+                                onClick={() => !hasPlayer && handleAddHero('player')}
+                            >
+                                {hasPlayer ? (
+                                    <>
+                                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30">
+                                            {playerCharacter.imageUrl ? (
+                                                <img src={playerCharacter.imageUrl} alt={playerCharacter.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full bg-brand-primary/20 flex items-center justify-center">
+                                                    <span className="text-xl font-bold text-brand-text">{getInitials(playerCharacter.name)}</span>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 rounded-b-2xl">
-                                        <div className="font-bold text-brand-text truncate">{playerCharacter.name}</div>
-                                        <div className="text-xs text-brand-text-muted">Main Hero</div>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <Icon name="plus" className="w-10 h-10 text-brand-accent opacity-60 mb-2" />
-                                    <span className="text-brand-text-muted font-semibold">Add Main Hero</span>
-                                </>
-                            )}
+                                        <div className="flex-1 text-left">
+                                            <div className="text-sm font-semibold text-brand-accent uppercase tracking-wider mb-1">Main Hero</div>
+                                            <div className="text-xl font-bold text-brand-text truncate">{playerCharacter.name}</div>
+                                        </div>
+                                        <div className="px-4">
+                                            <Icon name="chevron-right" className="w-5 h-5 text-brand-text-muted/30" />
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="w-20 h-20 rounded-xl border-2 border-dashed border-brand-primary/30 flex items-center justify-center bg-brand-primary/10 shrink-0">
+                                            <Icon name="plus" className="w-8 h-8 text-brand-accent opacity-60" />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <div className="text-sm font-semibold text-brand-text-muted uppercase tracking-wider mb-1">Slot 1</div>
+                                            <div className="text-lg font-bold text-brand-text/50">Add Main Hero</div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Companion Slots */}
+                            {[...Array(3)].map((_, index) => {
+                                const companion = companions[index];
+                                if (companion) {
+                                    return (
+                                        <div 
+                                            key={companion.id} 
+                                            className="relative h-28 rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex items-center p-4 gap-6 transition-all shadow-md"
+                                        >
+                                            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30">
+                                                {companion.imageUrl ? (
+                                                    <img src={companion.imageUrl} alt={companion.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-brand-primary/20 flex items-center justify-center">
+                                                        <span className="text-xl font-bold text-brand-text">{getInitials(companion.name)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <div className="text-sm font-semibold text-brand-accent/70 uppercase tracking-wider mb-1">{companion.profession || 'Companion'}</div>
+                                                <div className="text-xl font-bold text-brand-text truncate">{companion.name}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <div 
+                                            key={`empty-${index}`}
+                                            className="relative h-28 rounded-2xl border-2 border-brand-primary/40 border-dashed bg-brand-primary/5 flex items-center p-4 gap-6 transition-all cursor-pointer hover:border-brand-accent hover:bg-brand-primary/10"
+                                            onClick={() => handleAddHero('companion')}
+                                        >
+                                            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-brand-primary/30 flex items-center justify-center bg-brand-primary/10 shrink-0">
+                                                <Icon name="plus" className="w-8 h-8 text-brand-accent opacity-60" />
+                                            </div>
+                                            <div className="flex-1 text-left">
+                                                <div className="text-sm font-semibold text-brand-text-muted uppercase tracking-wider mb-1">Slot {index + 2}</div>
+                                                <div className="text-lg font-bold text-brand-text/50">Add a Hero</div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                            })}
                         </div>
 
-                        {/* Companion Slots Context: Up to 3. Map over existing. Fill rest with "Add a Hero" */}
-                        {[...Array(3)].map((_, index) => {
-                            const companion = companions[index];
-                            if (companion) {
-                                return (
-                                    <div key={companion.id} className="relative aspect-square rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex flex-col items-center justify-center">
-                                        {companion.imageUrl ? (
-                                            <img src={companion.imageUrl} alt={companion.name} className="w-full h-full object-cover rounded-2xl opacity-80" />
-                                        ) : (
-                                            <div className="w-20 h-20 rounded-full bg-brand-primary/20 flex items-center justify-center mb-2">
-                                                <span className="text-2xl font-bold text-brand-text">{getInitials(companion.name)}</span>
-                                            </div>
-                                        )}
-                                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 rounded-b-2xl">
-                                            <div className="font-bold text-brand-text truncate">{companion.name}</div>
-                                            <div className="text-xs text-brand-text-muted">{companion.profession || 'Companion'}</div>
-                                        </div>
-                                    </div>
-                                );
-                            } else {
-                                return (
-                                    <div 
-                                        key={`empty-${index}`}
-                                        className="relative aspect-square rounded-2xl border-2 border-brand-primary/40 border-dashed bg-brand-primary/5 flex flex-col items-center justify-center transition-all cursor-pointer hover:border-brand-accent hover:bg-brand-primary/10"
-                                        onClick={() => handleAddHero('companion')}
-                                    >
-                                        <Icon name="plus" className="w-10 h-10 text-brand-accent opacity-60 mb-2" />
-                                        <span className="text-brand-text-muted font-semibold">Add a Hero</span>
-                                    </div>
-                                );
-                            }
-                        })}
+                        <button
+                            onClick={() => startJourney(10)}
+                            disabled={!hasPlayer}
+                            className={`btn-lg rounded-full px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
+                        >
+                            Begin Journey
+                        </button>
                     </div>
-
-                    <button
-                        onClick={() => startJourney(10)}
-                        disabled={!hasPlayer}
-                        className={`btn-lg rounded-full px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
-                    >
-                        Begin Journey
-                    </button>
-                </div>
+                )
             ) : (
                 <>
                     <PageHeader 

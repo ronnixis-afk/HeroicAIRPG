@@ -435,6 +435,10 @@ export const useCharacterActions = (
             const startingFundsName = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
 
             const restartPayload: Partial<GameData> = {
+                playerCharacter: gameData.playerCharacter,
+                playerInventory: gameData.playerInventory,
+                companions: gameData.companions || [],
+                companionInventories: gameData.companionInventories || {},
                 story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: scenario.startingZone.name, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
                 messages: [
                     { id: `sys-restart-${Date.now()}`, sender: 'system', content: `Journey synchronized. Party assembled. Initial wealth: ${startingFundsQty} ${startingFundsName}.`, type: 'neutral' },
