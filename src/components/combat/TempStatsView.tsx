@@ -115,11 +115,6 @@ const TempStatsView: React.FC = () => {
                     subtitle={isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
                 >
                     <div className="absolute right-0 top-1 flex gap-1">
-                        {!isActive && enemies.length > 0 && (
-                            <button onClick={handleClearScene} className="btn-icon text-brand-text-muted hover:text-brand-danger" title="Clear Scene">
-                                <Icon name="trash" className="w-5 h-5" />
-                            </button>
-                        )}
                         <button onClick={() => setIsTemplateModalOpen(true)} className="btn-icon text-brand-text-muted hover:text-brand-accent" title="Configure Templates">
                             <Icon name="settings" className="w-5 h-5" />
                         </button>
@@ -152,25 +147,37 @@ const TempStatsView: React.FC = () => {
                 </div>
 
                 {/* Combat Control Button */}
-                <div className="flex justify-center mb-12">
-                    {!isActive ? (
+                <div className="flex flex-col items-center gap-4 mb-12">
+                    {!isActive && enemies.length > 0 && (
                         <button 
-                            onClick={handleStartCombat} 
-                            disabled={!hasAnyEnemies}
-                            className="btn-primary btn-md w-full sm:w-auto gap-3 shadow-xl"
+                            onClick={handleClearScene} 
+                            className="btn-secondary btn-md w-full sm:w-auto gap-3 shadow-md"
                         >
-                            <Icon name="sword" className="w-5 h-5" />
-                            {actorsInInitiative.length === 0 ? 'Roll Initiative and Fight' : 'Start Combat'}
-                        </button>
-                    ) : (
-                        <button
-                            onClick={concludeCombat}
-                            className="btn-primary btn-md w-full sm:w-auto !bg-brand-danger !text-white gap-3 shadow-lg shadow-brand-danger/20"
-                        >
-                            <Icon name="close" className="w-5 h-5" />
-                            End Combat
+                            <Icon name="trash" className="w-5 h-5 opacity-70" />
+                            <span>Clear Scene</span>
                         </button>
                     )}
+                    
+                    <div className="w-full flex justify-center">
+                        {!isActive ? (
+                            <button 
+                                onClick={handleStartCombat} 
+                                disabled={!hasAnyEnemies}
+                                className="btn-primary btn-md w-full sm:w-auto gap-3 shadow-xl"
+                            >
+                                <Icon name="sword" className="w-5 h-5" />
+                                {actorsInInitiative.length === 0 ? 'Roll Initiative and Fight' : 'Start Combat'}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={concludeCombat}
+                                className="btn-primary btn-md w-full sm:w-auto !bg-brand-danger !text-white gap-3 shadow-lg shadow-brand-danger/20"
+                            >
+                                <Icon name="close" className="w-5 h-5" />
+                                End Combat
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Actors List */}

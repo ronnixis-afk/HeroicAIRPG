@@ -19,10 +19,9 @@ const ITEM_TAG_MAPPING: Record<string, string> = {
 };
 
 const LORE_TAG_MAPPING: Record<string, string> = {
-    'place': 'location', 'geography': 'location', 'city': 'location', 'town': 'location',
-    'village': 'location', 'region': 'location', 'landmark': 'location', 'forest': 'location',
+    'place': 'location', 'geography': 'location', 'region': 'location', 'landmark': 'location', 'forest': 'location',
     'mountain': 'location', 'dungeon': 'location', 'map': 'location', 'kingdom': 'location',
-    'capital': 'location', 'border': 'location',
+    'border': 'location',
     'beast': 'npc', 'enemy': 'npc', 'monster': 'npc', 'boss': 'npc',
     'species': 'race', 'ancestry': 'race', 'lineage': 'race',
     'group': 'faction', 'organization': 'faction', 'politics': 'faction',

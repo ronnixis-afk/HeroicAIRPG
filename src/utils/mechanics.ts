@@ -82,7 +82,7 @@ export const DEFAULT_TEMPLATES: Record<string, EnemyTemplate> = {
     'Brawler': {
         name: 'Brawler',
         attackType: 'Melee',
-        mods: [3, 2, 3, -1, 0, 0],
+        mods: [4, 2, 4, 0, 0, 0],
         saves: ['strength', 'dexterity'],
         proficientSkills: ['Acrobatics', 'Athletics'],
         abilities: [{ target: 'Single', type: 'Damage' }],
@@ -350,7 +350,7 @@ const getDamageDiceForCR = (cr: number): string => {
 /**
  * Re-calculates actor stats based on CR and Ability Scores.
  */
-export const recalculateCombatActorStats = (actor: CombatActor, templates: Record<string, EnemyTemplate> = DEFAULT_TEMPLATES, baseScore: number = 8): CombatActor => {
+export const recalculateCombatActorStats = (actor: CombatActor, templates: Record<string, EnemyTemplate> = DEFAULT_TEMPLATES, baseScore: number = 12): CombatActor => {
     const updatedActor: CombatActor = { ...actor };
     const cr = updatedActor.challengeRating || 1;
     const sizeMod = BASE_SIZE_MODIFIERS[updatedActor.size || 'Medium'] || BASE_SIZE_MODIFIERS['Medium'];
@@ -487,7 +487,7 @@ export const generateEnemyFromTemplate = (
     nameOverride?: string,
     templates: Record<string, EnemyTemplate> = DEFAULT_TEMPLATES,
     sizeModifiers: Record<CombatActorSize, { str: number, dex: number, con: number, ac: number }> = DEFAULT_SIZE_MODIFIERS,
-    baseScore: number = 8,
+    baseScore: number = 12,
     archetypeOverride?: ArchetypeName | string,
     archetypeDefinitions: Record<ArchetypeName, { ground: number, climb: number, swim: number, fly: number }> = DEFAULT_ARCHETYPE_DEFINITIONS
 ): CombatActor => {

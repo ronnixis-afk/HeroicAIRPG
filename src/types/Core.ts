@@ -265,7 +265,8 @@ export const ITEM_TAGS = [
 export type ItemTag = typeof ITEM_TAGS[number];
 
 export const LORE_TAGS = [
-    'location', 'npc', 'faction', 'history', 'magic', 'quest', 'race'
+    'location', 'npc', 'faction', 'history', 'magic', 'quest', 'race',
+    'population-center', 'village', 'settlement', 'town', 'city', 'capital'
 ] as const;
 export type LoreTag = typeof LORE_TAGS[number];
 

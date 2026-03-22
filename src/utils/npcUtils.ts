@@ -171,7 +171,7 @@ export const combatActorToNPC = (actor: CombatActor, currentPOI: string | undefi
 /**
  * Converts a Registry NPC into a fully hydrated CombatActor.
  */
-export const npcToCombatActor = (npc: NPC, playerLevel: number, baseScore: number = 8, templates?: Record<string, EnemyTemplate>): CombatActor => {
+export const npcToCombatActor = (npc: NPC, playerLevel: number, baseScore: number = 12, templates?: Record<string, EnemyTemplate>): CombatActor => {
     const template = npc.template || 'Brute';
     const crTag = npc.difficulty || npc.cr || 'Normal';
     const size = npc.size || 'Medium';
