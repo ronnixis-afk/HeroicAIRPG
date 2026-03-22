@@ -59,9 +59,11 @@ const POIListItem: React.FC<{
     isExpanded: boolean;
     onToggleExpand: () => void;
     isPlayerHere?: boolean;
+    isInSameZone?: boolean;
     populationLevel?: string;
-}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, populationLevel }) => {
-    const { updateKnowledge } = useContext(GameDataContext);
+}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, isInSameZone, populationLevel }) => {
+    const { updateKnowledge, gameData } = useContext(GameDataContext);
+    const { setInspectedEntity, setPendingTravelConfirmation } = useUI();
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(entry.title);
     const [editContent, setEditContent] = useState(entry.content);
@@ -71,6 +73,14 @@ const POIListItem: React.FC<{
     const sortedPoiMemories = useMemo(() => {
         return [...(entry.memories || [])].reverse();
     }, [entry.memories]);
+
+    const connectedNpcs = useMemo(() => {
+        if (!gameData?.npcs) return [];
+        return gameData.npcs.filter(npc => 
+            npc.site_id === entry.id || 
+            (npc.currentPOI && npc.currentPOI.toLowerCase() === entry.title.toLowerCase())
+        );
+    }, [gameData?.npcs, entry.id, entry.title]);
 
     const activeTags = isEditing ? editTags : (entry.tags || []);
     const activeIsPopCenter = activeTags.includes('population-center');
@@ -112,9 +122,17 @@ const POIListItem: React.FC<{
         onEdit?.(entry);
     };
 
-    const handleInvestigate = (e: React.MouseEvent) => {
+    const handleInteract = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onInvestigate(entry);
+        if (isInSameZone) {
+            onInvestigate(entry);
+        } else {
+            setPendingTravelConfirmation({
+                destination: entry.title,
+                targetCoords: entry.coordinates || '',
+                method: 'Walk'
+            });
+        }
     };
 
     const handleStartEdit = (e: React.MouseEvent) => {
@@ -192,10 +210,10 @@ const POIListItem: React.FC<{
             onClick={onToggleExpand}
             className={`card-base flex flex-col overflow-hidden relative group border-brand-primary/40 hover:border-brand-accent/30 transition-all duration-300 cursor-pointer w-full`}
         >
-            <div className="flex flex-row items-stretch min-h-[100px]">
+            <div className={`flex items-stretch transition-all duration-500 ${isExpanded ? 'flex-col' : 'flex-row min-h-[100px]'}`}>
                 {/* Image/Icon Placeholder */}
                 {!isEditing && (
-                    <div className="w-1/4 bg-brand-primary/10 flex items-center justify-center relative overflow-hidden transition-all duration-300 flex-shrink-0">
+                    <div className={`${isExpanded ? 'w-full h-48' : 'w-1/4 min-h-[100px]'} bg-brand-primary/10 flex items-center justify-center relative overflow-hidden transition-all duration-500 flex-shrink-0`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 to-transparent opacity-50" />
                         {popIcon ? (
                             <div className={`relative z-10 w-full h-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110`}>
@@ -327,7 +345,7 @@ const POIListItem: React.FC<{
                                     </div>
                                 )}
 
-                                {/* POI Memories Section */}
+                                 {/* POI Memories Section */}
                                 {isExpanded && sortedPoiMemories.length > 0 && (
                                     <div className="mt-4 space-y-2">
                                         <div className="flex justify-between items-center">
@@ -347,6 +365,50 @@ const POIListItem: React.FC<{
                                                     <p className="text-[11px] text-brand-text leading-relaxed italic">
                                                         {m.content}
                                                     </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Connected NPCs Section */}
+                                {isExpanded && connectedNpcs.length > 0 && (
+                                    <div className="mt-4 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal uppercase">
+                                                {toTitleCase('Local Denizens')}
+                                            </label>
+                                            <span className="text-[9px] font-bold text-brand-text-muted opacity-40">
+                                                {connectedNpcs.length} {connectedNpcs.length === 1 ? 'entity' : 'entities'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-4 px-1">
+                                            {connectedNpcs.map(npc => (
+                                                <div 
+                                                    key={npc.id}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setInspectedEntity({ type: 'npc', data: npc });
+                                                    }}
+                                                    className="flex flex-col items-center gap-1.5 cursor-pointer group/avatar"
+                                                >
+                                                    <div className="relative pointer-events-none">
+                                                        <StatusAvatar 
+                                                            char={npc} 
+                                                            size={42} 
+                                                            showBars={false} 
+                                                            showName={false} 
+                                                            className="hover:scale-110 transition-transform duration-300 pointer-events-none"
+                                                        />
+                                                        {npc.status === 'Dead' && (
+                                                            <div className="absolute -bottom-1 -right-1 bg-brand-bg rounded-full p-0.5 border border-brand-danger/30">
+                                                                <Icon name="close" className="w-2.5 h-2.5 text-brand-danger" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-[9px] font-bold text-brand-text-muted truncate max-w-[50px] group-hover/avatar:text-brand-accent transition-colors">
+                                                        {npc.name.split(' ')[0]}
+                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
@@ -375,10 +437,10 @@ const POIListItem: React.FC<{
                             </div>
                         ) : (
                             <button
-                                onClick={handleInvestigate}
+                                onClick={handleInteract}
                                 className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold"
                             >
-                                {toTitleCase('Enter')}
+                                {toTitleCase(isInSameZone ? 'Enter' : 'Travel Here')}
                             </button>
                         )}
                     </div>
@@ -616,6 +678,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     isExpanded={expandedPoiId === entry.id}
                                                     onToggleExpand={() => setExpandedPoiId(expandedPoiId === entry.id ? null : entry.id)}
                                                     isPlayerHere={isPlayerHere && currentLocale === entry.title}
+                                                    isInSameZone={isPlayerHere}
                                                     populationLevel={zone?.populationLevel}
                                                 />
                                             ))
