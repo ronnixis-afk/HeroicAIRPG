@@ -26,6 +26,17 @@ export const toTitleCase = (str: string | undefined): string => {
 };
 
 /**
+ * Fixes casing if the string is in ALL CAPS.
+ */
+export const fixCasing = (str: string | undefined): string => {
+    if (!str) return '';
+    if (str.length > 3 && str === str.toUpperCase() && /[A-Z]/.test(str)) {
+        return toTitleCase(str);
+    }
+    return str;
+};
+
+/**
  * Returns a Tailwind color class based on the race.
  */
 export const getRaceColor = (race: string | undefined): string => {

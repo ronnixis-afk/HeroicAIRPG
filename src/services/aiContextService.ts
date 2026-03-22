@@ -7,7 +7,7 @@ import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ThinkingLevel } from '@google/genai';
 import { isLocaleMatch } from '../utils/mapUtils';
 import { canBeTargeted } from '../utils/resolution/StatusRules';
-import { getTimePeriod } from '../utils/timeUtils';
+import { getTimePeriod, getRelativeTimeString } from '../utils/timeUtils';
 
 // --- DATA MENU DEFINITIONS ---
 export type ContextKey = 'core_stats' | 'inventory' | 'combat_state' | 'location_details' | 'active_quests' | 'recent_history' | 'world_lore' | 'social_registry';
@@ -85,7 +85,7 @@ import { searchEmbeddings } from '../utils/mathUtils';
  * Retrieves relevant memories for an NPC based on the current user action.
  * Uses a "Composite Memory" strategy: 5 most recent + up to 5 most resonant (via semantic vector search).
  */
-export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = [], queryEmbedding?: number[]): string => {
+export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = [], queryEmbedding?: number[], currentTime?: string): string => {
     if (!memories || memories.length === 0) return 'First meeting.';
 
     // 1. Get 5 most recent (Chronological)
@@ -132,7 +132,10 @@ export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = 
     // 3. Merge and Format
     const composite = [...resonant, ...recent].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
-    return composite.map(m => `[${m.timestamp}]: ${m.content}`).join('; ');
+    return composite.map(m => {
+        const relativeTime = currentTime ? ` (${getRelativeTimeString(currentTime, m.timestamp)})` : "";
+        return `[${m.timestamp}${relativeTime}]: ${m.content}`;
+    }).join('; ');
 };
 
 export const getRelevantLore = (searchText: string, worldLore: LoreEntry[], queryEmbedding?: number[]): string => {
@@ -318,7 +321,10 @@ The user has expended a HEROIC POINT.
         if (currentPoi?.memories && currentPoi.memories.length > 0) {
             const recentPoiMemories = currentPoi.memories.slice(-5);
             poiMemoryContext = `\n[LOCATION HISTORY (${currentPoi.title})]:\n` +
-                recentPoiMemories.map(m => `- [${m.timestamp}]: ${m.content}`).join('\n');
+                recentPoiMemories.map(m => {
+                    const relativeTime = getRelativeTimeString(gameData.currentTime, m.timestamp);
+                    return `- [${m.timestamp} (${relativeTime})]: ${m.content}`;
+                }).join('\n');
         }
 
         tier2Resonance = `
@@ -334,7 +340,10 @@ ${poiMemoryContext}
     if (requiredKeys.includes('recent_history')) {
         const recentStoryLogs = (gameData.story ?? []).slice(-3);
         const recentMemory = recentStoryLogs
-            .map(log => `- ${log.summary || log.content}`)
+            .map(log => {
+                const relativeTime = getRelativeTimeString(gameData.currentTime, log.timestamp);
+                return `- [${log.timestamp} (${relativeTime})]: ${log.summary || log.content}`;
+            })
             .join('\n');
 
         let historicalEchoes = "";
@@ -354,7 +363,10 @@ ${poiMemoryContext}
             if (semanticLogs.length > 0) {
                 // Sort chronologically by original timestamp/order
                 const sortedLogs = semanticLogs.map(r => r.item).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-                historicalEchoes = `[HISTORICAL ECHOES]:\n` + sortedLogs.map(log => `- (Archived Memory): ${log.summary || log.content}`).join('\n') + `\n`;
+                historicalEchoes = `[HISTORICAL ECHOES]:\n` + sortedLogs.map(log => {
+                    const relativeTime = getRelativeTimeString(gameData.currentTime, log.timestamp);
+                    return `- [${log.timestamp} (${relativeTime}) - Archived Memory]: ${log.summary || log.content}`;
+                }).join('\n') + `\n`;
             }
         }
 
@@ -380,7 +392,7 @@ ${recentMemory || "The journey has just begun."}
                 return (isAtLocale && isSameZone || isActiveCompanion) && !n.isBodyCleared;
             })
             .map(n => {
-                const memoryBlock = getRelevantMemories(lastMessage.content, n.memories, queryEmbedding);
+                const memoryBlock = getRelevantMemories(lastMessage.content, n.memories, queryEmbedding, gameData.currentTime);
                 if (n.status === 'Dead') {
                     return `- [CORPSE]: ${n.name}. [CONDITION]: Dead. [FINAL MEMORY]: ${memoryBlock}`;
                 }

@@ -19,7 +19,7 @@ import { ArmorStatsEditor } from './editors/ArmorStatsEditor';
 import { ItemUsageEditor } from './editors/ItemUsageEditor';
 import { EffectBuilder } from '../character/editors/EffectBuilder';
 import { getBuffTag, getEnhancementPill, getActivePowerPill, MechanicalPill } from '../../utils/itemModifiers';
-import { toTitleCase } from '../../utils/npcUtils';
+import { toTitleCase, fixCasing } from '../../utils/npcUtils';
 
 interface ItemDetailViewProps {
     item: Item;
@@ -414,7 +414,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         {/* Name + inline edit */}
                         {!hideName && (
                             <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-brand-text leading-tight flex-1 min-w-0">{item.name}</h3>
+                                <h3 className="text-brand-text leading-tight flex-1 min-w-0">{toTitleCase(item.name)}</h3>
                             </div>
                         )}
 
@@ -468,7 +468,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                         {item.description && (
                             <div className="bg-brand-primary/10 p-4 rounded-2xl mb-4">
                                 <p className="text-body-base text-brand-text-muted leading-relaxed opacity-90">
-                                    {item.description}
+                                    {fixCasing(item.description)}
                                 </p>
                             </div>
                         )}
@@ -544,7 +544,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 animate-fade-in backdrop-blur-sm">
                                             <div className="w-full max-w-[320px] bg-brand-surface rounded-3xl shadow-2xl border border-brand-primary overflow-hidden flex flex-col max-h-[80vh]">
                                                 <div className="px-6 py-4 border-b border-brand-primary/10 flex justify-between items-center bg-brand-primary/5">
-                                                    <span className="text-[10px] font-bold text-brand-text-muted uppercase tracking-wider">Select Target</span>
+                                                    <span className="text-[10px] font-bold text-brand-text-muted tracking-normal">Select Target</span>
                                                      <Button 
                                                         onClick={() => setIsTargetDropdownOpen(false)} 
                                                         variant="tertiary" 

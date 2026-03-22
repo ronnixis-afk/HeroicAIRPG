@@ -71,3 +71,44 @@ export const getTimePeriod = (timeString: string): string => {
     if (hours >= 17 && hours < 20) return 'Dusk';
     return 'Night';
 };
+/**
+ * Calculates a relative time string between two in-game timestamps.
+ * Returns a string like "2 days and 5 hours ago".
+ * @param currentTimeStr The reference current time string.
+ * @param pastTimeStr The past time string to compare against.
+ */
+export const getRelativeTimeString = (currentTimeStr: string, pastTimeStr: string): string => {
+    const current = parseGameTime(currentTimeStr);
+    const past = parseGameTime(pastTimeStr);
+    
+    if (!current || !past) return "some time ago";
+
+    const diffMs = current.getTime() - past.getTime();
+    
+    // Safety check: if past is somehow in the future, just return the raw time or a blank
+    if (diffMs < 0) return "very recently";
+
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    const remainingHours = diffHours % 24;
+    const remainingMinutes = diffMinutes % 60;
+
+    // Cases for small time differences
+    if (diffDays === 0 && remainingHours === 0) {
+        if (remainingMinutes === 0) return "just now";
+        return `${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'} ago`;
+    }
+
+    // Standard case: "X days and Y hours ago"
+    let parts: string[] = [];
+    if (diffDays > 0) {
+        parts.push(`${diffDays} day${diffDays === 1 ? '' : 's'}`);
+    }
+    if (remainingHours > 0) {
+        parts.push(`${remainingHours} hour${remainingHours === 1 ? '' : 's'}`);
+    }
+
+    return `${parts.join(' and ')} ago`;
+};

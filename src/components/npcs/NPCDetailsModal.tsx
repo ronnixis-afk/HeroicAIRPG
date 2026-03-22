@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import Modal from '../Modal';
 import { type NPC, type CombatActorSize, type ArchetypeName, ARCHETYPE_NAMES, type NPCMemory } from '../../types';
-import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES, toTitleCase, getRaceColor, getGenderColor } from '../../utils/npcUtils';
+import { getRelationshipLabel, getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES, toTitleCase, getRaceColor, getGenderColor, fixCasing } from '../../utils/npcUtils';
 import AutoResizingTextarea from '../AutoResizingTextarea';
 import { Icon } from '../../components/Icon';
 import Button from '../Button';
@@ -18,24 +18,6 @@ interface NPCDetailsModalProps {
     onDelete: (id: string) => void;
 }
 
-const RefinementShimmer: React.FC = () => (
-    <div className="space-y-6 animate-pulse p-2">
-        <div className="h-16 bg-brand-primary/20 rounded-2xl border border-brand-surface"></div>
-        <div className="space-y-4">
-            <div className="h-11 bg-brand-primary/30 rounded-xl w-full"></div>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="h-11 bg-brand-primary/30 rounded-xl"></div>
-                <div className="h-11 bg-brand-primary/30 rounded-xl"></div>
-            </div>
-            <div className="h-24 bg-brand-primary/30 rounded-2xl w-full"></div>
-            <div className="h-24 bg-brand-primary/30 rounded-2xl w-full"></div>
-        </div>
-        <div className="flex flex-col items-center justify-center pt-4 gap-2">
-            <Icon name="spinner" className="w-8 h-8 animate-spin text-brand-accent" />
-            <p className="text-body-sm text-brand-accent font-bold animate-pulse text-xs">Analyzing plot context...</p>
-        </div>
-    </div>
-);
 
 const StyledInputGroup: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
     <div className="flex flex-col">
@@ -71,10 +53,10 @@ const PillSelect: React.FC<{
 const NPCViewContent: React.FC<{
     npc: NPC;
     onEdit: () => void;
-    onManualRefine: () => void;
     onInvite: () => void;
-    isRefining: boolean;
-}> = ({ npc, onEdit, onManualRefine, onInvite, isRefining }) => {
+    isInviting: boolean;
+}> = ({ npc, onEdit, onInvite, isInviting }) => {
+    const [isMemoriesOpen, setIsMemoriesOpen] = useState(false);
     const relInfo = getRelationshipLabel(npc.relationship);
 
     const DataRow = ({ label, value, icon, noTitle }: { label: string, value?: string, icon?: string, noTitle?: boolean }) => {
@@ -86,7 +68,7 @@ const NPCViewContent: React.FC<{
                     {toTitleCase(label)}
                 </label>
                 <p className="text-body-base text-brand-text leading-relaxed font-medium">
-                    {noTitle ? value : toTitleCase(value)}
+                    {noTitle ? fixCasing(value) : toTitleCase(value)}
                 </p>
             </div>
         );
@@ -175,24 +157,44 @@ const NPCViewContent: React.FC<{
                     <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">{toTitleCase("Chronicle of Interactions")}</label>
                     <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">{toTitleCase("Digital Memory Active")}</span>
                 </div>
-                <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
-                    {sortedMemories.length > 0 ? (
-                        sortedMemories.map((m, i) => (
-                            <div key={i} className="p-4 flex items-start gap-4 group/mem hover:bg-brand-primary/20 transition-colors">
-                                <div className="text-[10px] font-mono text-brand-accent opacity-50 shrink-0 pt-0.5">
-                                    {m.timestamp.split(',').slice(-1)[0].trim()}
+                
+                <Button
+                    onClick={() => setIsMemoriesOpen(true)}
+                    variant="secondary"
+                    size="sm"
+                    className="w-full py-3 rounded-xl border-dashed border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all font-bold"
+                    icon="history"
+                >
+                    View Memories
+                </Button>
+
+                <Modal 
+                    isOpen={isMemoriesOpen} 
+                    onClose={() => setIsMemoriesOpen(false)} 
+                    title={toTitleCase(`${npc.name}'s Memories`)}
+                    maxWidth="lg"
+                >
+                    <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
+                        {sortedMemories.length > 0 ? (
+                            sortedMemories.map((m, i) => (
+                                <div key={i} className="p-5 flex items-start gap-4 group/mem hover:bg-brand-primary/20 transition-colors">
+                                    <div className="text-[11px] font-mono text-brand-accent opacity-60 shrink-0 pt-1 min-w-[100px]">
+                                        {m.timestamp}
+                                    </div>
+                                    <div className="flex-1 space-y-1">
+                                        <p className="text-body-base text-brand-text leading-relaxed italic">
+                                            "{m.content}"
+                                        </p>
+                                    </div>
                                 </div>
-                                <p className="text-body-sm text-brand-text leading-relaxed italic">
-                                    {m.content}
-                                </p>
+                            ))
+                        ) : (
+                            <div className="p-10 text-center">
+                                <p className="text-body-base text-brand-text-muted italic opacity-40">No previous interactions recorded.</p>
                             </div>
-                        ))
-                    ) : (
-                        <div className="p-10 text-center">
-                            <p className="text-body-base text-brand-text-muted italic opacity-40">No previous interactions recorded.</p>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </Modal>
             </div>
 
             {!npc.companionId && (npc.template || npc.affinity || npc.archetype) && (
@@ -211,7 +213,7 @@ const NPCViewContent: React.FC<{
                 <div className="pt-8 border-t border-brand-primary/20 flex flex-col gap-6">
                     <Button
                         onClick={onInvite}
-                        isLoading={isRefining}
+                        isLoading={isInviting}
                         variant="primary"
                         size="lg"
                         className="w-full"
@@ -229,21 +231,6 @@ const NPCViewContent: React.FC<{
                     >
                         Edit Profile
                     </Button>
-
-                    <div className="flex flex-col items-center gap-4">
-                        <p className="text-body-sm text-brand-text-muted italic text-center px-4">
-                            Incomplete profile? Use the weaver to fill in details based on your current story context.
-                        </p>
-                        <Button
-                            onClick={onManualRefine}
-                            isLoading={isRefining}
-                            variant="secondary"
-                            className="w-full max-w-xs"
-                            icon="sparkles"
-                        >
-                            Weave Missing Details
-                        </Button>
-                    </div>
                 </div>
             )}
         </div>
@@ -251,11 +238,11 @@ const NPCViewContent: React.FC<{
 };
 
 const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc, onSave, onDelete }) => {
-    const { gameData, refineNPC, inviteNpcToParty } = useContext(GameDataContext);
+    const { gameData, inviteNpcToParty } = useContext(GameDataContext);
     const [isEditing, setIsEditing] = useState(false);
     const [editedNPC, setEditedNPC] = useState<NPC>(npc);
     const [isDirty, setIsDirty] = useState(false);
-    const [isRefining, setIsRefining] = useState(false);
+    const [isInviting, setIsInviting] = useState(false);
 
     const playerLevel = gameData?.playerCharacter.level || 1;
 
@@ -310,24 +297,14 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
         setIsDirty(true);
     };
 
-    const handleManualRefine = async () => {
-        if (isRefining) return;
-        setIsRefining(true);
-        try {
-            await refineNPC(editedNPC);
-        } finally {
-            setIsRefining(false);
-        }
-    };
-
     const handleInvite = async () => {
-        if (isRefining) return;
-        setIsRefining(true);
+        if (isInviting) return;
+        setIsInviting(true);
         try {
             await inviteNpcToParty(npc);
             onClose();
         } finally {
-            setIsRefining(false);
+            setIsInviting(false);
         }
     };
 
@@ -363,15 +340,12 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? toTitleCase("Edit Record") : toTitleCase(editedNPC.name)}>
-            {isRefining ? (
-                <RefinementShimmer />
-            ) : !isEditing ? (
+            {!isEditing ? (
                 <NPCViewContent
                     npc={editedNPC}
                     onEdit={() => setIsEditing(true)}
-                    onManualRefine={handleManualRefine}
                     onInvite={handleInvite}
-                    isRefining={isRefining}
+                    isInviting={isInviting}
                 />
             ) : (
                 <div className="space-y-8 pb-4 animate-page">

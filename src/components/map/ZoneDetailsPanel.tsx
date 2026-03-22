@@ -9,7 +9,8 @@ import { KeywordEditor } from '../KeywordEditor';
 import AutoResizingTextarea from '../../components/AutoResizingTextarea';
 import Accordion from '../Accordion';
 import { isLocaleMatch, parseHostility } from '../../utils/mapUtils';
-import { toTitleCase } from '../../utils/npcUtils';
+import { toTitleCase, fixCasing } from '../../utils/npcUtils';
+import Modal from '../Modal';
 import { StatusAvatar } from '../chat/StatusAvatar';
 
 const getHostilityLabel = (value: number): { label: string, color: string, bg: string, border: string } => {
@@ -65,6 +66,7 @@ const POIListItem: React.FC<{
     const { updateKnowledge, gameData } = useContext(GameDataContext);
     const { setInspectedEntity, setPendingTravelConfirmation } = useUI();
     const [isEditing, setIsEditing] = useState(false);
+    const [isMemoriesOpen, setIsMemoriesOpen] = useState(false);
     const [editTitle, setEditTitle] = useState(entry.title);
     const [editContent, setEditContent] = useState(entry.content);
     const [editTags, setEditTags] = useState<string[]>(entry.tags || []);
@@ -332,7 +334,7 @@ const POIListItem: React.FC<{
                                     </div>
                                 )}
                                 <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
-                                    {entry.content}
+                                    {fixCasing(entry.content)}
                                 </p>
                                 
                                 {isExpanded && entry.tags && entry.tags.length > 0 && (
@@ -350,24 +352,45 @@ const POIListItem: React.FC<{
                                     <div className="mt-4 space-y-2">
                                         <div className="flex justify-between items-center">
                                             <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal">
-                                                {toTitleCase('Location Chronicle')}
+                                                Location Chronicle
                                             </label>
                                             <span className="text-[9px] font-bold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">
                                                 {sortedPoiMemories.length} {sortedPoiMemories.length === 1 ? 'event' : 'events'}
                                             </span>
                                         </div>
-                                        <div className="bg-brand-primary/10 rounded-xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30 max-h-[200px] overflow-y-auto custom-scroll">
-                                            {sortedPoiMemories.map((m, i) => (
-                                                <div key={i} className="px-3 py-2.5 flex items-start gap-3 hover:bg-brand-primary/20 transition-colors">
-                                                    <div className="text-[9px] font-mono text-brand-accent opacity-50 shrink-0 pt-0.5 min-w-[60px]">
-                                                        {m.timestamp.split(',').slice(-1)[0]?.trim() || m.timestamp}
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsMemoriesOpen(true);
+                                            }}
+                                            className="w-full py-2.5 rounded-xl border border-dashed border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all flex items-center justify-center gap-2 text-[11px] font-bold text-brand-text-muted hover:text-brand-text"
+                                        >
+                                            <Icon name="history" className="w-3.5 h-3.5 text-brand-accent" />
+                                            View Memories
+                                        </button>
+
+                                        <Modal 
+                                            isOpen={isMemoriesOpen} 
+                                            onClose={() => setIsMemoriesOpen(false)} 
+                                            title={toTitleCase(`${entry.title} - Location Chronicle`)}
+                                            maxWidth="lg"
+                                        >
+                                            <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
+                                                {sortedPoiMemories.map((m, i) => (
+                                                    <div key={i} className="p-5 flex items-start gap-4 group/mem hover:bg-brand-primary/20 transition-colors">
+                                                        <div className="text-[11px] font-mono text-brand-accent opacity-60 shrink-0 pt-1 min-w-[100px]">
+                                                            {m.timestamp}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-body-base text-brand-text leading-relaxed italic">
+                                                                "{m.content}"
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <p className="text-[11px] text-brand-text leading-relaxed italic">
-                                                        {m.content}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        </Modal>
                                     </div>
                                 )}
 
@@ -375,8 +398,8 @@ const POIListItem: React.FC<{
                                 {isExpanded && connectedNpcs.length > 0 && (
                                     <div className="mt-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal uppercase">
-                                                {toTitleCase('Local Denizens')}
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal">
+                                                Local Denizens
                                             </label>
                                             <span className="text-[9px] font-bold text-brand-text-muted opacity-40">
                                                 {connectedNpcs.length} {connectedNpcs.length === 1 ? 'entity' : 'entities'}
@@ -432,7 +455,7 @@ const POIListItem: React.FC<{
                             {toTitleCase('Edit')}
                         </button>
                         {isPlayerHere ? (
-                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-widest bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-normal bg-brand-accent/10 rounded-xl border border-brand-accent/20">
                                 {toTitleCase('You Are Here')}
                             </div>
                         ) : (

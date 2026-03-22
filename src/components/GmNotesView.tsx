@@ -313,7 +313,7 @@ const GmNotesView: React.FC = () => {
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div className="flex flex-col items-center gap-3 bg-brand-surface/90 p-6 rounded-2xl backdrop-blur-md border border-brand-accent/20 shadow-2xl">
                                     <Icon name="spinner" className="w-10 h-10 animate-spin text-brand-accent" />
-                                    <span className="text-[10px] text-brand-accent font-black uppercase tracking-widest animate-pulse">Architecting fate...</span>
+                                    <span className="text-[10px] text-brand-accent font-black tracking-normal animate-pulse">Architecting Fate...</span>
                                 </div>
                             </div>
                         )}
@@ -355,7 +355,7 @@ const GmNotesView: React.FC = () => {
                                                     <p className={`text-[10px] font-bold truncate max-w-[90px] transition-colors ${isDead ? 'text-brand-danger' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
                                                         {npc.name}
                                                     </p>
-                                                    {isDead && <p className="text-[8px] font-black text-brand-danger/80 uppercase tracking-tighter mt-0.5">(Deceased)</p>}
+                                                    {isDead && <p className="text-[8px] font-black text-brand-danger/80 tracking-tighter mt-0.5">(Deceased)</p>}
                                                 </div>
                                             </button>
                                         );

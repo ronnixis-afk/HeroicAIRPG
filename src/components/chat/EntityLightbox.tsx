@@ -5,7 +5,7 @@ import Modal from '../Modal';
 import { ItemDetailView } from '../inventory/ItemDetailView';
 import NPCDetailsModal from '../npcs/NPCDetailsModal';
 import { LoreEntry, NPC, Item, MapZone, Companion } from '../../types';
-import { companionToNPC } from '../../utils/npcUtils';
+import { companionToNPC, fixCasing } from '../../utils/npcUtils';
 
 const getHostilityLabel = (value: number): { label: string, color: string } => {
     if (value <= -16) return { label: 'Sanctuary', color: 'text-emerald-400' };
@@ -104,7 +104,7 @@ export const EntityLightbox: React.FC = () => {
 
                             <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-primary/50 shadow-inner">
                                 <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap italic opacity-90">
-                                    {zone.description || "A mysterious place with no recorded overview."}
+                                    {fixCasing(zone.description) || "A mysterious place with no recorded overview."}
                                 </p>
                             </div>
 
@@ -142,7 +142,7 @@ export const EntityLightbox: React.FC = () => {
                         </div>
                         <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-primary/50">
                             <p className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap">
-                                {entry.content}
+                                {fixCasing(entry.content)}
                             </p>
                         </div>
                         {entry.milestones && entry.milestones.length > 0 && (
@@ -150,7 +150,7 @@ export const EntityLightbox: React.FC = () => {
                                 <label className="text-body-sm font-black text-brand-text-muted">Chronicle History</label>
                                 <div className="space-y-2 pl-3 border-l-2 border-brand-accent/30 ml-1">
                                     {entry.milestones.map((m, i) => (
-                                        <p key={i} className="text-body-sm text-brand-text italic leading-relaxed">{m}</p>
+                                        <p key={i} className="text-body-sm text-brand-text italic leading-relaxed">{fixCasing(m)}</p>
                                     ))}
                                 </div>
                             </div>

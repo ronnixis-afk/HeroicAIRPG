@@ -8,9 +8,7 @@ import { Icon } from './Icon';
 import Button from './Button';
 import PageHeader from './PageHeader';
 
-const toTitleCase = (str: string) => {
-    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-};
+import { toTitleCase, fixCasing } from '../utils/npcUtils';
 
 const NewTag: React.FC = () => (
     <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0">New</span>
@@ -261,7 +259,7 @@ const StoryView: React.FC = () => {
                                                         className={`text-body-sm leading-relaxed whitespace-pre-wrap cursor-pointer transition-colors ${log.isNew ? 'text-brand-text font-medium' : 'text-brand-text-muted hover:text-brand-text'}`}
                                                         onClick={() => handleLogClick(log)}
                                                     >
-                                                        {log.summary || log.content}
+                                                        {fixCasing(log.summary || log.content)}
                                                     </div>
                                                 )}
                                             </div>

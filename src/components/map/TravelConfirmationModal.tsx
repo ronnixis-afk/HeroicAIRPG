@@ -84,7 +84,7 @@ export const TravelConfirmationModal: React.FC = () => {
                 </div>
                 
                 <div className="w-full space-y-2 mb-8 text-left">
-                    <label className="text-[10px] uppercase font-bold text-brand-text-muted ml-1 tracking-widest">Choose Travel Mode</label>
+                    <label className="text-[10px] font-bold text-brand-text-muted ml-1 tracking-normal">Choose Travel Mode</label>
                     <div className="relative">
                         <select
                             value={selectedMethod}
