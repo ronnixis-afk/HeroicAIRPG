@@ -130,6 +130,38 @@ export const useSemanticIndexer = (
                     });
                 }
 
+                requiresStateUpdate = false;
+
+                // 5. Scan POI Memories (Location Event RAG)
+                const poiMemoryUpdates: { poiId: string, memory: string, embedding?: number[] }[] = [];
+
+                if (gameData.knowledge) {
+                    for (const poi of gameData.knowledge) {
+                        if (poi.memories && poi.tags?.includes('location')) {
+                            for (const mem of poi.memories) {
+                                if (!mem.embedding && mem.content) {
+                                    const vec = await generateEmbedding(mem.content);
+                                    if (vec) {
+                                        poiMemoryUpdates.push({
+                                            poiId: poi.id,
+                                            memory: mem.content,
+                                            embedding: vec
+                                        });
+                                        requiresStateUpdate = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (requiresStateUpdate && poiMemoryUpdates.length > 0) {
+                    dispatch({
+                        type: 'AI_UPDATE',
+                        payload: { poiMemories: poiMemoryUpdates }
+                    });
+                }
+
             } catch (err) {
                 console.error("Background indexing process naturally terminated or failed:", err);
             } finally {

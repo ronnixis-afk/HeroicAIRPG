@@ -22,11 +22,13 @@ export const performHousekeeping = async (
   userAlignmentShift: string;
   npcMemories: { npcId: string, memory: string }[];
   recruitedNpcIds: string[];
+  poiMemory?: { poiId: string, memory: string };
 }> => {
 
   // Create a unified, deduplicated social registry for the Housekeeper
   const socialMap = new Map<string, any>();
   const currentLocale = gameData.currentLocale || "";
+  const currentSiteId = gameData.current_site_id || "";
   const activeCompanionIds = new Set((gameData.companions || []).map(c => c.id));
 
   (gameData.npcs || []).forEach(n => {
@@ -133,7 +135,15 @@ export const performHousekeeping = async (
     3. **OUTPUT**: Return the 'id' of the NPC from the SOCIAL REGISTRY in the 'recruitedNpcIds' array.
 
     [NPC MEMORY INSTRUCTIONS]
-    1. For each NPC the player interacted with, extract ONE concise memory (MAX 10 WORDS).
+    1. For each NPC the player interacted with, extract ONE concise memory (max 10 words).
+
+    [POI MEMORY INSTRUCTIONS]
+    1. The player is currently at: "${currentLocale}" (site_id: "${currentSiteId}").
+    2. If any notable NON-COMBAT event occurred at this location (conversation, discovery, trade, arrival, departure, ritual, etc.), 
+       produce ONE concise summary (max 10 words) describing what happened here.
+    3. Do NOT create a POI memory for pure combat actions (attacking, being attacked, fighting).
+    4. If nothing notable happened at this POI, omit the poiMemory field or set it to null.
+    5. The memory content should use sentence case.
 
     // (Quest Audit Instructions removed as per user request to keep only Location Discovery quests)
 
@@ -160,7 +170,8 @@ export const performHousekeeping = async (
       "npcMemories": [
         { "npcId": "string", "memory": "string" }
       ],
-      "recruitedNpcIds": ["string"]
+      "recruitedNpcIds": ["string"],
+      "poiMemory": { "poiId": "${currentSiteId}", "memory": "string" } | null
     }
     `;
 
@@ -181,10 +192,11 @@ export const performHousekeeping = async (
       inventoryUpdates: result.inventoryUpdates || [],
       userAlignmentShift: result.userAlignmentShift || "Neutral",
       npcMemories: result.npcMemories || [],
-      recruitedNpcIds: result.recruitedNpcIds || []
+      recruitedNpcIds: result.recruitedNpcIds || [],
+      poiMemory: result.poiMemory || undefined
     };
   } catch (e) {
     console.error("Housekeeper failed:", e);
-    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [], recruitedNpcIds: [] };
+    return { inventoryUpdates: [], userAlignmentShift: "Neutral", npcMemories: [], recruitedNpcIds: [], poiMemory: undefined };
   }
 };

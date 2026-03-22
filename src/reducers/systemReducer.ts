@@ -665,6 +665,44 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 });
             }
 
+            // POI Memory Processing: Append event memories to knowledge entries (Points of Interest)
+            if (updates.poiMemories && Array.isArray(updates.poiMemories)) {
+                newState.knowledge = [...(newState.knowledge || [])];
+                updates.poiMemories.forEach(memData => {
+                    if (!memData || !memData.poiId || !memData.memory) return;
+
+                    // Resolve POI: Try by id first, then by matching current locale name
+                    let poiIdx = newState.knowledge!.findIndex(k =>
+                        k.id === memData.poiId && k.tags?.includes('location')
+                    );
+                    if (poiIdx === -1) {
+                        // Fallback: match by title against current locale
+                        const currentSiteName = newState.current_site_name || newState.currentLocale || '';
+                        if (currentSiteName) {
+                            poiIdx = newState.knowledge!.findIndex(k =>
+                                k.tags?.includes('location') &&
+                                k.title.toLowerCase().trim() === currentSiteName.toLowerCase().trim()
+                            );
+                        }
+                    }
+
+                    if (poiIdx > -1) {
+                        const existingPoi = newState.knowledge![poiIdx];
+                        newState.knowledge![poiIdx] = {
+                            ...existingPoi,
+                            memories: [
+                                ...(existingPoi.memories || []),
+                                {
+                                    content: memData.memory,
+                                    timestamp: newState.currentTime || new Date().toISOString(),
+                                    embedding: memData.embedding
+                                }
+                            ].slice(-30) // Cap at 30 entries per POI
+                        };
+                    }
+                });
+            }
+
             return newState;
         }
 

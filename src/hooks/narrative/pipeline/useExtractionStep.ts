@@ -62,7 +62,8 @@ export const useExtractionStep = (
                 inventoryUpdates: [],
                 userAlignmentShift: "Neutral",
                 npcMemories: [],
-                recruitedNpcIds: []
+                recruitedNpcIds: [],
+                poiMemory: undefined as { poiId: string, memory: string } | undefined
             });
 
         const [auditResult, housekeepingResult] = await Promise.all([auditPromise, housekeepingPromise]);
@@ -467,6 +468,15 @@ export const useExtractionStep = (
             });
         }
 
+        // 4.5 POI Memory: Record event at current location
+        if (!gameData.combatState?.isActive && housekeepingResult.poiMemory?.memory) {
+            const poiMem = housekeepingResult.poiMemory;
+            // Resolve POI by site_id or by matching the current locale name in knowledge
+            const poiId = poiMem.poiId || gameData.current_site_id || '';
+            if (poiId) {
+                finalUpdates.poiMemories = [{ poiId, memory: poiMem.memory }];
+            }
+        }
 
         // 5. Resolve Auditor Result Metadata
         if (resolvedLocale) finalUpdates.currentLocale = resolvedLocale;

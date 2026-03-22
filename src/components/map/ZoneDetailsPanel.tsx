@@ -4,12 +4,13 @@ import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { Icon } from '../Icon';
-import { MapZone, LoreEntry, StoryLog } from '../../types';
+import { MapZone, LoreEntry, StoryLog, POIMemory } from '../../types';
 import { KeywordEditor } from '../KeywordEditor';
 import AutoResizingTextarea from '../../components/AutoResizingTextarea';
 import Accordion from '../Accordion';
 import { isLocaleMatch, parseHostility } from '../../utils/mapUtils';
 import { toTitleCase } from '../../utils/npcUtils';
+import { StatusAvatar } from '../chat/StatusAvatar';
 
 const getHostilityLabel = (value: number): { label: string, color: string, bg: string, border: string } => {
     if (value <= -16) return { label: 'Sanctuary', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20' };
@@ -66,6 +67,10 @@ const POIListItem: React.FC<{
     const [editContent, setEditContent] = useState(entry.content);
     const [editTags, setEditTags] = useState<string[]>(entry.tags || []);
     const [editImage, setEditImage] = useState<string>(entry.keywords?.find(k => k.startsWith('image:'))?.replace('image:', '') || '');
+
+    const sortedPoiMemories = useMemo(() => {
+        return [...(entry.memories || [])].reverse();
+    }, [entry.memories]);
 
     const activeTags = isEditing ? editTags : (entry.tags || []);
     const activeIsPopCenter = activeTags.includes('population-center');
@@ -321,6 +326,32 @@ const POIListItem: React.FC<{
                                         ))}
                                     </div>
                                 )}
+
+                                {/* POI Memories Section */}
+                                {isExpanded && sortedPoiMemories.length > 0 && (
+                                    <div className="mt-4 space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal">
+                                                {toTitleCase('Location Chronicle')}
+                                            </label>
+                                            <span className="text-[9px] font-bold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">
+                                                {sortedPoiMemories.length} {sortedPoiMemories.length === 1 ? 'event' : 'events'}
+                                            </span>
+                                        </div>
+                                        <div className="bg-brand-primary/10 rounded-xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30 max-h-[200px] overflow-y-auto custom-scroll">
+                                            {sortedPoiMemories.map((m, i) => (
+                                                <div key={i} className="px-3 py-2.5 flex items-start gap-3 hover:bg-brand-primary/20 transition-colors">
+                                                    <div className="text-[9px] font-mono text-brand-accent opacity-50 shrink-0 pt-0.5 min-w-[60px]">
+                                                        {m.timestamp.split(',').slice(-1)[0]?.trim() || m.timestamp}
+                                                    </div>
+                                                    <p className="text-[11px] text-brand-text leading-relaxed italic">
+                                                        {m.content}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
@@ -329,7 +360,7 @@ const POIListItem: React.FC<{
 
             {/* Expanded Actions */}
             {!isEditing && (
-                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                     <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
                         <button
                             onClick={handleStartEdit}
@@ -530,6 +561,16 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                             <div className="space-y-8">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1 min-w-0">
+                                        {isPlayerHere && (
+                                            <div className="mb-3 animate-entrance">
+                                                <StatusAvatar 
+                                                    char={gameData.playerCharacter} 
+                                                    size={30} 
+                                                    showBars={false} 
+                                                    showName={false} 
+                                                />
+                                            </div>
+                                        )}
                                         <h3 className="mb-2 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">

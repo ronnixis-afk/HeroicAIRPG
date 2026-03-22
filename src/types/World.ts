@@ -52,6 +52,13 @@ export interface NPCMemory {
   embedding?: number[]; // Semantic Retrieval Vector
 }
 
+// POI Memory: Tracks events that occur at a specific Point of Interest
+export interface POIMemory {
+  timestamp: string;
+  content: string;
+  embedding?: number[]; // Semantic Retrieval Vector
+}
+
 export type ActorAlignment = 'ally' | 'neutral' | 'enemy';
 
 export interface LoreEntry {
@@ -73,6 +80,9 @@ export interface LoreEntry {
 
   // AI Architecture
   embedding?: number[]; // Semantic Retrieval Vector
+
+  // POI Memory System: Tracks events that happened at this location
+  memories?: POIMemory[];
 }
 
 export interface GalleryEntry {

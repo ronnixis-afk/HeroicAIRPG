@@ -1,7 +1,7 @@
 
 // services/aiContextService.ts
 
-import { GameData, ChatMessage, LoreEntry, ActorSuggestion, SKILL_DEFINITIONS, SKILL_NAMES, PlayerCharacter, Companion, CombatActor, CalculatedCombatStats, Inventory, NPC, NPCMemory, StoryLog } from '../types';
+import { GameData, ChatMessage, LoreEntry, ActorSuggestion, SKILL_DEFINITIONS, SKILL_NAMES, PlayerCharacter, Companion, CombatActor, CalculatedCombatStats, Inventory, NPC, NPCMemory, POIMemory, StoryLog } from '../types';
 import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { ThinkingLevel } from '@google/genai';
@@ -309,11 +309,24 @@ The user has expended a HEROIC POINT.
             .map(k => `- ${k.title}: ${k.content}`)
             .join('\n');
 
+        // POI Memory Context: Include recent memories from the current location
+        let poiMemoryContext = "";
+        const currentPoi = (gameData.knowledge ?? []).find(k =>
+            k.tags?.includes('location') &&
+            k.title.toLowerCase().trim() === (gameData.currentLocale || '').toLowerCase().trim()
+        );
+        if (currentPoi?.memories && currentPoi.memories.length > 0) {
+            const recentPoiMemories = currentPoi.memories.slice(-5);
+            poiMemoryContext = `\n[LOCATION HISTORY (${currentPoi.title})]:\n` +
+                recentPoiMemories.map(m => `- [${m.timestamp}]: ${m.content}`).join('\n');
+        }
+
         tier2Resonance = `
 ### TIER 2: WORLD RESONANCE
 ${resonantLore || "No relevant historical lore detected."}
 [LOCAL POINTS OF INTEREST]:
 ${localPOIs || "No specific local landmarks."}
+${poiMemoryContext}
 `;
     }
 

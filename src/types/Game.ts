@@ -3,7 +3,7 @@
 
 import { PlayerCharacter, Companion } from './Characters';
 import { Inventory, Item, StoreItem, InventoryUpdatePayload } from './Items';
-import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution } from './World';
+import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution, POIMemory } from './World';
 import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillConfiguration, BodySlot, CombatActorSize, StatusEffect, ArchetypeName, ActiveBuff } from './Core';
 
 export interface CombatConfiguration {
@@ -87,6 +87,7 @@ export interface AIUpdatePayload {
   knowledge?: LoreEntry[];
   objectives?: (Partial<LoreEntry> & { progressUpdate?: string })[];
   npcMemories?: { npcId: string, memory: string, embedding?: number[] }[];
+  poiMemories?: { poiId: string, memory: string, embedding?: number[] }[];
   storyUpdates?: { id: string, content: string, summary?: string, embedding?: number[], isNew?: boolean, originatingMessageId?: string }[];
   story?: StoryLog[];
   combatState?: Partial<CombatState>;

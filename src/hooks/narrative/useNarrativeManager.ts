@@ -333,6 +333,17 @@ export const useNarrativeManager = (
             });
         }
 
+        // 5. Index POI Memories
+        if (updates.poiMemories && updates.poiMemories.length > 0) {
+            updates.poiMemories.forEach(m => {
+                if (m.memory) {
+                    indexingTasks.push(generateEmbedding(m.memory).then(vec => {
+                        if (vec) (m as any).embedding = vec;
+                    }));
+                }
+            });
+        }
+
         // Wait for all embeddings to resolve (these are very fast API calls)
         if (indexingTasks.length > 0) {
             await Promise.allSettled(indexingTasks);
