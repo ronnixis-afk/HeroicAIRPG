@@ -151,6 +151,7 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'RESET_WORLD':
         case 'RESTART_ADVENTURE':
         case 'COMPLETE_RESTART':
+        case 'SET_PRE_GAME_STATE':
         case 'UPDATE_COMBAT_CONFIGURATION':
         case 'SET_USE_AI_TTS':
         case 'SET_PARTY_HIDDEN':

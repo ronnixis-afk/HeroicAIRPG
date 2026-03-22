@@ -461,7 +461,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 };
 
 
-export const generateStartingScenario = async (character: any, gameData: GameData, hookIndex: number) => {
+export const generateStartingScenario = async (character: any, gameData: GameData, hookIndex: number, companions: Companion[] = []) => {
     const worldContext = getWorldContext(gameData);
     const selectedHook = STORY_HOOKS[hookIndex - 1] || STORY_HOOKS[0];
 
@@ -475,6 +475,10 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
     else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
     else { popLevel = 'Barren'; features = []; }
 
+    const companionContext = companions.length > 0
+        ? `\n[COMPANION PROFILES]\n${companions.map(c => `Name: ${c.name}, Race: ${c.race}, Level: ${c.level}, Profession: ${c.profession}, Background: ${c.background}`).join('\n')}`
+        : '';
+
     const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
 
 [WORLD CONTEXT]
@@ -486,6 +490,7 @@ Level: ${character.level}
 Race: ${character.race}
 Profession: ${character.profession}
 Background: ${character.background}
+${companionContext}
 
 [MANDATORY STORY HOOK]
 You MUST base the catalyst of this adventure on the following scenario:
@@ -494,7 +499,7 @@ You MUST base the catalyst of this adventure on the following scenario:
 [INSTRUCTIONS]
 1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
    - narrativeLens: A colourful blend of ${character.name}'s background based on their race (${character.race}) and traits (${character.background}). Use evocative, sensory language.
-   - narrativePath: Explain ${character.name}'s reason to survive and why they chose their life as a ${character.profession}.
+   - narrativePath: Explain ${character.name}'s reason to survive and why they chose their life as a ${character.profession}. ${companions.length > 0 ? "IMPORTANT: Since one or more companions are accompanying the main character, you MUST weave the companions stories and their relationship with the main character into this narrative." : ""}
    - narrativeCatalyst: Immersive implementation of the specific Hook provided above. This should be the longest part.
 2. introSummary: A 2-sentence tactical plot brief.
 3. startingObjective: A primary quest to guide the player immediately.

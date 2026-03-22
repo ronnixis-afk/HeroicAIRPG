@@ -131,7 +131,8 @@ export interface GameDataContextType {
   updatePlotPoint: (point: PlotPoint) => void;
   weaveNarrative: () => Promise<void>;
   integrateRefinedCharacter: (character: PlayerCharacter) => Promise<void>;
-  integrateCharacter: (character: PlayerCharacter | Companion, isCompanion?: boolean) => Promise<void>;
+  integrateCharacter: (character: PlayerCharacter | Companion, isCompanion?: boolean, deferGameStart?: boolean) => Promise<void>;
+  startJourney: (hookIndex?: number) => Promise<void>;
   updateMapZone: (zone: MapZone) => void;
   movePlayerOnMap: (coordinates: string) => void;
   updateMapSettings: (settings: MapSettings) => void;

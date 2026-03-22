@@ -299,6 +299,24 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 partyStealthScore: 10
             };
 
+        case 'SET_PRE_GAME_STATE': {
+            const preGamePayload = action.payload;
+            const pcData = new PlayerCharacter(preGamePayload.playerCharacter as Partial<PlayerCharacter>);
+            const playerInv = preGamePayload.playerInventory || { equipped: [], carried: [], storage: [], assets: [] };
+            pcData.maxHeroicPoints = pcData.getMaxHeroicPoints(playerInv);
+            pcData.heroicPoints = Math.min(pcData.heroicPoints || 0, pcData.maxHeroicPoints);
+
+            return {
+                ...state,
+                playerCharacter: pcData,
+                playerInventory: playerInv,
+                knowledge: preGamePayload.knowledge || state.knowledge || [],
+                mapZones: preGamePayload.mapZones || state.mapZones || [],
+                story: [],
+                currentTime: state.currentTime,
+            };
+        }
+
         case 'COMPLETE_RESTART': {
             const restartPayload = action.payload;
             const pcData = restartPayload.playerCharacter ? new PlayerCharacter(restartPayload.playerCharacter) : state.playerCharacter;

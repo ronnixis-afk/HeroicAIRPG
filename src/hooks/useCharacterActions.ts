@@ -94,7 +94,7 @@ export const useCharacterActions = (
         dispatch({ type: 'DELETE_NPC', payload: `npc-${companionId}` });
     }, [dispatch]);
 
-    const integrateCharacter = useCallback(async (character: PlayerCharacter | Companion, isCompanion: boolean = false) => {
+    const integrateCharacter = useCallback(async (character: PlayerCharacter | Companion, isCompanion: boolean = false, deferGameStart: boolean = false) => {
         if (!gameData) return;
 
         const isJoiningMidGame = isCompanion && gameData.story.length > 0;
@@ -260,7 +260,28 @@ export const useCharacterActions = (
                 setCreationProgress({ isActive: true, step: "Integration complete!", progress: 100 });
                 await new Promise(resolve => setTimeout(resolve, 800));
                 setCreationProgress({ isActive: false, step: '', progress: 0 });
-                setActiveView('chat');
+                
+                if (isJoiningMidGame) {
+                    setActiveView('chat');
+                }
+            } else if (deferGameStart) {
+                // Pre-game party creation logic
+                setCreationProgress({ isActive: true, step: "Saving character data...", progress: 95 });
+                
+                const preGamePayload: Partial<GameData> = {
+                    playerCharacter: character as PlayerCharacter,
+                    playerInventory: processedInventory,
+                    knowledge: knowledgeUpdates,
+                    mapZones: mapZonesUpdate
+                };
+
+                dispatch({ type: 'PLOT_POINT', payload: { id: `bg-pp-${Date.now()}`, content: `[Origin] ${character.background || "An explorer with no past."}`, type: 'Background', isNew: true } } as any);
+                dispatch({ type: 'SET_PRE_GAME_STATE', payload: preGamePayload });
+
+                setCreationProgress({ isActive: true, step: "Integration complete!", progress: 100 });
+                await new Promise(resolve => setTimeout(resolve, 800));
+                setCreationProgress({ isActive: false, step: '', progress: 0 });
+                // Note: We do NOT transition to 'chat' here; we stay on the party creation screen.
             } else if (scenario) {
                 setCreationProgress({ isActive: true, step: "Auditing initial timeline...", progress: 90 });
 
@@ -345,6 +366,107 @@ export const useCharacterActions = (
         }
     }, [gameData, dispatch, setCreationProgress, setError, setActiveView, weaveGrandDesign]);
 
+    const startJourney = useCallback(async (hookIndex: number = 10) => {
+        if (!gameData || !gameData.playerCharacter || gameData.playerCharacter.name === 'Adventurer') return;
+        
+        setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
+        try {
+            const scenario = await generateStartingScenario(gameData.playerCharacter, gameData, hookIndex, gameData.companions || []);
+
+            // Check if player's coordinates exist in the mapZones (from SET_PRE_GAME_STATE)
+            // If not, we just use 0-0.
+            const coords = '0-0';
+
+            const startingZone: MapZone = {
+                id: `zone-start-${Date.now()}`,
+                coordinates: coords,
+                name: scenario.startingZone.name,
+                description: scenario.startingZone.description,
+                hostility: scenario.startingZone.hostility,
+                populationLevel: scenario.startingZone.populationLevel,
+                zoneFeatures: scenario.startingZone.zoneFeatures,
+                visited: true,
+                tags: ['location', 'safe', 'start'],
+            };
+            
+            let mapZonesUpdate = [...(gameData.mapZones || [])];
+            const existingStartIdx = mapZonesUpdate.findIndex(z => z.coordinates === coords);
+            if (existingStartIdx > -1) mapZonesUpdate[existingStartIdx] = startingZone;
+            else mapZonesUpdate.push(startingZone);
+
+            let knowledgeUpdates = [...(gameData.knowledge || [])];
+            scenario.startingZone.knowledge.forEach((k: any, i: number) => {
+                const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
+                if (k.isPopulationCenter) tags.push('population-center');
+                knowledgeUpdates.push({
+                    id: `know-start-${Date.now()}-${i}`,
+                    title: k.title,
+                    content: k.content,
+                    coordinates: coords,
+                    visited: k.isBackgroundRelated === true,
+                    tags: tags,
+                    isNew: true
+                } as LoreEntry);
+            });
+
+            setCreationProgress({ isActive: true, step: "Auditing initial timeline...", progress: 60 });
+
+            const baselineData = {
+                ...gameData,
+                playerCoordinates: coords,
+                currentLocale: scenario.startingZone.name
+            };
+
+            const [auditRes, houseRes] = await Promise.all([
+                auditSystemState("Arrival", scenario.introNarrative, baselineData, [gameData.playerCharacter.name]),
+                performHousekeeping("Arrival", scenario.introNarrative, baselineData)
+            ]);
+
+            const introNpcs: NPC[] = (auditRes.newNPCs || []).map(n => ({
+                id: n.id || `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                relationship: 0,
+                status: 'Alive',
+                isNew: true,
+                ...n,
+                currentPOI: auditRes.currentLocale || scenario.startingZone.name
+            } as NPC));
+
+            const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
+            const startingFundsName = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
+
+            const restartPayload: Partial<GameData> = {
+                story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: scenario.startingZone.name, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
+                messages: [
+                    { id: `sys-restart-${Date.now()}`, sender: 'system', content: `Journey synchronized. Party assembled. Initial wealth: ${startingFundsQty} ${startingFundsName}.`, type: 'neutral' },
+                    { id: `ai-intro-${Date.now()}`, sender: 'ai', content: scenario.introNarrative, location: scenario.startingZone.name, alignmentOptions: Array.isArray(scenario.alignmentOptions) ? scenario.alignmentOptions : undefined }
+                ],
+                objectives: [{ id: `obj-start-${Date.now()}`, title: scenario.startingObjective.title, content: scenario.startingObjective.content, status: 'active', isTracked: true, isNew: true, tags: ['quest', 'main'], updates: [] }],
+                knowledge: knowledgeUpdates,
+                mapZones: mapZonesUpdate,
+                playerCoordinates: coords,
+                currentLocale: auditRes.currentLocale || scenario.startingZone.name,
+                npcs: [...(gameData.npcs || []), ...introNpcs],
+                gmNotes: `Origin: ${scenario.introSummary}`
+            };
+
+            dispatch({ type: 'COMPLETE_RESTART', payload: restartPayload });
+
+            setCreationProgress({ isActive: true, step: "Journey begins!", progress: 100 });
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setCreationProgress({ isActive: false, step: '', progress: 0 });
+            setActiveView('chat');
+
+            setTimeout(() => {
+                weaveGrandDesign();
+            }, 150);
+
+        } catch (e) {
+            console.error("Start Journey failed", e);
+            setError(e instanceof Error ? e : new Error("Failed to start journey."));
+            setCreationProgress({ isActive: false, step: '', progress: 0 });
+        }
+    }, [gameData, dispatch, setCreationProgress, setError, setActiveView, weaveGrandDesign]);
+
     const integrateRefinedCharacter = useCallback(async (character: PlayerCharacter) => {
         return integrateCharacter(character, false);
     }, [integrateCharacter]);
@@ -356,6 +478,7 @@ export const useCharacterActions = (
         addCompanion,
         deleteCompanion,
         integrateCharacter,
-        integrateRefinedCharacter
+        integrateRefinedCharacter,
+        startJourney
     };
 };

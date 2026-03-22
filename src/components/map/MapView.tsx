@@ -242,10 +242,10 @@ const MapView: React.FC = () => {
 
                         {isPlayerHere && (
                             <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none drop-shadow-lg">
-                                <div className={`${isCombatActive ? 'animate-pulse ring-2 ring-red-500 rounded-[var(--avatar-radius)]' : 'ring-2 ring-brand-accent/50 rounded-[var(--avatar-radius)]'} transition-all duration-300`}>
+                                <div className={`${isCombatActive ? 'animate-pulse ring-2 ring-red-500 rounded-[var(--avatar-radius)]' : ''} transition-all duration-300`}>
                                     <ActorAvatar 
                                         actor={gameData.playerCharacter} 
-                                        size={40} 
+                                        size={20} 
                                         showBars={false} 
                                         showName={false}
                                         className="!scale-100" // Ensure it doesn't scale on hover etc unless we want it to

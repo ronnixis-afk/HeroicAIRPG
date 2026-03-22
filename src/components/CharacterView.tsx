@@ -10,10 +10,11 @@ import { CharacterCreationWizard } from './character/CharacterCreationWizard';
 import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
-    const { gameData, updateCompanion } = useContext(GameDataContext);
+    const { gameData, updateCompanion, startJourney } = useContext(GameDataContext);
     const { selectedCharacterId, setSelectedCharacterId } = useUI();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
+    const [wizardType, setWizardType] = useState<'player' | 'companion'>('player');
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -50,9 +51,16 @@ const CharacterView: React.FC = () => {
     }, [activeCharacter, selectedCharacterId, setSelectedCharacterId]);
 
     // Initial characters have default names from mockSheetService
-    const isNewHero = playerCharacter.name === 'Adventurer' || playerCharacter.name === 'New Hero';
+    const isPreGame = gameData.story.length === 0;
+    const hasPlayer = playerCharacter.name !== 'Adventurer' && playerCharacter.name !== 'New Hero';
+
+    const handleAddHero = (type: 'player' | 'companion') => {
+        setWizardType(type);
+        setIsWizardOpen(true);
+    };
 
     const handleAddCompanion = () => {
+        setWizardType('companion');
         setIsWizardOpen(true);
     };
 
@@ -72,23 +80,85 @@ const CharacterView: React.FC = () => {
     return (
         <div ref={containerRef} className="p-2 pt-8 max-w-2xl mx-auto pb-24">
 
-            {isNewHero ? (
+            {isPreGame ? (
                 <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6 animate-fade-in bg-brand-bg">
-                    <div className="w-32 h-32 rounded-full bg-brand-primary/20 flex items-center justify-center mb-8 border-2 border-dashed border-brand-accent/40 animate-pulse">
-                        <Icon name="character" className="w-16 h-16 text-brand-accent opacity-40" />
-                    </div>
                     <PageHeader 
-                        title="Forge Your Legend" 
-                        subtitle="Every great chronicle starts with a single name and a defined spirit." 
-                        className="mb-12 border-none"
+                        title="Forge Your Party" 
+                        subtitle="Every great chronicle starts with a capable crew." 
+                        className="mb-8 border-none"
                         subtitleClassName="max-w-xs mx-auto leading-relaxed"
                         titleAs="h4"
                     />
+                    
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl mb-12">
+                        {/* Main Character Slot */}
+                        <div 
+                            className={`relative aspect-square rounded-2xl border-2 flex flex-col items-center justify-center transition-all cursor-pointer 
+                                ${hasPlayer ? 'border-brand-primary bg-brand-surface' : 'border-brand-primary/40 border-dashed bg-brand-primary/5 hover:border-brand-accent hover:bg-brand-primary/10'}`}
+                            onClick={() => !hasPlayer && handleAddHero('player')}
+                        >
+                            {hasPlayer ? (
+                                <>
+                                    {playerCharacter.imageUrl ? (
+                                        <img src={playerCharacter.imageUrl} alt={playerCharacter.name} className="w-full h-full object-cover rounded-2xl opacity-80" />
+                                    ) : (
+                                        <div className="w-20 h-20 rounded-full bg-brand-primary/20 flex items-center justify-center mb-2">
+                                            <span className="text-2xl font-bold text-brand-text">{getInitials(playerCharacter.name)}</span>
+                                        </div>
+                                    )}
+                                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 rounded-b-2xl">
+                                        <div className="font-bold text-brand-text truncate">{playerCharacter.name}</div>
+                                        <div className="text-xs text-brand-text-muted">Main Hero</div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <Icon name="plus" className="w-10 h-10 text-brand-accent opacity-60 mb-2" />
+                                    <span className="text-brand-text-muted font-semibold">Add Main Hero</span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Companion Slots Context: Up to 3. Map over existing. Fill rest with "Add a Hero" */}
+                        {[...Array(3)].map((_, index) => {
+                            const companion = companions[index];
+                            if (companion) {
+                                return (
+                                    <div key={companion.id} className="relative aspect-square rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex flex-col items-center justify-center">
+                                        {companion.imageUrl ? (
+                                            <img src={companion.imageUrl} alt={companion.name} className="w-full h-full object-cover rounded-2xl opacity-80" />
+                                        ) : (
+                                            <div className="w-20 h-20 rounded-full bg-brand-primary/20 flex items-center justify-center mb-2">
+                                                <span className="text-2xl font-bold text-brand-text">{getInitials(companion.name)}</span>
+                                            </div>
+                                        )}
+                                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 rounded-b-2xl">
+                                            <div className="font-bold text-brand-text truncate">{companion.name}</div>
+                                            <div className="text-xs text-brand-text-muted">{companion.profession || 'Companion'}</div>
+                                        </div>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div 
+                                        key={`empty-${index}`}
+                                        className="relative aspect-square rounded-2xl border-2 border-brand-primary/40 border-dashed bg-brand-primary/5 flex flex-col items-center justify-center transition-all cursor-pointer hover:border-brand-accent hover:bg-brand-primary/10"
+                                        onClick={() => handleAddHero('companion')}
+                                    >
+                                        <Icon name="plus" className="w-10 h-10 text-brand-accent opacity-60 mb-2" />
+                                        <span className="text-brand-text-muted font-semibold">Add a Hero</span>
+                                    </div>
+                                );
+                            }
+                        })}
+                    </div>
+
                     <button
-                        onClick={() => setIsWizardOpen(true)}
-                        className="btn-primary btn-lg rounded-full"
+                        onClick={() => startJourney(10)}
+                        disabled={!hasPlayer}
+                        className={`btn-lg rounded-full px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
                     >
-                        Create Your Hero
+                        Begin Journey
                     </button>
                 </div>
             ) : (
@@ -171,7 +241,7 @@ const CharacterView: React.FC = () => {
             <CharacterCreationWizard
                 isOpen={isWizardOpen}
                 onClose={() => setIsWizardOpen(false)}
-                type={isNewHero ? 'player' : 'companion'}
+                type={isPreGame ? wizardType : 'companion'}
             />
         </div>
     );

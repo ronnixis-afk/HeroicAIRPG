@@ -222,6 +222,7 @@ export type GameAction =
   | { type: 'RESET_WORLD' }
   | { type: 'RESTART_ADVENTURE' }
   | { type: 'COMPLETE_RESTART'; payload: Partial<GameData> }
+  | { type: 'SET_PRE_GAME_STATE'; payload: Partial<GameData> }
   | { type: 'UPDATE_COMBAT_CONFIGURATION'; payload: CombatConfiguration }
   | { type: 'SET_PARTY_HIDDEN'; payload: { isHidden: boolean, score?: number } }
   | { type: 'USE_HEROIC_POINT' };
