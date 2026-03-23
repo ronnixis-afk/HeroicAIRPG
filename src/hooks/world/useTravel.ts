@@ -225,21 +225,21 @@ export const useTravel = (
 
     const processUserInitiatedTravel = useCallback(async (userContent: string, preParsedIntent?: { destination: string, method: string }) => {
         if (!gameData) return;
-        if (!preParsedIntent) {
-            dispatch({ type: 'ADD_MESSAGE', payload: { id: `user-travel-trigger-${Date.now()}`, sender: 'user', mode: 'CHAR', content: userContent } });
-        }
-
+        
+        // 1. Parse Intent (with available landmarks context)
         setIsAiGenerating(true);
         try {
-            const intent = preParsedIntent || await parseTravelIntent(userContent, gameData.messages);
+            const intent = preParsedIntent || await parseTravelIntent(userContent, gameData.messages, gameData);
             if (intent && intent.destination) {
                 const dest = intent.destination;
                 const method = intent.method || "walking";
                 let targetCoords: string | undefined = undefined;
 
                 let isKnownZone = false;
-                let matchedZoneName = dest; // Initialize with original destination
+                let matchedZoneName = dest;
+                const normalizedDest = String(dest || "").toLowerCase().trim();
 
+                // 2. Resolve Cardinal Directions
                 const directionMap: Record<string, { dx: number, dy: number }> = {
                     'north': { dx: 0, dy: -1 }, 'south': { dx: 0, dy: 1 },
                     'east': { dx: 1, dy: 0 }, 'west': { dx: -1, dy: 0 },
@@ -248,19 +248,17 @@ export const useTravel = (
                 };
 
                 const p = parseCoords(gameData.playerCoordinates || '');
-                const normalizedDest = String(dest || "").toLowerCase().trim();
-
                 if (directionMap[normalizedDest] && p) {
                     const move = directionMap[normalizedDest];
                     const nx = p.x + move.dx, ny = p.y + move.dy;
                     targetCoords = `${nx}-${ny}`;
                 }
 
-                if (!targetCoords) {
-                    // Try to fuzzy match against known zones first
+                // 3. Resolve Named Destinations (if no direction matched)
+                if (!targetCoords && normalizedDest.length > 2) {
+                    // Try to match against known zones first
                     const matchedZone = gameData.mapZones?.find(z => {
                         const zName = (z.name || "").toLowerCase();
-                        // Allows passing "I travel to Iron Forge" and matching "The Iron Forge"
                         return zName.includes(normalizedDest) || normalizedDest.includes(zName);
                     });
 
@@ -269,8 +267,12 @@ export const useTravel = (
                         matchedZoneName = matchedZone.name;
                         isKnownZone = true;
                     } else {
-                        // Or against POIs
-                        const matchedPoi = gameData.knowledge?.find(k => k.title?.toLowerCase().includes(normalizedDest));
+                        // Match against POIs using more robust isLocaleMatch
+                        const matchedPoi = gameData.knowledge?.find(k => k.tags?.includes('location') && (
+                            k.title.toLowerCase().includes(normalizedDest) || 
+                            normalizedDest.includes(k.title.toLowerCase())
+                        ));
+                        
                         if (matchedPoi) {
                             targetCoords = matchedPoi.coordinates;
                             matchedZoneName = matchedPoi.title;
@@ -279,19 +281,46 @@ export const useTravel = (
                     }
                 }
 
-                if (!targetCoords) targetCoords = gameData.playerCoordinates || '0-0';
                 setIsAiGenerating(false);
 
-                if (isKnownZone) {
-                    // Interrupt and wait for user confirmation
-                    setPendingTravelConfirmation({
-                        destination: matchedZoneName,
-                        targetCoords,
-                        method
+                // 4. Execution or Feedback Logic
+                if (targetCoords) {
+                    // Check if we are already there
+                    if (targetCoords === gameData.playerCoordinates && isKnownZone) {
+                        dispatch({
+                            type: 'ADD_MESSAGE',
+                            payload: {
+                                id: `sys-travel-same-${Date.now()}`,
+                                sender: 'system',
+                                content: `You are already at or near ${matchedZoneName}.`,
+                                type: 'neutral'
+                            }
+                        });
+                        return;
+                    }
+
+                    if (isKnownZone) {
+                        // Interrupt and wait for user confirmation
+                        setPendingTravelConfirmation({
+                            destination: matchedZoneName,
+                            targetCoords,
+                            method
+                        });
+                    } else {
+                        // Uncharted exploration
+                        await initiateTravel(dest, method, targetCoords);
+                    }
+                } else if (!directionMap[normalizedDest]) {
+                    // Named destination was provided but nothing matched
+                    dispatch({
+                        type: 'ADD_MESSAGE',
+                        payload: {
+                            id: `sys-travel-fail-${Date.now()}`,
+                            sender: 'system',
+                            content: `I couldn't locate "${dest}" on your map. Try traveling in a cardinal direction (e.g., "Go North") or referencing a discovered landmark by its exact name.`,
+                            type: 'neutral'
+                        }
                     });
-                } else {
-                    // Uncharted exploration proceeds without interruption
-                    await initiateTravel(dest, method, targetCoords);
                 }
             } else {
                 setIsAiGenerating(false);
@@ -300,7 +329,7 @@ export const useTravel = (
             console.error("Travel intent parsing failed", e);
             setIsAiGenerating(false);
         }
-    }, [gameData, dispatch, initiateTravel, setIsAiGenerating]);
+    }, [gameData, dispatch, initiateTravel, setIsAiGenerating, setPendingTravelConfirmation]);
 
     return { processArrival, initiateTravel, processUserInitiatedTravel };
 };

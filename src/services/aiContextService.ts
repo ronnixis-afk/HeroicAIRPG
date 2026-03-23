@@ -216,6 +216,20 @@ export const getAvailableSkillsContext = (gameData: GameData): string => {
     return `[AVAILABLE SKILLS (CONFIG: ${config})]:\n${skillListWithKeywords}`;
 };
 
+/**
+ * Summarizes all available map zones and POIs that the player can travel to.
+ */
+export const getTravelDestinationsContext = (gameData: GameData): string => {
+    const zones = (gameData.mapZones || []).map(z => `- ${z.name} (Zone)`);
+    const pois = (gameData.knowledge || [])
+        .filter(k => k.tags?.includes('location'))
+        .map(k => `- ${k.title} (POI in Zone: ${(gameData.mapZones?.find(z => z.coordinates === k.coordinates)?.name || 'Unknown')})`);
+        
+    const combined = [...new Set([...zones, ...pois])];
+    if (combined.length === 0) return 'No known locations discovered yet.';
+    return `[DISCOVERED LOCATIONS]:\n${combined.join('\n')}`;
+};
+
 // 2. THE NARRATOR CONTEXT BUILDER
 export const buildSystemInstruction = (
     gameData: GameData,

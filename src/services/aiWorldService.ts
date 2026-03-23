@@ -403,14 +403,32 @@ export const generateZoneDetails = async (
     return finalDetails as { name: string, description: string, hostility: number, keywords: string[] };
 };
 
+import { getTravelDestinationsContext } from './aiContextService';
+
 /**
  * Parses user travel intent from chat.
  */
-export const parseTravelIntent = async (userContent: string, history: ChatMessage[]): Promise<{ destination: string, method: string }> => {
+export const parseTravelIntent = async (userContent: string, history: ChatMessage[], gameData?: GameData): Promise<{ destination: string, method: string }> => {
     const ai = getAi();
+    
+    // Enrich with context of known places to ensure the AI picks a canonical name if possible
+    const destContext = gameData ? getTravelDestinationsContext(gameData) : '';
+    
     const input = `Analyze the user's travel intent.
-    Current message: "${userContent}"
-    Recent history: ${JSON.stringify(history.slice(-3))}
+    [USER MESSAGE]
+    "${userContent}"
+    
+    [HISTORY (RECENT)]
+    ${JSON.stringify(history.slice(-3))}
+    
+    ${destContext}
+
+    [INSTRUCTIONS]
+    1. Identify the 'destination' and 'method' (e.g., walking, ship, etc.) from the message.
+    2. If the user mentions a location that exists in the [DISCOVERED LOCATIONS] list above, use that exact canonical name as the 'destination'.
+    3. If the user mentions a CARDINAL DIRECTION (north, south, east, west, etc.) ONLY, return that direction as the 'destination'.
+    4. If it's a new uncharted location, return the user's name for it.
+    
     Return JSON: { "destination": "string", "method": "string" }`;
 
     const response = await ai.models.generateContent({

@@ -59,11 +59,14 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
             return { ...state, knowledge: state.knowledge.map(k => k.id === action.payload.id ? action.payload : k) };
 
         case 'ADD_KNOWLEDGE': {
-            const newKn = action.payload.map((k, i) => ({ 
-                ...k, 
-                id: `know-${Date.now()}-${i}`,
-                isNew: true 
-            } as LoreEntry));
+            const existingKeys = new Set(state.knowledge.map(k => `${k.title?.toLowerCase()}|${k.coordinates}`));
+            const newKn = action.payload
+                .filter(k => !existingKeys.has(`${k.title?.toLowerCase()}|${k.coordinates}`))
+                .map((k, i) => ({ 
+                    ...k, 
+                    id: `know-${Date.now()}-${i}`,
+                    isNew: true 
+                } as LoreEntry));
             return { ...state, knowledge: [...state.knowledge, ...newKn] };
         }
 
