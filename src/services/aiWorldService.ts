@@ -6,6 +6,8 @@ import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
 import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
+import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
+import { Ability } from '../types';
 
 /**
  * THE PLOT EXPANDER (Tactical Specialist)
@@ -77,8 +79,17 @@ export const generateWorldPreview = async (
     [INSTRUCTIONS]
     1. SUMMARY: Write exactly 2 paragraphs explaining the current state of the world.
     2. RACES: Generate EXACTLY ${numRaces + 1} major races. One MUST be 'Humans'.
+       - Each race MUST have a unique 'description', 'appearance', and 'qualities'.
+       - description: MAX 30 WORDS. Sentence Case.
+       - appearance: MAX 15 WORDS. Sentence Case.
+       - qualities: MAX 15 WORDS. Sentence Case. (e.g. "Translucent skin", "Can walk on water", "Floats", "Can see in the dark").
     3. FACTIONS: Generate EXACTLY ${numFactions} organizations.
     
+    [CASING RULES]
+    - Use Title Case for ALL names and titles.
+    - Use Sentence Case for descriptions, goals, and other text blocks.
+    - DO NOT use ALL CAPS or ALL UPPERCASE for any portion of the response.
+
     Ensure all elements are internally consistent. If a race belongs to a specific faction, mention it in their description.`;
 
     try {
@@ -102,11 +113,12 @@ export const generateWorldPreview = async (
                                 type: Type.OBJECT,
                                 properties: {
                                     name: { type: Type.STRING },
-                                    description: { type: Type.STRING, description: "A one-sentence physical and cultural overview." },
-                                    personality: { type: Type.STRING, description: "Common behavioral traits (Max 10 words)." },
+                                    description: { type: Type.STRING, description: "Cultural and historical overview (Max 30 words)." },
+                                    appearance: { type: Type.STRING, description: "Physical characteristics (Max 15 words)." },
+                                    qualities: { type: Type.STRING, description: "Unique descriptive traits (Max 15 words)." },
                                     faction: { type: Type.STRING, description: "The name of the primary faction they align with, if any." }
                                 },
-                                required: ["name", "description", "personality"]
+                                required: ["name", "description", "appearance", "qualities"]
                             }
                         },
                         factions: {
@@ -129,9 +141,23 @@ export const generateWorldPreview = async (
         });
 
         const rawData = JSON.parse(cleanJson(response.text || '{}')) || {};
+        const rawRaces = Array.isArray(rawData.races) ? rawData.races : [];
+
+        // Distribute racial traits
+        const shuffledTraits = [...RACIAL_TRAIT_BLUEPRINTS].sort(() => 0.5 - Math.random());
+        const racesWithTraits = rawRaces.map((race: any, index: number) => {
+            const blueprint = shuffledTraits[index % shuffledTraits.length];
+            const racialTrait: Ability = {
+                ...blueprint,
+                id: `racial-${race.name.toLowerCase()}-${Date.now()}`,
+                name: `${race.name} Trait`
+            } as Ability;
+            return { ...race, racialTrait };
+        });
+
         return {
             context: rawData.summary || "A mysterious world awaits.",
-            races: Array.isArray(rawData.races) ? rawData.races : [],
+            races: racesWithTraits,
             factions: Array.isArray(rawData.factions) ? rawData.factions : []
         };
     } catch (e) {

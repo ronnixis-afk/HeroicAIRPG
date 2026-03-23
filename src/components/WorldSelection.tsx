@@ -219,9 +219,10 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             previewData.races.forEach(r => {
                 loreEntries.push({
                     title: r.name,
-                    content: `${r.description}\n\nPersonality: ${r.personality}\nAllegiance: ${r.faction || 'None'}`,
+                    content: `${r.description}\n\nAppearance: ${r.appearance}\nQualities: ${r.qualities}\nAllegiance: ${r.faction || 'None'}`,
                     tags: ['race', 'npc'],
-                    keywords: r.keywords || []
+                    keywords: r.keywords || [],
+                    racialTrait: r.racialTrait
                 });
             });
 
@@ -503,9 +504,19 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 {previewData.races.map((race, i) => (
                                     <div key={i} className="bg-brand-surface/40 p-4 rounded-xl border border-brand-primary/50">
                                         <h5 className="font-bold text-brand-text text-sm mb-1">{race.name}</h5>
-                                        <p className="text-body-sm text-brand-text-muted leading-relaxed italic">{race.description}</p>
-                                        <div className="mt-2">
+                                        <p className="text-body-sm text-brand-text mb-2 leading-relaxed italic">{race.description}</p>
+                                        <div className="grid grid-cols-1 gap-2 mb-3">
+                                            <p className="text-[11px]"><span className="font-bold text-brand-text-muted">Appearance:</span> <span className="text-brand-text">{race.appearance}</span></p>
+                                            <p className="text-[11px]"><span className="font-bold text-brand-text-muted">Qualities:</span> <span className="text-brand-text">{race.qualities}</span></p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 items-center">
                                             <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/5 px-2 py-0.5 rounded border border-brand-accent/10">Faction: {race.faction || 'Neutral'}</span>
+                                            {race.racialTrait && (
+                                                <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/20 px-2 py-0.5 rounded border border-brand-primary/30 flex items-center gap-1">
+                                                    <Icon name="sparkles" className="w-2.5 h-2.5" />
+                                                    {race.racialTrait.name} (+2 {race.racialTrait.buffs?.[0]?.abilityName})
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

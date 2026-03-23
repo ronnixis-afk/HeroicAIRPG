@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useContext, useEffect } from 'react';
+import { RACIAL_TRAIT_BLUEPRINTS } from '../../constants/racialTraits';
 import { GameDataContext } from '../../context/GameDataContext';
 import { useUI } from '../../context/UIContext';
 import { Icon } from '../Icon';
@@ -68,17 +69,17 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     const isPreGame = gameData?.story?.length === 0;
 
     const availableRaces = useMemo(() => {
-        if (!gameData?.world) return [{ name: 'Human', description: 'Ambitious and versatile.' }];
+        if (!gameData?.world) return [{ name: 'Human', description: 'Ambitious and versatile.', racialTrait: undefined }];
         const racesFromLore = gameData.world
             .filter(l => l.tags?.includes('race'))
-            .map(l => ({ name: l.title, description: l.content }))
+            .map(l => ({ name: l.title, description: l.content, racialTrait: l.racialTrait }))
             .sort((a, b) => a.name.localeCompare(b.name));
 
         return racesFromLore.length > 0 ? racesFromLore : [
-            { name: 'Human', description: 'Ambitious and versatile.' },
-            { name: 'Elf', description: 'Graceful and long-lived.' },
-            { name: 'Dwarf', description: 'Stout and resilient.' },
-            { name: 'Orc', description: 'Strong and fierce.' }
+            { name: 'Human', description: 'Ambitious and versatile.', racialTrait: { ...RACIAL_TRAIT_BLUEPRINTS[5], id: 'racial-human', name: 'Human Trait' } },
+            { name: 'Elf', description: 'Graceful and long-lived.', racialTrait: { ...RACIAL_TRAIT_BLUEPRINTS[1], id: 'racial-elf', name: 'Elf Trait' } },
+            { name: 'Dwarf', description: 'Stout and resilient.', racialTrait: { ...RACIAL_TRAIT_BLUEPRINTS[2], id: 'racial-dwarf', name: 'Dwarf Trait' } },
+            { name: 'Orc', description: 'Strong and fierce.', racialTrait: { ...RACIAL_TRAIT_BLUEPRINTS[0], id: 'racial-orc', name: 'Orc Trait' } }
         ];
     }, [gameData?.world]);
 
@@ -250,15 +251,38 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setWeavingMessage('Enrolling ally...');
         setCreationProgress({ isActive: true, step: "Enrolling candidate...", progress: 10 });
         try {
+            const raceObj = availableRaces.find(r => r.name === recruit.race);
+            const racialTrait = raceObj?.racialTrait;
+
             const traitSkillsList = [...recruit.bgSeeds, ...recruit.genSeeds].flatMap((t: any) => t.buffs || []).filter((b: any) => b.type === 'skill').map((b: any) => b.skillName).filter((s: any): s is string => !!s);
-            const wovenData = await weaveHero(gameData, { name: recruit.name, gender: recruit.gender, race: recruit.race, backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), generalTraits: recruit.genSeeds.map((t: any) => t.name), combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, guaranteedSkills: traitSkillsList }, true);
-            const allAbilities: Ability[] = [...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
+            const wovenData = await weaveHero(gameData as any, { 
+                name: recruit.name, 
+                gender: recruit.gender, 
+                race: recruit.race, 
+                backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), 
+                generalTraits: recruit.genSeeds.map((t: any) => t.name), 
+                combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
+                guaranteedSkills: traitSkillsList,
+                racialTrait
+            }, true);
+            
+            const allAbilities: Ability[] = [
+                ...(racialTrait ? [{ ...racialTrait, id: `racial-rec-${Date.now()}` }] : []),
+                ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), 
+                ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), 
+                { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }
+            ];
+
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
             const baseCharData = { id: `comp-${Date.now()}`, name: recruit.name, gender: recruit.gender, race: recruit.race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: recruit.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level: playerLevel, experiencePoints: getXpForLevel(playerLevel) };
             await integrateCharacter(new Companion(baseCharData), true, isPreGame);
             onClose();
-        } catch (e) { console.error(e); setIsWeaving(false); setCreationProgress({ isActive: false, step: '', progress: 0 }); }
+        } catch (e) { 
+            console.error("Recruit selection failed", e); 
+            setIsWeaving(false); 
+            setCreationProgress({ isActive: false, step: '', progress: 0 }); 
+        }
     };
 
     const handleConfirmManual = async () => {
@@ -268,6 +292,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setWeavingMessage(loadingMsg);
         setCreationProgress({ isActive: true, step: loadingMsg, progress: 10 });
         try {
+            const selectedRaceObj = availableRaces.find(r => r.name === race);
+            const racialTrait = selectedRaceObj?.racialTrait;
+
             const wovenData = await weaveHero(gameData, {
                 name,
                 gender: isShip ? 'Unspecified' : gender,
@@ -278,11 +305,16 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 customBackground: customBackground, // Pass custom background to AI
                 abilityScores: abilityScores, // Pass template stats if available
                 savingThrows: savingThrows || undefined,
-                guaranteedSkills: [...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName).filter((s): s is string => !!s)
+                guaranteedSkills: [...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName).filter((s): s is string => !!s),
+                racialTrait
             }, isCompanion);
 
-
-            const allAbilities: Ability[] = [...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
+            const allAbilities: Ability[] = [
+                ...(racialTrait ? [{ ...racialTrait, id: `racial-${Date.now()}` }] : []),
+                ...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
+                ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })),
+                { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }
+            ];
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
 
@@ -290,7 +322,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const finalChar = type === 'player' ? new PlayerCharacter(baseCharData) : new Companion(baseCharData);
             await integrateCharacter(finalChar, isCompanion, isPreGame);
             onClose();
-        } catch (e) { console.error("Hero creation failed", e); setIsWeaving(false); setCreationProgress({ isActive: false, step: '', progress: 0 }); }
+        } catch (e) { 
+            console.error("Hero creation failed", e); 
+            setIsWeaving(false); 
+            setCreationProgress({ isActive: false, step: '', progress: 0 }); 
+        }
     };
 
     const toggleTrait = (trait: LibraryTrait, set: LibraryTrait[], setter: (val: LibraryTrait[]) => void, limit: number) => {

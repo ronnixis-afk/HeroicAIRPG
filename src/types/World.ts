@@ -2,6 +2,7 @@
 // types/World.ts
 
 import { AbilityScoreName, AbilityEffect, StatusEffect, RollMode, CombatActorSize, ArchetypeName, SkillName } from './Core';
+import { Ability } from './Characters';
 
 // Fix: Added LocationUpdate interface to support structured AI spatial transition responses
 export interface LocationUpdate {
@@ -83,6 +84,9 @@ export interface LoreEntry {
 
   // POI Memory System: Tracks events that happened at this location
   memories?: POIMemory[];
+
+  // Racial Trait: Ability score bonus trait for races
+  racialTrait?: Ability;
 }
 
 export interface GalleryEntry {
@@ -390,9 +394,11 @@ export interface ActorSuggestion {
 export interface Race {
   name: string;
   description: string;
-  personality: string;
+  appearance: string;
+  qualities: string;
   faction?: string;
   keywords?: string[];
+  racialTrait?: Ability;
 }
 
 export interface Faction {

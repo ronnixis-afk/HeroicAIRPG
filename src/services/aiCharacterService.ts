@@ -186,7 +186,8 @@ export const weaveHero = async (
         customBackground?: string,
         abilityScores?: any,
         savingThrows?: AbilityScoreName[],
-        guaranteedSkills?: string[]
+        guaranteedSkills?: string[],
+        racialTrait?: Ability
     },
 
     isCompanion: boolean = false
@@ -225,6 +226,7 @@ export const weaveHero = async (
     Name: ${selections.name}
     Gender: ${selections.gender}
     Race: ${selections.race}
+    ${selections.racialTrait ? `Racial Trait: ${selections.racialTrait.name} (${selections.racialTrait.description})` : ''}
     Background Seeds: ${selections.backgroundTraits.join(', ')}
     General Qualities: ${selections.generalTraits.join(', ')}
     Chosen Combat Blueprint: ${selections.combatAbility.name} - ${selections.combatAbility.description}
