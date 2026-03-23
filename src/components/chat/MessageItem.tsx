@@ -9,19 +9,35 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
     const sections = text.split('\n---\n');
     return (
         <>
-            {sections.map((section, index) => (
-                <React.Fragment key={index}>
-                    {index > 0 && <hr className="my-3 border-brand-primary/50" />}
-                    <div className="whitespace-pre-wrap my-1 leading-relaxed text-body-base">
-                        {section.trim().split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
-                            if (!part) return null;
-                            if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
-                            if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
-                            return <EntityLinker key={partIndex} text={part} />;
-                        })}
-                    </div>
-                </React.Fragment>
-            ))}
+            {sections.map((section, sectionIdx) => {
+                const lines = section.trim().split('\n');
+                return (
+                    <React.Fragment key={sectionIdx}>
+                        {sectionIdx > 0 && <hr className="my-3 border-brand-primary/50" />}
+                        <div className="leading-relaxed text-body-base">
+                            {lines.map((line, lineIdx) => {
+                                const trimmedLine = line.trim();
+                                if (!trimmedLine) return <div key={lineIdx} className="h-2" />;
+
+                                // Detect dialogue line: starts with bold or italic patterns e.g. **Name** or *Name*
+                                const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
+                                
+                                return (
+                                    <div key={lineIdx} className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'}`}>
+                                        {isDialogue && <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />}
+                                        {line.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
+                                            if (!part) return null;
+                                            if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
+                                            if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
+                                            return <EntityLinker key={partIndex} text={part} />;
+                                        })}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </React.Fragment>
+                );
+            })}
         </>
     );
 };
