@@ -122,7 +122,19 @@ export const generateNarrativeResponse = async (
                         type: Type.STRING, 
                         description: "Paragraph 1: Strict structure. S1-2: Sensory/Mood block. [DOUBLE NEWLINE]. S3: Player ('You') Dialogue. S4-7: Companion/NPC Dialogue. All dialogue on individual lines in italics (*Name: dialogue*)." 
                     },
-                    paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." }
+                    paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." },
+                    characterReactions: {
+                        type: Type.ARRAY,
+                        description: "Internal metadata for character sentiment towards the player's action.",
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                name: { type: Type.STRING, description: "First name of the character responding." },
+                                sentiment: { type: Type.STRING, enum: ["like", "dislike", "neutral"], description: "Whether they approve or disapprove of the action based on their alignment." }
+                            },
+                            required: ["name", "sentiment"]
+                        }
+                    }
                 },
                 required: ["paragraph1", "paragraph2"]
             },
@@ -268,6 +280,7 @@ The player has expended a HEROIC POINT this round.
     **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
     - Paragraph 1: Structured Narrative. S1-2: Sensory block. DOUBLE NEWLINE. S3: Player direct speech (as 'You'). S4-7: Companion/NPC direct speech (each on a new line). Dialogue MUST be italicized (*Name: dialogue*).
     - Paragraph 2: Environmental Hook & Agency. Describe 2-3 POIs + status/threat hint.
+    - [REACTION SCHEMA]: Populate 'characterReactions' for each speaking character. The sentiment ('like' or 'dislike') MUST NOT appear in the text, but the DIALOGUE in Paragraph 1 must reflect this sentiment through tone, content, and attitude.
     - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
     ${previously}

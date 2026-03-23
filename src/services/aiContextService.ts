@@ -251,7 +251,8 @@ Every 'narration' field MUST be exactly two paragraphs and address the player in
 - Sentence 5: Companion/NPC 2 dialogue. Format as (*Name: Direct speech*) on its own line.
 - Sentence 6: Companion/NPC 3 dialogue. Format as (*Name: Direct speech*) on its own line.
 - Sentence 7: Companion/NPC 4 dialogue. Format as (*Name: Direct speech*) on its own line.
-- DIALOGUE RULES: Each dialogue line MUST be on its own line. Italics (*) must be used for all dialogue. Ensure the text remains the same visual color as the rest of the paragraph.
+- CHARACTER REACTIONS: Populate the 'characterReactions' array for each character who speaks. Determine if they 'like' or 'dislike' the player's action based on their alignment and personality.
+- DIALOGUE RULES: Each dialogue line MUST be on its own line. Italics (*) must be used for all dialogue. Ensure the text remains the same visual color as the rest of the paragraph. The dialogue content and tone MUST reflect the character's reaction sentiment (approval/disapproval) without explicitly mentioning 'like' or 'dislike'.
 `;
 
     const activeCompanions = (gameData.companions || []).filter(c => c.isInParty !== false);
