@@ -120,7 +120,7 @@ export const generateNarrativeResponse = async (
                 properties: {
                     paragraph1: { 
                         type: Type.STRING, 
-                        description: "Paragraph 1: Strict structure. S1-2: Sensory block. S3-7: Character Dialogue, EACH ON A NEW LINE, formatted in italics (*Name: dialogue*)." 
+                        description: "Paragraph 1: Strict structure. S1-2: Sensory/Mood block. [DOUBLE NEWLINE]. S3: Player ('You') Dialogue. S4-7: Companion/NPC Dialogue. All dialogue on individual lines in italics (*Name: dialogue*)." 
                     },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." }
                 },
@@ -266,7 +266,7 @@ The player has expended a HEROIC POINT this round.
     ${heroicDirective}
     **STRICT FORMATTING RULE**: Plain text only. NO bolding or italics. EXCEPTION: Character dialogue lines in Paragraph 1 MUST be italicized (*Name: dialogue*).
     **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
-    - Paragraph 1: Structured Narrative. S1-2: Sensory block. S3-7: Character dialogue (Max 4 others), EACH ON A NEW LINE, formatted $ *Name: "Direct speech"* $.
+    - Paragraph 1: Structured Narrative. S1-2: Sensory block. DOUBLE NEWLINE. S3: Player direct speech (as 'You'). S4-7: Companion/NPC direct speech (each on a new line). Dialogue MUST be italicized (*Name: dialogue*).
     - Paragraph 2: Environmental Hook & Agency. Describe 2-3 POIs + status/threat hint.
     - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 

@@ -16,7 +16,7 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
                         {section.trim().split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
                             if (!part) return null;
                             if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
-                            if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-accent/90"><EntityLinker text={part.slice(1, -1)} /></em>;
+                            if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
                             return <EntityLinker key={partIndex} text={part} />;
                         })}
                     </div>

@@ -244,13 +244,14 @@ You are a legendary TTRPG Storyteller and Game Master. Your goal is to create vi
 Every 'narration' field MUST be exactly two paragraphs and address the player in the second person ('You'). No more, no less.
 
 **Paragraph 1 — The Structured Narrative:**
-- Sentence 1 & 2: Sensory Consequence & Mood. Narrate the immediate impact of the player's last action with two sensory details and establish the atmosphere.
-- Sentence 3: Player dialogue. Format as (*Name: Direct speech*) on its own line.
+- Sentence 1 & 2: Sensory Consequence & Mood block.
+- DOUBLE NEWLINE: Insert two newlines after Sentence 2 before starting the dialogue section.
+- Sentence 3: Player dialogue. Format as (*You: Direct speech*) on its own line.
 - Sentence 4: Companion/NPC 1 dialogue. Format as (*Name: Direct speech*) on its own line.
 - Sentence 5: Companion/NPC 2 dialogue. Format as (*Name: Direct speech*) on its own line.
 - Sentence 6: Companion/NPC 3 dialogue. Format as (*Name: Direct speech*) on its own line.
 - Sentence 7: Companion/NPC 4 dialogue. Format as (*Name: Direct speech*) on its own line.
-- DIALOGUE RULES: Each dialogue sentence MUST be on a new line (separated from the sensory paragraph). Use the character's first name. Format in italics using asterisks (*). Pull from character profiles to ensure dialogue is unique and rich.
+- DIALOGUE RULES: Each dialogue line MUST be on its own line. Italics (*) must be used for all dialogue. Ensure the text remains the same visual color as the rest of the paragraph.
 `;
 
     const activeCompanions = (gameData.companions || []).filter(c => c.isInParty !== false);
