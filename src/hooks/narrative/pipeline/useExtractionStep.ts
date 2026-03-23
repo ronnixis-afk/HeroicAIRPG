@@ -26,9 +26,20 @@ export const useExtractionStep = (
         forcedCoordinates?: string
     ) => {
         const registryNpcNames = (gameData.npcs ?? []).map(n => n.name ? String(n.name).toLowerCase().trim() : 'unknown');
+        const companionNames = (gameData.companions ?? []).flatMap(c => {
+            if (!c.name) return [];
+            const names = [c.name.toLowerCase().trim()];
+            // If it's a multi-word name, also exclude the first word (usually first name)
+            const firstName = c.name.split(' ')[0].toLowerCase().trim();
+            if (firstName && firstName !== names[0]) names.push(firstName);
+            return names;
+        });
+
+        const playerFirstName = gameData.playerCharacter.name.split(' ')[0].toLowerCase().trim();
         const excludeList = [
-            gameData.playerCharacter.name,
-            ...(gameData.companions ?? []).map(c => c.name),
+            gameData.playerCharacter.name.toLowerCase().trim(),
+            playerFirstName,
+            ...companionNames,
             ...registryNpcNames
         ].filter((n): n is string => !!n);
 

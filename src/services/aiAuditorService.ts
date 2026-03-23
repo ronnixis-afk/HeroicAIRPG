@@ -59,6 +59,9 @@ export const auditSystemState = async (
     Gm Narrative: "${narrativeResult}"
     Party Stealth Status: ${isHidden ? "Hidden (Enemies are unaware)" : "Visible (Enemies can see you)"}
 
+    [MANDATORY NAME EXCLUSION LIST]
+    ${excludeList.join(', ')} (DO NOT create new characters with these names)
+
     [Valid Ancestries]
     The only established races in this world are: ${raceListStr}.
 
@@ -78,7 +81,8 @@ export const auditSystemState = async (
 
     3. **Npc Discovery**: ${flags?.socialChange ? `Identify new characters introduced. 
        - **Strict Ancestry Rule**: You must select the "race" field from the [Valid Ancestries] list.
-       - **Essential Status Rule**: Set "is_essential" as true for unique named characters.` : "SKIP: No new characters were introduced."}
+       - **Essential Status Rule**: Set "is_essential" as true for unique named characters.
+       - **NAME PROTECTION**: You MUST NOT extract any character whose name matches a name in the [MANDATORY NAME EXCLUSION LIST]. If a character in the narrative has one of these names, it is the player or an existing companion—ignore them for discovery.` : "SKIP: No new characters were introduced."}
 
     4. **Engagement Check (Critical)**: ${flags?.engagementChange ? `Determine if the scene has escalated to active combat.
        - set "activeEngagement" to true only if:
@@ -117,10 +121,19 @@ export const auditSystemState = async (
         
         const result = JSON.parse(cleanJson(response.text || "{}"));
         
+        // --- SYSTEM-MANAGED VALIDATION (Code-side filtering) ---
+        const normalizedExclusions = new Set(excludeList.map(name => name.toLowerCase().trim()));
+        const filteredNewNPCs = (result.newNPCs || []).filter((newNpc: any) => {
+            if (!newNpc.name) return false;
+            const npcNameLower = newNpc.name.toLowerCase().trim();
+            // Reject if name exactly matches or is a protected substring (to handle 'Nik' vs 'Nikolas')
+            return !normalizedExclusions.has(npcNameLower);
+        });
+
         return {
             currentLocale: result.currentLocale || gameData.currentLocale || '',
             timePassedMinutes: Number(result.timePassedMinutes) || 0,
-            newNPCs: result.newNPCs || [],
+            newNPCs: filteredNewNPCs,
             npcUpdates: result.npcUpdates || [],
             activeEngagement: !!result.activeEngagement,
             missedRollRequests: result.missedRolls || [],
