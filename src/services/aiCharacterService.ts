@@ -2,7 +2,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
-import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS } from '../types';
+import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS, AbilityScoreName } from '../types';
 import { STORY_HOOKS } from '../constants/storyHooks';
 
 /**
@@ -183,8 +183,12 @@ export const weaveHero = async (
         backgroundTraits: string[],
         generalTraits: string[],
         combatAbility: Ability,
-        customBackground?: string
+        customBackground?: string,
+        abilityScores?: any,
+        savingThrows?: AbilityScoreName[],
+        guaranteedSkills?: string[]
     },
+
     isCompanion: boolean = false
 ): Promise<{
     profession: string,
@@ -234,11 +238,14 @@ export const weaveHero = async (
        Max 100 words.
     4. personality: Provide a list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
     5. keywords: Provide 4-6 thematic keywords.
-    6. abilityScores: Use a "Standard Array" logic (15, 14, 13, 12, 10, 8) distributed to fit the profession.
+    6. abilityScores: ${selections.abilityScores ? `Use these EXACT ability scores: ${JSON.stringify(selections.abilityScores)}` : `Use a "Standard Array" logic (16, 14, 14, 12, 10, 8) distributed to fit the profession.`}
+
     7. skills: You MUST allocate proficiency to at least 4 skills.
-       - IMPORTANT: Any skills mentioned in the "Background Seeds", "General Qualities", or "Custom Background Context" MUST be marked as proficient.
+       ${selections.guaranteedSkills && selections.guaranteedSkills.length > 0 ? `- IMPORTANT: These skills are provided by the character's traits and MUST be marked as proficient: [${selections.guaranteedSkills.join(', ')}].` : ''}
+       - Any skills mentioned in the "Background Seeds", "General Qualities", or "Custom Background Context" MUST also be marked as proficient.
        - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].
-    8. savingThrows: Choose exactly 2 Saving Throw proficiencies.
+    8. savingThrows: ${selections.savingThrows ? `Use these EXACT saving throw proficiencies: ${selections.savingThrows.join(', ')}` : "Choose exactly 2 Saving Throw proficiencies."}
+
     9. skinnedAbility: Transform the Combat Blueprint into a unique thematic signature power for ${selections.name}. 
        - Rename it evocatively.
        - Rewrite the description to match the flavor.
@@ -279,6 +286,15 @@ export const weaveHero = async (
         });
 
         const result = JSON.parse(cleanJson(response.text || "{}"));
+        
+        const convertSavesToMap = (saves: AbilityScoreName[]) => ({
+            strength: { proficient: saves.includes('strength') },
+            dexterity: { proficient: saves.includes('dexterity') },
+            constitution: { proficient: saves.includes('constitution') },
+            intelligence: { proficient: saves.includes('intelligence') },
+            wisdom: { proficient: saves.includes('wisdom') },
+            charisma: { proficient: saves.includes('charisma') }
+        });
 
         return {
             profession: result.profession || "Adventurer",
@@ -286,8 +302,8 @@ export const weaveHero = async (
             background: result.background || "A traveler with a mysterious past.",
             personality: result.personality || "Quiet, determined.",
             keywords: Array.isArray(result.keywords) ? result.keywords : ["brave", "adventurer"],
-            abilityScores: result.abilityScores || { strength: { score: 10 }, dexterity: { score: 10 }, constitution: { score: 10 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
-            savingThrows: result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
+            abilityScores: selections.abilityScores || result.abilityScores || { strength: { score: 10 }, dexterity: { score: 10 }, constitution: { score: 10 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
+            savingThrows: selections.savingThrows ? convertSavesToMap(selections.savingThrows) : (result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } }),
             skills: result.skills || {},
             skinnedAbility: {
                 ...selections.combatAbility,

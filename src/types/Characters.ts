@@ -157,6 +157,10 @@ export class PlayerCharacter {
         this.isSentient = data.isSentient;
         this.alignment = data.alignment || { lawChaos: 0, goodEvil: 0 };
         this.combatLoadout = data.combatLoadout || { primaryAbilityId: '', secondaryAbilityId: '' };
+
+        // SYSTEMIC FIX: Automatically scale all abilities to the character's level upon instantiation.
+        // This ensures that traits are never "stuck" at Level 1 values.
+        this.scaleAllAbilities();
     }
 
     /**
@@ -345,6 +349,36 @@ export class PlayerCharacter {
             used: usedTraits,
             available: Math.max(0, total - usedTraits)
         };
+    }
+
+    /**
+     * Updates an ability's DC and dice formulas to match the character's current level 
+     * and ability scores.
+     */
+    scaleAbility(ability: Ability, inventory?: Inventory): void {
+        if (!ability.effect) return;
+
+        const standardDC = this.getStandardAbilityDC(inventory);
+        const standardDice = this.getStandardEffectFormula(ability.effect, inventory);
+
+        // Update DC
+        if (ability.effect.dc !== undefined) {
+            ability.effect.dc = standardDC;
+        }
+
+        // Update Damage/Heal formulas
+        if (ability.effect.type === 'Damage') {
+            ability.effect.damageDice = standardDice;
+        } else if (ability.effect.type === 'Heal') {
+            ability.effect.healDice = standardDice;
+        }
+    }
+
+    /**
+     * Scales all character abilities to current level.
+     */
+    scaleAllAbilities(inventory?: Inventory): void {
+        (this.abilities || []).forEach(ability => this.scaleAbility(ability, inventory));
     }
 }
 

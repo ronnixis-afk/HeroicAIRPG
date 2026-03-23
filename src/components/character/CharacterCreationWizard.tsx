@@ -6,7 +6,7 @@ import { Icon } from '../Icon';
 import Modal from '../Modal';
 import { TRAIT_LIBRARY, LibraryTrait } from '../../utils/traitLibrary';
 import { CharacterTemplate } from '../../utils/templateRegistry';
-import { Ability, PlayerCharacter, Companion, SKILL_NAMES } from '../../types';
+import { Ability, PlayerCharacter, Companion, SKILL_NAMES, AbilityScoreName } from '../../types';
 import { weaveHero, generateRecruitSkins } from '../../services/aiCharacterService';
 import { getXPForLevel, getXPForLevel as getXpForLevel } from '../../utils/mechanics';
 import { getBuffTag } from '../../utils/itemModifiers';
@@ -57,6 +57,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
     const [isShip, setIsShip] = useState(false);
     const [customBackground, setCustomBackground] = useState('');
+    const [abilityScores, setAbilityScores] = useState<any>(null);
+    const [savingThrows, setSavingThrows] = useState<AbilityScoreName[] | null>(null);
+
 
     const isCompanion = type === 'companion';
     const activeSteps = isShip ? SHIP_STEPS : (isCompanion ? COMPANION_STEPS : PLAYER_STEPS);
@@ -102,8 +105,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             setIsWeaving(false);
             setIsShip(false);
             setCustomBackground('');
+            setAbilityScores(null);
+            setSavingThrows(null);
         }
     }, [isOpen, type, playerLevel]);
+
 
     const libraryTraits = useMemo(() => TRAIT_LIBRARY.filter(t => !t.requiredConfig || t.requiredConfig === skillConfig), [skillConfig]);
 
@@ -174,8 +180,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         // Prefill background context with all template traits
         const traitSummary = [...bg, ...gen].map(t => t.name).join(', ');
         setCustomBackground(traitSummary);
-
+        setAbilityScores(template.abilityScores);
+        setSavingThrows(template.savingThrows || null);
         setStep(isShip ? 4 : 6);
+
     };
 
     const handleSelectCustom = () => {
@@ -184,7 +192,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setGeneralTraits([]);
         setCombatAbility(null);
         setCustomBackground('');
+        setAbilityScores(null);
+        setSavingThrows(null);
         setStep(isShip ? 2 : 3);
+
     };
 
     const handleGenerateRecruits = async () => {
@@ -239,7 +250,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setWeavingMessage('Enrolling ally...');
         setCreationProgress({ isActive: true, step: "Enrolling candidate...", progress: 10 });
         try {
-            const wovenData = await weaveHero(gameData, { name: recruit.name, gender: recruit.gender, race: recruit.race, backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), generalTraits: recruit.genSeeds.map((t: any) => t.name), combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability }, true);
+            const traitSkillsList = [...recruit.bgSeeds, ...recruit.genSeeds].flatMap((t: any) => t.buffs || []).filter((b: any) => b.type === 'skill').map((b: any) => b.skillName).filter((s: any): s is string => !!s);
+            const wovenData = await weaveHero(gameData, { name: recruit.name, gender: recruit.gender, race: recruit.race, backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), generalTraits: recruit.genSeeds.map((t: any) => t.name), combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, guaranteedSkills: traitSkillsList }, true);
             const allAbilities: Ability[] = [...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
@@ -263,8 +275,12 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 backgroundTraits: backgroundTraits.map(t => t.name),
                 generalTraits: generalTraits.map(t => t.name),
                 combatAbility: { ...combatAbility, id: 'blueprint' } as Ability,
-                customBackground: customBackground // Pass custom background to AI
+                customBackground: customBackground, // Pass custom background to AI
+                abilityScores: abilityScores, // Pass template stats if available
+                savingThrows: savingThrows || undefined,
+                guaranteedSkills: [...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName).filter((s): s is string => !!s)
             }, isCompanion);
+
 
             const allAbilities: Ability[] = [...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })), ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })), { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }];
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));

@@ -213,6 +213,11 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             isLevelUpTrait: true // Phase 2/3: Consume point
         };
 
+        // SYSTEMIC FIX: Ensure the new trait is scaled to the character's level immediately
+        if (character && 'scaleAbility' in character) {
+            (character as PlayerCharacter).scaleAbility(newAbility, inventory);
+        }
+
         const newAbilities = [...character.abilities, newAbility];
         onChange(['abilities'], newAbilities);
         setIsLibraryOpen(false);

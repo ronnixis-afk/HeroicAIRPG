@@ -4,6 +4,51 @@
 export const ABILITY_SCORES = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'] as const;
 export type AbilityScoreName = typeof ABILITY_SCORES[number];
 
+export type RoleName = 
+    | 'Tank' 
+    | 'DPS_Str' | 'DPS_Dex' | 'DPS_Int' 
+    | 'Healer' 
+    | 'Support' 
+    | 'Specialist' 
+    | 'Social' 
+    | 'Balanced_Str' | 'Balanced_Dex' | 'Balanced_Cha' 
+    | 'Utility' | 'Archetype';
+
+export const ROLE_STAT_DISTRIBUTIONS: Record<RoleName, Record<AbilityScoreName, number>> = {
+    'Tank': { strength: 14, dexterity: 14, constitution: 16, intelligence: 8, wisdom: 12, charisma: 10 },
+    'DPS_Str': { strength: 16, dexterity: 14, constitution: 14, intelligence: 10, wisdom: 12, charisma: 8 },
+    'DPS_Dex': { strength: 14, dexterity: 16, constitution: 14, intelligence: 10, wisdom: 12, charisma: 8 },
+    'DPS_Int': { strength: 8, dexterity: 14, constitution: 14, intelligence: 16, wisdom: 12, charisma: 10 },
+    'Healer': { strength: 8, dexterity: 12, constitution: 14, intelligence: 10, wisdom: 16, charisma: 14 },
+    'Support': { strength: 8, dexterity: 14, constitution: 14, intelligence: 12, wisdom: 10, charisma: 16 },
+    'Specialist': { strength: 10, dexterity: 14, constitution: 12, intelligence: 16, wisdom: 14, charisma: 8 },
+    'Social': { strength: 8, dexterity: 12, constitution: 10, intelligence: 14, wisdom: 14, charisma: 16 },
+    'Balanced_Str': { strength: 16, dexterity: 14, constitution: 14, intelligence: 10, wisdom: 12, charisma: 8 },
+    'Balanced_Dex': { strength: 14, dexterity: 16, constitution: 14, intelligence: 10, wisdom: 12, charisma: 8 },
+    'Balanced_Cha': { strength: 14, dexterity: 10, constitution: 14, intelligence: 8, wisdom: 12, charisma: 16 },
+    'Utility': { strength: 10, dexterity: 16, constitution: 14, intelligence: 14, wisdom: 12, charisma: 8 },
+    'Archetype': { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 }
+};
+
+export const ROLE_SAVE_PROFICIENCIES: Record<RoleName, AbilityScoreName[]> = {
+    'Tank': ['constitution', 'strength'],
+    'DPS_Str': ['strength', 'constitution'],
+    'DPS_Dex': ['dexterity', 'strength'],
+    'DPS_Int': ['intelligence', 'dexterity'],
+    'Healer': ['wisdom', 'charisma'],
+    'Support': ['charisma', 'wisdom'],
+    'Specialist': ['intelligence', 'wisdom'],
+    'Social': ['charisma', 'intelligence'],
+    'Balanced_Str': ['strength', 'constitution'],
+    'Balanced_Dex': ['dexterity', 'constitution'],
+    'Balanced_Cha': ['charisma', 'strength'],
+    'Utility': ['dexterity', 'intelligence'],
+    'Archetype': ['strength', 'dexterity']
+};
+
+
+
+
 export type SkillConfiguration = 'Fantasy' | 'Modern' | 'Sci-Fi' | 'Magitech';
 
 export interface SkillDefinition {
