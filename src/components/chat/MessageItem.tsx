@@ -70,10 +70,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                                 });
                                                 window.dispatchEvent(event);
                                             }}
-                                            className="px-4 h-8 text-xs font-bold rounded-full transition-all flex items-center gap-2 text-white bg-[#1C1C1E] border border-white/10 hover:bg-[#2C2C2E] shadow-sm transform hover:scale-[1.02] active:scale-95"
+                                            className="px-4 h-8 text-xs font-bold rounded-full transition-all flex items-center gap-2 text-white bg-[#1C1C1E] hover:bg-[#2C2C2E] shadow-sm transform hover:scale-[1.02] active:scale-95"
                                         >
                                             {iconFile && (
-                                                <img src={iconFile} alt={opt.alignment} className="w-7 h-7 object-contain drop-shadow-md" />
+                                                <img src={iconFile} alt={opt.alignment} className="w-[25px] h-[25px] object-contain drop-shadow-md" />
                                             )}
                                             {opt.label}
                                         </button>

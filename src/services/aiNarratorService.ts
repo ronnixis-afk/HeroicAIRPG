@@ -118,7 +118,7 @@ export const generateNarrativeResponse = async (
             narration: {
                 type: Type.OBJECT,
                 properties: {
-                    paragraph1: { type: Type.STRING, description: "Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + banter)." },
+                    paragraph1: { type: Type.STRING, description: "Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + actual character dialogue). If NPCs are present, include internal banter as DIRECT SPEECH that reflects their personalities, NOT a description of banter occurring." },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." }
                 },
                 required: ["paragraph1", "paragraph2"]
@@ -142,11 +142,11 @@ export const generateNarrativeResponse = async (
             },
             alignmentOptions: {
                 type: Type.ARRAY,
-                description: "4 logical suggestions for the next action based on the chat context. Each button action represents alignment actions. Max 5 words per label.",
+                description: "4 logical suggestions for the next action. Each button action MUST strongly represent an absolute moral alignment (Good, Evil, Lawful, Chaotic). Labels must be concise, punchy, and reflect 'maximum commitment' to that alignment.",
                 items: {
                     type: Type.OBJECT,
                     properties: {
-                        label: { type: Type.STRING, description: "Max 5 words. Use Title Case." },
+                        label: { type: Type.STRING, description: "Max 5 words. Use Title Case. Must be an action-oriented phrase representing the specified alignment at its most extreme/purest form." },
                         alignment: { type: Type.STRING, description: "Good | Evil | Lawful | Chaotic" }
                     },
                     required: ["label", "alignment"]
@@ -263,7 +263,7 @@ The player has expended a HEROIC POINT this round.
     ${heroicDirective}
     **STRICT FORMATTING RULE**: Plain text only. NO bolding or italics.
     **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
-    - Paragraph 1: Resolve the combat actions with visceral sensory impact and mood.
+    - Paragraph 1: Resolve the combat actions with visceral sensory impact and mood. If NPCs are present, weave in actual direct dialogue/banter that reflects their unique personalities and reactions.
     - Paragraph 2: Describe the resulting environmental state and the immediate tactical hook for the player.
     - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
@@ -274,7 +274,7 @@ The player has expended a HEROIC POINT this round.
     2. DO NOT use numbers. 
     3. Translate results (Hit, Miss, Defeated) into action descriptions.
     4. The Dice Truth: You are forbidden from changing any mechanical outcome provided.
-    5. ALIGNMENT ACTIONS: Provide 4 logical next steps for the player based on their moral alignment (Good, Evil, Lawful, Chaotic).
+    5. ALIGNMENT ACTIONS: Provide 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
     
     [Output Schema (Json)]:
     {
