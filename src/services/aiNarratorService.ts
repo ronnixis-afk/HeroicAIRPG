@@ -118,7 +118,7 @@ export const generateNarrativeResponse = async (
             narration: {
                 type: Type.OBJECT,
                 properties: {
-                    paragraph1: { type: Type.STRING, description: "Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + actual character dialogue). If NPCs are present, include internal banter as DIRECT SPEECH that reflects their personalities, NOT a description of banter occurring." },
+                    paragraph1: { type: Type.STRING, description: "Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + actual character/companion/npc dialogue & banter that reflects their personalities)." },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." }
                 },
                 required: ["paragraph1", "paragraph2"]
@@ -263,7 +263,7 @@ The player has expended a HEROIC POINT this round.
     ${heroicDirective}
     **STRICT FORMATTING RULE**: Plain text only. NO bolding or italics.
     **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
-    - Paragraph 1: Resolve the combat actions with visceral sensory impact and mood. If NPCs are present, weave in actual direct dialogue/banter that reflects their unique personalities and reactions.
+    - Paragraph 1: Sensory Consequence (impact + 2 sensory details + mood + actual character/companion/npc dialogue & banter that reflects their personalities).
     - Paragraph 2: Describe the resulting environmental state and the immediate tactical hook for the player.
     - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
