@@ -245,12 +245,12 @@ Every 'narration' field MUST be exactly two paragraphs and address the player in
 
 **Paragraph 1 — The Structured Narrative:**
 - Sentence 1 & 2: Sensory Consequence & Mood. Narrate the immediate impact of the player's last action with two sensory details and establish the atmosphere.
-- Sentence 3: Player dialogue (Direct Speech).
-- Sentence 4: Companion/NPC 1 dialogue (Direct Speech).
-- Sentence 5: Companion/NPC 2 dialogue (Direct Speech).
-- Sentence 6: Companion/NPC 3 dialogue (Direct Speech).
-- Sentence 7: Companion/NPC 4 dialogue (Direct Speech).
-- DIALOGUE RULES: Pull from character sheets and NPC descriptions to ensure dialogue is unique, rich, and reflects their specific personalities. If fewer than 4 companions/NPCs are present, focus on those available.
+- Sentence 3: Player dialogue. Format as (*Name: Direct speech*) on its own line.
+- Sentence 4: Companion/NPC 1 dialogue. Format as (*Name: Direct speech*) on its own line.
+- Sentence 5: Companion/NPC 2 dialogue. Format as (*Name: Direct speech*) on its own line.
+- Sentence 6: Companion/NPC 3 dialogue. Format as (*Name: Direct speech*) on its own line.
+- Sentence 7: Companion/NPC 4 dialogue. Format as (*Name: Direct speech*) on its own line.
+- DIALOGUE RULES: Each dialogue sentence MUST be on a new line (separated from the sensory paragraph). Use the character's first name. Format in italics using asterisks (*). Pull from character profiles to ensure dialogue is unique and rich.
 `;
 
     const activeCompanions = (gameData.companions || []).filter(c => c.isInParty !== false);
@@ -447,7 +447,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
    - Use 'staying' if no movement occurred.
    - Use 'returning' if visiting a previously established POI from the [LOCAL POINTS OF INTEREST] list, and use its exact title.
    - Use 'exploring_new' ONLY if moving to an entirely unestablished or new location.
-2. PLAIN TEXT ONLY: No Markdown (**, *) in 'narration'.
+2. PLAIN TEXT ONLY: No Markdown (**, #, etc.) in 'narration'. EXCEPTION: You MUST use italics (*) for character dialogue lines as specified in the [MANDATORY PROSE STRUCTURE].
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.
 5. QUEST GENERATION (LOCATION DISCOVERY ONLY): You are STRICTLY FORBIDDEN from generating or proposing new missions or tasks UNLESS the party has just transitioned to a NEW Point of Interest or Location. Only in the event of Location Discovery may you create a single objective focused on uncovering the secrets or resolving the threat of that specific site. Provide a 'title' and a 'content' that explicitly defines the completion condition.
