@@ -81,18 +81,23 @@ const CombatConsensusPanel: React.FC = () => {
                 messages: [...gameData.messages, systemPrompt]
             });
 
+            const narrationText = aiRes.narration && typeof aiRes.narration === 'object'
+                ? `${aiRes.narration.paragraph1}\n\n${aiRes.narration.paragraph2}`
+                : (typeof aiRes.narration === 'string' ? aiRes.narration : (aiRes.narrative || "The situation resolve itself..."));
+
             const aiMessage: ChatMessage = {
                 id: `ai-deesc-${Date.now()}`,
                 sender: 'ai',
-                content: aiRes.narrative,
-                rolls: finalRolls
+                content: narrationText,
+                rolls: finalRolls,
+                dialogues: aiRes.narration?.dialogues
             };
             setMessages(prev => [...prev, aiMessage]);
 
             if (aiRes.updates) applyAiUpdates(aiRes.updates);
 
             if (!isSuccess) {
-                executeInitiationPipeline(aiRes.narrative, currentSuggestions);
+                executeInitiationPipeline(narrationText, currentSuggestions);
             }
         } catch (e) {
             console.error("De-escalation failed", e);

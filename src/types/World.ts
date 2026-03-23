@@ -199,6 +199,12 @@ export interface AlignmentOption {
   alignment: 'Good' | 'Evil' | 'Lawful' | 'Chaotic';
 }
 
+export interface DialogueLine {
+  actorName: string;
+  content: string;
+  isAlignmentReaction?: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'user' | 'ai' | 'system';
@@ -217,6 +223,7 @@ export interface ChatMessage {
     attackerName: string;
     nextCombatantName: string;
   };
+  dialogues?: DialogueLine[]; // Structured dialogue lines for consistent formatting
 }
 
 export interface DiceRollRequest {

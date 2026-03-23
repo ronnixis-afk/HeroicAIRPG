@@ -120,9 +120,22 @@ export const generateNarrativeResponse = async (
                 properties: {
                     paragraph1: { 
                         type: Type.STRING, 
-                        description: "Paragraph 1: Strict structure. S1-2: Sensory/Mood block. [DOUBLE NEWLINE]. S3: Player ('You') Dialogue. S4-7: Companion/NPC Dialogue. Format dialogues as: **Name**: *Dialogue content* on individual lines." 
+                        description: "Paragraph 1: Sensory & Atmospheric summary. Focus on the immediate environment and resulting mood. NO dialogue here." 
                     },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." },
+                    dialogues: {
+                        type: Type.ARRAY,
+                        description: "Structured dialogue lines. Max 1 dialogue per actor. DO NOT include player ('You') dialogue.",
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                actorName: { type: Type.STRING, description: "Name of the character speaking. Title Case." },
+                                content: { type: Type.STRING, description: "The dialogue spoken by the actor. Sentence Case." },
+                                isAlignmentReaction: { type: Type.BOOLEAN, description: "True if this dialogue is a direct reaction to the player's moral alignment choice." }
+                            },
+                            required: ["actorName", "content"]
+                        }
+                    },
                     characterReactions: {
                         type: Type.ARRAY,
                         description: "Internal metadata for character sentiment towards the player's action.",
@@ -276,12 +289,16 @@ The player has expended a HEROIC POINT this round.
     [Tone]: ${tone}. ${isMature ? 'Brutal and visceral realism is encouraged.' : 'Focus on heroic feats.'}
     [GM Directives]: ${gmDirectives}
     ${heroicDirective}
-    **STRICT FORMATTING RULE**: Plain text only. NO bolding or italics. EXCEPTION: Character dialogue lines in Paragraph 1 MUST use bold names and italicized speech (**Name**: *Speech content*).
-    **PROSE STRUCTURE**: You MUST write exactly two paragraphs. 
-    - Paragraph 1: Structured Narrative. S1-2: Sensory block. DOUBLE NEWLINE. S3: Player direct speech (as '**You**'). S4-7: Companion/NPC direct speech (each on a new line). Format dialogues precisely as: **Name**: *Speech content*.
-    - Paragraph 2: Environmental Hook & Agency. Describe 2-3 POIs + status/threat hint.
-    - [REACTION SCHEMA]: Populate 'characterReactions' for each speaking character. The sentiment ('like' or 'dislike') MUST NOT appear in the text, but the DIALOGUE in Paragraph 1 must reflect this sentiment through tone, content, and attitude.
-    - PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
+    **Formatting Rules**: 
+    1. Plain text only in paragraphs. NO bolding or italics in narration bodies.
+    2. Write exactly two paragraphs (paragraph1 and paragraph2).
+    3. NO dialogues in 'paragraph1'. Use the structured 'dialogues' array instead.
+    4. **SYSTEM DIALOGUE PROTOCOL**: 
+       - Max 1 dialogue entry per actor. 
+       - DO NOT include player ('You') dialogue.
+       - Each entry must be in the 'dialogues' array.
+       - PRIORITY: Favor NPCs who have a distinct reaction to the player's specific alignment action.
+    5. PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
     ${previously}
     [Actor Logic]: ${partyOverview || 'Standard party.'}
@@ -295,8 +312,11 @@ The player has expended a HEROIC POINT this round.
     [Output Schema (Json)]:
     {
       "narration": {
-          "paragraph1": "string",
-          "paragraph2": "string"
+          "paragraph1": "Atmospheric sensory summary. NO dialogue.",
+          "paragraph2": "Environmental Hook & Agency (2-3 POIs + status/threat hint).",
+          "dialogues": [
+            { "actorName": "string", "content": "string", "isAlignmentReaction": boolean }
+          ]
       },
       "turnSummary": "string",
       "adventure_brief": "string",

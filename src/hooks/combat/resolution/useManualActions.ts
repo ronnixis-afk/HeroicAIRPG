@@ -212,7 +212,8 @@ export const useManualActions = (
                         content: narrationText, 
                         combatInfo: { attackerName: actorInstance.name, nextCombatantName: 'Next' }, 
                         rolls: rolls,
-                        alignmentOptions: aiRes.alignmentOptions
+                        alignmentOptions: aiRes.alignmentOptions,
+                        dialogues: aiRes.narration?.dialogues
                     } 
                 });
                 dispatch({ type: 'ADVANCE_TURN' });

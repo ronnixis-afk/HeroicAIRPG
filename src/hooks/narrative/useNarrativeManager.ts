@@ -157,6 +157,7 @@ export const useNarrativeManager = (
                 location: aiResponse.location_update?.site_name || gameData.currentLocale,
                 rolls: resolution.diceRolls || [],
                 alignmentOptions: Array.isArray(aiResponse.alignmentOptions) ? aiResponse.alignmentOptions : undefined,
+                dialogues: aiResponse.narration?.dialogues,
                 mode: isOoc ? 'OOC' : 'CHAR',
                 usage: { ...(aiResponse.usage || {}), latencyMs: performance.now() - startTime } as any
             };

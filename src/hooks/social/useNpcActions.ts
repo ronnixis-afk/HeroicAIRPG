@@ -199,12 +199,17 @@ export const useNpcActions = (
                     'gemini-3.1-flash-lite-preview'
                 );
 
+                const narrationText = aiRes.narration && typeof aiRes.narration === 'object'
+                    ? `${aiRes.narration.paragraph1}\n\n${aiRes.narration.paragraph2}`
+                    : (typeof aiRes.narration === 'string' ? aiRes.narration : `${npc.name} agrees to join you!`);
+
                 const aiMessage: ChatMessage = {
                     id: `ai-invite-res-${Date.now()}`,
                     sender: 'ai',
-                    content: aiRes.narration || `${npc.name} agrees to join you!`,
+                    content: narrationText,
                     location: gameData.currentLocale || 'Current Area',
-                    rolls: rolls
+                    rolls: rolls,
+                    dialogues: aiRes.narration?.dialogues
                 };
                 dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
             }

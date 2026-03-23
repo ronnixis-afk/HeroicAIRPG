@@ -109,6 +109,11 @@ export interface AIResponse {
   narration: {
     paragraph1: string;
     paragraph2: string;
+    dialogues?: {
+      actorName: string;
+      content: string;
+      isAlignmentReaction?: boolean;
+    }[];
   };
   turnSummary: string;
   adventure_brief: string;

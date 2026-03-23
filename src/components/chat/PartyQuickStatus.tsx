@@ -176,11 +176,16 @@ export const PartyQuickStatus: React.FC = () => {
 
             const aiResponse = await generateResponse({ id: 'stealth-prompt', sender: 'system', content: prompt } as ChatMessage, gameData);
             const finalUpdates = getMechanicalUpdates(aiResponse.updates || {});
+            const narrationText = aiResponse.narration && typeof aiResponse.narration === 'object'
+                ? `${aiResponse.narration.paragraph1}\n\n${aiResponse.narration.paragraph2}`
+                : (typeof aiResponse.narration === 'string' ? aiResponse.narration : (finalSuccess ? "The party vanishes into the shadows." : "A misstep betrays your position."));
+
             const aiMessage: ChatMessage = {
                 id: `ai-stealth-${Date.now()}`,
                 sender: 'ai',
-                content: aiResponse.narration || (finalSuccess ? "The party vanishes into the shadows." : "A misstep betrays your position."),
-                rolls: allRolls
+                content: narrationText,
+                rolls: allRolls,
+                dialogues: aiResponse.narration?.dialogues
             };
             await applyAiUpdates(finalUpdates, aiMessage);
         } catch (e) {

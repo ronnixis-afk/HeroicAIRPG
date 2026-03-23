@@ -4,7 +4,7 @@ import { EntityLinker } from './EntityLinker';
 import { DiceTray } from './DiceTray';
 import { Icon } from '../Icon';
 
-const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
+const FormattedMessage: React.FC<{ text: string; dialogues?: any[] }> = ({ text, dialogues }) => {
     if (!text || typeof text !== 'string') return null;
     const sections = text.split('\n---\n');
     return (
@@ -19,7 +19,7 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
                                 const trimmedLine = line.trim();
                                 if (!trimmedLine) return <div key={lineIdx} className="h-2" />;
 
-                                // Detect dialogue line: starts with bold or italic patterns e.g. **Name** or *Name*
+                                // Detect legacy dialogue line (still support it for old messages)
                                 const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
                                 
                                 return (
@@ -38,6 +38,25 @@ const FormattedMessage: React.FC<{ text: string }> = ({ text }) => {
                     </React.Fragment>
                 );
             })}
+            
+            {dialogues && dialogues.length > 0 && (
+                <div className="mt-4 space-y-4">
+                    {dialogues.map((d, idx) => (
+                        <div key={idx} className="animate-fade-in">
+                             <div className="mb-3 pt-3 relative">
+                                <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
+                                <strong className="font-bold text-brand-text italic block mb-1">
+                                    <EntityLinker text={d.actorName} />
+                                </strong>
+                                <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
+                                    <EntityLinker text={d.content} />
+                                </span>
+                            </div>
+                            {idx < dialogues.length - 1 && <hr className="my-4 border-brand-primary/5 border-dashed" />}
+                        </div>
+                    ))}
+                </div>
+            )}
         </>
     );
 };
@@ -65,7 +84,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                     </div>
                 ) : (
                     <div className={msg.mode === 'OOC' ? 'text-brand-text-muted/80' : 'text-brand-text'}>
-                        <FormattedMessage text={msg.content || ''} />
+                        <FormattedMessage text={msg.content || ''} dialogues={msg.dialogues} />
                         {msg.rolls && <DiceTray rolls={msg.rolls} />}
 
                         {showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (

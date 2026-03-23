@@ -289,7 +289,8 @@ export const useNarrativeRound = (
                     sender: 'ai', 
                     content: narrationText, 
                     rolls: allRolls,
-                    alignmentOptions: cinematicRes.alignmentOptions 
+                    alignmentOptions: cinematicRes.alignmentOptions,
+                    dialogues: cinematicRes.narration?.dialogues
                 } 
             });
 
