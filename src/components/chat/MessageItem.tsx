@@ -6,57 +6,78 @@ import { Icon } from '../Icon';
 
 const FormattedMessage: React.FC<{ text: string; dialogues?: any[] }> = ({ text, dialogues }) => {
     if (!text || typeof text !== 'string') return null;
+
+    const renderTextContent = (content: string) => {
+        const lines = content.trim().split('\n');
+        return (
+            <div className="leading-relaxed text-body-base">
+                {lines.map((line, lineIdx) => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return <div key={lineIdx} className="h-2" />;
+                    const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
+                    return (
+                        <div key={lineIdx} className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'}`}>
+                            {isDialogue && <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />}
+                            {line.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
+                                if (!part) return null;
+                                if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
+                                if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
+                                return <EntityLinker key={partIndex} text={part} />;
+                            })}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    const dialoguesContent = dialogues && dialogues.length > 0 ? (
+        <div className="my-6 space-y-4">
+            {dialogues.map((d, idx) => (
+                <div key={idx} className="animate-fade-in">
+                    <div className="mb-3 pt-3 relative">
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
+                        <strong className="font-bold text-brand-text italic block mb-1">
+                            <EntityLinker text={d.actorName} />
+                        </strong>
+                        <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
+                            <EntityLinker text={d.content} />
+                        </span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    ) : null;
+
+    // Sandwich Logic: If we have multiple paragraphs and dialogues, put dialogues between P1 and P2
+    const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+    
+    if (dialoguesContent && paragraphs.length >= 2) {
+        return (
+            <>
+                {renderTextContent(paragraphs[0])}
+                {dialoguesContent}
+                {paragraphs.slice(1).map((para, i) => (
+                    <React.Fragment key={i}>
+                        <div className="h-4" />
+                        {renderTextContent(para)}
+                    </React.Fragment>
+                ))}
+            </>
+        );
+    }
+
+    // Default Fallback / Single Paragraph / Horizontal Rule Sections
     const sections = text.split('\n---\n');
     return (
         <>
-            {sections.map((section, sectionIdx) => {
-                const lines = section.trim().split('\n');
-                return (
-                    <React.Fragment key={sectionIdx}>
-                        {sectionIdx > 0 && <hr className="my-3 border-brand-primary/50" />}
-                        <div className="leading-relaxed text-body-base">
-                            {lines.map((line, lineIdx) => {
-                                const trimmedLine = line.trim();
-                                if (!trimmedLine) return <div key={lineIdx} className="h-2" />;
-
-                                // Detect legacy dialogue line (still support it for old messages)
-                                const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
-                                
-                                return (
-                                    <div key={lineIdx} className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'}`}>
-                                        {isDialogue && <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />}
-                                        {line.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
-                                            if (!part) return null;
-                                            if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
-                                            if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
-                                            return <EntityLinker key={partIndex} text={part} />;
-                                        })}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </React.Fragment>
-                );
-            })}
-            
-            {dialogues && dialogues.length > 0 && (
-                <div className="mt-4 space-y-4">
-                    {dialogues.map((d, idx) => (
-                        <div key={idx} className="animate-fade-in">
-                             <div className="mb-3 pt-3 relative">
-                                <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
-                                <strong className="font-bold text-brand-text italic block mb-1">
-                                    <EntityLinker text={d.actorName} />
-                                </strong>
-                                <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
-                                    <EntityLinker text={d.content} />
-                                </span>
-                            </div>
-                            {idx < dialogues.length - 1 && <hr className="my-4 border-brand-primary/5 border-dashed" />}
-                        </div>
-                    ))}
-                </div>
-            )}
+            {sections.map((section, sectionIdx) => (
+                <React.Fragment key={sectionIdx}>
+                    {sectionIdx > 0 && <hr className="my-3 border-brand-primary/50" />}
+                    {renderTextContent(section)}
+                </React.Fragment>
+            ))}
+            {dialoguesContent}
         </>
     );
 };
