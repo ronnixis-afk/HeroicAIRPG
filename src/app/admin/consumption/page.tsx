@@ -17,9 +17,17 @@ export default function AdminConsumptionPage() {
                 return;
             }
             
-            const email = user.emailAddresses[0]?.emailAddress || '';
-            const tier = resolveUserTier(email, user.publicMetadata?.tier as string);
-            setIsAuthorized(tier === 'super_admin');
+            // Fetch the authoritative tier from the server (which has access to SUPER_ADMIN_EMAILS)
+            fetch('/api/user-tier')
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data?.tier) {
+                        setIsAuthorized(data.tier === 'super_admin');
+                    } else {
+                        setIsAuthorized(false);
+                    }
+                })
+                .catch(() => setIsAuthorized(false));
         }
     }, [isLoaded, user]);
 
