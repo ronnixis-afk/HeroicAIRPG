@@ -199,7 +199,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
     }, [isLatest, isUser, totalChars, isRecentlyCreated]);
 
     return (
-        <div className="flex flex-col items-start animate-fade-in w-full">
+        <div id={`msg-${msg.id}`} className="flex flex-col items-start animate-fade-in w-full scroll-mt-6">
             <div className={`relative group w-full ${isUser
                 ? "bg-transparent border-none max-w-[83%]"
                 : "bg-transparent max-w-[83%] font-normal mb-1"

@@ -696,9 +696,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
             <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} title={previewData ? "World Preview" : "Forging a New World"}>
                 {isGenerating ? (
-                    <div className="p-6">
-                        <CharacterCreationLoader title="Forging World..." step={generationStep} progress={progress} />
-                    </div>
+                    <CharacterCreationLoader title="Forging World..." step={generationStep} progress={progress} />
                 ) : previewData ? (
                     <div className="space-y-8 animate-page py-2">
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">

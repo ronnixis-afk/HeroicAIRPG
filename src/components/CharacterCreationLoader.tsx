@@ -9,7 +9,7 @@ interface CharacterCreationLoaderProps {
 
 const CharacterCreationLoader: React.FC<CharacterCreationLoaderProps> = ({ title = "Processing...", step, progress }) => {
     return (
-        <div className="flex flex-col items-center justify-center p-6 bg-brand-surface rounded-2xl w-full border border-brand-primary shadow-inner">
+        <div className="flex flex-col items-center justify-center w-full bg-transparent p-0">
             <h3 className="text-brand-accent mb-4">{title}</h3>
             <div className="w-full bg-brand-primary rounded-full h-2 mb-3 overflow-hidden border border-brand-surface shadow-inner">
                 <div 

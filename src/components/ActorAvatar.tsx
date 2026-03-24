@@ -61,7 +61,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
     const tempRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
     const staminaRatio = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
 
-    const isDead = (a.status === 'Dead' || currentHp <= 0);
+    const isDead = (a.status?.toLowerCase() === 'dead' || currentHp <= 0);
     const isLowHp = !isDead && hpRatio <= 0.25;
     const hasStatus = (a.statusEffects?.length || 0) > 0;
     const initials = a.name ? a.name.slice(0, 2).toUpperCase() : '??';
@@ -113,8 +113,8 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                 )}
 
                 {isDead && (
-                    <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
-                        <Icon name="close" className="w-3/5 h-3/5 text-brand-danger opacity-50 drop-shadow-md" />
+                    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                        <Icon name="close" className="w-3/4 h-3/4 text-brand-danger drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                     </div>
                 )}
 

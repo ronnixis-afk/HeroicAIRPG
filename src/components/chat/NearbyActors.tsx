@@ -34,7 +34,7 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
             const npcPOI = npc.currentPOI || "";
             const isAtLocale = isLocaleMatch(npcPOI, currentLocale || "");
             const inParty = npc.companionId || partyNames.has(npc.name?.toLowerCase() || '');
-            const isPresent = npc.status !== 'Dead' || !npc.isBodyCleared;
+            const isPresent = npc.status?.toLowerCase() !== 'dead' || !npc.isBodyCleared;
             return isAtLocale && !inParty && !npc.isShip && isPresent;
         });
     }, [gameData.npcs, gameData.currentLocale, activeCompanions]);

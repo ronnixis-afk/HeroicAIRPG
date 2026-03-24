@@ -20,13 +20,11 @@ const CombatInitiationModal: React.FC<CombatInitiationModalProps> = ({
       hideHeader
       maxWidth="sm"
     >
-      <div className="py-8">
-        <CharacterCreationLoader 
-          title="Combat Initiating" 
-          step={step} 
-          progress={progress} 
-        />
-      </div>
+      <CharacterCreationLoader 
+        title="Combat Initiating" 
+        step={step} 
+        progress={progress} 
+      />
     </Modal>
   );
 };

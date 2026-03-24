@@ -41,6 +41,7 @@ const ChatView: React.FC = () => {
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const isInitialRender = useRef(true);
+    const lastUserMessageId = useRef<string | null>(null);
 
     // Audio Logic for auto-play in Hands-Free
     const { speak, playingMessageId } = useAudioPlayback(
@@ -119,12 +120,42 @@ const ChatView: React.FC = () => {
 
     useEffect(() => {
         const timer = setTimeout(() => {
+            if (!processedMessages || processedMessages.length === 0) return;
+
+            // Find the latest user message in the current set
+            const lastUserMsg = [...processedMessages].reverse().find(m => m.sender === 'user') as any;
+
+            // Handle Initial Render: Always anchor to the bottom of the chat history
+            if (isInitialRender.current) {
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({ behavior: 'auto', block: 'end' });
+                }
+                if (lastUserMsg) {
+                    lastUserMessageId.current = lastUserMsg.id;
+                }
+                isInitialRender.current = false;
+                return;
+            }
+            
+            // Check if this is a NEW user message we haven't scrolled to top yet
+            if (lastUserMsg && lastUserMsg.id !== lastUserMessageId.current) {
+                const element = document.getElementById(`msg-${lastUserMsg.id}`);
+                if (element) {
+                    // Force the user message to the top of the screen/container
+                    element.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    lastUserMessageId.current = lastUserMsg.id;
+                    return; // Skip standard bottom scroll for this specific update
+                }
+            }
+
             if (chatEndRef.current) {
                 chatEndRef.current.scrollIntoView({
-                    behavior: isInitialRender.current ? 'auto' : 'smooth',
+                    behavior: 'smooth',
                     block: 'end'
                 });
-                isInitialRender.current = false;
             }
         }, 100);
         return () => clearTimeout(timer);
