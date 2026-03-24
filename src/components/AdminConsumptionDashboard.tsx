@@ -65,25 +65,25 @@ const AdminConsumptionDashboard: React.FC = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0c1114] text-brand-text p-4 md:p-8 inter">
-            <div className="max-w-6xl mx-auto">
+        <div className="h-screen bg-[#0c1114] text-brand-text overflow-y-auto inter custom-scroll">
+            <div className="max-w-6xl mx-auto p-4 md:p-8">
+                <button 
+                    onClick={() => window.location.href = '/'}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-surface border border-brand-primary/20 hover:bg-brand-primary/20 transition-all text-xs font-bold text-brand-text-muted hover:text-brand-text mb-6"
+                >
+                    <Icon name="arrowLeft" className="w-3.5 h-3.5" />
+                    Back
+                </button>
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-brand-text mb-2">Admin Consumption Dashboard</h1>
+                        <h1 className="text-4xl font-black text-brand-text mb-2 tracking-tight">Admin Consumption Dashboard</h1>
                         <p className="text-brand-text-muted text-sm">Monitor AI Usage and Real-Time Infrastructure Costs</p>
                     </div>
-                    <button 
-                        onClick={() => window.location.href = '/'}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-primary/10 border border-brand-primary/20 hover:bg-brand-primary/20 transition-all text-sm font-bold"
-                    >
-                        <Icon name="arrowLeft" className="w-4 h-4" />
-                        Back to World Selection
-                    </button>
                 </div>
 
                 {/* Scorecards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 gap-4 mb-8">
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-4 text-brand-accent">
                             <Icon name="currencyCoins" className="w-5 h-5" />
