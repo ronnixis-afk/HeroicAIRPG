@@ -203,7 +203,7 @@ const CharacterView: React.FC = () => {
                     <PageHeader 
                         title="Heroes" 
                         subtitle="Manage stats, abilities, and details for your party." 
-                        titleAs="h5"                    />
+                        titleAs="h3"                    />
 
                     <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-2'}`}>
                         <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-1 pb-1 gap-4 justify-around`}>
