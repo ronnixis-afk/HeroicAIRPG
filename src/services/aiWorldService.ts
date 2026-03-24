@@ -42,6 +42,7 @@ export const expandEncounterPlot = async (matrix: EncounterMatrixResult, worldSu
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
+            type: 'Tactical Brief',
             model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
@@ -95,6 +96,7 @@ export const generateWorldPreview = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
+            type: 'World Building',
             model: AI_MODELS.DEFAULT,
             contents: prompt,
             config: {
@@ -240,6 +242,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     let popAttempts = 0;
     while (popAttempts <= 2) {
         const popRes = await ai.models.generateContent({
+            type: 'World Building',
             model: 'gemini-3.1-flash-lite-preview',
             contents: popPrompt + (popAttempts > 0 ? `\n\n[RETRY ATTEMPT ${popAttempts}] The previous title was too similar to existing locations: [${existingNames.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
             config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
@@ -277,6 +280,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
 
     while (attempts <= maxRetries) {
         const response = await ai.models.generateContent({
+            type: 'World Building',
             model: 'gemini-3.1-flash-lite-preview',
             contents: input + (attempts > 0 ? `\n\n[RETRY ATTEMPT ${attempts}] Some generated titles were too similar to existing locations: [${updatedExistingNames.join(', ')}]. Choose DIFFERENT, DISTINCT nouns or adjectives.` : ''),
             config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }

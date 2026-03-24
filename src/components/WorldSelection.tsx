@@ -79,6 +79,11 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+    // Consumption & Credits State
+    const [credits, setCredits] = useState({ currentCredits: 0, maxCredits: 1000 });
+    const [consumptionData, setConsumptionData] = useState<{ logs: any[], stats: any } | null>(null);
+    const [isLoadingConsumption, setIsLoadingConsumption] = useState(false);
+
     const fetchWorlds = async () => {
         setIsLoadingWorlds(true);
         try {
@@ -94,11 +99,17 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     useEffect(() => {
         fetchWorlds();
         handleFetchCloudSaves();
+        fetchCredits();
 
         // Fetch user tier
         fetch('/api/user-tier')
             .then(res => res.ok ? res.json() : null)
-            .then(data => { if (data?.tier) setUserTier(data.tier); })
+            .then(data => {
+                if (data?.tier) {
+                    setUserTier(data.tier);
+                    if (data.tier === 'super_admin') fetchConsumption();
+                }
+            })
             .catch(() => { })
             .finally(() => setIsTierLoading(false));
 
@@ -108,6 +119,33 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         const day = String(now.getDate()).padStart(2, '0');
         setStartingDate(`${year}-${month}-${day}`);
     }, []);
+
+    const fetchCredits = async () => {
+        try {
+            const res = await fetch('/api/user/credits');
+            if (res.ok) {
+                const data = await res.json();
+                setCredits(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch credits:", e);
+        }
+    };
+
+    const fetchConsumption = async () => {
+        setIsLoadingConsumption(true);
+        try {
+            const res = await fetch('/api/admin/consumption');
+            if (res.ok) {
+                const data = await res.json();
+                setConsumptionData(data);
+            }
+        } catch (e) {
+            console.error("Failed to fetch consumption:", e);
+        } finally {
+            setIsLoadingConsumption(false);
+        }
+    };
 
     const handleFetchCloudSaves = async () => {
         setIsLoadingCloud(true);
@@ -380,24 +418,176 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
             {/* User Account Drawer Overlay */}
             <div className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsDrawerOpen(false)}></div>
-            <div className={`fixed inset-y-0 right-0 w-80 bg-brand-surface border-l border-brand-primary/30 z-50 transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex items-center justify-between p-6 border-b border-brand-primary/20">
-                    <h2 className="text-lg font-bold text-brand-text">Hero Profile</h2>
-                    <button onClick={() => setIsDrawerOpen(false)} className="text-brand-text-muted hover:text-brand-accent transition-colors p-1">
-                        <Icon name="x" className="w-6 h-6" />
+            <div className={`fixed inset-y-0 right-0 w-80 bg-[#0c1114] border-l border-brand-primary/30 z-50 transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-brand-primary/10 bg-brand-surface/30">
+                    <div className="flex flex-col">
+                        <h2 className="text-lg font-bold text-brand-text mb-0.5 inter">User Menu</h2>
+                        <span className="text-[10px] text-brand-accent font-black tracking-widest opacity-80 inter">Profile & Settings</span>
+                    </div>
+                    <button onClick={() => setIsDrawerOpen(false)} className="text-brand-text-muted hover:text-brand-accent transition-colors p-2 rounded-full hover:bg-brand-primary/10">
+                        <Icon name="close" className="w-5 h-5" />
                     </button>
                 </div>
-                <div className="p-6 flex flex-col items-center gap-4">
-                    <div className="p-1 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-primary/20 border border-brand-accent/30 shadow-lg shadow-brand-accent/10">
-                        <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-16 h-16 rounded-full" } }} />
+
+                <div className="flex-1 overflow-y-auto custom-scroll pb-10">
+                    {/* 1. Credits & Usage */}
+                    <div className="p-6 pb-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
+                                <span className="text-xs font-bold text-brand-text tracking-wide inter">Credits & Usage</span>
+                            </div>
+                            <button className="text-[10px] font-black text-brand-accent px-2 py-1 rounded bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
+                                Buy More
+                            </button>
+                        </div>
+                        <div className="w-full h-2 bg-brand-primary/20 rounded-full overflow-hidden border border-brand-primary/10 shadow-inner">
+                            <div className="h-full bg-gradient-to-r from-brand-accent to-brand-primary transition-all duration-1000" style={{ width: `${(credits.currentCredits / credits.maxCredits) * 100}%` }}></div>
+                        </div>
+                        <div className="flex justify-between mt-2">
+                            <span className="text-[10px] text-brand-text-muted font-medium inter">Remaining Credits</span>
+                            <span className="text-[10px] text-brand-text font-black inter">{credits.currentCredits} / {credits.maxCredits}</span>
+                        </div>
                     </div>
-                    <div className="text-center">
-                        <span className={`text-xs font-black ${tierInfo.color} mb-1 block`}>{isTierLoading ? 'Syncing...' : tierInfo.label}</span>
-                        <span className="text-sm font-medium text-brand-text break-all">{userEmail || 'Loading...'}</span>
+
+                    <div className="px-3 space-y-1">
+                        {/* 2. Subscription & Billing */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                <Icon name="shield" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Subscription & Billing</span>
+                                <span className="text-[10px] text-brand-text-muted inter">Manage Plans & Payment</span>
+                            </div>
+                        </button>
+
+                        {/* 3. Account Profile */}
+                        <div className="w-full flex flex-col gap-3 p-3 rounded-xl bg-brand-primary/5 border border-brand-primary/10 mt-2 mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-primary/20 border border-brand-accent/30 shadow-lg">
+                                    <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-10 h-10 rounded-full" } }} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-brand-text inter">{userEmail?.split('@')[0] || 'User'}</span>
+                                    <span className={`text-[10px] font-black ${tierInfo.color} inter tracking-tighter`}>{tierInfo.label}</span>
+                                </div>
+                                <button className="ml-auto p-2 text-brand-text-muted hover:text-brand-accent transition-colors">
+                                    <Icon name="edit" className="w-4 h-4" />
+                                </button>
+                            </div>
+                            <p className="text-[11px] text-brand-text-muted leading-relaxed px-1 font-medium italic inter opacity-60">"Your profile summary and bio display here."</p>
+                        </div>
+
+                        <div className="h-px bg-brand-primary/10 mx-3 my-2" />
+
+                        {/* 4. Characters & Worlds */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-brand-accent/10 flex items-center justify-center text-brand-accent group-hover:scale-110 transition-transform">
+                                <Icon name="boxDrawer" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Characters & Worlds</span>
+                                <span className="text-[10px] text-brand-text-muted inter">Manage Saved RPG Assets</span>
+                            </div>
+                        </button>
+
+                        {/* 5. Achievements & Stats */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
+                                <Icon name="starFill" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Achievements & Stats</span>
+                                <span className="text-[10px] text-brand-text-muted inter">Progress Tracking & Records</span>
+                            </div>
+                        </button>
+
+                        {/* 6. App & AI Settings */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform">
+                                <Icon name="settings" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Settings</span>
+                                <span className="text-[10px] text-brand-text-muted inter">Preferences & AI Generation</span>
+                            </div>
+                        </button>
+
+                        {/* 7. Community & Friends */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                <Icon name="users" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Community & Friends</span>
+                                <span className="text-[10px] text-brand-text-muted inter">Connect with Other Players</span>
+                            </div>
+                        </button>
+
+                        {/* 8. Help & Support */}
+                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                            <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+                                <Icon name="info" className="w-4 h-4" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-brand-text inter">Help & Support</span>
+                                <span className="text-[10px] text-brand-text-muted inter">FAQs, Discord & Feedback</span>
+                            </div>
+                        </button>
+
+                        {/* Super Admin Consumption Section */}
+                        {userTier === 'super_admin' && (
+                            <div className="mt-6 pt-6 border-t border-brand-primary/20">
+                                <div className="flex items-center justify-between px-3 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <Icon name="currencyCoins" className="w-4 h-4 text-brand-accent" />
+                                        <span className="text-xs font-bold text-brand-text inter">Admin Consumption</span>
+                                    </div>
+                                    <span className="text-xs font-black text-green-400 inter">
+                                        ${consumptionData?.stats.totalCostUsd.toFixed(4) || '0.0000'}
+                                    </span>
+                                </div>
+                                
+                                <div className="px-3 space-y-2">
+                                    <div className="bg-brand-surface/50 border border-brand-primary/10 rounded-lg p-3">
+                                        <div className="flex justify-between text-[10px] text-brand-text-muted mb-2 font-medium">
+                                            <span>Type</span>
+                                            <span>Tokens</span>
+                                            <span>Cost</span>
+                                        </div>
+                                        <div className="space-y-2 max-h-48 overflow-y-auto custom-scroll pr-1">
+                                            {consumptionData?.logs.map((log: any) => (
+                                                <div key={log.id} className="flex justify-between items-center text-[10px] border-b border-brand-primary/5 pb-2">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-brand-text font-bold truncate max-w-[80px]">{log.type}</span>
+                                                        <span className="text-[8px] opacity-50">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                                                    </div>
+                                                    <span className="text-brand-text-muted">{(log.totalTokens / 1000).toFixed(1)}k</span>
+                                                    <span className="text-brand-accent">${log.costUsd.toFixed(5)}</span>
+                                                </div>
+                                            ))}
+                                            {(!consumptionData?.logs || consumptionData.logs.length === 0) && (
+                                                <div className="text-center py-4 text-brand-text-muted italic opacity-50">No Consumption Logs Found.</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="mt-auto p-6 text-center">
-                    <p className="text-[10px] text-brand-text-muted font-medium opacity-50">Powered By Gemini 3</p>
+
+                {/* 9. Log Out */}
+                <div className="mt-auto p-4 border-t border-brand-primary/10 bg-brand-surface/20">
+                    <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-danger/10 text-brand-text-muted hover:text-brand-danger transition-all group">
+                        <Icon name="arrowLeft" className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="text-xs font-bold inter">Log Out</span>
+                    </button>
+                    <div className="mt-4 text-center opacity-30 select-none">
+                        <p className="text-[8px] text-brand-text-muted font-black tracking-[0.2em]">Powered By Gemini 3</p>
+                    </div>
                 </div>
             </div>
 

@@ -13,7 +13,10 @@ export const getAi = (): any => {
                         const response = await fetch('/api/generate', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(requestOptions)
+                            body: JSON.stringify({
+                                ...requestOptions,
+                                type: requestOptions.type || 'Response'
+                            })
                         });
 
                         if (!response.ok) {

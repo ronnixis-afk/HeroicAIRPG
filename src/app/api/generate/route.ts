@@ -32,40 +32,63 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { model, contents, config } = body;
+        const { model, contents, config, type = 'Response' } = body;
 
         const apiKey = process.env.GEMINI_API_KEY;
 
         if (!apiKey) {
-            return NextResponse.json({ error: 'GEMINI_API_KEY is not configured.' }, { status: 500 });
+            return NextResponse.json({ error: 'Gemini API Key is not configured.' }, { status: 500 });
         }
 
         const ai = new GoogleGenAI({ apiKey });
 
-        // Forward the entire config object from the client to the Gemini SDK.
-        // The client sends: { model, contents, config: { systemInstruction, responseMimeType, responseSchema, tools, thinkingConfig, ... } }
         const response = await ai.models.generateContent({
             model: model,
             contents: contents,
             config: config
         });
 
-        const tokenCount = response.usageMetadata?.totalTokenCount || 0;
+        // Detailed Token Usage Extraction
+        const inputTokens = response.usageMetadata?.promptTokenCount || 0;
+        const outputTokens = response.usageMetadata?.candidatesTokenCount || 0;
+        const totalTokens = response.usageMetadata?.totalTokenCount || 0;
 
-        // Non-blocking Usage Sync
-        Promise.all([
-            prisma.user.upsert({
-                where: { id: userId },
-                update: {},
-                create: { id: userId, email: "hidden@supabase.clerk" }
-            }),
-            prisma.usageLog.create({
-                data: {
-                    userId: userId,
-                    tokens: tokenCount
-                }
-            })
-        ]).catch(err => console.error("Failed to log usage:", err));
+        // Pricing Logic (Gemini 1.5 Flash / Pro Estimates)
+        // Note: These are simplified estimates for demonstration
+        let costUsd = 0;
+        if (model.includes('pro')) {
+            costUsd = (inputTokens * 1.25 / 1000000) + (outputTokens * 3.75 / 1000000);
+        } else {
+            // Flash pricing
+            costUsd = (inputTokens * 0.075 / 1000000) + (outputTokens * 0.30 / 1000000);
+        }
+
+        // Atomic Transaction: Update User Credits and Create Usage Log
+        try {
+            await prisma.$transaction([
+                prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        currentCredits: {
+                            decrement: Math.max(1, Math.ceil(totalTokens / 100)) // 1 credit per 100 tokens
+                        }
+                    }
+                }),
+                prisma.usageLog.create({
+                    data: {
+                        userId: userId,
+                        tokens: totalTokens,
+                        inputTokens: inputTokens,
+                        outputTokens: outputTokens,
+                        model: model,
+                        type: type, // e.g. 'World Building', 'Market Item', 'Response'
+                        costUsd: costUsd
+                    }
+                })
+            ]);
+        } catch (err) {
+            console.error("Failed to log detailed usage:", err);
+        }
 
         return NextResponse.json({
             text: response.text,

@@ -11,20 +11,27 @@ datasource db {
 }
 
 model User {
-  id        String     @id // Clerk User ID
-  email     String     @unique
-  tier      String     @default("newbie") // newbie | adventurer | hero
-  createdAt DateTime   @default(now())
-  UsageLogs UsageLog[]
-  GameSaves GameSave[]
+  id             String     @id // Clerk User ID
+  email          String     @unique
+  tier           String     @default("newbie") // newbie | adventurer | hero | super_admin
+  maxCredits     Int        @default(1000)
+  currentCredits Int        @default(1000)
+  createdAt      DateTime   @default(now())
+  UsageLogs      UsageLog[]
+  GameSaves      GameSave[]
 }
 
 model UsageLog {
-  id        String   @id @default(uuid())
-  userId    String
-  User      User     @relation(fields: [userId], references: [id])
-  tokens    Int      // Track AI prompt/completion tokens
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  User         User     @relation(fields: [userId], references: [id])
+  tokens       Int      // Total tokens
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  model        String   @default("unknown")
+  type         String   @default("response") // world-building, market-item, response, etc.
+  costUsd      Float    @default(0.0)
+  createdAt    DateTime @default(now())
 }
 
 model GameSave {
