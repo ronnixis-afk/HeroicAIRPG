@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { DiceRoll } from '../../types';
 import { Icon } from '../Icon';
-import { EntityLinker } from './EntityLinker';
+import Modal from '../Modal';
 
 const DiceRollRow: React.FC<{ roll: DiceRoll }> = ({ roll }) => {
     const isDamage = roll.rollType === 'Damage Roll';
@@ -138,8 +138,8 @@ const getGroupHeader = (roll: DiceRoll) => {
 export const DiceTray: React.FC<{ rolls: DiceRoll[] }> = ({ rolls }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Filter out Encounter Checks as they should be represented in the text logs
-    const visibleRolls = rolls.filter(r => r.rollType !== 'Encounter Check');
+    // Show all rolls, including Encounter Checks, as requested for rest mechanics
+    const visibleRolls = rolls;
 
     if (visibleRolls.length === 0) return null;
 
@@ -147,13 +147,20 @@ export const DiceTray: React.FC<{ rolls: DiceRoll[] }> = ({ rolls }) => {
     return (
         <div className="w-full mt-2 animate-fade-in px-1">
             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-1.5 text-body-sm font-normal text-brand-text-muted hover:text-brand-text transition-all select-none focus:outline-none mb-1.5"
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-body-xs font-bold text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/20 transition-all select-none focus:outline-none mb-1.5 group"
             >
-                <span>{isOpen ? 'Hide Rolls' : `Show Rolls (${visibleRolls.length})`}</span>
+                <Icon name="dice" className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:rotate-12 transition-transform" />
+                <span>Show Dice Rolls ({visibleRolls.length})</span>
             </button>
-            {isOpen && (
-                <div className="space-y-0.5 animate-fade-in">
+
+            <Modal
+                isOpen={isOpen}
+                onClose={() => setIsOpen(false)}
+                title="Dice Rolls"
+                maxWidth="full"
+            >
+                <div className="space-y-0.5">
                     {visibleRolls.map((roll, index) => {
                         const header = getGroupHeader(roll);
                         const showHeader = header !== lastHeader;
@@ -170,7 +177,10 @@ export const DiceTray: React.FC<{ rolls: DiceRoll[] }> = ({ rolls }) => {
                         );
                     })}
                 </div>
-            )}
+            </Modal>
         </div>
     );
 };
+
+
+
