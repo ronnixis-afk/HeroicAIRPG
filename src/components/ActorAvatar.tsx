@@ -112,11 +112,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                     </div>
                 )}
 
-                {isDead && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                        <Icon name="close" className="w-3/4 h-3/4 text-brand-danger drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                    </div>
-                )}
+                {/* Overlay Moved Outside button to avoid grayscale filter */}
 
                 {isStealthed && !isEnriching && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none text-brand-accent drop-shadow-lg">
@@ -135,6 +131,13 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
 
 
             </button>
+            
+            {/* Dead Status Overlay - Outside button to avoid grayscale filter */}
+            {isDead && (
+                <div className="absolute top-0 left-0 w-full aspect-square z-50 flex items-center justify-center pointer-events-none animate-fade-in">
+                    <Icon name="close" className="w-[85%] h-[85%] text-brand-danger drop-shadow-[0_0_12px_rgba(239,68,68,0.8)]" />
+                </div>
+            )}
 
             {/* Buff Indicators (Upper Right) */}
             {a.activeBuffs && a.activeBuffs.length > 0 && (

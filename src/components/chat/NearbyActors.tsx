@@ -141,54 +141,60 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
         setOpenMenuId(null);
     };
 
-    const NPCContextMenu = ({ npc }: { npc: NPC }) => (
-        <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-2xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px] max-w-[75vw] w-max">
-            <div className="px-4 py-3 border-b border-brand-primary/30 mb-1">
-                <div className="text-body-sm font-bold text-brand-text whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-1.5">
-                    {npc.name}
-                    {npc.gender?.toLowerCase() === 'male' && <Icon name="male" className="w-3 h-3 text-blue-400" />}
-                    {npc.gender?.toLowerCase() === 'female' && <Icon name="female" className="w-3 h-3 text-pink-400" />}
+    const NPCContextMenu = ({ npc }: { npc: NPC }) => {
+        const isDead = npc.status?.toLowerCase() === 'dead';
+
+        return (
+            <div className="absolute right-full mr-3 top-0 flex flex-col gap-1 bg-brand-surface/90 backdrop-blur-2xl border border-brand-primary rounded-2xl p-1.5 shadow-2xl animate-fade-in z-[100] min-w-[180px] max-w-[75vw] w-max">
+                <div className="px-4 py-3 border-b border-brand-primary/30 mb-1">
+                    <div className="text-body-sm font-bold text-brand-text whitespace-nowrap overflow-hidden text-ellipsis flex items-center gap-1.5">
+                        {npc.name}
+                        {npc.gender?.toLowerCase() === 'male' && <Icon name="male" className="w-3 h-3 text-blue-400" />}
+                        {npc.gender?.toLowerCase() === 'female' && <Icon name="female" className="w-3 h-3 text-pink-400" />}
+                    </div>
+                    <div className="text-body-sm font-normal text-brand-text-muted capitalize">
+                        {npc.race}
+                    </div>
                 </div>
-                <div className="text-body-sm font-normal text-brand-text-muted capitalize">
-                    {npc.race}
-                </div>
+
+                <button
+                    onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
+                >
+                    <img src="/icons/people.png" alt="Profile" className="w-8 h-8 object-contain" />
+                    <span>View Profile</span>
+                </button>
+                <button
+                    onClick={() => { setSelectedCharacterId(npc.id); setActiveView('temp-stats'); setOpenMenuId(null); }}
+                    className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
+                >
+                    <img src="/icons/scene.png" alt="Stats" className="w-8 h-8 object-contain" />
+                    <span>View Stats</span>
+                </button>
+                <button
+                    onClick={() => !isDead && handleAttack(npc)}
+                    disabled={isDead}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 ${isDead ? 'opacity-40 cursor-not-allowed filter grayscale' : 'hover:bg-brand-primary/50 active:bg-brand-accent active:text-black'}`}
+                >
+                    <img src="/icons/attack.png" alt="Attack" className="w-8 h-8 object-contain" />
+                    <span>Attack</span>
+                </button>
+                <button
+                    onClick={() => {
+                        if (isDead) return;
+                        setPickpocketTarget(npc);
+                        setIsPickpocketModalOpen(true);
+                        setOpenMenuId(null);
+                    }}
+                    disabled={isDead}
+                    className={`w-full text-left px-4 py-2.5 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 ${isDead ? 'opacity-40 cursor-not-allowed filter grayscale' : 'hover:bg-brand-primary/50 active:bg-brand-accent active:text-black'}`}
+                >
+                    <img src="/icons/pickpocket.png" alt="Pickpocket" className="w-8 h-8 object-contain" />
+                    <span>Pickpocket</span>
+                </button>
             </div>
-
-            <button
-                onClick={() => { setInspectedEntity({ type: 'npc', data: npc }); setOpenMenuId(null); }}
-                className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
-            >
-                <img src="/icons/people.png" alt="Profile" className="w-8 h-8 object-contain" />
-                <span>View Profile</span>
-            </button>
-            <button
-                onClick={() => { setSelectedCharacterId(npc.id); setActiveView('temp-stats'); setOpenMenuId(null); }}
-                className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
-            >
-                <img src="/icons/scene.png" alt="Stats" className="w-8 h-8 object-contain" />
-                <span>View Stats</span>
-            </button>
-            <button
-                onClick={() => handleAttack(npc)}
-                className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
-            >
-                <img src="/icons/attack.png" alt="Attack" className="w-8 h-8 object-contain" />
-                <span>Attack</span>
-            </button>
-            <button
-                onClick={() => {
-                    setPickpocketTarget(npc);
-                    setIsPickpocketModalOpen(true);
-                    setOpenMenuId(null);
-                }}
-                className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3 active:bg-brand-accent active:text-black"
-            >
-                <img src="/icons/pickpocket.png" alt="Pickpocket" className="w-8 h-8 object-contain" />
-                <span>Pickpocket</span>
-            </button>
-
-        </div>
-    );
+        );
+    };
 
     if (displayList.length === 0) return null;
 
