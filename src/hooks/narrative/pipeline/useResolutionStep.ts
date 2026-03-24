@@ -55,14 +55,26 @@ export const useResolutionStep = (
 
         // 1. Handle Skill/Ability Requests
         if (assessment.intentType === 'skill' && assessment.requests.length > 0) {
-            // Inject heroic flag into requests
-            const heroicRequests = assessment.requests.map(req => ({
-                ...req,
-                isHeroic: isHeroic
-            }));
+             // Heroic AI RPG Convention: Non-ship party members always join skill rolls.
+             // This ensures one person succeeding means the whole party succeeds (Any Success Policy).
+             const companions = (gameData.companions || []).filter(c => c.isInParty !== false && !c.isShip);
+             
+             // Ensure every active non-ship companion has a corresponding roll for each requested skill.
+             const expandedRequests: DiceRollRequest[] = [...assessment.requests.map(req => ({ ...req, isHeroic }))];
+             
+             assessment.requests.forEach(req => {
+                 if (req.rollType === 'Skill Check' || req.rollType === 'Ability Check') {
+                     companions.forEach(comp => {
+                         const alreadyExists = expandedRequests.some(r => r.rollerName === comp.name && r.checkName === req.checkName);
+                         if (!alreadyExists) {
+                             expandedRequests.push({ ...req, rollerName: comp.name, isHeroic });
+                         }
+                     });
+                 }
+             });
 
             // Pass the global heroic flag to processDiceRolls
-            const res = combatActions.processDiceRolls(heroicRequests, { isHeroic: isHeroic });
+            const res = combatActions.processDiceRolls(expandedRequests, { isHeroic: isHeroic });
             diceRolls = [...diceRolls, ...res.rolls];
             mechanicsSummary = res.summary;
 
