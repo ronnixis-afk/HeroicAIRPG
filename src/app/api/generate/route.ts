@@ -54,15 +54,18 @@ export async function POST(req: NextRequest) {
         const outputTokens = response.usageMetadata?.candidatesTokenCount || 0;
         const totalTokens = response.usageMetadata?.totalTokenCount || 0;
 
-        // Pricing Logic
+        // Pricing Logic (2026 Official Rates)
         let costUsd = 0;
-        const isImageModel = model.toLowerCase().includes('image') || model.toLowerCase().includes('vision');
+        const modelLower = model.toLowerCase();
+        const isImageModel = modelLower.includes('image') || modelLower.includes('vision');
         
         if (isImageModel) {
-            // Flat rate for image generation (e.g., $0.03 per image)
-            costUsd = 0.03;
-        } else if (model.includes('pro')) {
-            costUsd = (inputTokens * 1.25 / 1000000) + (outputTokens * 3.75 / 1000000);
+            // Granular Image Pricing
+            if (modelLower.includes('ultra')) costUsd = 0.06;
+            else if (modelLower.includes('fast')) costUsd = 0.02;
+            else costUsd = 0.04; // Standard / Pro Image
+        } else if (modelLower.includes('pro')) {
+            costUsd = (inputTokens * 1.25 / 1000000) + (outputTokens * 5.00 / 1000000);
         } else {
             // Flash pricing
             costUsd = (inputTokens * 0.075 / 1000000) + (outputTokens * 0.30 / 1000000);
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
                     where: { id: userId },
                     data: {
                         currentCredits: {
-                            decrement: isImageModel ? 50 : Math.max(1, Math.ceil(totalTokens / 100)) // 50 credits for images, else 1 per 100 tokens
+                            decrement: isImageModel ? 100 : Math.max(1, Math.ceil(totalTokens / 50)) // 100 credits for images, else 1 per 50 tokens
                         }
                     }
                 }),
