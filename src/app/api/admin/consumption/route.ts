@@ -29,10 +29,27 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const typeFilter = searchParams.get('type');
         const modelFilter = searchParams.get('model');
+        const period = searchParams.get('period') || 'today';
 
         const where: any = {};
         if (typeFilter) where.type = typeFilter;
         if (modelFilter) where.model = modelFilter;
+
+        // Apply period filter
+        const now = new Date();
+        if (period === 'today') {
+            const startOfDay = new Date(now);
+            startOfDay.setHours(0, 0, 0, 0);
+            where.createdAt = { gte: startOfDay };
+        } else if (period === 'week') {
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - 7);
+            where.createdAt = { gte: startOfWeek };
+        } else if (period === 'month') {
+            const startOfMonth = new Date(now);
+            startOfMonth.setDate(now.getDate() - 30);
+            where.createdAt = { gte: startOfMonth };
+        }
 
         // Fetch logs with filters
         const logs = await prisma.usageLog.findMany({
@@ -46,8 +63,9 @@ export async function GET(req: NextRequest) {
             take: 100
         });
 
-        // Global aggregates
-        const globalStats = await prisma.usageLog.aggregate({
+        // Global aggregates (total for the selected period)
+        const periodStats = await prisma.usageLog.aggregate({
+            where,
             _sum: {
                 costUsd: true,
                 tokens: true,
@@ -56,18 +74,18 @@ export async function GET(req: NextRequest) {
             }
         });
 
-        // Today's aggregates (Local Server Time)
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-
-        const todayStats = await prisma.usageLog.aggregate({
-            where: {
-                createdAt: { gte: startOfToday }
-            },
+        // Lifetime total (for the "Total Cost" card)
+        const lifetimeStats = await prisma.usageLog.aggregate({
             _sum: {
                 costUsd: true
             }
         });
+
+        // Dynamic Filters - Get unique types and models from the database
+        const [uniqueTypes, uniqueModels] = await Promise.all([
+            prisma.usageLog.groupBy({ by: ['type'] }),
+            prisma.usageLog.groupBy({ by: ['model'] })
+        ]);
 
         return NextResponse.json({
             logs: logs.map((log: any) => ({
@@ -83,11 +101,15 @@ export async function GET(req: NextRequest) {
                 createdAt: log.createdAt
             })),
             stats: {
-                totalCostUsd: globalStats._sum.costUsd || 0,
-                totalTodayCostUsd: todayStats._sum.costUsd || 0,
-                totalTokens: globalStats._sum.tokens || 0,
-                totalInputTokens: globalStats._sum.inputTokens || 0,
-                totalOutputTokens: globalStats._sum.outputTokens || 0
+                totalCostUsd: lifetimeStats._sum.costUsd || 0,
+                totalTodayCostUsd: periodStats._sum.costUsd || 0, // In this context "Today" will mean "Period Total"
+                totalTokens: periodStats._sum.tokens || 0,
+                totalInputTokens: periodStats._sum.inputTokens || 0,
+                totalOutputTokens: periodStats._sum.outputTokens || 0
+            },
+            filters: {
+                types: uniqueTypes.map(t => t.type),
+                models: uniqueModels.map(m => m.model)
             }
         });
     } catch (error: any) {

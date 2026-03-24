@@ -11,6 +11,10 @@ interface AdminConsumptionData {
         totalInputTokens: number;
         totalOutputTokens: number;
     };
+    filters: {
+        types: string[];
+        models: string[];
+    };
 }
 
 const AdminConsumptionDashboard: React.FC = () => {
@@ -19,6 +23,7 @@ const AdminConsumptionDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [typeFilter, setTypeFilter] = useState('');
     const [modelFilter, setModelFilter] = useState('');
+    const [period, setPeriod] = useState('today');
 
     const fetchConsumption = async () => {
         setLoading(true);
@@ -26,6 +31,7 @@ const AdminConsumptionDashboard: React.FC = () => {
             const params = new URLSearchParams();
             if (typeFilter) params.append('type', typeFilter);
             if (modelFilter) params.append('model', modelFilter);
+            params.append('period', period);
 
             const res = await fetch(`/api/admin/consumption?${params.toString()}`);
             if (res.ok) {
@@ -43,7 +49,7 @@ const AdminConsumptionDashboard: React.FC = () => {
         if (isLoaded && user) {
             fetchConsumption();
         }
-    }, [isLoaded, user, typeFilter, modelFilter]);
+    }, [isLoaded, user, typeFilter, modelFilter, period]);
 
     if (!isLoaded || loading) {
         return (
@@ -53,16 +59,9 @@ const AdminConsumptionDashboard: React.FC = () => {
         );
     }
 
-    // Extract unique types and models for filters
-    const availableTypes = ['Response', 'World Building', 'Character Creation', 'Market Item', 'NPC Discovery', 'Lore Generation', 'Tactical Brief'];
-    const availableModels = [
-        'gemini-3.1-flash-lite-preview', 
-        'gemini-3-pro-image-preview', 
-        'gemini-2.5-flash-preview-tts',
-        'models/gemini-2.0-flash-exp',
-        'gemini-1.5-flash', 
-        'gemini-1.5-pro'
-    ];
+    // Dynamic types and models from API
+    const availableTypes = data?.filters?.types || [];
+    const availableModels = data?.filters?.models || [];
 
     return (
         <div className="h-screen bg-[#0c1114] text-brand-text overflow-y-auto inter custom-scroll">
@@ -96,10 +95,10 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl border-t-green-500/30">
                         <div className="flex items-center gap-3 mb-4 text-green-400">
                             <Icon name="sparkles" className="w-5 h-5" />
-                            <span className="text-xs font-black tracking-wide opacity-60">Today's Cost</span>
+                            <span className="text-xs font-black tracking-wide opacity-60">Period Cost</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">${data?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}</div>
-                        <div className="text-[10px] text-brand-text-muted">Usage since Start of Day (Local)</div>
+                        <div className="text-[10px] text-brand-text-muted">Total Cost For Selected Period</div>
                     </div>
 
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
@@ -114,24 +113,41 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-4 text-purple-400">
                             <Icon name="users" className="w-5 h-5" />
-                            <span className="text-xs font-black tracking-wide opacity-60">Active Sessions</span>
+                            <span className="text-xs font-black tracking-wide opacity-60">Period Activity</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">{data?.logs.length || 0}</div>
-                        <div className="text-[10px] text-brand-text-muted">Displayed Log Entries</div>
+                        <div className="text-[10px] text-brand-text-muted">Interactions In This Period</div>
                     </div>
                 </div>
 
-                <div className="bg-brand-surface border border-brand-primary/10 rounded-2xl p-5 mb-6 shadow-lg">
-                    <div className="flex items-center gap-2 text-[10px] font-black text-brand-accent/60 px-1 mb-4 uppercase tracking-[0.2em]">
-                        <Icon name="settings" className="w-3 h-3" />
-                        <span>Filters</span>
+                {/* Filters Row */}
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    {/* Period Selector */}
+                    <div className="flex bg-brand-surface border border-brand-primary/10 rounded-2xl p-1.5 shadow-lg h-14 items-center">
+                        {['today', 'week', 'month'].map((p) => (
+                            <button
+                                key={p}
+                                onClick={() => setPeriod(p)}
+                                className={`px-6 h-full rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                    period === p 
+                                    ? 'bg-brand-accent text-black shadow-lg shadow-brand-accent/20' 
+                                    : 'text-brand-text-muted hover:text-brand-text'
+                                }`}
+                            >
+                                {p === 'week' ? 'This Week' : p === 'month' ? 'This Month' : 'Today'}
+                            </button>
+                        ))}
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
+
+                    {/* Dropdown Filters */}
+                    <div className="flex-1 bg-brand-surface border border-brand-primary/10 rounded-2xl p-4 md:p-1.5 flex flex-col md:flex-row gap-2 shadow-lg items-center">
+                        <div className="md:px-4 text-[10px] font-black text-brand-accent/40 uppercase tracking-widest hidden md:block">
+                            Filters
+                        </div>
                         <select 
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2.5 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full"
+                            className="bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px]"
                         >
                             <option value="">All Call Types</option>
                             {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
@@ -140,23 +156,21 @@ const AdminConsumptionDashboard: React.FC = () => {
                         <select 
                             value={modelFilter}
                             onChange={(e) => setModelFilter(e.target.value)}
-                            className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2.5 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full"
+                            className="bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px]"
                         >
                             <option value="">All AI Models</option>
                             {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                    </div>
 
-                    {(typeFilter || modelFilter) && (
-                        <div className="mt-4 flex justify-end">
+                        {(typeFilter || modelFilter) && (
                             <button 
                                 onClick={() => { setTypeFilter(''); setModelFilter(''); }}
-                                className="text-[10px] font-black text-brand-accent hover:underline uppercase tracking-widest"
+                                className="px-4 text-[10px] font-black text-red-400 hover:text-red-300 uppercase tracking-widest transition-colors"
                             >
-                                Reset Filters
+                                Reset
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
                 {/* Log Table */}
