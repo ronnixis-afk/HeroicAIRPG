@@ -243,7 +243,7 @@ export const generateCombatStartNarrative = async (
 };
 
 export const generateCombatConclusion = async (names: string[], loot: any[], context: string, location: string, gameData: GameData) => {
-    const input = `Describe the end of combat in PLAIN TEXT. NO Markdown formatting allowed.
+    const input = `Describe the end of combat and the immediate aftermath in PLAIN TEXT. 
     
     [WORLD SUMMARY]
     ${gameData.worldSummary || 'No global summary available.'}
@@ -252,10 +252,17 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
     Loot: ${JSON.stringify(loot)}
     Context: ${context}
     
+    [INSTRUCTIONS]
+    1. Write a brief, immersive narration of the victory and transition to exploration.
+    2. ALIGNMENT ACTIONS: Provide 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
+
     Return JSON: { 
       "narrative": "string (plain text prose)", 
       "location": "string", 
-      "turnSummary": "string (STRICT MAX 10 WORDS concise but detailed memory for the log)" 
+      "turnSummary": "string (STRICT MAX 10 WORDS concise but detailed memory for the log)",
+      "alignmentOptions": [
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic" }
+      ]
     }`;
 
     const ai = getAi();

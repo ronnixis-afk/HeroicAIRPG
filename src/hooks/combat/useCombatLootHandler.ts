@@ -155,6 +155,7 @@ export const useCombatLootHandler = (
                         sender: 'ai',
                         content: res.narrative,
                         location: res.location || preCombatLocation,
+                        alignmentOptions: res.alignmentOptions
                     };
 
                     dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
