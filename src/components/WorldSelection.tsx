@@ -545,9 +545,27 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         <Icon name="currencyCoins" className="w-4 h-4 text-brand-accent" />
                                         <span className="text-xs font-bold text-brand-text inter">Admin Consumption</span>
                                     </div>
-                                    <span className="text-xs font-black text-green-400 inter">
-                                        ${consumptionData?.stats.totalCostUsd.toFixed(4) || '0.0000'}
-                                    </span>
+                                    <button 
+                                        onClick={() => window.location.href = '/admin/consumption'}
+                                        className="text-[10px] font-black text-brand-accent hover:underline inter"
+                                    >
+                                        View Full Dashboard
+                                    </button>
+                                </div>
+                                
+                                <div className="px-3 space-y-2 mb-4">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-[10px] text-brand-text-muted font-medium inter">Total Consumption</span>
+                                        <span className="text-xs font-black text-green-400 inter">
+                                            ${consumptionData?.stats.totalCostUsd.toFixed(4) || '0.0000'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] text-brand-text-muted font-medium inter">Consumed Today</span>
+                                        <span className="text-[10px] font-black text-brand-text inter">
+                                            ${consumptionData?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}
+                                        </span>
+                                    </div>
                                 </div>
                                 
                                 <div className="px-3 space-y-2">

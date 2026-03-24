@@ -26,24 +26,46 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        // Fetch logs with user email for context
+        const { searchParams } = new URL(req.url);
+        const typeFilter = searchParams.get('type');
+        const modelFilter = searchParams.get('model');
+
+        const where: any = {};
+        if (typeFilter) where.type = typeFilter;
+        if (modelFilter) where.model = modelFilter;
+
+        // Fetch logs with filters
         const logs = await prisma.usageLog.findMany({
+            where,
             orderBy: { createdAt: 'desc' },
             include: {
                 User: {
                     select: { email: true }
                 }
             },
-            take: 100 // Limit to last 100 logs for performance
+            take: 100
         });
 
-        // Calculate total cost from all logs (not just the last 100)
-        const aggregation = await prisma.usageLog.aggregate({
+        // Global aggregates
+        const globalStats = await prisma.usageLog.aggregate({
             _sum: {
                 costUsd: true,
                 tokens: true,
                 inputTokens: true,
                 outputTokens: true
+            }
+        });
+
+        // Today's aggregates (Local Server Time)
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+
+        const todayStats = await prisma.usageLog.aggregate({
+            where: {
+                createdAt: { gte: startOfToday }
+            },
+            _sum: {
+                costUsd: true
             }
         });
 
@@ -60,10 +82,11 @@ export async function GET(req: NextRequest) {
                 createdAt: log.createdAt
             })),
             stats: {
-                totalCostUsd: aggregation._sum.costUsd || 0,
-                totalTokens: aggregation._sum.tokens || 0,
-                totalInputTokens: aggregation._sum.inputTokens || 0,
-                totalOutputTokens: aggregation._sum.outputTokens || 0
+                totalCostUsd: globalStats._sum.costUsd || 0,
+                totalTodayCostUsd: todayStats._sum.costUsd || 0,
+                totalTokens: globalStats._sum.tokens || 0,
+                totalInputTokens: globalStats._sum.inputTokens || 0,
+                totalOutputTokens: globalStats._sum.outputTokens || 0
             }
         });
     } catch (error: any) {
