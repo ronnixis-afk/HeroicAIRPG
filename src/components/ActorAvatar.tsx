@@ -48,21 +48,24 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
     maxStaminaOverride
 }) => {
     const a = actor as any;
+    const isStatusDead = a.status?.toLowerCase() === 'dead';
 
-    // Normalize stats extraction
-    const currentHp = hpOverride !== undefined ? hpOverride : (a.currentHitPoints ?? a.maxHitPoints ?? 0);
-    const maxHp = maxHpOverride !== undefined ? maxHpOverride : (a.maxHitPoints ?? 0);
+    // Normalize stats extraction with fallbacks for narrative NPCs
+    const maxHp = maxHpOverride !== undefined ? maxHpOverride : (a.maxHitPoints ?? (!isStatusDead ? 1 : 0));
+    const currentHp = hpOverride !== undefined ? hpOverride : (a.currentHitPoints ?? a.maxHitPoints ?? maxHp);
+    
     const tempHp = tempHpOverride !== undefined ? tempHpOverride : (a.temporaryHitPoints ?? 0);
-    const maxTempHp = maxTempHpOverride !== undefined ? maxTempHpOverride : (a.maxTemporaryHitPoints ?? 0);
+    const maxTempHp = maxTempHpOverride !== undefined ? maxTempHpOverride : (a.maxTemporaryHitPoints ?? tempHp);
+    
     const stamina = staminaOverride !== undefined ? staminaOverride : (a.stamina ?? 0);
-    const maxStamina = maxStaminaOverride !== undefined ? maxStaminaOverride : (a.maxStamina ?? 0);
+    const maxStamina = maxStaminaOverride !== undefined ? maxStaminaOverride : (a.maxStamina ?? stamina);
 
     const hpRatio = maxHp > 0 ? Math.max(0, Math.min(1, currentHp / maxHp)) : 0;
     const tempRatio = maxTempHp > 0 ? Math.max(0, Math.min(1, tempHp / maxTempHp)) : 0;
     const staminaRatio = maxStamina > 0 ? Math.max(0, Math.min(1, stamina / maxStamina)) : 0;
 
-    const isDead = (a.status?.toLowerCase() === 'dead' || currentHp <= 0);
-    const isLowHp = !isDead && hpRatio <= 0.25;
+    const isDead = isStatusDead || (maxHp > 0 && currentHp <= 0);
+    const isLowHp = maxHp > 0 && !isDead && hpRatio <= 0.25;
     const hasStatus = (a.statusEffects?.length || 0) > 0;
     const initials = a.name ? a.name.slice(0, 2).toUpperCase() : '??';
     
@@ -171,21 +174,23 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                     </span>
                 )}
 
-                {showBars && (
+                {showBars && (maxHp > 0 || maxTempHp > 0 || maxStamina > 0) && (
                     <div className="w-full bg-[var(--color-status-bg)] rounded-full overflow-hidden border border-[var(--color-status-border)] flex flex-col shadow-inner">
                         {/* HP Bar */}
-                        <div 
-                            className="w-full relative" 
-                            style={{ height: size > 50 ? 'var(--status-bar-height-combat)' : 'var(--status-bar-height)' }}
-                        >
+                        {maxHp > 0 && (
                             <div 
-                                className="h-full transition-all duration-500 ease-out"
-                                style={{ 
-                                    width: `${hpRatio * 100}%`,
-                                    backgroundColor: finalHpColor
-                                }}
-                            />
-                        </div>
+                                className="w-full relative" 
+                                style={{ height: size > 50 ? 'var(--status-bar-height-combat)' : 'var(--status-bar-height)' }}
+                            >
+                                <div 
+                                    className="h-full transition-all duration-500 ease-out"
+                                    style={{ 
+                                        width: `${hpRatio * 100}%`,
+                                        backgroundColor: finalHpColor
+                                    }}
+                                />
+                            </div>
+                        )}
                         
                         {/* Shield Bar (Temp HP) */}
                         {maxTempHp > 0 && (

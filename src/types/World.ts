@@ -1,7 +1,7 @@
 
 // types/World.ts
 
-import { AbilityScoreName, AbilityEffect, StatusEffect, RollMode, CombatActorSize, ArchetypeName, SkillName } from './Core';
+import { AbilityScoreName, AbilityEffect, StatusEffect, RollMode, CombatActorSize, ArchetypeName, SkillName, ActiveBuff } from './Core';
 import { Ability } from './Characters';
 
 // Fix: Added LocationUpdate interface to support structured AI spatial transition responses
@@ -158,6 +158,7 @@ export interface NPC {
   memories?: NPCMemory[];
   // Fix: Added statusEffects to NPC to support untargetable logic (e.g. Invisible/Hidden)
   statusEffects?: StatusEffect[];
+  activeBuffs?: ActiveBuff[];
   isFollowing?: boolean;
 }
 
@@ -269,6 +270,7 @@ export interface CombatActor {
   skills?: Record<SkillName, { proficient: boolean; passiveScore: number }>;
   specialAbilities?: CombatActorSpecialAbility[];
   statusEffects: StatusEffect[];
+  activeBuffs?: ActiveBuff[];
   rank?: 'normal' | 'elite' | 'boss';
   size?: CombatActorSize;
   isAlly?: boolean;

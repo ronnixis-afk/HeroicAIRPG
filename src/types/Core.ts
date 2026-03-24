@@ -496,8 +496,9 @@ export interface Buff {
     // Added 'temp_hp' to support shield/temp hp buffs in the system
     // Added 'hero_points' to support hero point capacity modifiers
     /* Fix: Added 'hero_points' to the type union to resolve unintentional comparison errors in Characters.ts */
-    type: 'ac' | 'attack' | 'damage' | 'save' | 'skill' | 'ability' | 'resistance' | 'immunity' | 'exdam' | 'temp_hp' | 'hero_points';
+    type: 'ac' | 'attack' | 'damage' | 'save' | 'skill' | 'ability' | 'resistance' | 'immunity' | 'exdam' | 'temp_hp' | 'hero_points' | 'status';
     bonus: number;
+    name?: string;
     skillName?: SkillName;
     abilityName?: AbilityScoreName;
     damageType?: DamageType;

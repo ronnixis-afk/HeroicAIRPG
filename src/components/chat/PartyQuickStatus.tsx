@@ -68,11 +68,13 @@ export const PartyQuickStatus: React.FC = () => {
             dispatch({ type: 'SET_PARTY_HIDDEN', payload: { isHidden: false } });
             const removalUpdates: any = {
                 playerCharacter: {
-                    statusEffects: (playerCharacter.statusEffects || []).filter(s => s.name !== 'Invisible')
+                    statusEffects: (playerCharacter.statusEffects || []).filter(s => s.name !== 'Invisible'),
+                    activeBuffs: (playerCharacter.activeBuffs || []).filter(b => b.name !== 'Invisible')
                 },
                 companions: activeCompanions.map(c => ({
                     id: c.id,
-                    statusEffects: (c.statusEffects || []).filter(s => s.name !== 'Invisible')
+                    statusEffects: (c.statusEffects || []).filter(s => s.name !== 'Invisible'),
+                    activeBuffs: (c.activeBuffs || []).filter(b => b.name !== 'Invisible')
                 }))
             };
             await applyAiUpdates(removalUpdates);
@@ -134,16 +136,17 @@ export const PartyQuickStatus: React.FC = () => {
         const getMechanicalUpdates = (existingUpdates: any = {}) => {
             const updates: any = { ...existingUpdates };
             if (finalSuccess) {
-                const hiddenStatus: StatusEffect = { name: 'Invisible', duration: 10 };
-                const pcCurrent = playerCharacter.statusEffects || [];
-                if (!pcCurrent.some(s => s.name === 'Invisible')) {
-                    updates.playerCharacter = { ...updates.playerCharacter, statusEffects: [...pcCurrent, hiddenStatus] };
+                const hiddenBuff: any = { name: 'Invisible', type: 'status', bonus: 0, duration: 10 };
+                
+                const pcBuffs = playerCharacter.activeBuffs || [];
+                if (!pcBuffs.some(b => b.name === 'Invisible')) {
+                    updates.playerCharacter = { ...updates.playerCharacter, activeBuffs: [...pcBuffs, hiddenBuff] };
                 }
 
                 updates.companions = activeCompanions.filter(c => !c.isShip).map(comp => {
-                    const current = comp.statusEffects || [];
-                    const hasStatus = current.some(s => s.name === 'Invisible');
-                    return { id: comp.id, statusEffects: hasStatus ? current : [...current, hiddenStatus] };
+                    const currentBuffs = comp.activeBuffs || [];
+                    const hasBuff = currentBuffs.some(b => b.name === 'Invisible');
+                    return { id: comp.id, activeBuffs: hasBuff ? currentBuffs : [...currentBuffs, hiddenBuff] };
                 });
             }
             return updates;
@@ -225,11 +228,7 @@ export const PartyQuickStatus: React.FC = () => {
                     <span>Quick Actions</span>
                 </button>
                 <button onClick={handleStealthToggle} className="w-full text-left px-4 py-2.5 hover:bg-brand-primary/50 rounded-xl transition-all text-body-sm font-normal text-brand-text flex items-center gap-3">
-                    {isPartyHidden ? (
-                        <Icon name="close" className="w-4 h-4 text-brand-accent" />
-                    ) : (
-                        <img src="/icons/sneak.png" alt="Sneak" className="w-8 h-8 object-contain" />
-                    )}
+                    <img src="/icons/sneak.png" alt="Sneak" className="w-8 h-8 object-contain" />
                     <span>{isPartyHidden ? 'Disable Stealth' : 'Hide & Sneak'}</span>
                 </button>
             </div>

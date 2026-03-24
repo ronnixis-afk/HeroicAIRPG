@@ -14,12 +14,19 @@ interface StatusCheckResult {
  */
 // Fix: Exporting canBeTargeted to resolve missing member errors in consumer components
 export const canBeTargeted = (actor: CombatActor | PlayerCharacter | Companion | NPC): boolean => {
-    if (!actor.statusEffects || actor.statusEffects.length === 0) return true;
+    const statusEffects = actor.statusEffects || [];
+    const activeBuffs = actor.activeBuffs || [];
     
-    // Check if any active status effect is in the untargetable registry
-    return !actor.statusEffects.some(effect => 
+    // Check if any active status effect or buff is in the untargetable registry
+    const hasUntargetableStatus = statusEffects.some(effect => 
         (UNTARGETABLE_STATUS_NAMES as readonly string[]).includes(effect.name)
     );
+
+    const hasUntargetableBuff = activeBuffs.some(buff => 
+        buff.name && (UNTARGETABLE_STATUS_NAMES as readonly string[]).includes(buff.name)
+    );
+
+    return !hasUntargetableStatus && !hasUntargetableBuff;
 };
 
 export const checkStatusBasedRollMode = (
@@ -51,7 +58,7 @@ export const checkStatusBasedRollMode = (
     }
 
     // Invisible: Advantage on Attacks
-    if (attackerEffects.some(e => e.name === 'Invisible')) {
+    if (attackerEffects.some(e => e.name === 'Invisible') || (attacker.activeBuffs || []).some(b => b.name === 'Invisible')) {
         results.push({ mode: 'advantage', reason: 'Invisible' });
     }
 
@@ -78,7 +85,7 @@ export const checkStatusBasedRollMode = (
         }
         
         // Target Invisible
-        if (targetEffects.some(e => e.name === 'Invisible')) {
+        if (targetEffects.some(e => e.name === 'Invisible') || (target.activeBuffs || []).some(b => b.name === 'Invisible')) {
             results.push({ mode: 'disadvantage', reason: 'Target Invisible' });
         }
     }
