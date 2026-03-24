@@ -54,20 +54,27 @@ export async function POST(req: NextRequest) {
         const outputTokens = response.usageMetadata?.candidatesTokenCount || 0;
         const totalTokens = response.usageMetadata?.totalTokenCount || 0;
 
-        // Pricing Logic (2026 Official Rates)
+        // Pricing Logic (2026 Official Gemini 3.1 & 1.5 Rates)
         let costUsd = 0;
         const modelLower = model.toLowerCase();
         const isImageModel = modelLower.includes('image') || modelLower.includes('vision');
         
         if (isImageModel) {
-            // Granular Image Pricing
+            // Granular Image Pricing (Imagen 3/4.0)
             if (modelLower.includes('ultra')) costUsd = 0.06;
             else if (modelLower.includes('fast')) costUsd = 0.02;
             else costUsd = 0.04; // Standard / Pro Image
+        } else if (modelLower.includes('3.1') && modelLower.includes('pro')) {
+            // Gemini 3.1 Pro Preview
+            costUsd = (inputTokens * 2.00 / 1000000) + (outputTokens * 12.00 / 1000000);
+        } else if (modelLower.includes('3.1') && modelLower.includes('lite')) {
+            // Gemini 3.1 Flash-Lite
+            costUsd = (inputTokens * 0.25 / 1000000) + (outputTokens * 1.50 / 1000000);
         } else if (modelLower.includes('pro')) {
+            // Legacy 1.5 Pro
             costUsd = (inputTokens * 1.25 / 1000000) + (outputTokens * 5.00 / 1000000);
         } else {
-            // Flash pricing
+            // Flash 1.5 (Standard) pricing
             costUsd = (inputTokens * 0.075 / 1000000) + (outputTokens * 0.30 / 1000000);
         }
 
@@ -78,7 +85,7 @@ export async function POST(req: NextRequest) {
                     where: { id: userId },
                     data: {
                         currentCredits: {
-                            decrement: isImageModel ? 100 : Math.max(1, Math.ceil(totalTokens / 50)) // 100 credits for images, else 1 per 50 tokens
+                            decrement: isImageModel ? 100 : Math.max(1, Math.ceil(totalTokens / 20)) // 100 credits for images, else 1 per 20 tokens (Calibrated for 2026 costs)
                         }
                     }
                 }),

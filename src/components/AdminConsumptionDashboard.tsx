@@ -55,7 +55,14 @@ const AdminConsumptionDashboard: React.FC = () => {
 
     // Extract unique types and models for filters
     const availableTypes = ['Response', 'World Building', 'Character Creation', 'Market Item', 'NPC Discovery', 'Lore Generation', 'Tactical Brief'];
-    const availableModels = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-3.1-flash-lite-preview'];
+    const availableModels = [
+        'gemini-3.1-flash-lite-preview', 
+        'gemini-3-pro-image-preview', 
+        'gemini-2.5-flash-preview-tts',
+        'models/gemini-2.0-flash-exp',
+        'gemini-1.5-flash', 
+        'gemini-1.5-pro'
+    ];
 
     return (
         <div className="min-h-screen bg-[#0c1114] text-brand-text p-4 md:p-8 inter">
