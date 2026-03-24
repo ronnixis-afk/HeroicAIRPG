@@ -148,9 +148,9 @@ export const DiceTray: React.FC<{ rolls: DiceRoll[] }> = ({ rolls }) => {
         <div className="w-full mt-2 animate-fade-in px-1">
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-body-xs font-bold text-brand-text-muted hover:text-brand-text hover:bg-brand-primary/20 transition-all select-none focus:outline-none mb-1.5 group"
+                className="flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-full bg-transparent hover:bg-brand-primary/10 text-body-sm font-normal text-brand-text-muted hover:text-brand-text transition-all select-none focus:outline-none mb-1 group"
             >
-                <Icon name="dice" className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 group-hover:rotate-12 transition-transform" />
+                <Icon name="dice" className="w-3 h-3 opacity-40 group-hover:opacity-100 group-hover:rotate-12 transition-transform" />
                 <span>Show Dice Rolls ({visibleRolls.length})</span>
             </button>
 
