@@ -159,6 +159,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                                     <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted">User Email</th>
                                     <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted">Activity Type</th>
                                     <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted">Model Used</th>
+                                    <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted text-right">Duration</th>
                                     <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted text-right">Tokens</th>
                                     <th className="p-4 text-xs font-black tracking-wide text-brand-text-muted text-right">Estimated Cost</th>
                                 </tr>
@@ -177,6 +178,9 @@ const AdminConsumptionDashboard: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="p-4 text-[10px] font-medium text-brand-text-muted opacity-80">{log.model}</td>
+                                        <td className="p-4 text-right text-xs font-mono text-brand-text-muted">
+                                            {(log.durationMs / 1000).toFixed(1)}s
+                                        </td>
                                         <td className="p-4 text-right text-xs">
                                             <div className="font-bold text-brand-text">{(log.totalTokens / 1000).toFixed(1)}k</div>
                                             <div className="text-[9px] opacity-40">In: {(log.inputTokens/1000).toFixed(1)}k | Out: {(log.outputTokens/1000).toFixed(1)}k</div>

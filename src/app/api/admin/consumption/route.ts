@@ -79,6 +79,7 @@ export async function GET(req: NextRequest) {
                 outputTokens: log.outputTokens,
                 totalTokens: log.tokens,
                 costUsd: log.costUsd,
+                durationMs: log.durationMs,
                 createdAt: log.createdAt
             })),
             stats: {

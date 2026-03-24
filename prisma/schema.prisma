@@ -25,12 +25,13 @@ model UsageLog {
   id           String   @id @default(uuid())
   userId       String
   User         User     @relation(fields: [userId], references: [id])
-  tokens       Int      // Total tokens
+  tokens       Int      // Total tokens (can be 0 for purely image gen if not using token units)
   inputTokens  Int      @default(0)
   outputTokens Int      @default(0)
   model        String   @default("unknown")
   type         String   @default("response") // world-building, market-item, response, etc.
   costUsd      Float    @default(0.0)
+  durationMs   Int      @default(0)
   createdAt    DateTime @default(now())
 }
 

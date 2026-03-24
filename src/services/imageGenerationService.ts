@@ -60,6 +60,7 @@ export const generateCharacterImage = async (description: string, items: any[], 
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
+            type: 'Profile Picture',
             model: AI_MODELS.IMAGE_GEN,
             contents: { parts: [{ text: prompt }] },
             config: {
@@ -156,6 +157,7 @@ export const generateSceneVisuals = async (
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
+            type: 'Scene Generation',
             model: 'gemini-3-pro-image-preview',
             contents: { parts: parts },
             config: {

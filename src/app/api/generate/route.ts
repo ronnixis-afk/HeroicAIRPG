@@ -35,28 +35,33 @@ export async function POST(req: NextRequest) {
         const { model, contents, config, type = 'Response' } = body;
 
         const apiKey = process.env.GEMINI_API_KEY;
-
         if (!apiKey) {
             return NextResponse.json({ error: 'Gemini API Key is not configured.' }, { status: 500 });
         }
 
         const ai = new GoogleGenAI({ apiKey });
-
+        
+        const startTime = Date.now();
         const response = await ai.models.generateContent({
             model: model,
             contents: contents,
             config: config
         });
+        const durationMs = Date.now() - startTime;
 
         // Detailed Token Usage Extraction
         const inputTokens = response.usageMetadata?.promptTokenCount || 0;
         const outputTokens = response.usageMetadata?.candidatesTokenCount || 0;
         const totalTokens = response.usageMetadata?.totalTokenCount || 0;
 
-        // Pricing Logic (Gemini 1.5 Flash / Pro Estimates)
-        // Note: These are simplified estimates for demonstration
+        // Pricing Logic
         let costUsd = 0;
-        if (model.includes('pro')) {
+        const isImageModel = model.toLowerCase().includes('image') || model.toLowerCase().includes('vision');
+        
+        if (isImageModel) {
+            // Flat rate for image generation (e.g., $0.03 per image)
+            costUsd = 0.03;
+        } else if (model.includes('pro')) {
             costUsd = (inputTokens * 1.25 / 1000000) + (outputTokens * 3.75 / 1000000);
         } else {
             // Flash pricing
@@ -70,7 +75,7 @@ export async function POST(req: NextRequest) {
                     where: { id: userId },
                     data: {
                         currentCredits: {
-                            decrement: Math.max(1, Math.ceil(totalTokens / 100)) // 1 credit per 100 tokens
+                            decrement: isImageModel ? 50 : Math.max(1, Math.ceil(totalTokens / 100)) // 50 credits for images, else 1 per 100 tokens
                         }
                     }
                 }),
@@ -81,8 +86,9 @@ export async function POST(req: NextRequest) {
                         inputTokens: inputTokens,
                         outputTokens: outputTokens,
                         model: model,
-                        type: type, // e.g. 'World Building', 'Market Item', 'Response'
-                        costUsd: costUsd
+                        type: type, 
+                        costUsd: costUsd,
+                        durationMs: durationMs
                     }
                 })
             ]);
@@ -90,10 +96,15 @@ export async function POST(req: NextRequest) {
             console.error("Failed to log detailed usage:", err);
         }
 
+        // Support for both Text and InlineData (Images)
+        let textResult = '';
+        try { textResult = response.text || ''; } catch(e) { /* ignore if not text */ }
+
         return NextResponse.json({
-            text: response.text,
+            text: textResult,
             usageMetadata: response.usageMetadata,
-            candidates: response.candidates
+            candidates: response.candidates,
+            durationMs: durationMs
         });
     } catch (error: any) {
         console.error('Error generating AI content:', error);
