@@ -4,25 +4,60 @@ import { EntityLinker } from './EntityLinker';
 import { DiceTray } from './DiceTray';
 import { Icon } from '../Icon';
 
-const FormattedMessage: React.FC<{ text: string; dialogues?: any[] }> = ({ text, dialogues }) => {
+const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars?: number }> = ({ text, dialogues, visibleChars = Infinity }) => {
     if (!text || typeof text !== 'string') return null;
 
+    let remainingChars = visibleChars;
+
     const renderTextContent = (content: string) => {
+        if (remainingChars <= 0) return null;
+        
         const lines = content.trim().split('\n');
         return (
             <div className="leading-relaxed text-body-base">
                 {lines.map((line, lineIdx) => {
+                    if (remainingChars <= 0) return null;
                     const trimmedLine = line.trim();
-                    if (!trimmedLine) return <div key={lineIdx} className="h-2" />;
+                    if (!trimmedLine) {
+                        return <div key={lineIdx} className="h-2" />;
+                    }
                     const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
+                    
+                    const parts = line.split(/(\*\*.*?\*\*|\*.*?\*)/g);
                     return (
                         <div key={lineIdx} className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'}`}>
                             {isDialogue && <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />}
-                            {line.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, partIndex) => {
-                                if (!part) return null;
-                                if (part.startsWith('**') && part.endsWith('**')) return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={part.slice(2, -2)} /></strong>;
-                                if (part.startsWith('*') && part.endsWith('*')) return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={part.slice(1, -1)} /></em>;
-                                return <EntityLinker key={partIndex} text={part} />;
+                            {parts.map((part, partIndex) => {
+                                if (!part || remainingChars <= 0) return null;
+                                
+                                let contentToShow = part;
+                                let isFormatting = false;
+                                let strippedPart = part;
+
+                                if (part.startsWith('**') && part.endsWith('**')) {
+                                    strippedPart = part.slice(2, -2);
+                                    isFormatting = true;
+                                } else if (part.startsWith('*') && part.endsWith('*')) {
+                                    strippedPart = part.slice(1, -1);
+                                    isFormatting = true;
+                                }
+
+                                if (remainingChars < strippedPart.length) {
+                                    contentToShow = strippedPart.slice(0, remainingChars);
+                                    remainingChars = 0;
+                                } else {
+                                    contentToShow = strippedPart;
+                                    remainingChars -= strippedPart.length;
+                                }
+
+                                if (isFormatting) {
+                                    if (part.startsWith('**')) {
+                                        return <strong key={partIndex} className="font-bold text-brand-text"><EntityLinker text={contentToShow} /></strong>;
+                                    } else {
+                                        return <em key={partIndex} className="italic text-brand-text"><EntityLinker text={contentToShow} /></em>;
+                                    }
+                                }
+                                return <EntityLinker key={partIndex} text={contentToShow} />;
                             })}
                         </div>
                     );
@@ -31,35 +66,61 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[] }> = ({ text,
         );
     };
 
-    const dialoguesContent = dialogues && dialogues.length > 0 ? (
-        <div className="my-6 space-y-4">
-            {dialogues.map((d, idx) => (
-                <div key={idx} className="animate-fade-in">
-                    <div className="mb-3 pt-3 relative">
-                        <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
-                        <strong className="font-bold text-brand-text italic block mb-1">
-                            <EntityLinker text={d.actorName} />
-                        </strong>
-                        <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
-                            <EntityLinker text={d.content} />
-                        </span>
-                    </div>
-                </div>
-            ))}
-        </div>
-    ) : null;
+    const renderDialogues = () => {
+        if (!dialogues || dialogues.length === 0 || remainingChars <= 0) return null;
 
-    // Sandwich Logic: If we have multiple paragraphs and dialogues, put dialogues between P1 and P2
+        return (
+            <div className="my-6 space-y-4">
+                {dialogues.map((d, idx) => {
+                    if (remainingChars <= 0) return null;
+                    
+                    let actorName = d.actorName;
+                    let content = d.content;
+
+                    if (remainingChars < actorName.length) {
+                        actorName = actorName.slice(0, remainingChars);
+                        content = "";
+                        remainingChars = 0;
+                    } else {
+                        remainingChars -= actorName.length;
+                        if (remainingChars < content.length) {
+                            content = content.slice(0, remainingChars);
+                            remainingChars = 0;
+                        } else {
+                            remainingChars -= content.length;
+                        }
+                    }
+
+                    return (
+                        <div key={idx} className="animate-fade-in">
+                            <div className="mb-3 pt-3 relative">
+                                <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
+                                <strong className="font-bold text-brand-text italic block mb-1">
+                                    <EntityLinker text={actorName} />
+                                </strong>
+                                {content && (
+                                    <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
+                                        <EntityLinker text={content} />
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
     
-    if (dialoguesContent && paragraphs.length >= 2) {
+    if (dialogues && dialogues.length > 0 && paragraphs.length >= 2) {
         return (
             <>
                 {renderTextContent(paragraphs[0])}
-                {dialoguesContent}
+                {renderDialogues()}
                 {paragraphs.slice(1).map((para, i) => (
                     <React.Fragment key={i}>
-                        <div className="h-4" />
+                        {remainingChars > 0 && <div className="h-4" />}
                         {renderTextContent(para)}
                     </React.Fragment>
                 ))}
@@ -67,17 +128,16 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[] }> = ({ text,
         );
     }
 
-    // Default Fallback / Single Paragraph / Horizontal Rule Sections
     const sections = text.split('\n---\n');
     return (
         <>
             {sections.map((section, sectionIdx) => (
                 <React.Fragment key={sectionIdx}>
-                    {sectionIdx > 0 && <hr className="my-3 border-brand-primary/50" />}
+                    {sectionIdx > 0 && remainingChars > 0 && <hr className="my-3 border-brand-primary/50" />}
                     {renderTextContent(section)}
                 </React.Fragment>
             ))}
-            {dialoguesContent}
+            {renderDialogues()}
         </>
     );
 };
@@ -88,10 +148,55 @@ interface MessageItemProps {
     onClearChat: () => void;
     isPlaying: boolean;
     showAlignmentOptions?: boolean;
+    isLatest?: boolean;
 }
 
-export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearChat, isPlaying, showAlignmentOptions = true }) => {
+export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearChat, isPlaying, showAlignmentOptions = true, isLatest = false }) => {
     const isUser = msg.sender === 'user';
+    const [visibleChars, setVisibleChars] = React.useState(isUser ? Infinity : 0);
+    const [isRevealing, setIsRevealing] = React.useState(!isUser && isLatest);
+    
+    const totalChars = React.useMemo(() => {
+        let count = (msg.content || '').length;
+        if (msg.dialogues) {
+            msg.dialogues.forEach(d => {
+                count += (d.actorName || '').length + (d.content || '').length;
+            });
+        }
+        return count;
+    }, [msg.content, msg.dialogues]);
+
+    const msgTimestamp = React.useMemo(() => {
+        const match = msg.id.match(/-(\d+)$/);
+        return match ? parseInt(match[1]) : Date.now();
+    }, [msg.id]);
+
+    const isRecentlyCreated = React.useMemo(() => Date.now() - msgTimestamp < 10000, [msgTimestamp]);
+
+    React.useEffect(() => {
+        if (isUser || !isLatest || !isRecentlyCreated) {
+            setVisibleChars(Infinity);
+            setIsRevealing(false);
+            return;
+        }
+
+        // Reveal effect
+        let current = 0;
+        const speed = 10; // slightly faster for better feeel
+        const interval = setInterval(() => {
+            current += 3; // reveal 3 chars at a time
+            if (current >= totalChars) {
+                setVisibleChars(Infinity);
+                setIsRevealing(false);
+                clearInterval(interval);
+            } else {
+                setVisibleChars(current);
+                window.dispatchEvent(new CustomEvent('chat-reveal-update'));
+            }
+        }, speed);
+
+        return () => clearInterval(interval);
+    }, [isLatest, isUser, totalChars, isRecentlyCreated]);
 
     return (
         <div className="flex flex-col items-start animate-fade-in w-full">
@@ -105,10 +210,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                     </div>
                 ) : (
                     <div className={msg.mode === 'OOC' ? 'text-brand-text-muted/80' : 'text-brand-text'}>
-                        <FormattedMessage text={msg.content || ''} dialogues={msg.dialogues} />
-                        {msg.rolls && <DiceTray rolls={msg.rolls} />}
+                        <FormattedMessage 
+                            text={msg.content || ''} 
+                            dialogues={msg.dialogues} 
+                            visibleChars={visibleChars}
+                        />
+                        
+                        {!isRevealing && msg.rolls && <DiceTray rolls={msg.rolls} />}
 
-                        {showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (
+                        {!isRevealing && showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-4 animate-fade-in">
                                 {msg.alignmentOptions.map((opt, idx) => {
                                     let iconFile = '';
@@ -139,30 +249,32 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                         )}
 
                         {/* Contextual Action Tray: Slides out on hover/focus */}
-                        <div className="grid transition-all duration-300 ease-in-out grid-rows-[0fr] group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
-                            <div className="overflow-hidden">
-                                <div className="flex justify-between items-center w-full pt-4 pb-1 animate-fade-in">
-                                    <div className="flex gap-2">
+                        {!isRevealing && (
+                            <div className="grid transition-all duration-300 ease-in-out grid-rows-[0fr] group-hover:grid-rows-[1fr] group-focus-within:grid-rows-[1fr] opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
+                                <div className="overflow-hidden">
+                                    <div className="flex justify-between items-center w-full pt-4 pb-1 animate-fade-in">
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onSpeak(msg.content || '', msg.id)}
+                                                className={`btn-secondary btn-sm rounded-full gap-2 ${isPlaying ? 'bg-brand-accent/10 border-brand-accent text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-text'}`}
+                                                title={isPlaying ? "Stop" : "Read aloud"}
+                                            >
+                                                <Icon name={isPlaying ? "close" : "play"} className="w-3.5 h-3.5" />
+                                                <span className="font-bold tracking-normal">{isPlaying ? "Stop" : "Listen"}</span>
+                                            </button>
+                                        </div>
                                         <button
-                                            onClick={() => onSpeak(msg.content || '', msg.id)}
-                                            className={`btn-secondary btn-sm rounded-full gap-2 ${isPlaying ? 'bg-brand-accent/10 border-brand-accent text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-text'}`}
-                                            title={isPlaying ? "Stop" : "Read aloud"}
+                                            onClick={onClearChat}
+                                            className="btn-tertiary text-[10px] gap-1.5 text-brand-danger hover:text-white hover:bg-brand-danger/20 px-3 py-1.5 rounded-full transition-all"
+                                            title="Clear history up to this point"
                                         >
-                                            <Icon name={isPlaying ? "close" : "play"} className="w-3.5 h-3.5" />
-                                            <span className="font-bold tracking-normal">{isPlaying ? "Stop" : "Listen"}</span>
+                                            <Icon name="trash" className="w-3 h-3" />
+                                            <span>Clear Previous</span>
                                         </button>
                                     </div>
-                                    <button
-                                        onClick={onClearChat}
-                                        className="btn-tertiary text-[10px] gap-1.5 text-brand-danger hover:text-white hover:bg-brand-danger/20 px-3 py-1.5 rounded-full transition-all"
-                                        title="Clear history up to this point"
-                                    >
-                                        <Icon name="trash" className="w-3 h-3" />
-                                        <span>Clear Previous</span>
-                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 )}
             </div>

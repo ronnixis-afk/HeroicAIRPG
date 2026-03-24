@@ -293,6 +293,27 @@ const ChatView: React.FC = () => {
         return null;
     }, [processedMessages, gameData?.combatState?.isActive]);
 
+    const smoothScrollToBottom = () => {
+        const container = document.querySelector('.chat-scroll-container');
+        if (container) {
+            // Only scroll if we are within 150px of the bottom (user hasn't scrolled up to read)
+            const isNearBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) < 150;
+            if (isNearBottom) {
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'end'
+                    });
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener('chat-reveal-update', smoothScrollToBottom);
+        return () => window.removeEventListener('chat-reveal-update', smoothScrollToBottom);
+    }, []);
+
     return (
         <div className="h-full flex flex-col overflow-hidden relative">
             <div className="absolute top-[3px] right-[3px] z-40">
@@ -303,8 +324,6 @@ const ChatView: React.FC = () => {
                 <div className="max-w-3xl mx-auto p-4 space-y-4">
                     {processedMessages.map((msg, index) => {
                         if (!msg) return null;
-
-
 
                         if (msg.sender === 'system_group') {
                             return (
@@ -336,6 +355,8 @@ const ChatView: React.FC = () => {
                             );
                         }
 
+                        const isLatest = index === processedMessages.length - 1;
+
                         return (
                             <React.Fragment key={msg.id}>
                                 <MessageItem
@@ -344,6 +365,7 @@ const ChatView: React.FC = () => {
                                     isPlaying={playingMessageId === msg.id}
                                     showAlignmentOptions={msg.id === latestAiMessageWithAlignment}
                                     onClearChat={() => handleClearPrevious(msg.id)}
+                                    isLatest={isLatest}
                                 />
                             </React.Fragment>
                         );

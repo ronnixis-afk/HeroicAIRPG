@@ -29,7 +29,55 @@ export const useTime = (
         
         const hostility = getCurrentZoneHostility();
         const { roll, matrix } = generateEncounterRoll(`${type === 'short' ? 'Short' : 'Long'} Rest`, hostility);
-        
+
+        // Apply mechanical recovery
+        let playerHeal = 0;
+        const companionHeals: Record<string, number> = {};
+        if (type === 'short') {
+            const level = gameData.playerCharacter.level;
+            for (let i = 0; i < level; i++) playerHeal += Math.floor(Math.random() * 8) + 1;
+            gameData.companions.forEach(c => {
+                let heal = 0;
+                for (let i = 0; i < (c.level || 1); i++) heal += Math.floor(Math.random() * 8) + 1;
+                companionHeals[c.id] = heal;
+            });
+        }
+
+        const isSafe = roll.outcome !== 'Encounter';
+
+        if (isSafe) {
+            const genericMessage = type === 'short'
+                ? "You take a moment to catch your breath and tend to your gear. The brief respite clears your mind and restores your physical energy for the path ahead."
+                : "You establish a secure camp and surrender to a deep, restorative sleep. When you finally stir, your wounds are healed and your full potential is completely restored.";
+
+            // Log player intent and narrative response (Normal chat format)
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `rest-intent-${Date.now()}`,
+                    sender: 'user',
+                    content: `I take a ${type === 'short' ? 'Short' : 'Long'} Rest.`,
+                    mode: 'CHAR'
+                }
+            });
+
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `rest-narrative-${Date.now() + 1}`,
+                    sender: 'ai',
+                    content: genericMessage,
+                    rolls: [roll],
+                    type: 'neutral'
+                }
+            });
+
+            // Apply mechanics (HP, Time, Abilities)
+            dispatch({ type: 'REST', payload: { type, newTime, playerHeal, companionHeals } });
+            setIsAiGenerating(false);
+            return;
+        }
+
         setIsAiGenerating(true);
         let isHostileIntent = false;
         let generativeCombatInstruction = "";
@@ -67,18 +115,6 @@ export const useTime = (
 
         dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-rest-enc-${Date.now()}`, sender: 'system', content: `Danger Check: ${roll.total}${preRolledSummary ? '\n' + preRolledSummary : ''}`, rolls: preRolledRolls, type: 'neutral' } });
 
-        // Apply mechanical recovery
-        let playerHeal = 0;
-        const companionHeals: Record<string, number> = {};
-        if (type === 'short') {
-            const level = gameData.playerCharacter.level;
-            for(let i=0; i<level; i++) playerHeal += Math.floor(Math.random() * 8) + 1;
-            gameData.companions.forEach(c => {
-                let heal = 0;
-                for(let i=0; i<(c.level || 1); i++) heal += Math.floor(Math.random() * 8) + 1;
-                companionHeals[c.id] = heal;
-            });
-        }
         dispatch({ type: 'REST', payload: { type, newTime, playerHeal, companionHeals } });
 
         const mechanicsResult = {
