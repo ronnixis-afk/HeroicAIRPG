@@ -77,8 +77,8 @@ const AdminConsumptionDashboard: React.FC = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-4xl font-black text-brand-text mb-2 tracking-tight">Admin Consumption Dashboard</h1>
-                        <p className="text-brand-text-muted text-sm">Monitor AI Usage and Real-Time Infrastructure Costs</p>
+                        <h3 className="text-2xl font-black text-brand-text mb-1 tracking-tight">Admin Consumption Dashboard</h3>
+                        <p className="text-brand-text-muted text-xs">Monitor AI Usage and Real-Time Infrastructure Costs</p>
                     </div>
                 </div>
 
@@ -121,38 +121,41 @@ const AdminConsumptionDashboard: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="bg-brand-surface border border-brand-primary/10 rounded-2xl p-4 mb-6 flex flex-wrap gap-4 items-center shadow-lg">
-                    <div className="flex items-center gap-2 text-sm font-bold text-brand-text-muted px-2">
-                        <Icon name="settings" className="w-4 h-4" />
-                        <span>Filter By</span>
+                <div className="bg-brand-surface border border-brand-primary/10 rounded-2xl p-5 mb-6 shadow-lg">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-brand-accent/60 px-1 mb-4 uppercase tracking-[0.2em]">
+                        <Icon name="settings" className="w-3 h-3" />
+                        <span>Filters</span>
                     </div>
                     
-                    <select 
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer min-w-[160px]"
-                    >
-                        <option value="">All Call Types</option>
-                        {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <select 
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                            className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2.5 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full"
+                        >
+                            <option value="">All Call Types</option>
+                            {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
 
-                    <select 
-                        value={modelFilter}
-                        onChange={(e) => setModelFilter(e.target.value)}
-                        className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer min-w-[160px]"
-                    >
-                        <option value="">All AI Models</option>
-                        {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
-                    </select>
+                        <select 
+                            value={modelFilter}
+                            onChange={(e) => setModelFilter(e.target.value)}
+                            className="bg-[#0c1114] border border-brand-primary/20 rounded-lg px-4 py-2.5 text-sm text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full"
+                        >
+                            <option value="">All AI Models</option>
+                            {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
+                        </select>
+                    </div>
 
                     {(typeFilter || modelFilter) && (
-                        <button 
-                            onClick={() => { setTypeFilter(''); setModelFilter(''); }}
-                            className="text-xs font-bold text-brand-accent hover:underline px-2"
-                        >
-                            Reset Filters
-                        </button>
+                        <div className="mt-4 flex justify-end">
+                            <button 
+                                onClick={() => { setTypeFilter(''); setModelFilter(''); }}
+                                className="text-[10px] font-black text-brand-accent hover:underline uppercase tracking-widest"
+                            >
+                                Reset Filters
+                            </button>
+                        </div>
                     )}
                 </div>
 
