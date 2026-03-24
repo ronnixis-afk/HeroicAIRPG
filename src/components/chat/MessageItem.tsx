@@ -4,31 +4,38 @@ import { EntityLinker } from './EntityLinker';
 import { DiceTray } from './DiceTray';
 import { Icon } from '../Icon';
 
-const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars?: number }> = ({ text, dialogues, visibleChars = Infinity }) => {
+const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleLines?: number }> = ({ text, dialogues, visibleLines = Infinity }) => {
     if (!text || typeof text !== 'string') return null;
 
-    let remainingChars = visibleChars;
+    let currentLineIdx = 0;
 
     const renderTextContent = (content: string) => {
-        if (remainingChars <= 0) return null;
-        
         const lines = content.trim().split('\n');
         return (
             <div className="leading-relaxed text-body-base">
                 {lines.map((line, lineIdx) => {
-                    if (remainingChars <= 0) return null;
                     const trimmedLine = line.trim();
                     if (!trimmedLine) {
                         return <div key={lineIdx} className="h-2" />;
                     }
-                    const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
                     
+                    const isVisible = currentLineIdx < visibleLines;
+                    const isJustRevealed = isVisible && currentLineIdx === Math.floor(visibleLines) - 1 && visibleLines !== Infinity;
+                    currentLineIdx++;
+
+                    if (!isVisible) return null;
+
+                    const isDialogue = trimmedLine.startsWith('**') || (trimmedLine.startsWith('*') && trimmedLine.includes(':'));
                     const parts = line.split(/(\*\*.*?\*\*|\*.*?\*)/g);
+                    
                     return (
-                        <div key={lineIdx} className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'}`}>
+                        <div 
+                            key={lineIdx} 
+                            className={`relative ${isDialogue ? 'mt-3 pt-3' : 'mb-1'} ${isJustRevealed ? 'animate-reveal-line' : ''}`}
+                        >
                             {isDialogue && <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />}
                             {parts.map((part, partIndex) => {
-                                if (!part || remainingChars <= 0) return null;
+                                if (!part) return null;
                                 
                                 let contentToShow = part;
                                 let isFormatting = false;
@@ -42,13 +49,7 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars
                                     isFormatting = true;
                                 }
 
-                                if (remainingChars < strippedPart.length) {
-                                    contentToShow = strippedPart.slice(0, remainingChars);
-                                    remainingChars = 0;
-                                } else {
-                                    contentToShow = strippedPart;
-                                    remainingChars -= strippedPart.length;
-                                }
+                                contentToShow = strippedPart;
 
                                 if (isFormatting) {
                                     if (part.startsWith('**')) {
@@ -67,32 +68,22 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars
     };
 
     const renderDialogues = () => {
-        if (!dialogues || dialogues.length === 0 || remainingChars <= 0) return null;
+        if (!dialogues || dialogues.length === 0) return null;
 
         return (
             <div className="my-6 space-y-4">
                 {dialogues.map((d, idx) => {
-                    if (remainingChars <= 0) return null;
+                    const actorName = d.actorName;
+                    const content = d.content;
                     
-                    let actorName = d.actorName;
-                    let content = d.content;
+                    const isVisible = currentLineIdx < visibleLines;
+                    const isJustRevealed = isVisible && currentLineIdx === Math.floor(visibleLines) - 1 && visibleLines !== Infinity;
+                    currentLineIdx++;
 
-                    if (remainingChars < actorName.length) {
-                        actorName = actorName.slice(0, remainingChars);
-                        content = "";
-                        remainingChars = 0;
-                    } else {
-                        remainingChars -= actorName.length;
-                        if (remainingChars < content.length) {
-                            content = content.slice(0, remainingChars);
-                            remainingChars = 0;
-                        } else {
-                            remainingChars -= content.length;
-                        }
-                    }
+                    if (!isVisible) return null;
 
                     return (
-                        <div key={idx} className="animate-fade-in">
+                        <div key={idx} className={isJustRevealed ? 'animate-reveal-line' : 'animate-fade-in'}>
                             <div className="mb-3 pt-3 relative">
                                 <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
                                 <strong className="font-bold text-brand-text italic block mb-1">
@@ -120,7 +111,7 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars
                 {renderDialogues()}
                 {paragraphs.slice(1).map((para, i) => (
                     <React.Fragment key={i}>
-                        {remainingChars > 0 && <div className="h-4" />}
+                        {currentLineIdx < visibleLines && <div className="h-4" />}
                         {renderTextContent(para)}
                     </React.Fragment>
                 ))}
@@ -133,7 +124,7 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleChars
         <>
             {sections.map((section, sectionIdx) => (
                 <React.Fragment key={sectionIdx}>
-                    {sectionIdx > 0 && remainingChars > 0 && <hr className="my-3 border-brand-primary/50" />}
+                    {sectionIdx > 0 && currentLineIdx < visibleLines && <hr className="my-3 border-brand-primary/50" />}
                     {renderTextContent(section)}
                 </React.Fragment>
             ))}
@@ -153,16 +144,29 @@ interface MessageItemProps {
 
 export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearChat, isPlaying, showAlignmentOptions = true, isLatest = false }) => {
     const isUser = msg.sender === 'user';
-    const [visibleChars, setVisibleChars] = React.useState(isUser ? Infinity : 0);
+    const [visibleLines, setVisibleLines] = React.useState(isUser ? Infinity : 0);
     const [isRevealing, setIsRevealing] = React.useState(!isUser && isLatest);
     
-    const totalChars = React.useMemo(() => {
-        let count = (msg.content || '').length;
-        if (msg.dialogues) {
-            msg.dialogues.forEach(d => {
-                count += (d.actorName || '').length + (d.content || '').length;
+    const totalLines = React.useMemo(() => {
+        let count = 0;
+        
+        // Count lines in content
+        if (msg.content) {
+            const sections = msg.content.split('\n---\n');
+            sections.forEach(section => {
+                const paragraphs = section.split('\n\n').filter(p => p.trim().length > 0);
+                paragraphs.forEach(para => {
+                    const lines = para.trim().split('\n');
+                    count += lines.filter(l => l.trim().length > 0).length;
+                });
             });
         }
+        
+        // Count dialogues
+        if (msg.dialogues) {
+            count += msg.dialogues.length;
+        }
+        
         return count;
     }, [msg.content, msg.dialogues]);
 
@@ -175,28 +179,29 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
 
     React.useEffect(() => {
         if (isUser || !isLatest || !isRecentlyCreated) {
-            setVisibleChars(Infinity);
+            setVisibleLines(Infinity);
             setIsRevealing(false);
             return;
         }
 
-        // Reveal effect
+        // Reveal effect line by line
         let current = 0;
-        const speed = 10; // slightly faster for better feeel
+        const lineSpeed = 300; // time between lines
+        
         const interval = setInterval(() => {
-            current += 3; // reveal 3 chars at a time
-            if (current >= totalChars) {
-                setVisibleChars(Infinity);
+            current += 1;
+            if (current >= totalLines) {
+                setVisibleLines(Infinity);
                 setIsRevealing(false);
                 clearInterval(interval);
             } else {
-                setVisibleChars(current);
+                setVisibleLines(current);
                 window.dispatchEvent(new CustomEvent('chat-reveal-update'));
             }
-        }, speed);
+        }, lineSpeed);
 
         return () => clearInterval(interval);
-    }, [isLatest, isUser, totalChars, isRecentlyCreated]);
+    }, [isLatest, isUser, totalLines, isRecentlyCreated]);
 
     return (
         <div id={`msg-${msg.id}`} className="flex flex-col items-start animate-fade-in w-full scroll-mt-6">
@@ -213,7 +218,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                         <FormattedMessage 
                             text={msg.content || ''} 
                             dialogues={msg.dialogues} 
-                            visibleChars={visibleChars}
+                            visibleLines={visibleLines}
                         />
                         
                         {!isRevealing && msg.rolls && <DiceTray rolls={msg.rolls} />}
