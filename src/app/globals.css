@@ -397,8 +397,6 @@
   animation: exit 0.8s ease-in forwards;
 }
 
-
-
 @keyframes toast-zoom-in-out {
   0% { opacity: 0; transform: scale(0.9) translateY(20px); }
   3% { opacity: 1; transform: scale(1) translateY(0); }
@@ -408,4 +406,25 @@
 
 .animate-toast-container {
   animation: toast-zoom-in-out 10s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  @apply relative overflow-hidden bg-white/5 rounded-md;
+}
+
+.shimmer::after {
+  content: "";
+  @apply absolute inset-0;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
 }

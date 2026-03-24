@@ -51,7 +51,7 @@ const AdminConsumptionDashboard: React.FC = () => {
         }
     }, [isLoaded, user, typeFilter, modelFilter, period]);
 
-    if (!isLoaded || loading) {
+    if (!isLoaded) {
         return (
             <div className="min-h-screen bg-[#0c1114] flex items-center justify-center">
                 <div className="w-12 h-12 border-4 border-brand-accent border-t-transparent rounded-full animate-spin" />
@@ -62,6 +62,22 @@ const AdminConsumptionDashboard: React.FC = () => {
     // Dynamic types and models from API
     const availableTypes = data?.filters?.types || [];
     const availableModels = data?.filters?.models || [];
+
+    const SkeletonValue = ({ className = "w-24 h-8" }) => (
+        <div className={`shimmer rounded-lg ${className}`} />
+    );
+
+    const SkeletonRow = () => (
+        <tr className="border-b border-brand-primary/5">
+            <td className="p-4"><div className="shimmer h-4 w-24 rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-32 rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-20 rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-28 rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-12 ml-auto rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-16 ml-auto rounded" /></td>
+            <td className="p-4"><div className="shimmer h-4 w-20 ml-auto rounded" /></td>
+        </tr>
+    );
 
     return (
         <div className="h-screen bg-[#0c1114] text-brand-text overflow-y-auto inter custom-scroll">
@@ -88,7 +104,9 @@ const AdminConsumptionDashboard: React.FC = () => {
                             <Icon name="currencyCoins" className="w-5 h-5" />
                             <span className="text-xs font-black opacity-60">Total Cost</span>
                         </div>
-                        <div className="text-3xl font-bold text-brand-text mb-1">${data?.stats.totalCostUsd.toFixed(4) || '0.0000'}</div>
+                        <div className="text-3xl font-bold text-brand-text mb-1">
+                            {loading && !data ? <SkeletonValue /> : `$${data?.stats.totalCostUsd.toFixed(4) || '0.0000'}`}
+                        </div>
                         <div className="text-[10px] text-brand-text-muted">Lifetime Expenditure in USD</div>
                     </div>
 
@@ -97,7 +115,9 @@ const AdminConsumptionDashboard: React.FC = () => {
                             <Icon name="sparkles" className="w-5 h-5" />
                             <span className="text-xs font-black opacity-60">Period Cost</span>
                         </div>
-                        <div className="text-3xl font-bold text-brand-text mb-1">${data?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}</div>
+                        <div className="text-3xl font-bold text-brand-text mb-1">
+                            {loading && !data ? <SkeletonValue /> : `$${data?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}`}
+                        </div>
                         <div className="text-[10px] text-brand-text-muted">Total Cost For Selected Period</div>
                     </div>
 
@@ -106,7 +126,9 @@ const AdminConsumptionDashboard: React.FC = () => {
                             <Icon name="status" className="w-5 h-5" />
                             <span className="text-xs font-black opacity-60">Total Tokens</span>
                         </div>
-                        <div className="text-3xl font-bold text-brand-text mb-1">{(data?.stats.totalTokens ? data.stats.totalTokens / 1000000 : 0).toFixed(2)}M</div>
+                        <div className="text-3xl font-bold text-brand-text mb-1">
+                            {loading && !data ? <SkeletonValue /> : `${(data?.stats.totalTokens ? data.stats.totalTokens / 1000000 : 0).toFixed(2)}M`}
+                        </div>
                         <div className="text-[10px] text-brand-text-muted">Total Volume In and Out</div>
                     </div>
 
@@ -115,7 +137,9 @@ const AdminConsumptionDashboard: React.FC = () => {
                             <Icon name="users" className="w-5 h-5" />
                             <span className="text-xs font-black opacity-60">Period Activity</span>
                         </div>
-                        <div className="text-3xl font-bold text-brand-text mb-1">{data?.logs.length || 0}</div>
+                        <div className="text-3xl font-bold text-brand-text mb-1">
+                            {loading && !data ? <SkeletonValue className="w-16 h-8" /> : (data?.logs.length || 0)}
+                        </div>
                         <div className="text-[10px] text-brand-text-muted">Interactions In This Period</div>
                     </div>
                 </div>
@@ -128,11 +152,12 @@ const AdminConsumptionDashboard: React.FC = () => {
                             <button
                                 key={p}
                                 onClick={() => setPeriod(p)}
+                                disabled={loading}
                                 className={`px-6 h-full rounded-xl text-[10px] font-black transition-all ${
                                     period === p 
                                     ? 'bg-brand-accent text-black shadow-lg shadow-brand-accent/20' 
                                     : 'text-brand-text-muted hover:text-brand-text'
-                                }`}
+                                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {p === 'week' ? 'This Week' : p === 'month' ? 'This Month' : 'Today'}
                             </button>
@@ -147,7 +172,8 @@ const AdminConsumptionDashboard: React.FC = () => {
                         <select 
                             value={typeFilter}
                             onChange={(e) => setTypeFilter(e.target.value)}
-                            className="bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px]"
+                            disabled={loading}
+                            className={`bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px] ${loading ? 'opacity-50' : ''}`}
                         >
                             <option value="">All Call Types</option>
                             {availableTypes.map(t => <option key={t} value={t}>{t}</option>)}
@@ -156,7 +182,8 @@ const AdminConsumptionDashboard: React.FC = () => {
                         <select 
                             value={modelFilter}
                             onChange={(e) => setModelFilter(e.target.value)}
-                            className="bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px]"
+                            disabled={loading}
+                            className={`bg-[#0c1114] border border-brand-primary/20 rounded-xl px-4 h-11 text-xs text-brand-text focus:outline-none focus:border-brand-accent transition-colors cursor-pointer w-full md:w-auto md:min-w-[180px] ${loading ? 'opacity-50' : ''}`}
                         >
                             <option value="">All AI Models</option>
                             {availableModels.map(m => <option key={m} value={m}>{m}</option>)}
@@ -174,7 +201,12 @@ const AdminConsumptionDashboard: React.FC = () => {
                 </div>
 
                 {/* Log Table */}
-                <div className="bg-brand-surface border border-brand-primary/10 rounded-2xl shadow-2xl overflow-hidden mb-20">
+                <div className="bg-brand-surface border border-brand-primary/10 rounded-2xl shadow-2xl overflow-hidden mb-20 relative">
+                    {loading && data && (
+                        <div className="absolute inset-x-0 top-0 h-1 bg-brand-accent/30 overflow-hidden z-50">
+                            <div className="h-full bg-brand-accent w-1/3 animate-shimmer" style={{ animation: 'shimmer 1s infinite linear' }} />
+                        </div>
+                    )}
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -188,35 +220,41 @@ const AdminConsumptionDashboard: React.FC = () => {
                                     <th className="p-4 text-xs font-black text-brand-text-muted text-right">Estimated Cost</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {data?.logs.map((log) => (
-                                    <tr key={log.id} className="border-b border-brand-primary/5 hover:bg-brand-primary/5 transition-colors group">
-                                        <td className="p-4 text-xs text-brand-text-muted">
-                                            {new Date(log.createdAt).toLocaleDateString()} <br/>
-                                            <span className="opacity-50">{new Date(log.createdAt).toLocaleTimeString()}</span>
-                                        </td>
-                                        <td className="p-4 text-xs font-medium text-brand-text truncate max-w-[150px]">{log.email}</td>
-                                        <td className="p-4">
-                                            <span className="px-2 py-1 rounded-md bg-brand-primary/10 text-[10px] font-bold text-brand-accent border border-brand-primary/10">
-                                                {log.type}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-[10px] font-medium text-brand-text-muted opacity-80">{log.model}</td>
-                                        <td className="p-4 text-right text-xs font-mono text-brand-text-muted">
-                                            {(log.durationMs / 1000).toFixed(1)}s
-                                        </td>
-                                        <td className="p-4 text-right text-xs">
-                                            <div className="font-bold text-brand-text">{(log.totalTokens / 1000).toFixed(1)}k</div>
-                                            <div className="text-[9px] opacity-40">In: {(log.inputTokens/1000).toFixed(1)}k | Out: {(log.outputTokens/1000).toFixed(1)}k</div>
-                                        </td>
-                                        <td className="p-4 text-right text-sm font-bold text-green-400 group-hover:scale-110 transition-transform origin-right">
-                                            ${log.costUsd.toFixed(5)}
-                                        </td>
-                                    </tr>
-                                ))}
-                                {(!data?.logs || data.logs.length === 0) && (
+                            <tbody className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+                                {loading && !data ? (
+                                    <>
+                                        {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+                                    </>
+                                ) : (
+                                    data?.logs.map((log) => (
+                                        <tr key={log.id} className="border-b border-brand-primary/5 hover:bg-brand-primary/5 transition-colors group">
+                                            <td className="p-4 text-xs text-brand-text-muted">
+                                                {new Date(log.createdAt).toLocaleDateString()} <br/>
+                                                <span className="opacity-50">{new Date(log.createdAt).toLocaleTimeString()}</span>
+                                            </td>
+                                            <td className="p-4 text-xs font-medium text-brand-text truncate max-w-[150px]">{log.email}</td>
+                                            <td className="p-4">
+                                                <span className="px-2 py-1 rounded-md bg-brand-primary/10 text-[10px] font-bold text-brand-accent border border-brand-primary/10">
+                                                    {log.type}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-[10px] font-medium text-brand-text-muted opacity-80">{log.model}</td>
+                                            <td className="p-4 text-right text-xs font-mono text-brand-text-muted">
+                                                {(log.durationMs / 1000).toFixed(1)}s
+                                            </td>
+                                            <td className="p-4 text-right text-xs">
+                                                <div className="font-bold text-brand-text">{(log.totalTokens / 1000).toFixed(1)}k</div>
+                                                <div className="text-[9px] opacity-40">In: {(log.inputTokens/1000).toFixed(1)}k | Out: {(log.outputTokens/1000).toFixed(1)}k</div>
+                                            </td>
+                                            <td className="p-4 text-right text-sm font-bold text-green-400 group-hover:scale-110 transition-transform origin-right">
+                                                ${log.costUsd.toFixed(5)}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                                {!loading && (!data?.logs || data.logs.length === 0) && (
                                     <tr>
-                                        <td colSpan={6} className="p-12 text-center text-brand-text-muted italic opacity-50">
+                                        <td colSpan={7} className="p-12 text-center text-brand-text-muted italic opacity-50">
                                             No Consumption Records Found matching these filters.
                                         </td>
                                     </tr>
@@ -231,3 +269,4 @@ const AdminConsumptionDashboard: React.FC = () => {
 };
 
 export default AdminConsumptionDashboard;
+
