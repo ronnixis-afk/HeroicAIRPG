@@ -219,8 +219,8 @@ const StoreView: React.FC = () => {
 
     return (
         <div className="max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 pt-8 pb-24 pr-1">
-                <div className="animate-fade-in">
+            <div className="flex-1 overflow-y-auto custom-scroll p-4 pb-24 pr-1">
+                <div className="animate-fade-in pt-8">
                     <PageHeader 
                         title="Merchant" 
                         subtitle="Buy equipment and supplies." 

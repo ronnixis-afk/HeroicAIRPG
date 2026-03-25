@@ -78,25 +78,34 @@ export const generateCombatEncounterSuggestions = async (
     excludeList: string[] = []
 ): Promise<ActorSuggestion[]> => {
 
-    const slotsInstruction = enemySlots
+    const slotsInstruction = enemySlots && enemySlots.length > 0
         ? `**SYSTEM OVERRIDE - MANDATORY ENEMY SPECS**:
            You MUST generate EXACTLY ${enemySlots.length} enemies matching these slots sequentially:
            ${enemySlots.map((s, i) => `${i + 1}. Difficulty Preset: ${s.difficulty}`).join('\n')}`
-        : 'Generate a reasonable number of enemies for a balanced fight.';
+        : 'Based on the [PARTY STRENGTH] and [HOSTILES ALREADY PRESENT], generate a REASONABLE and BALANCED number of reinforcements to make this a challenging but fair fight.';
 
     const shipMandate = hasShip
         ? `\n**MANDATORY SHIP RULE**: The player party currently utilizes a VEHICLE/SHIP. You MUST set 'isShip': true for at least ONE of the generated enemies (usually the highest difficulty one) to provide a fair engagement scale.`
         : '';
+
+    const partyStrength = `Party Level: ${partyLevel}, Members: ${gameData.playerCharacter.name} + ${gameData.companions.filter(c => c.isInParty).length} companions.`;
+    const hostilesPresent = existingActors.length > 0 
+        ? `Hostiles already engaged: ${existingActors.map(a => `${a.name} (${a.rank || 'Normal'})`).join(', ')}`
+        : 'No hostiles are currently engaged.';
 
     const prompt = `Generate a balanced combat encounter based on the narrative context.
     
     [WORLD SUMMARY]
     ${gameData.worldSummary || 'No global summary available.'}
 
+    [PARTY STRENGTH]
+    ${partyStrength}
+
+    [HOSTILES ALREADY PRESENT]
+    ${hostilesPresent}
+
     Context: "${narrativeContext}"
-    PartyLevel: ${partyLevel}
     Has Ship: ${hasShip}
-    Existing Allies in Scene: ${JSON.stringify(existingActors)}
     
     ${slotsInstruction}${shipMandate}
     

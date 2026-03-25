@@ -190,7 +190,7 @@ export const useCombatGeneration = (
 
         // Step 1: Alignment & Social Stance Resolution
         setCombatInitiationStatus(prev => ({ ...prev, step: 'Resolving Social Stances...', progress: 30 }));
-        const currentEnemies = gameData.combatState?.enemies || [];
+        let currentEnemies = [...(gameData.combatState?.enemies || [])];
         const alignmentCandidates = currentEnemies.filter(e => (e.alignment === 'neutral' || !e.alignment) && e.currentHitPoints && e.currentHitPoints > 0).map(e => {
             const registry = gameData.npcs.find(n => n.id === e.id);
             return { id: e.id, name: e.name, relationship: registry?.relationship || 0 };
@@ -200,13 +200,16 @@ export const useCombatGeneration = (
             try {
                 const alignmentMap = await resolveCombatAlignments(narrative, alignmentCandidates, gameData);
                 Object.entries(alignmentMap).forEach(([id, alignment]) => {
-                    const actor = currentEnemies.find(e => e.id === id);
-                    if (actor) {
-                        dispatch({ type: 'UPDATE_COMBAT_ENEMY', payload: { ...actor, alignment, isAlly: alignment === 'ally' } });
+                    const idx = currentEnemies.findIndex(e => e.id === id);
+                    if (idx > -1) {
+                        const actor = { ...currentEnemies[idx], alignment, isAlly: alignment === 'ally' };
+                        currentEnemies[idx] = actor;
+                        dispatch({ type: 'UPDATE_COMBAT_ENEMY', payload: actor });
 
                         // If resolved to neutral, remove from combat initiative
                         if (alignment === 'neutral') {
                             dispatch({ type: 'DELETE_COMBAT_ENEMY', payload: id });
+                            currentEnemies = currentEnemies.filter(e => e.id !== id);
                         }
                     }
                 });
@@ -215,11 +218,14 @@ export const useCombatGeneration = (
             }
         }
 
-        // Step 2: Enrichment
+        // Filter out existing hostiles who are actually enemies or allies already engaged
+        const engagedHostiles = currentEnemies.filter(e => e.alignment === 'enemy');
+
+        // Step 2: Enrichment & Reinforcements
         let finalSuggestions = [...suggestions];
 
-        // Safety check for empty combat: If no suggestions and no existing enemies, re-assess from history
-        if (finalSuggestions.length === 0 && currentEnemies.length === 0) {
+        // Safety check for empty combat: If no suggestions and no existing hostiles, re-assess from history
+        if (finalSuggestions.length === 0 && engagedHostiles.length === 0) {
             setCombatInitiationStatus(prev => ({ ...prev, step: 'Identifying Hostiles...', progress: 40 }));
             try {
                 const reassessed = await reassessCombatEnemies(gameData, context);
@@ -232,8 +238,9 @@ export const useCombatGeneration = (
         }
 
         const hasAnonymousSlots = finalSuggestions.some(s => !s.name);
+        const needsBalancing = finalSuggestions.length > 0;
 
-        if (hasAnonymousSlots) {
+        if (hasAnonymousSlots || needsBalancing) {
             setCombatInitiationStatus(prev => ({ ...prev, step: 'Naming Reinforcements...', progress: 50 }));
             try {
                 const excludeList = [
@@ -241,7 +248,10 @@ export const useCombatGeneration = (
                     ...gameData.companions.map(c => c.name),
                     ...(gameData.npcs || []).map(n => n.name)
                 ];
-                const enriched = await generateCombatEncounterSuggestions(narrative, level, hasShip, [], gameData, finalSuggestions as any, excludeList);
+                // Pass engaged hostiles to the AI so it can balance against them
+                const enriched = await generateCombatEncounterSuggestions(
+                    narrative, level, hasShip, engagedHostiles, gameData, finalSuggestions as any, excludeList
+                );
                 finalSuggestions = enriched;
             } catch (e) {
                 console.warn("Failed to enrich reinforcements", e);
@@ -250,24 +260,28 @@ export const useCombatGeneration = (
 
         setCombatInitiationStatus(prev => ({ ...prev, step: 'Initializing Fray...', progress: 70 }));
 
-        if (finalSuggestions.length > 0) {
-            const stagedProps = stageActors(finalSuggestions, true);
-            const generatedActors = stagedProps.map(p => p.actor);
+        // Collect ALL hostiles that need skinning (existing ones + new reinforcements)
+        const stagedReinforcements = finalSuggestions.length > 0 ? stageActors(finalSuggestions, true) : [];
+        const newActors = stagedReinforcements.map(p => p.actor);
+        const allHostilesForSkinning = [...engagedHostiles, ...newActors];
 
+        if (allHostilesForSkinning.length > 0) {
             setCombatInitiationStatus(prev => ({ ...prev, step: 'Skinning Abilities...', progress: 80 }));
             try {
                 const enrichedData = await enrichCombatantDetails(
-                    generatedActors,
+                    allHostilesForSkinning,
                     context,
                     gameData.affinities || DEFAULT_AFFINITIES,
                     worldSummary
                 );
 
-                generatedActors.forEach((actor, index) => {
+                allHostilesForSkinning.forEach((actor, index) => {
                     const skinData = enrichedData[index.toString()];
                     if (skinData) {
+                        // 1. Update basic fields
                         if (skinData.name && skinData.name !== "Unique Name") actor.name = skinData.name;
                         if (skinData.description && skinData.description !== "Short description") actor.description = skinData.description;
+                        
                         if (skinData.affinity && skinData.affinity !== "AffinityName" && (gameData.affinities || DEFAULT_AFFINITIES)[skinData.affinity]) {
                             actor.affinity = skinData.affinity;
                             const aff = (gameData.affinities || DEFAULT_AFFINITIES)[skinData.affinity];
@@ -275,23 +289,52 @@ export const useCombatGeneration = (
                             actor.immunities = [...aff.immunities];
                             actor.vulnerabilities = [...aff.vulnerabilities];
                         }
+                        
+                        // 2. Skin Attacks (Immutably update the array)
                         if (skinData.attacks && skinData.attacks.length > 0) {
-                            skinData.attacks.forEach((skinnedAtk: any, j: number) => {
-                                if (actor.attacks && actor.attacks[j]) {
-                                    actor.attacks[j].name = skinnedAtk.name;
-                                    if (skinnedAtk.damageType) actor.attacks[j].damageType = skinnedAtk.damageType;
-                                    if (skinnedAtk.description) (actor.attacks[j] as any).description = skinnedAtk.description;
+                            actor.attacks = (actor.attacks || []).map((atk, j) => {
+                                const skinnedAtk = skinData.attacks[j];
+                                if (skinnedAtk) {
+                                    return { 
+                                        ...atk, 
+                                        name: skinnedAtk.name, 
+                                        damageType: skinnedAtk.damageType || atk.damageType,
+                                        description: skinnedAtk.description || (atk as any).description 
+                                    };
                                 }
+                                return atk;
                             });
                         }
+                        
+                        // 3. Skin Special Abilities (Immutably update the array)
                         if (skinData.specialAbilities && skinData.specialAbilities.length > 0) {
-                            skinData.specialAbilities.forEach((skinnedAb: any, j: number) => {
-                                if (actor.specialAbilities && actor.specialAbilities[j]) {
-                                    actor.specialAbilities[j].name = skinnedAb.name;
-                                    actor.specialAbilities[j].description = skinnedAb.description || actor.specialAbilities[j].description;
-                                    if (skinnedAb.damageType) actor.specialAbilities[j].damageType = skinnedAb.damageType;
-                                    if (skinnedAb.targetType) actor.specialAbilities[j].targetType = skinnedAb.targetType;
+                            actor.specialAbilities = (actor.specialAbilities || []).map((ab, j) => {
+                                const skinnedAb = skinData.specialAbilities[j];
+                                if (skinnedAb) {
+                                    return {
+                                        ...ab,
+                                        name: skinnedAb.name,
+                                        description: skinnedAb.description || ab.description,
+                                        damageType: skinnedAb.damageType || ab.damageType,
+                                        targetType: skinnedAb.targetType || ab.targetType
+                                    };
                                 }
+                                return ab;
+                            });
+                        }
+
+                        // SYNC BACK TO REGISTRY / STATE
+                        // If it's an existing actor, we need to UPDATE it with a NEW reference
+                        if (index < engagedHostiles.length) {
+                            dispatch({ type: 'UPDATE_COMBAT_ENEMY', payload: { ...actor } });
+                        }
+                        
+                        // Sync names/descriptions to NPC registry if it's a persistent NPC
+                        const registryNpc = gameData.npcs.find(n => n.id === actor.id);
+                        if (registryNpc) {
+                            dispatch({ 
+                                type: 'UPDATE_NPC', 
+                                payload: { ...registryNpc, name: actor.name, description: actor.description || registryNpc.description } 
                             });
                         }
                     }
@@ -299,16 +342,17 @@ export const useCombatGeneration = (
             } catch (e) {
                 console.warn("Skinning failed", e);
             }
-
-            stagedProps.forEach(({ actor, npc }) => {
-                dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
-                if (npc) {
-                    npc.name = actor.name;
-                    npc.description = actor.description || '';
-                    dispatch({ type: 'ADD_NPC', payload: npc });
-                }
-            });
         }
+
+        // Final dispatch for staged reinforcements
+        stagedReinforcements.forEach(({ actor, npc }) => {
+            dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
+            if (npc) {
+                npc.name = actor.name;
+                npc.description = actor.description || '';
+                dispatch({ type: 'ADD_NPC', payload: npc });
+            }
+        });
 
         // Step 3: Final Narrative Bridge
         if (isManualStart) {

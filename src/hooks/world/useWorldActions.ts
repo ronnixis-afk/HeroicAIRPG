@@ -1,6 +1,6 @@
 // hooks/world/useWorldActions.ts
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { GameAction, GameData, ActorSuggestion, MapZone, MapSettings, LoreEntry } from '../../types';
 import { useWorldSelectors } from './useWorldSelectors';
 import { useTravel } from './useTravel';
@@ -48,21 +48,37 @@ export const useWorldActions = (
 
 
 
+    const loadingZonesRef = useRef<Set<string>>(new Set());
+
     const lazyLoadPois = useCallback(async (zone: MapZone) => {
-        if (!gameData) return;
+        if (!gameData || !zone.coordinates) return;
+        
+        const coords = zone.coordinates;
+        if (loadingZonesRef.current.has(coords)) return;
+
+        // Guard: Prevent double-generation if POIs already exist for this coordinate
+        const existingPois = gameData.knowledge?.filter(k => k.coordinates === coords && k.tags?.includes('location')) || [];
+        if (existingPois.length > 0) return;
+
+        loadingZonesRef.current.add(coords);
+
         try {
             const pois = await generatePoisForZone(zone, gameData.worldSummary || '', gameData.mapSettings);
-            const slicedPois = Array.isArray(pois) ? pois.slice(0, 4) : [];
-            const newKnowledge: Omit<LoreEntry, 'id'>[] = slicedPois.map(p => ({
+            const validPois = Array.isArray(pois) ? pois : [];
+            const newKnowledge: Omit<LoreEntry, 'id'>[] = validPois.map(p => ({
                 title: p.title,
                 content: p.content,
-                coordinates: zone.coordinates,
+                coordinates: coords,
                 tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
                 isNew: true,
                 visited: p.title.toLowerCase().includes('open area')
             }));
             dispatch({ type: 'ADD_KNOWLEDGE', payload: newKnowledge });
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            loadingZonesRef.current.delete(coords);
+        }
     }, [gameData, dispatch]);
 
     const syncCurrentLocaleToPoi = useCallback(async (zone: MapZone, localeName: string) => {
