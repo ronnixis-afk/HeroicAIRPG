@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { prisma } from '../../../../lib/prisma';
 
 export async function GET(req: NextRequest) {
     try {
@@ -25,8 +19,8 @@ export async function GET(req: NextRequest) {
         }
 
         return NextResponse.json(user);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching credits:', error);
-        return NextResponse.json({ error: 'Failed to fetch credits' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to fetch credits.' }, { status: 500 });
     }
 }

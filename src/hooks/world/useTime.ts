@@ -92,7 +92,7 @@ export const useTime = (
                 checkName: 'Perception',
                 dc: 12 + Math.floor(gameData.playerCharacter.level / 2)
             };
-            const res = (window as any).processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
+            const res = window.processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
             const skillRoll = res.rolls[0];
             preRolledRolls.push(skillRoll);
             preRolledSummary = res.summary;
@@ -156,7 +156,7 @@ export const useTime = (
                 checkName: 'Perception',
                 dc: 12 + Math.floor(gameData.playerCharacter.level / 2)
             };
-            const res = (window as any).processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
+            const res = window.processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
             const skillRoll = res.rolls[0];
             preRolledRolls.push(skillRoll);
             preRolledSummary = res.summary;

@@ -197,7 +197,7 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         weaveNarrative,
         updateMapZoneAction: worldActions.updateMapZone,
         movePlayerOnMapAction: worldActions.movePlayerOnMap,
-        updateBaseScoreAction: combatActions.updateBaseScore,
+        updateBaseScore: combatActions.updateBaseScore,
         fetchActionSuggestions,
         saveWorldProgress,
         integrateRefinedCharacter: characterActions.integrateRefinedCharacter,

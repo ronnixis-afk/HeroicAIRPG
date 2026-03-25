@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { prisma } from '../../../lib/prisma';
 import { resolveUserTier, canAccessAI } from '../../../lib/tierConfig';
 import { AI_MODELS } from '../../../config/aiConfig';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { isRateLimited } from '../../../lib/rateLimit';
 
 export async function POST(req: NextRequest) {
     try {
@@ -29,6 +24,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { error: 'AI access is not available for your account tier.' },
                 { status: 403 }
+            );
+        }
+
+        // Rate limiting: prevent API abuse
+        if (isRateLimited(userId)) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please wait a moment before trying again.' },
+                { status: 429 }
             );
         }
 
@@ -62,10 +65,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             embedding: embeddingValues
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error generating embedding:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to generate embedding' },
+            { error: 'An internal error occurred while generating the embedding.' },
             { status: 500 }
         );
     }

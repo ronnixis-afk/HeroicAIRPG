@@ -30,7 +30,7 @@ export interface ModifierDefinition {
  */
 export const getTempHpLabel = (config?: SkillConfiguration): string => {
     const isBrowser = typeof window !== 'undefined';
-    const activeConfig = config || (isBrowser ? (window as any).gameDataCache?.skillConfiguration : undefined);
+    const activeConfig = config || (isBrowser ? window.gameDataCache?.skillConfiguration : undefined);
     if (activeConfig === 'Sci-Fi' || activeConfig === 'Magitech') return 'Shield';
     return 'Temp HP';
 };

@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { prisma } from '../../../lib/prisma';
 import { resolveUserTier, canAccessAI } from '../../../lib/tierConfig';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 /**
  * Generates a short-lived ephemeral token for the Gemini Live API.
@@ -58,10 +52,10 @@ export async function POST(req: NextRequest) {
             token: token.name,
             expiresAt: expireTime,
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error generating Live API token:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to generate Live API token' },
+            { error: 'Failed to generate Live API token.' },
             { status: 500 }
         );
     }

@@ -124,7 +124,6 @@ export interface GameDataContextType {
   updateAffinity: (key: string, affinity: AffinityDefinition) => void;
   updateSizeModifier: (size: CombatActorSize, mods: { str: number, dex: number, con: number, ac: number }) => void;
   updateBaseScore: (score: number) => void;
-  updateBaseScoreAction: (score: number) => void; // redundant alias
   updateArchetype: (name: ArchetypeName, speeds: { ground: number, climb: number, swim: number, fly: number }) => void;
   addPlotPoint: (point: PlotPoint) => void;
   deletePlotPoint: (id: string) => void;
@@ -157,8 +156,21 @@ export interface GameDataContextType {
   dispatch: React.Dispatch<GameAction>;
 }
 
-// Create with default null to enforce Provider usage
+// Backwards-compatible empty default for existing useContext(GameDataContext) consumers.
+// New code should prefer useGameDataContext() for runtime safety.
 export const GameDataContext = createContext<GameDataContextType>({} as GameDataContextType);
+
+/**
+ * Safe context hook — throws a clear error if used outside GameDataProvider.
+ * New components should use this instead of useContext(GameDataContext) directly.
+ */
+export function useGameDataContext(): GameDataContextType {
+  const ctx = useContext(GameDataContext);
+  if (!ctx || !ctx.gameData) {
+    throw new Error('useGameDataContext must be used within a GameDataProvider');
+  }
+  return ctx;
+}
 
 interface GameDataProviderProps {
   children?: ReactNode;

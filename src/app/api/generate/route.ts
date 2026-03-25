@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { prisma } from '../../../lib/prisma';
 import { resolveUserTier, canAccessAI } from '../../../lib/tierConfig';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { isRateLimited } from '../../../lib/rateLimit';
 
 export async function POST(req: NextRequest) {
     try {
@@ -28,6 +23,22 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { error: 'AI access is not available for your account tier.' },
                 { status: 403 }
+            );
+        }
+
+        // Rate limiting: prevent API abuse
+        if (isRateLimited(userId)) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please wait a moment before trying again.' },
+                { status: 429 }
+            );
+        }
+
+        // Credit pre-check: reject if balance is insufficient
+        if (dbUser && dbUser.currentCredits <= 0) {
+            return NextResponse.json(
+                { error: 'Insufficient credits. Please wait for your credits to replenish.' },
+                { status: 402 }
             );
         }
 
@@ -116,11 +127,12 @@ export async function POST(req: NextRequest) {
             candidates: response.candidates,
             durationMs: durationMs
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error generating AI content:', error);
+        const statusCode = error instanceof Error && error.message?.includes('503') ? 503 : 500;
         return NextResponse.json(
-            { error: error?.message || 'Failed to generate content' },
-            { status: 500 }
+            { error: statusCode === 503 ? 'AI service is temporarily unavailable. Please try again.' : 'An internal error occurred while generating content.' },
+            { status: statusCode }
         );
     }
 }

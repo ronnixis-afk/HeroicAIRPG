@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { prisma } from '../../../../lib/prisma';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -30,10 +24,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         }
 
         return NextResponse.json(save);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching cloud save:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to fetch cloud save' },
+            { error: 'Failed to fetch cloud save.' },
             { status: 500 }
         );
     }
@@ -65,10 +59,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         });
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error deleting cloud save:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to delete cloud save' },
+            { error: 'Failed to delete cloud save.' },
             { status: 500 }
         );
     }

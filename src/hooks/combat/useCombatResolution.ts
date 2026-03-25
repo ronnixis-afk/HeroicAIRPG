@@ -29,7 +29,7 @@ export const useCombatResolution = (
     // I agree: Caching the processor on the window allows the stateless World hooks (Travel/Time) 
     // to resolve "Danger Pipeline" checks without circular dependencies.
     useEffect(() => {
-        (window as any).processDiceRollsCache = processDiceRolls;
+        window.processDiceRollsCache = processDiceRolls;
     }, [processDiceRolls]);
 
     // Orchestrators (Refactored Sub-modules)

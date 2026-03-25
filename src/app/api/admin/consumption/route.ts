@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
+import { prisma } from '../../../../lib/prisma';
 import { resolveUserTier } from '../../../../lib/tierConfig';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 export async function GET(req: NextRequest) {
     try {
@@ -112,7 +106,7 @@ export async function GET(req: NextRequest) {
                 models: uniqueModels.map(m => m.model)
             }
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching consumption logs:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }

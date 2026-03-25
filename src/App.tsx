@@ -18,8 +18,7 @@ import SettingsView from './components/SettingsView';
 import ItemForgeView from './components/inventory/ItemForgeView';
 import NPCsView from './components/npcs/NPCsView';
 import GalleryView from './components/GalleryView';
-/* Fix: Import GameDataProvider alongside GameDataContext to resolve naming errors in the App root */
-import { GameDataContext, GameDataProvider } from './context/GameDataContext';
+import { GameDataContext, GameDataProvider, useGameDataContext } from './context/GameDataContext';
 import { UIProvider, useUI } from './context/UIContext';
 import WorldSelection from './components/WorldSelection';
 import type { View, Inventory, ChatMessage } from './types';
@@ -115,7 +114,7 @@ const GameInterface: React.FC = () => {
     performAutomatedPlayerTurn,
     addGalleryEntry,
     useHeroicPoint
-  } = useContext(GameDataContext);
+  } = useGameDataContext();
 
   const {
     activeView, setActiveView,
@@ -150,7 +149,7 @@ const GameInterface: React.FC = () => {
   // Global Context Cache: Ensures non-React services can access current game settings (like Faster GM)
   useEffect(() => {
     if (gameData) {
-      (window as any).gameDataCache = gameData;
+      window.gameDataCache = gameData;
     }
   }, [gameData]);
 

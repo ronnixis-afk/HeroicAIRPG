@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '../../../generated/prisma';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+import { prisma } from '../../../lib/prisma';
 
 export async function GET(req: NextRequest) {
     try {
@@ -31,10 +25,10 @@ export async function GET(req: NextRequest) {
         });
 
         return NextResponse.json(saves);
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error fetching cloud saves:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to fetch cloud saves' },
+            { error: 'Failed to fetch cloud saves.' },
             { status: 500 }
         );
     }
@@ -52,6 +46,18 @@ export async function POST(req: NextRequest) {
 
         if (!worldId || !name || !data) {
             return NextResponse.json({ error: 'Missing required payload: worldId, name, data' }, { status: 400 });
+        }
+
+        // Input validation: prevent oversized or malformed payloads
+        if (typeof worldId !== 'string' || worldId.length > 200) {
+            return NextResponse.json({ error: 'Invalid worldId.' }, { status: 400 });
+        }
+        if (typeof name !== 'string' || name.length > 200) {
+            return NextResponse.json({ error: 'Invalid save name.' }, { status: 400 });
+        }
+        const dataSize = JSON.stringify(data).length;
+        if (dataSize > 5_000_000) { // 5MB limit
+            return NextResponse.json({ error: 'Save data exceeds maximum size (5MB).' }, { status: 413 });
         }
 
         // We use upsert so they can overwrite a single master save per World ID.
@@ -95,10 +101,10 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json({ success: true, id: save.id, updatedAt: save.updatedAt });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error saving to cloud:', error);
         return NextResponse.json(
-            { error: error?.message || 'Failed to save to cloud' },
+            { error: 'Failed to save to cloud.' },
             { status: 500 }
         );
     }

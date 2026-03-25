@@ -227,7 +227,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
         if (isCombat) {
             try {
-                const { name, description, damageType } = await skinAbilityFlavor(newAbility, character, (window as any).gameDataCache || { worldSummary: '' });
+                const { name, description, damageType } = await skinAbilityFlavor(newAbility, character, window.gameDataCache || { worldSummary: '' });
 
                 const updatedAbilities = newAbilities.map(a => {
                     if (a.id === abilityId) {

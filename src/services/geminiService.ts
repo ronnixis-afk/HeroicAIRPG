@@ -82,7 +82,3 @@ export {
 };
 
 export { getRelevantLore, getAdjacencyContext, getAvailableSkillsContext, type ContextKey };
-
-// Placeholder for unused imports to satisfy type checking if needed by consumers
-export const weaveNarrativeFromObjective = async () => { };
-export const generateAdventureIntro = async () => { };

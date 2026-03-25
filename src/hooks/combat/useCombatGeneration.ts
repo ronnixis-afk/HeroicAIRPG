@@ -396,7 +396,7 @@ export const useCombatGeneration = (
         setIsAiGenerating(true);
 
         try {
-            const aiResponse = await (window as any).getGeminiResponse?.(userMessage, gameData) || { narrative: "Conflict erupts!", suggestedActors: [] };
+            const aiResponse = await window.getGeminiResponse?.(userMessage, gameData) || { narrative: "Conflict erupts!", suggestedActors: [] };
 
             const aiMessage: ChatMessage = { id: `ai-${Date.now()}`, sender: 'ai', content: aiResponse.narrative, location: aiResponse.location };
             dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
