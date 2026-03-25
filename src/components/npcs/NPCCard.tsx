@@ -40,7 +40,7 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                     </h5>
 
                     {npc.isNew && (
-                        <span className="bg-brand-accent text-black text-[10px] px-2 py-0.5 rounded-full shadow-sm animate-pulse tracking-normal font-bold">
+                        <span className="bg-brand-accent text-black text-[10px] px-2 py-0.5 rounded-lg shadow-sm animate-pulse tracking-normal font-bold">
                             New
                         </span>
                     )}
@@ -62,19 +62,19 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     <div className="flex flex-wrap items-center gap-2">
                         {npc.gender && (
-                            <span className={`text-[10px] px-2.5 py-1 rounded border tracking-normal font-bold ${getGenderColor(npc.gender)}`}>
+                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border tracking-normal font-bold ${getGenderColor(npc.gender)}`}>
                                 {toTitleCase(npc.gender)}
                             </span>
                         )}
                         {npc.race && (
-                            <span className={`text-[10px] px-2.5 py-1 rounded border tracking-normal font-bold ${getRaceColor(npc.race)}`}>
+                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border tracking-normal font-bold ${getRaceColor(npc.race)}`}>
                                 {toTitleCase(npc.race)}
                             </span>
                         )}
                     </div>
 
                     <div className={`flex items-center gap-1.5 text-[10px] font-bold transition-opacity duration-300 ${isDead ? 'opacity-40' : 'opacity-100'}`}>
-                        <span className="text-brand-accent tabular-nums bg-brand-accent/5 px-2 py-1 rounded border border-brand-accent/20">
+                        <span className="text-brand-accent tabular-nums bg-brand-accent/5 px-2 py-1 rounded-lg border border-brand-accent/20">
                             {npc.relationship > 0 ? `+${npc.relationship}` : npc.relationship}
                         </span>
                         <span className="text-brand-text-muted uppercase tracking-wider text-[9px]">

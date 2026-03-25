@@ -33,11 +33,11 @@ const PillSelect: React.FC<{
     colorClass: string;
     label?: string;
 }> = ({ value, onChange, options, colorClass, label }) => (
-    <div className={`relative inline-flex items-center border rounded-full px-4 py-1.5 ${colorClass} transition-all hover:bg-opacity-20`}>
+    <div className={`relative inline-flex items-center border rounded-lg px-4 py-1.5 ${colorClass} transition-all hover:bg-opacity-20`}>
         <select
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            className="appearance-none bg-transparent border-none text-xs font-bold focus:outline-none cursor-pointer pr-5 w-full tracking-normal"
+            className="appearance-none bg-transparent border-none text-[10px] font-bold focus:outline-none cursor-pointer pr-5 w-full tracking-normal"
         >
             <option value="" className="text-black">Select {label ? toTitleCase(label) : ''}</option>
             {options.map(opt => (
@@ -94,22 +94,22 @@ const NPCViewContent: React.FC<{
                 <div className="flex justify-between items-center gap-4">
                     <div className="flex flex-wrap gap-2">
                         {npc.race && (
-                            <span className={`text-xs font-bold px-3 py-1 rounded-lg border tracking-normal ${getRaceColor(npc.race)}`}>
+                            <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border tracking-normal ${getRaceColor(npc.race)}`}>
                                 {toTitleCase(npc.race)}
                             </span>
                         )}
                         {npc.gender && (
-                            <span className={`text-xs font-bold px-3 py-1 rounded-lg border tracking-normal ${getGenderColor(npc.gender)}`}>
+                            <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border tracking-normal ${getGenderColor(npc.gender)}`}>
                                 {toTitleCase(npc.gender)}
                             </span>
                         )}
                         {npc.status !== 'Alive' && (
-                            <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1 rounded-lg border border-brand-danger/20 tracking-normal">
+                            <span className="text-[10px] font-bold text-brand-danger bg-brand-danger/10 px-3 py-1 rounded-lg border border-brand-danger/20 tracking-normal">
                                 {toTitleCase(npc.status)}
                             </span>
                         )}
                         {npc.is_essential && (
-                            <span className="text-xs font-bold text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-lg border border-yellow-500/20 tracking-normal flex items-center gap-1">
+                            <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-lg border border-yellow-500/20 tracking-normal flex items-center gap-1">
                                 <Icon name="starFill" className="w-3 h-3" />
                                 Essential
                             </span>
@@ -155,7 +155,7 @@ const NPCViewContent: React.FC<{
             <div className="space-y-4">
                 <div className="flex justify-between items-center px-1">
                     <label className="text-xs font-bold text-brand-text-muted opacity-60 tracking-normal">{toTitleCase("Chronicle of Interactions")}</label>
-                    <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">{toTitleCase("Digital Memory Active")}</span>
+                    <span className="text-[10px] font-bold text-brand-accent px-2.5 py-1 rounded-lg bg-brand-accent/5 border border-brand-accent/20 tracking-normal">{toTitleCase("Digital Memory Active")}</span>
                 </div>
                 
                 <Button
@@ -201,10 +201,10 @@ const NPCViewContent: React.FC<{
                 <div className="space-y-3 pt-2">
                     <label className="text-xs font-bold text-brand-text-muted opacity-60 px-1 tracking-normal">{toTitleCase("Combat Classification")}</label>
                     <div className="flex flex-wrap gap-2">
-                        {npc.difficulty && <span className="text-xs font-bold text-brand-danger bg-brand-danger/10 px-3 py-1.5 rounded-full border border-brand-danger/20 tracking-normal">{toTitleCase(npc.difficulty)} {toTitleCase("Threat")}</span>}
-                        {npc.template && <span className="text-xs font-bold text-purple-400 bg-purple-900/10 px-3 py-1.5 rounded-full border border-purple-500/20 tracking-normal">{toTitleCase(npc.template)}</span>}
-                        {npc.affinity && npc.affinity !== 'None' && <span className="text-xs font-bold text-orange-400 bg-orange-900/10 px-3 py-1.5 rounded-full border border-orange-500/20 tracking-normal">{toTitleCase(npc.affinity)} {toTitleCase("Affinity")}</span>}
-                        {npc.archetype && <span className="text-xs font-bold text-teal-400 bg-teal-900/10 px-3 py-1.5 rounded-full border border-teal-500/20 tracking-normal">{toTitleCase(npc.archetype)}</span>}
+                        {npc.difficulty && <span className="text-[10px] font-bold text-brand-danger bg-brand-danger/10 px-3 py-1.5 rounded-lg border border-brand-danger/20 tracking-normal">{toTitleCase(npc.difficulty)} {toTitleCase("Threat")}</span>}
+                        {npc.template && <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 px-3 py-1.5 rounded-lg border border-purple-500/20 tracking-normal">{toTitleCase(npc.template)}</span>}
+                        {npc.affinity && npc.affinity !== 'None' && <span className="text-[10px] font-bold text-orange-400 bg-orange-900/10 px-3 py-1.5 rounded-lg border border-orange-500/20 tracking-normal">{toTitleCase(npc.affinity)} {toTitleCase("Affinity")}</span>}
+                        {npc.archetype && <span className="text-[10px] font-bold text-teal-400 bg-teal-900/10 px-3 py-1.5 rounded-lg border border-teal-500/20 tracking-normal">{toTitleCase(npc.archetype)}</span>}
                     </div>
                 </div>
             )}

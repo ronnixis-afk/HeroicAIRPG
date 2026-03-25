@@ -119,7 +119,7 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
                 {!isPlayer && onToggleParty && !isShrunk && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onToggleParty(); }}
-                        className={`absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 shadow-md transition-all duration-200 z-20 ${
+                        className={`absolute -top-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center border-2 shadow-md transition-all duration-200 z-20 ${
                             isInParty 
                                 ? 'bg-brand-accent border-brand-accent text-black scale-100' 
                                 : 'bg-brand-surface border-brand-primary text-brand-text-muted hover:text-brand-text scale-90 hover:scale-100'

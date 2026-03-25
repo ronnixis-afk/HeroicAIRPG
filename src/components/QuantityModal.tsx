@@ -119,18 +119,18 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
         {action === 'Buy' && (
           <div className="flex items-center gap-3">
             <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Total Cost</span>
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-inner ${canAfford ? 'bg-brand-accent/5 border-brand-accent/20' : 'bg-brand-danger/5 border-brand-danger/20'}`}>
+            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border shadow-inner ${canAfford ? 'bg-brand-accent/5 border-brand-accent/20' : 'bg-brand-danger/5 border-brand-danger/20'}`}>
               <Icon name="currencyCoins" className={`w-4 h-4 ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`} />
-              <span className={`text-sm font-bold tabular-nums ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`}>{totalPrice}</span>
+              <span className={`text-[10px] font-bold tabular-nums ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`}>{totalPrice}</span>
             </div>
           </div>
         )}
         {action === 'Sell' && (
           <div className="flex items-center gap-3">
             <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Return Value</span>
-            <div className="flex items-center gap-2 bg-brand-accent/5 px-4 py-1.5 rounded-full border border-brand-accent/20 shadow-inner">
+            <div className="flex items-center gap-2 bg-brand-accent/5 px-4 py-1.5 rounded-lg border border-brand-accent/20 shadow-inner">
               <Icon name="currencyCoins" className="w-4 h-4 text-brand-accent" />
-              <span className="text-sm font-bold text-brand-accent tabular-nums">{Math.floor((('price' in item ? item.price : 0) || 0) / 2) * quantity}</span>
+              <span className="text-[10px] font-bold text-brand-accent tabular-nums">{Math.floor((('price' in item ? item.price : 0) || 0) / 2) * quantity}</span>
             </div>
           </div>
         )}
@@ -224,14 +224,14 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
               return (
                 <span
                   key={idx}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded-full border bg-brand-bg tracking-normal shadow-sm ${colorClass}`}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg tracking-normal shadow-sm ${colorClass}`}
                 >
                   {label}
                 </span>
               );
             })}
             {item.effect && (
-              <span className="border border-purple-500/30 text-purple-400 bg-brand-bg text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+              <span className="border border-purple-500/30 text-purple-400 bg-brand-bg text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
                 <Icon name="sparkles" className="w-3 h-3" />
                 {formatEffectLabel(item.effect)}
               </span>

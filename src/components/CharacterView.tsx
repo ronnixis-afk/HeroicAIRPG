@@ -192,7 +192,7 @@ const CharacterView: React.FC = () => {
                         <button
                             onClick={() => startJourney(10)}
                             disabled={!hasPlayer}
-                            className={`btn-lg rounded-full px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
+                            className={`btn-lg rounded-lg px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
                         >
                             Begin Journey
                         </button>
@@ -248,7 +248,7 @@ const CharacterView: React.FC = () => {
                                 <button
                                     onClick={isRecruitmentAvailable ? handleAddCompanion : undefined}
                                     disabled={!isRecruitmentAvailable}
-                                    className={`w-20 h-20 flex items-center justify-center rounded-full transition-colors shrink-0 border-2 border-dashed 
+                                    className={`w-20 h-20 flex items-center justify-center rounded-lg transition-colors shrink-0 border-2 border-dashed 
                                         ${isRecruitmentAvailable 
                                             ? 'bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary border-brand-primary/50 hover:border-brand-accent cursor-pointer' 
                                             : 'bg-brand-surface/50 text-brand-text-muted/30 border-brand-primary/20 cursor-not-allowed'}`}

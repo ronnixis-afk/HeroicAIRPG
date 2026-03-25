@@ -43,7 +43,7 @@ export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subti
                                     {t.name}
                                 </span>
                                 {isSelected && <Icon name="check" className="w-4 h-4 text-brand-accent" />}
-                                {isLocked && <span className="text-[9px] font-bold text-brand-danger border border-brand-danger/20 px-3 py-0.5 rounded-full">Locked</span>}
+                                {isLocked && <span className="text-[10px] font-bold text-brand-danger border border-brand-danger/20 px-3 py-0.5 rounded-lg">Locked</span>}
                             </div>
                             <p className="text-xs text-brand-text-muted leading-relaxed">{t.description}</p>
                             

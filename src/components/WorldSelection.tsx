@@ -540,7 +540,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
                                 <span className="text-xs font-bold text-brand-text tracking-wide inter">Credits & Usage</span>
                             </div>
-                            <button className="text-[10px] font-black text-brand-accent px-2 py-1 rounded bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
+                            <button className="text-[10px] font-black text-brand-accent px-2 py-1 rounded-lg bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
                                 Buy More
                             </button>
                         </div>
@@ -717,7 +717,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             <button
                                 onClick={handleFetchCloudSaves}
                                 disabled={isLoadingCloud}
-                                className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1.5 px-3 rounded-full flex items-center gap-1.5 hover:text-brand-accent hover:border-brand-accent/50 transition-all shadow-sm active:scale-95"
+                                className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1.5 px-3 rounded-lg flex items-center gap-1.5 hover:text-brand-accent hover:border-brand-accent/50 transition-all shadow-sm active:scale-95"
                             >
                                 {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
                                 Sync Cloud
@@ -761,7 +761,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         </div>
                                     )}
                                     {realm.status === 'cloud-only' && (
-                                        <div className="bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black text-brand-text/70 border border-brand-surface shadow-sm uppercase tracking-tighter">
+                                        <div className="bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-brand-text/70 border border-brand-surface shadow-sm uppercase tracking-tighter">
                                             Cloud Only
                                         </div>
                                     )}
@@ -829,9 +829,9 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                             <p className="text-[11px]"><span className="font-bold text-brand-text-muted">Qualities:</span> <span className="text-brand-text">{race.qualities}</span></p>
                                         </div>
                                         <div className="flex flex-wrap gap-2 items-center">
-                                            <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/5 px-2 py-0.5 rounded border border-brand-accent/10">Faction: {race.faction || 'Neutral'}</span>
+                                            <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/5 px-2 py-0.5 rounded-lg border border-brand-accent/10">Faction: {race.faction || 'Neutral'}</span>
                                             {race.racialTrait && (
-                                                <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/20 px-2 py-0.5 rounded border border-brand-primary/30 flex items-center gap-1">
+                                                <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/20 px-2 py-0.5 rounded-lg border border-brand-primary/30 flex items-center gap-1">
                                                     <Icon name="sparkles" className="w-2.5 h-2.5" />
                                                     {race.racialTrait.name} (+2 {race.racialTrait.buffs?.[0]?.abilityName})
                                                 </span>
@@ -909,7 +909,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         key={theme}
                                         onClick={() => handleThemeToggle(theme)}
                                         type="button"
-                                        className={`btn-sm rounded-full focus:outline-none ${selectedThemes.includes(theme) ? 'btn-primary' : 'btn-secondary opacity-60'}`}
+                                        className={`btn-sm rounded-lg focus:outline-none ${selectedThemes.includes(theme) ? 'btn-primary' : 'btn-secondary opacity-60'}`}
                                     >
                                         {theme}
                                     </button>

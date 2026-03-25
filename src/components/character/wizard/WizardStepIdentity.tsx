@@ -32,7 +32,7 @@ const StyledSelect: React.FC<{
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={disabled}
-                className="w-full bg-brand-primary h-11 px-5 pr-10 rounded-full text-sm font-semibold text-brand-text border border-brand-surface focus:border-brand-accent focus:outline-none appearance-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-brand-primary h-11 px-5 pr-10 rounded-lg text-sm font-semibold text-brand-text border border-brand-surface focus:border-brand-accent focus:outline-none appearance-none transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {options.map(opt => (
                     <option key={opt} value={opt}>{opt}</option>

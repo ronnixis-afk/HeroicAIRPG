@@ -482,7 +482,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             return (
                                 <div className="flex flex-wrap gap-1.5 mb-3">
                                     {propTags.map((tag, i) => (
-                                        <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border inline-flex items-center tracking-normal ${tag.color}`}>
+                                        <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border inline-flex items-center tracking-normal ${tag.color}`}>
                                             {tag.label}
                                         </span>
                                     ))}
@@ -531,7 +531,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 {mechanicalPills.map((pill, idx) => (
                                     <span
                                         key={idx}
-                                        className={`text-[10px] font-bold px-3 py-1.5 rounded-full border bg-brand-bg tracking-normal shadow-sm flex items-center gap-1.5 ${pill.colorClass}`}
+                                        className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg tracking-normal shadow-sm flex items-center gap-1.5 ${pill.colorClass}`}
                                     >
                                         {pill.icon && <Icon name={pill.icon} className="w-3 h-3" />}
                                         {pill.label}
@@ -634,7 +634,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                                 </div>
                                                                 <div className="flex flex-col min-w-0">
                                                                     <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(npc.name)}</span>
-                                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit mt-0.5 ${npc.alignment === 'enemy' ? 'text-red-400 bg-red-400/10' : (npc.alignment === 'ally' ? 'text-emerald-400 bg-emerald-400/10' : 'text-yellow-400 bg-yellow-400/10')}`}>
+                                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg w-fit mt-0.5 ${npc.alignment === 'enemy' ? 'text-red-400 bg-red-400/10' : (npc.alignment === 'ally' ? 'text-emerald-400 bg-emerald-400/10' : 'text-yellow-400 bg-yellow-400/10')}`}>
                                                                         {toTitleCase(npc.alignment || 'Neutral')}
                                                                     </span>
                                                                 </div>

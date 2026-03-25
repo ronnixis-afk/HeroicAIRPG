@@ -13,7 +13,7 @@ const toTitleCase = (str: string) => {
 };
 
 const NewTag: React.FC = () => (
-    <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0">New</span>
+    <span className="bg-brand-accent text-black text-[10px] font-black px-1.5 py-0.5 rounded-lg ml-2 flex-shrink-0">New</span>
 );
 
 const EditableObjectiveContent: React.FC<{
@@ -44,13 +44,13 @@ const EditableObjectiveContent: React.FC<{
         <div className="space-y-6 pt-2 pb-4 animate-page">
             <div className="flex flex-wrap gap-2">
                 {displayTags.map(tag => (
-                    <span key={tag} className="flex items-center bg-brand-surface border border-brand-primary rounded-full px-2.5 py-0.5 text-[10px] font-bold text-brand-text-muted capitalize">
+                    <span key={tag} className="flex items-center bg-brand-surface border border-brand-primary rounded-lg px-2.5 py-0.5 text-[10px] font-bold text-brand-text-muted capitalize">
                         <span className="mr-1 opacity-50">#</span>
                         {tag}
                     </span>
                 ))}
                 {entry.coordinates && (
-                    <span className="text-brand-accent text-[10px] font-bold flex items-center gap-1 bg-brand-accent/10 px-2.5 py-0.5 rounded-full border border-brand-accent/20">
+                    <span className="text-brand-accent text-[10px] font-bold flex items-center gap-1 bg-brand-accent/10 px-2.5 py-0.5 rounded-lg border border-brand-accent/20">
                         <Icon name="location" className="w-3 h-3" />
                         {locationLabel ? toTitleCase(locationLabel) : entry.coordinates}
                     </span>

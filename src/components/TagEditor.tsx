@@ -32,7 +32,7 @@ export const TagEditor: React.FC<TagEditorProps> = ({ tags, onTagsChange, option
                         <button
                             key={option}
                             onClick={() => handleToggleTag(option)}
-                            className={`px-4 py-2 rounded-full text-body-sm font-bold transition-all border capitalize ${
+                            className={`px-4 py-2 rounded-lg text-[10px] font-bold transition-all border capitalize ${
                                 isActive
                                     ? 'bg-brand-accent text-black border-brand-accent shadow-lg shadow-brand-accent/10'
                                     : 'bg-transparent text-brand-text-muted border-brand-primary hover:border-brand-secondary hover:text-brand-text'
@@ -50,7 +50,7 @@ export const TagEditor: React.FC<TagEditorProps> = ({ tags, onTagsChange, option
                     <p className="text-body-sm font-bold text-brand-text-muted mb-2 ml-1">Special tags</p>
                     <div className="flex flex-wrap gap-2">
                         {customTags.map(tag => (
-                            <span key={tag} className="px-3 py-1.5 rounded-xl bg-brand-primary/30 border border-brand-surface text-body-sm text-brand-text-muted">
+                            <span key={tag} className="px-3 py-1.5 rounded-lg bg-brand-primary/30 border border-brand-surface text-[10px] text-brand-text-muted">
                                 {tag}
                             </span>
                         ))}

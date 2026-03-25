@@ -234,7 +234,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                                             </td>
                                             <td className="p-4 text-xs font-medium text-brand-text truncate max-w-[150px]">{log.email}</td>
                                             <td className="p-4">
-                                                <span className="px-2 py-1 rounded-md bg-brand-primary/10 text-[10px] font-bold text-brand-accent border border-brand-primary/10">
+                                                <span className="px-2 py-1 rounded-lg bg-brand-primary/10 text-[10px] font-bold text-brand-accent border border-brand-primary/10">
                                                     {log.type}
                                                 </span>
                                             </td>

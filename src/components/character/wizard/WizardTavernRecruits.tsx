@@ -63,7 +63,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
                                         <h4 className="text-base font-bold text-brand-text group-hover:text-brand-accent truncate">{recruit.name}</h4>
                                         <p className="text-[10px] font-bold text-brand-text-muted opacity-60 capitalize">{recruit.gender} {recruit.race}</p>
                                     </div>
-                                    <div className="bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded text-[9px] font-bold text-brand-accent">Ally</div>
+                                    <div className="bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded-lg text-[10px] font-bold text-brand-accent">Ally</div>
                                 </div>
                                 
                                 <div className="flex-1">
@@ -74,7 +74,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
                                 <div className="space-y-3 mt-auto">
                                     <div>
                                         <label className="text-[8px] font-bold text-brand-text-muted opacity-40 block mb-1">Prowess</label>
-                                        <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 border border-purple-500/20 px-2.5 py-1 rounded-full">{recruit.comSeed.name}</span>
+                                        <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 border border-purple-500/20 px-2.5 py-1 rounded-lg">{recruit.comSeed.name}</span>
                                     </div>
                                     <div>
                                         <label className="text-[8px] font-bold text-brand-text-muted opacity-40 block mb-1">Expertise</label>
@@ -82,7 +82,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
                                             {[...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || [])
                                                 .filter(b => b.type === 'skill')
                                                 .map((b, i) => (
-                                                    <span key={i} className="text-[9px] font-bold text-brand-accent bg-brand-accent/5 border border-brand-accent/10 px-2 py-0.5 rounded-md capitalize">{b.skillName}</span>
+                                                    <span key={i} className="text-[10px] font-bold text-brand-accent bg-brand-accent/5 border border-brand-accent/10 px-2 py-0.5 rounded-lg capitalize">{b.skillName}</span>
                                                 ))
                                             }
                                         </div>

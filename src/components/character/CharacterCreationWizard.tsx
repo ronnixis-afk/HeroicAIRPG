@@ -385,7 +385,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 </label>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {[...backgroundTraits, ...generalTraits].map(trait => (
-                                                        <span key={trait.name} className="text-brand-text text-[9px] font-bold px-2 py-0.5 rounded-md border border-brand-surface bg-brand-primary/30">{trait.name}</span>
+                                                        <span key={trait.name} className="text-brand-text text-[10px] font-bold px-2 py-0.5 rounded-lg border border-brand-surface bg-brand-primary/30">{trait.name}</span>
                                                     ))}
                                                 </div>
                                             </div>
@@ -394,7 +394,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                     <label className="text-body-sm font-bold text-brand-text-muted opacity-60 block">Other Bonuses</label>
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {acquiredOtherBonuses.map(bonus => (
-                                                            <span key={bonus} className="text-orange-400 text-[9px] font-bold px-2 py-0.5 rounded-full border border-orange-400/20 bg-orange-400/5">{bonus}</span>
+                                                            <span key={bonus} className="text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-orange-400/20 bg-orange-400/5">{bonus}</span>
                                                         ))}
                                                     </div>
                                                 </div>
@@ -404,7 +404,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             <label className="text-body-sm font-bold text-brand-text-muted opacity-60 block">Capabilities</label>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {acquiredSkills.map(skill => (
-                                                    <span key={skill} className="text-brand-accent text-[9px] font-bold px-2 py-0.5 rounded-full border border-brand-accent/20 bg-brand-accent/5 capitalize">{skill}</span>
+                                                    <span key={skill} className="text-brand-accent text-[10px] font-bold px-2 py-0.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 capitalize">{skill}</span>
                                                 ))}
                                             </div>
                                         </div>

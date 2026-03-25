@@ -263,7 +263,7 @@ const MapView: React.FC = () => {
     return (
         <div className="relative h-full w-full overflow-hidden bg-brand-bg select-none">
             <div className="absolute top-4 right-4 z-30 flex flex-col gap-3">
-                <div className="flex flex-col bg-brand-surface/90 backdrop-blur-md border border-brand-primary rounded-full shadow-lg overflow-hidden">
+                <div className="flex flex-col bg-brand-surface/90 backdrop-blur-md border border-brand-primary rounded-lg shadow-lg overflow-hidden">
                     <button onClick={() => setScale(s => Math.min(s + 0.2, 3))} className="p-3 text-brand-text hover:text-brand-accent transition-colors">
                         <Icon name="plus" className="w-5 h-5" />
                     </button>
@@ -275,7 +275,7 @@ const MapView: React.FC = () => {
 
                 <button
                     onClick={centerOnPlayer}
-                    className="btn-icon bg-brand-surface/90 backdrop-blur-md border border-brand-primary p-3 rounded-full shadow-lg text-brand-text hover:text-brand-accent"
+                    className="btn-icon bg-brand-surface/90 backdrop-blur-md border border-brand-primary p-3 rounded-lg shadow-lg text-brand-text hover:text-brand-accent"
                     title="Center on Player"
                 >
                     <Icon name="location" className="w-6 h-6" />

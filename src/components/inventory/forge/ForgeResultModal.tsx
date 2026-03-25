@@ -48,12 +48,12 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         {(selectedModifiers.length > 0 && showModifiers) || forgedItem.effect ? (
                             <div className="flex flex-wrap justify-center gap-2 px-2">
                                 {selectedModifiers.map(mod => (
-                                    <div key={mod.id} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-[10px] font-black bg-brand-bg shadow-sm ${MODIFIER_REGISTRY[mod.type].colorClass}`}>
+                                    <div key={mod.id} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg border text-[10px] font-black bg-brand-bg shadow-sm ${MODIFIER_REGISTRY[mod.type].colorClass}`}>
                                         <span>{mod.tag}</span>
                                     </div>
                                 ))}
                                 {forgedItem.effect && (
-                                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-purple-500 text-purple-400 text-[10px] font-black bg-brand-bg shadow-sm">
+                                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border border-purple-500 text-purple-400 text-[10px] font-black bg-brand-bg shadow-sm">
                                         <Icon name="sparkles" className="w-3 h-3" />
                                         <span>{formatEffectLabel(forgedItem.effect, forgedItem.usage, (forgedItem.tags || []).some(t => t === 'consumable' || t === 'throwable'))}</span>
                                     </div>

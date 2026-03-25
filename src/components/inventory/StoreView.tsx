@@ -61,7 +61,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
             <div className="flex flex-wrap gap-1.5">
                 {/* Weapon/Armor Stats */}
                 {item.weaponStats && (
-                    <span className="text-[9px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 capitalize tracking-normal">
+                    <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30 capitalize tracking-normal">
                         {item.weaponStats.damages[0].dice.toLowerCase()} {item.weaponStats.damages[0].type.toLowerCase()}
                         {item.weaponStats.enhancementBonus !== 0 && ` (${item.weaponStats.enhancementBonus >= 0 ? '+' : ''}${item.weaponStats.enhancementBonus})`}
                     </span>
@@ -77,7 +77,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                 {item.buffs?.map((buff, idx) => {
                     const { label, colorClass } = getBuffTag(buff);
                     return (
-                        <span key={idx} className={`text-[9px] font-bold px-2 py-0.5 rounded-full border bg-brand-bg/50 ${colorClass} tracking-normal`}>
+                        <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border bg-brand-bg/50 ${colorClass} tracking-normal`}>
                             {label}
                         </span>
                     );
@@ -85,7 +85,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
 
                 {/* Active Power Slot */}
                 {item.effect && (
-                    <span className="text-[9px] font-bold text-purple-400 bg-purple-900/10 px-2 py-0.5 rounded-full border border-purple-400/50 flex items-center gap-1.5 tracking-normal">
+                    <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 px-2 py-0.5 rounded-lg border border-purple-400/50 flex items-center gap-1.5 tracking-normal">
                         <Icon name="sparkles" className="w-2 h-2" />
                         {getActivePowerPill(item.effect).label}
                     </span>
@@ -120,7 +120,7 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
                     <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
                     {item.quantity && item.quantity > 1 && <span className="text-body-sm font-bold text-brand-text-muted">x{item.quantity}</span>}
                     {item._sourceList && item._sourceList !== 'Carried' && (
-                        <span className="text-[9px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 tracking-normal">
+                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30 tracking-normal">
                             {item._sourceList}
                         </span>
                     )}
@@ -237,7 +237,7 @@ const StoreView: React.FC = () => {
 
                     <div className="flex flex-col w-full px-1">
                         <div className="flex justify-center items-center mb-4">
-                            <div className="flex items-center gap-1.5 text-brand-accent font-black text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm">
+                            <div className="flex items-center gap-1.5 text-brand-accent font-black text-[10px] tabular-nums bg-brand-accent/5 px-3 py-1 rounded-lg border border-brand-accent/20 shadow-sm">
                                 <Icon name="currencyCoins" className="w-3.5 h-3.5" />
                                 <span>{playerGold} {currencyName}</span>
                             </div>
