@@ -8,7 +8,7 @@ import { Icon } from '../../components/Icon';
 import Button from '../Button';
 import { DEFAULT_TEMPLATES, DEFAULT_AFFINITIES, getDifficultyParams, DifficultyPreset } from '../../utils/mechanics';
 import { GameDataContext } from '../../context/GameDataContext';
-import RelationshipBar from './RelationshipBar';
+
 
 interface NPCDetailsModalProps {
     isOpen: boolean;
@@ -124,7 +124,7 @@ const NPCViewContent: React.FC<{
                             {toTitleCase(relInfo.label)} ({npc.relationship > 0 ? '+' : ''}{npc.relationship})
                         </span>
                     </div>
-                    <RelationshipBar value={npc.relationship} />
+
                 </div>
             </div>
 
