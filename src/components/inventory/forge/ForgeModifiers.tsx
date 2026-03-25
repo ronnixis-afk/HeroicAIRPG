@@ -135,13 +135,13 @@ export const ForgeModifiers: React.FC<ForgeModifiersProps> = ({
                     <div 
                         key={mod.id} 
                         onClick={() => onEditModifier(mod)} 
-                        className={`flex items-center gap-1.5 pl-4 pr-1 py-1.5 rounded-full border text-body-sm font-bold bg-brand-bg cursor-pointer hover:scale-105 transition-all shadow-sm ${editModeId === mod.id ? 'ring-2 ring-brand-text' : ''} ${MODIFIER_REGISTRY[mod.type].colorClass}`}
+                        className={`flex items-center gap-1.5 pl-4 pr-1 py-1.5 rounded-lg border text-[10px] font-bold bg-brand-bg cursor-pointer hover:scale-105 transition-all shadow-sm ${editModeId === mod.id ? 'ring-2 ring-brand-text' : ''} ${MODIFIER_REGISTRY[mod.type].colorClass}`}
                     >
                         <span>{mod.tag}</span>
-                        {mod.duration === 'Active' && <span className="text-[8px] opacity-60 ml-0.5">(A)</span>}
+                        {mod.duration === 'Active' && <span className="text-[10px] opacity-60 ml-0.5">(A)</span>}
                         <button 
                             onClick={(e) => { e.stopPropagation(); onRemoveModifier(mod.id); }} 
-                            className="hover:bg-brand-danger hover:text-white rounded-full p-1 ml-1 transition-colors"
+                            className="hover:bg-brand-danger hover:text-white rounded-lg p-1 ml-1 transition-colors"
                         >
                             <Icon name="close" className="w-3 h-3" />
                         </button>

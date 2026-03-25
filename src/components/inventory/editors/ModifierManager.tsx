@@ -230,13 +230,13 @@ export const ModifierManager: React.FC<{ item: Item, onChange: (path: (string | 
                         <div
                             key={mod.id}
                             onClick={() => handleEdit(mod)}
-                            className={`flex items-center gap-1.5 pl-4 pr-1 py-1.5 rounded-full border text-[10px] font-bold cursor-pointer transition-all hover:scale-105 bg-brand-bg ${editModeId === mod.id ? 'ring-2 ring-brand-text shadow-lg' : 'shadow-sm'} ${MODIFIER_REGISTRY[mod.type].colorClass}`}
+                            className={`flex items-center gap-1.5 pl-4 pr-1 py-1.5 rounded-lg border text-[10px] font-bold cursor-pointer transition-all hover:scale-105 bg-brand-bg ${editModeId === mod.id ? 'ring-2 ring-brand-text shadow-lg' : 'shadow-sm'} ${MODIFIER_REGISTRY[mod.type].colorClass}`}
                         >
                             <span>{mod.label}</span>
-                            {mod.duration === 'Active' && <span className="text-[8px] opacity-60 ml-0.5">(A)</span>}
+                            {mod.duration === 'Active' && <span className="text-[10px] opacity-60 ml-0.5">(A)</span>}
                             <button
                                 onClick={(e) => { e.stopPropagation(); handleDelete(mod); }}
-                                className="hover:bg-brand-danger hover:text-white rounded-full p-1 ml-1.5 transition-colors"
+                                className="hover:bg-brand-danger hover:text-white rounded-lg p-1 ml-1.5 transition-colors"
                             >
                                 <Icon name="close" className="w-3 h-3" />
                             </button>

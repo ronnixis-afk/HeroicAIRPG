@@ -134,8 +134,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
             </div>
           </div>
         )}
-        {action === 'Drop' && <p className="text-sm text-brand-danger font-bold tracking-normal italic">Discarding {quantity} unit{quantity > 1 ? 's' : ''}</p>}
-        {action === 'Split' && <p className="text-sm text-brand-accent font-bold tracking-normal italic">New Stack: {quantity} unit{quantity > 1 ? 's' : ''}</p>}
+        {action === 'Drop' && <p className="text-sm text-brand-danger font-bold italic">Discarding {quantity} unit{quantity > 1 ? 's' : ''}</p>}
+        {action === 'Split' && <p className="text-sm text-brand-accent font-bold italic">New Stack: {quantity} unit{quantity > 1 ? 's' : ''}</p>}
       </div>
 
       <div className="flex gap-4">
@@ -174,12 +174,12 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
           {(weaponTags.length > 0 || slotLabel) && (
             <div className="flex flex-wrap gap-2 mb-4">
               {weaponTags.map(tag => (
-                <span key={tag} className="text-[10px] font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20 tracking-normal">
+                <span key={tag} className="text-[10px] font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20">
                   {tag}
                 </span>
               ))}
               {slotLabel && (
-                <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20 tracking-normal">
+                <span className="text-[10px] font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20">
                   {slotLabel}
                 </span>
               )}
@@ -224,7 +224,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
               return (
                 <span
                   key={idx}
-                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg tracking-normal shadow-sm ${colorClass}`}
+                  className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg shadow-sm ${colorClass}`}
                 >
                   {label}
                 </span>
@@ -241,23 +241,23 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
 
         {/* Stepper Controls */}
         <div className="bg-white/5 p-4 rounded-3xl border border-white/5 shadow-inner flex flex-col items-center">
-          <label className="text-[10px] font-bold text-brand-text-muted mb-4 opacity-60 text-center uppercase tracking-widest">Select Quantity</label>
+          <label className="text-[10px] font-bold text-brand-text-muted mb-4 opacity-60 text-center">Select Quantity</label>
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={() => setQuantity(q => Math.max(1, q - 1))}
               disabled={quantity <= 1 || isLoading}
-              className="h-11 w-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+              className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
             >
               <Icon name="minus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
             </button>
             <div className="flex flex-col items-center min-w-[70px]">
-              <h2 className="text-brand-text text-3xl font-heading font-bold tabular-nums mb-0 tracking-tight">{quantity}</h2>
+              <h2 className="text-brand-text text-3xl font-heading font-bold tabular-nums mb-0">{quantity}</h2>
               <span className="text-[10px] font-bold text-brand-text-muted opacity-40">Units</span>
             </div>
             <button
               onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
               disabled={quantity >= maxQuantity || isLoading}
-              className="h-11 w-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+              className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
             >
               <Icon name="plus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
             </button>

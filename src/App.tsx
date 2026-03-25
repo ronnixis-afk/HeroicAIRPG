@@ -352,7 +352,7 @@ const GameInterface: React.FC = () => {
       {isCombatActive && activeView === 'chat' && <CombatStatusDisplay />}
 
       <main className="flex-1 overflow-hidden relative">
-        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery'].includes(activeView) ? '' : 'animate-page p-2'}`}>
+        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery', 'item-forge'].includes(activeView) ? '' : 'animate-page p-2'}`}>
           {renderView()}
         </div>
       </main>

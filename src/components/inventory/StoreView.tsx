@@ -61,8 +61,8 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
             <div className="flex flex-wrap gap-1.5">
                 {/* Weapon/Armor Stats */}
                 {item.weaponStats && (
-                    <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30 capitalize tracking-normal">
-                        {item.weaponStats.damages[0].dice.toLowerCase()} {item.weaponStats.damages[0].type.toLowerCase()}
+                    <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30">
+                        {item.weaponStats.damages[0].dice} {item.weaponStats.damages[0].type}
                         {item.weaponStats.enhancementBonus !== 0 && ` (${item.weaponStats.enhancementBonus >= 0 ? '+' : ''}${item.weaponStats.enhancementBonus})`}
                     </span>
                 )}
@@ -77,7 +77,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
                 {item.buffs?.map((buff, idx) => {
                     const { label, colorClass } = getBuffTag(buff);
                     return (
-                        <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border bg-brand-bg/50 ${colorClass} tracking-normal`}>
+                        <span key={idx} className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border bg-brand-bg/50 ${colorClass}`}>
                             {label}
                         </span>
                     );
@@ -85,7 +85,7 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
 
                 {/* Active Power Slot */}
                 {item.effect && (
-                    <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 px-2 py-0.5 rounded-lg border border-purple-400/50 flex items-center gap-1.5 tracking-normal">
+                    <span className="text-[10px] font-bold text-purple-400 bg-purple-900/10 px-2 py-0.5 rounded-lg border border-purple-400/50 flex items-center gap-1.5">
                         <Icon name="sparkles" className="w-2 h-2" />
                         {getActivePowerPill(item.effect).label}
                     </span>
@@ -120,7 +120,7 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
                     <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
                     {item.quantity && item.quantity > 1 && <span className="text-body-sm font-bold text-brand-text-muted">x{item.quantity}</span>}
                     {item._sourceList && item._sourceList !== 'Carried' && (
-                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30 tracking-normal">
+                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30">
                             {item._sourceList}
                         </span>
                     )}
@@ -218,30 +218,23 @@ const StoreView: React.FC = () => {
     };
 
     return (
-        <div className="p-4 pt-8 max-w-2xl mx-auto h-full flex flex-col">
-            <PageHeader 
-                title="Merchant" 
-                subtitle="Buy equipment and supplies." 
-            />
+        <div className="max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto custom-scroll p-4 pt-8 pb-24 pr-1">
+                <div className="animate-fade-in">
+                    <PageHeader 
+                        title="Merchant" 
+                        subtitle="Buy equipment and supplies." 
+                    />
 
-            <div className="flex justify-center gap-8 mb-3 animate-fade-in border-b border-brand-primary/20 pb-2">
-                <ScaleRadio label="Person" isActive={activeScale === 'Person'} onClick={() => setActiveScale('Person')} />
-                <ScaleRadio label="Mount" isActive={activeScale === 'Mount'} onClick={() => setActiveScale('Mount')} />
-                {hasShipyard && (
-                    <ScaleRadio label="Ship" isActive={activeScale === 'Ship'} onClick={() => setActiveScale('Ship')} />
-                )}
-            </div>
-
-            <div className="flex-1 overflow-y-auto custom-scroll pr-1 pb-24">
-                <div className="space-y-4 animate-fade-in">
-
-                    <div className="flex flex-col w-full px-1">
-                        <div className="flex justify-center items-center mb-4">
-                            <div className="flex items-center gap-1.5 text-brand-accent font-black text-[10px] tabular-nums bg-brand-accent/5 px-3 py-1 rounded-lg border border-brand-accent/20 shadow-sm">
-                                <Icon name="currencyCoins" className="w-3.5 h-3.5" />
-                                <span>{playerGold} {currencyName}</span>
-                            </div>
+                    <div className="sticky top-0 z-20 bg-brand-bg pt-2 pb-3 -mx-4 px-4 border-b border-brand-primary/20 mb-4 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
+                        <div className="flex justify-center gap-8 mb-4">
+                            <ScaleRadio label="Person" isActive={activeScale === 'Person'} onClick={() => setActiveScale('Person')} />
+                            <ScaleRadio label="Mount" isActive={activeScale === 'Mount'} onClick={() => setActiveScale('Mount')} />
+                            {hasShipyard && (
+                                <ScaleRadio label="Ship" isActive={activeScale === 'Ship'} onClick={() => setActiveScale('Ship')} />
+                            )}
                         </div>
+
                         <div className="grid grid-cols-4 gap-2 w-full">
                             {SHOP_CATEGORIES.map(cat => (
                                 <CategoryTab
@@ -254,52 +247,63 @@ const StoreView: React.FC = () => {
                         </div>
                     </div>
 
-                    <div>
-                        {isLoading ? (
-                            <div className="flex flex-col items-center justify-center h-48 text-brand-text-muted">
-                                <Icon name="spinner" className="w-8 h-8 animate-spin mb-4 text-brand-accent" />
-                                <p className="text-body-sm font-bold animate-pulse">Negotiating with suppliers...</p>
+                    <div className="space-y-4">
+                        <div className="flex flex-col w-full px-1">
+                            <div className="flex justify-center items-center mb-4">
+                                <div className="flex items-center gap-1.5 text-brand-accent font-bold text-[10px] tabular-nums bg-brand-accent/5 px-3 py-1 rounded-lg border border-brand-accent/20 shadow-sm">
+                                    <Icon name="currencyCoins" className="w-3.5 h-3.5" />
+                                    <span>{playerGold} {currencyName}</span>
+                                </div>
                             </div>
-                        ) : inventory.length > 0 ? (
-                            <div className="space-y-2">
-                                {inventory.map((item, idx) => (
-                                    <StoreItemCard
-                                        key={`${item.id}-${idx}`}
-                                        item={item}
-                                        onBuy={handleBuyClick}
-                                        canAfford={(item.price || 99999) <= playerGold}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-12 text-brand-text-muted italic border-2 border-dashed border-brand-primary/30 rounded-2xl bg-brand-surface/20">
-                                <p className="text-body-base">The shelves are bare.</p>
-                                <p className="text-body-sm mt-1 opacity-60">Try requesting a new shipment above.</p>
-                            </div>
-                        )}
-                    </div>
+                        </div>
 
-                    <div className="flex flex-col items-center justify-center w-full gap-4 pt-4 border-t border-brand-primary/10">
-                        <p className="text-[10px] font-bold text-brand-text-muted opacity-60 uppercase tracking-widest">
-                            Can't Find What You Are Looking For?
-                        </p>
-                        <button
-                            onClick={() => handleRefreshCategory()}
-                            disabled={isLoading}
-                            className="btn-secondary btn-md w-60"
-                        >
+                        <div>
                             {isLoading ? (
-                                <><Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> Stocking...</>
+                                <div className="flex flex-col items-center justify-center h-48 text-brand-text-muted">
+                                    <Icon name="spinner" className="w-8 h-8 animate-spin mb-4 text-brand-accent" />
+                                    <p className="text-body-sm font-bold animate-pulse">Negotiating with suppliers...</p>
+                                </div>
+                            ) : inventory.length > 0 ? (
+                                <div className="space-y-2">
+                                    {inventory.map((item, idx) => (
+                                        <StoreItemCard
+                                            key={`${item.id}-${idx}`}
+                                            item={item}
+                                            onBuy={handleBuyClick}
+                                            canAfford={(item.price || 99999) <= playerGold}
+                                        />
+                                    ))}
+                                </div>
                             ) : (
-                                <><Icon name="refresh" className="w-4 h-4 mr-2" /> Request Shipment</>
+                                <div className="text-center py-12 text-brand-text-muted italic border-2 border-dashed border-brand-primary/30 rounded-2xl bg-brand-surface/20">
+                                    <p className="text-body-base">The shelves are bare.</p>
+                                    <p className="text-body-sm mt-1 opacity-60">Try requesting a new shipment above.</p>
+                                </div>
                             )}
-                        </button>
-                    </div>
+                        </div>
 
-                    <div className="mt-4 p-4 bg-brand-surface rounded-2xl border border-brand-primary/30 text-center shadow-inner">
-                        <p className="text-body-sm text-brand-text-muted italic leading-relaxed">
-                            Prices fluctuate based on location and scarcity.
-                        </p>
+                        <div className="flex flex-col items-center justify-center w-full gap-4 pt-4 border-t border-brand-primary/10">
+                            <p className="text-[10px] font-bold text-brand-text-muted opacity-60">
+                                Can't Find What You Are Looking For?
+                            </p>
+                            <button
+                                onClick={() => handleRefreshCategory()}
+                                disabled={isLoading}
+                                className="btn-secondary btn-md w-60"
+                            >
+                                {isLoading ? (
+                                    <><Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> Stocking...</>
+                                ) : (
+                                    <><Icon name="refresh" className="w-4 h-4 mr-2" /> Request Shipment</>
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="mt-4 p-4 bg-brand-surface rounded-2xl border border-brand-primary/30 text-center shadow-inner">
+                            <p className="text-body-sm text-brand-text-muted italic leading-relaxed">
+                                Prices fluctuate based on location and scarcity.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>

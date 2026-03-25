@@ -66,7 +66,7 @@ const LootPanel: React.FC = () => {
                             <h5 className="text-[10px] font-black text-brand-text-muted tracking-normal mb-4 px-1 leading-none">Defeated Foes</h5>
                             <div className="flex flex-wrap gap-2">
                                 {lootState.defeatedEnemies.map(enemy => (
-                                    <span key={enemy.id} className="bg-brand-danger/10 text-brand-danger text-[10px] font-black px-4 py-1.5 rounded-full border border-brand-danger/20 shadow-sm leading-none">
+                                    <span key={enemy.id} className="bg-brand-danger/10 text-brand-danger text-[10px] font-black px-4 py-1.5 rounded-lg border border-brand-danger/20 shadow-sm leading-none">
                                         {enemy.name}
                                     </span>
                                 ))}

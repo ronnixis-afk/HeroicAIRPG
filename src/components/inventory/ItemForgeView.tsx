@@ -43,117 +43,111 @@ const ItemForgeView: React.FC = () => {
     const { state, actions } = useForgeLogic();
 
     return (
-        <div className="p-2 pt-4 max-w-2xl mx-auto pb-12 h-full flex flex-col">
+        <div className="animate-fade-in space-y-8 pb-32 pt-4 max-w-2xl mx-auto px-2">
             <PageHeader 
                 title="Forge" 
                 subtitle="Create custom equipment infused with system power." 
                 className="mb-6 pb-4"
             />
+                <ForgeHeader
+                    forgeScale={state.forgeScale}
+                    setForgeScale={actions.setForgeScale}
+                    baseGroup={state.baseGroup}
+                    onCategorySelect={actions.onCategorySelect}
+                    baseSubtype={state.baseSubtype}
+                    setBaseSubtype={actions.setBaseSubtype}
+                    selectedRarity={state.selectedRarity}
+                    setSelectedRarity={actions.setSelectedRarity}
+                    onRandomize={actions.handleRandomize}
+                    filteredGroups={state.filteredGroups}
+                    activeGroupData={state.activeGroupData}
+                    randomizedSummary={state.randomizedSummary}
+                />
 
-            <div className="flex-1 overflow-y-auto custom-scroll pr-1 pb-10">
-                <div className="space-y-8 animate-fade-in">
-                    <ForgeHeader
-                        forgeScale={state.forgeScale}
-                        setForgeScale={actions.setForgeScale}
-                        baseGroup={state.baseGroup}
-                        onCategorySelect={actions.onCategorySelect}
-                        baseSubtype={state.baseSubtype}
-                        setBaseSubtype={actions.setBaseSubtype}
-                        selectedRarity={state.selectedRarity}
-                        setSelectedRarity={actions.setSelectedRarity}
-                        onRandomize={actions.handleRandomize}
-                        filteredGroups={state.filteredGroups}
-                        activeGroupData={state.activeGroupData}
-                        randomizedSummary={state.randomizedSummary}
-                    />
+                <div>
+                    <h4 className="mb-0">Configuration</h4>
 
-                    <div>
-                        <h4 className="mb-0">Configuration</h4>
+                    <div className="space-y-6">
+                        <ForgeIdentity
+                            itemName={state.itemName}
+                            setItemName={actions.setItemName}
+                            lorePrompt={state.lorePrompt}
+                            setLorePrompt={actions.setLorePrompt}
+                            selectedRarity={state.selectedRarity}
+                            baseGroup={state.baseGroup}
+                            baseSubtypeLabel={state.activeSubtypeData?.label}
+                            forgeScale={state.forgeScale}
+                            activeSlot={state.activeSlot}
+                        />
 
-                        <div className="space-y-6">
-                            <ForgeIdentity
-                                itemName={state.itemName}
-                                setItemName={actions.setItemName}
-                                lorePrompt={state.lorePrompt}
-                                setLorePrompt={actions.setLorePrompt}
-                                selectedRarity={state.selectedRarity}
-                                baseGroup={state.baseGroup}
-                                baseSubtypeLabel={state.activeSubtypeData?.label}
+                        {state.showChassisSection && (
+                            <ForgeChassis
+                                showWeaponChassis={state.showWeaponChassis}
+                                showArmorChassis={state.showArmorChassis}
                                 forgeScale={state.forgeScale}
-                                activeSlot={state.activeSlot}
+                                isHeavy={state.isHeavy}
+                                setIsHeavy={actions.setIsHeavy}
+                                baseDamageDice={state.baseDamageDice}
+                                setBaseDamageDice={actions.setBaseDamageDice}
+                                baseDamageType={state.baseDamageType}
+                                setBaseDamageType={actions.setBaseDamageType}
+                                armorType={state.armorType}
+                                setArmorType={actions.setArmorType}
+                                baseAC={state.baseAC}
+                                setBaseAC={actions.setBaseAC}
                             />
+                        )}
 
-                            {state.showChassisSection && (
-                                <ForgeChassis
-                                    showWeaponChassis={state.showWeaponChassis}
-                                    showArmorChassis={state.showArmorChassis}
-                                    forgeScale={state.forgeScale}
-                                    isHeavy={state.isHeavy}
-                                    setIsHeavy={actions.setIsHeavy}
-                                    baseDamageDice={state.baseDamageDice}
-                                    setBaseDamageDice={actions.setBaseDamageDice}
-                                    baseDamageType={state.baseDamageType}
-                                    setBaseDamageType={actions.setBaseDamageType}
-                                    armorType={state.armorType}
-                                    setArmorType={actions.setArmorType}
-                                    baseAC={state.baseAC}
-                                    setBaseAC={actions.setBaseAC}
-                                />
-                            )}
+                        {state.showModifiers && (
+                            <ForgeModifiers
+                                selectedModifiers={state.selectedModifiers}
+                                editModeId={state.editModeId}
+                                modCategory={state.modCategory}
+                                modSubOption={state.modSubOption}
+                                modValue={state.modValue}
+                                modDuration={state.modDuration}
+                                validationError={state.validationError}
+                                activeSlot={state.activeSlot}
+                                onResetBuilderState={actions.resetBuilderState}
+                                onEditModifier={actions.handleEditModifier}
+                                onCancelEdit={actions.handleCancelEdit}
+                                onAddModifier={actions.handleAddModifier}
+                                onRemoveModifier={actions.onRemoveModifier}
+                                onSetModSubOption={actions.setModSubOption}
+                                onSetModValue={actions.setModValue}
+                                onSetModDuration={actions.setModDuration}
+                                filteredModifierCategories={state.filteredModifierCategories}
+                            />
+                        )}
 
-                            {state.showModifiers && (
-                                <ForgeModifiers
-                                    selectedModifiers={state.selectedModifiers}
-                                    editModeId={state.editModeId}
-                                    modCategory={state.modCategory}
-                                    modSubOption={state.modSubOption}
-                                    modValue={state.modValue}
-                                    modDuration={state.modDuration}
-                                    validationError={state.validationError}
-                                    activeSlot={state.activeSlot}
-                                    onResetBuilderState={actions.resetBuilderState}
-                                    onEditModifier={actions.handleEditModifier}
-                                    onCancelEdit={actions.handleCancelEdit}
-                                    onAddModifier={actions.handleAddModifier}
-                                    onRemoveModifier={actions.onRemoveModifier}
-                                    onSetModSubOption={actions.setModSubOption}
-                                    onSetModValue={actions.setModValue}
-                                    onSetModDuration={actions.setModDuration}
-                                    filteredModifierCategories={state.filteredModifierCategories}
-                                />
-                            )}
-
-                            {state.canHaveEffect && (
-                                <ForgeEffects
-                                    effectType={state.effectType}
-                                    setEffectType={actions.setEffectType}
-                                    isEditingEffect={state.isEditingEffect}
-                                    setIsEditingEffect={actions.setIsEditingEffect}
-                                    effectConfig={state.effectConfig}
-                                    setEffectConfig={actions.setEffectConfig}
-                                    usageType={state.usageType}
-                                    setUsageType={actions.setUsageType}
-                                    usageCount={state.usageCount}
-                                    setUsageCount={actions.setUsageCount}
-                                    allowedEffectTypes={state.allowedEffectTypes}
-                                    isSingleUse={state.isSingleUse}
-                                />
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="mt-8 flex justify-center pb-12">
-                        <button
-                            onClick={actions.handleForge}
-                            disabled={!state.baseGroup || (state.showModifiers && state.selectedModifiers.length === 0 && state.effectType === 'None' && !state.itemName.trim() && !state.lorePrompt.trim())}
-                            className="btn-primary btn-md w-full max-w-sm rounded-full shadow-brand-accent/20"
-                        >
-                            Forge Item
-                        </button>
+                        {state.canHaveEffect && (
+                            <ForgeEffects
+                                effectType={state.effectType}
+                                setEffectType={actions.setEffectType}
+                                isEditingEffect={state.isEditingEffect}
+                                setIsEditingEffect={actions.setIsEditingEffect}
+                                effectConfig={state.effectConfig}
+                                setEffectConfig={actions.setEffectConfig}
+                                usageType={state.usageType}
+                                setUsageType={actions.setUsageType}
+                                usageCount={state.usageCount}
+                                setUsageCount={actions.setUsageCount}
+                                allowedEffectTypes={state.allowedEffectTypes}
+                                isSingleUse={state.isSingleUse}
+                            />
+                        )}
                     </div>
                 </div>
-            </div>
 
+                <div className="mt-8 flex justify-center pb-12">
+                    <button
+                        onClick={actions.handleForge}
+                        disabled={!state.baseGroup || (state.showModifiers && state.selectedModifiers.length === 0 && state.effectType === 'None' && !state.itemName.trim() && !state.lorePrompt.trim())}
+                        className="btn-primary btn-md w-full max-w-sm rounded-full shadow-brand-accent/20"
+                    >
+                        Forge Item
+                    </button>
+                </div>
             <ForgeResultModal
                 isOpen={state.isForgeModalOpen}
                 isForging={state.isForging}

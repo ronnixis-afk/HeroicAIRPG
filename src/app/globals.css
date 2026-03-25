@@ -76,7 +76,7 @@
 
   /* Typography System: 5 Header Sizes */
   h1, h2, h3, h4, h5 {
-    @apply tracking-tight;
+    @apply tracking-normal;
     font-family: var(--font-heading);
     font-weight: var(--heading-weight);
     margin-bottom: 0;

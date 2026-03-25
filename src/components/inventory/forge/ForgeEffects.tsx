@@ -152,9 +152,9 @@ export const ForgeEffects: React.FC<ForgeEffectsProps> = ({
             <label className="text-body-sm font-bold text-brand-text-muted mb-3 ml-1 block">Mechanical Effects</label>
             {effectType !== 'None' && !isEditingEffect ? (
                 <div className="flex items-center">
-                    <div onClick={() => setIsEditingEffect(true)} className="flex items-center gap-2 pl-4 pr-1 py-1.5 rounded-full border text-body-sm font-bold bg-brand-bg cursor-pointer hover:scale-105 transition-all shadow-sm border-purple-500 text-purple-400">
+                    <div onClick={() => setIsEditingEffect(true)} className="flex items-center gap-2 pl-4 pr-1 py-1.5 rounded-lg border text-[10px] font-bold bg-brand-bg cursor-pointer hover:scale-105 transition-all shadow-sm border-purple-500 text-purple-400">
                         <span>{formatEffectLabel({ ...effectConfig, type: effectType as any }, { type: usageType, maxUses: usageCount, currentUses: usageCount }, isSingleUse)}</span>
-                        <button onClick={(e) => { e.stopPropagation(); setEffectType('None'); }} className="hover:bg-brand-danger hover:text-white rounded-full p-1 ml-1 transition-colors"><Icon name="close" className="w-3 h-3" /></button>
+                        <button onClick={(e) => { e.stopPropagation(); setEffectType('None'); }} className="hover:bg-brand-danger hover:text-white rounded-lg p-1 ml-1 transition-colors"><Icon name="close" className="w-3 h-3" /></button>
                     </div>
                 </div>
             ) : isEditingEffect ? renderEffectEditor() : (

@@ -41,7 +41,7 @@ export const ForgeIdentity: React.FC<ForgeIdentityProps> = ({
                     </div>
                 </div>
                 {activeSlot && (
-                    <span className="text-body-sm bg-brand-accent/10 border border-brand-accent/20 text-brand-accent font-bold px-3 py-1 rounded-full">
+                    <span className="text-[10px] bg-brand-accent/10 border border-brand-accent/20 text-brand-accent font-bold px-3 py-1 rounded-lg">
                         Slot: {activeSlot}
                     </span>
                 )}
