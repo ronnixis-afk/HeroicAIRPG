@@ -175,7 +175,9 @@ const SettingsView: React.FC = () => {
 
             const world = await worldService.getWorldById(worldId);
             if (world) {
-                await cloudSaveService.pushSaveToCloud(worldId, world.name, world.gameData);
+                const result = await cloudSaveService.pushSaveToCloud(worldId, world.name, world.gameData);
+                // Update local save metadata to match cloud's updatedAt for sync status accuracy
+                await worldService.saveGameData(worldId, world.gameData, result.updatedAt);
                 setCloudMessage('Backup successful!');
             }
         } catch (err: any) {

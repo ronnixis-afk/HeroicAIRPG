@@ -68,6 +68,7 @@ export interface GameData {
 export interface World {
   id: string;
   name: string;
+  updatedAt?: string;
   gameData: GameData;
 }
 

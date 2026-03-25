@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        return NextResponse.json({ success: true, id: save.id });
+        return NextResponse.json({ success: true, id: save.id, updatedAt: save.updatedAt });
     } catch (error: any) {
         console.error('Error saving to cloud:', error);
         return NextResponse.json(

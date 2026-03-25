@@ -169,9 +169,9 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             const existingWorlds = await worldService.getAllWorlds();
             const existingWorld = existingWorlds.find(w => w.id === worldId);
             if (existingWorld) {
-                await worldService.saveGameData(worldId, data);
+                await worldService.saveGameData(worldId, data, save.updatedAt);
             } else {
-                await worldService.importWorldsFromJson(JSON.stringify([{ id: worldId, name, gameData: data }]));
+                await worldService.importWorldsFromJson(JSON.stringify([{ id: worldId, name, gameData: data, updatedAt: save.updatedAt }]));
             }
             await fetchWorlds();
             onWorldSelected(worldId);
@@ -402,6 +402,63 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const tierInfo = TIER_CONFIG[userTier] || TIER_CONFIG['newbie'];
     const userEmail = user?.emailAddresses?.[0]?.emailAddress || '';
 
+    // Unified Realms Logic
+    const unifiedRealms = (() => {
+        const realmsMap = new Map<string, any>();
+
+        // Add Local Saves
+        worlds.forEach(w => {
+            realmsMap.set(w.id, {
+                id: w.id,
+                name: w.name,
+                local: w,
+                status: 'local-only' as const
+            });
+        });
+
+        // Merge Cloud Saves
+        cloudSaves.forEach(c => {
+            const existing = realmsMap.get(c.worldId);
+            if (existing) {
+                existing.cloud = c;
+                if (existing.local?.updatedAt) {
+                    const localTime = new Date(existing.local.updatedAt).getTime();
+                    const cloudTime = new Date(c.updatedAt).getTime();
+                    
+                    // Use a small buffer for "synced" status
+                    if (Math.abs(localTime - cloudTime) < 5000) {
+                        existing.status = 'synced';
+                    } else if (localTime > cloudTime) {
+                        existing.status = 'local-newer';
+                    } else {
+                        existing.status = 'cloud-newer';
+                    }
+                }
+            } else {
+                realmsMap.set(c.worldId, {
+                    id: c.worldId,
+                    name: c.name,
+                    cloud: c,
+                    status: 'cloud-only' as const
+                });
+            }
+        });
+
+        return Array.from(realmsMap.values()).sort((a, b) => {
+            const timeA = new Date(a.local?.updatedAt || a.cloud?.updatedAt || 0).getTime();
+            const timeB = new Date(b.local?.updatedAt || b.cloud?.updatedAt || 0).getTime();
+            return timeB - timeA;
+        });
+    })();
+
+    const handleRealmSelection = async (realm: any) => {
+        if (realm.status === 'cloud-only' || realm.status === 'cloud-newer') {
+            if (realm.cloud) await handleRestoreCloudSave(realm.cloud);
+        } else {
+            onWorldSelected(realm.id);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
@@ -612,7 +669,17 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             <main className="flex-1 pb-20 mt-2">
                 {/* Local Worlds Horizontal Scroll (Netflix Style) */}
                 <section className="mb-10">
-                    <h5 className="text-lg font-bold text-brand-text px-6 mb-4">Your Realms</h5>
+                    <div className="flex items-center justify-between px-6 mb-4">
+                        <h5 className="text-lg font-bold text-brand-text m-0">Your Realms</h5>
+                        <button
+                            onClick={handleFetchCloudSaves}
+                            disabled={isLoadingCloud}
+                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1 px-3 rounded-full flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
+                        >
+                            {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
+                            Sync Cloud
+                        </button>
+                    </div>
                     <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar">
                         {/* Forge New Realm Card */}
                         <button
@@ -625,22 +692,48 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             <span className="font-bold text-sm text-center px-4 leading-tight">Forge New<br />Realm</span>
                         </button>
 
-                        {worlds.map(world => (
-                            <div key={world.id} className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden cursor-pointer shadow-lg bg-brand-surface border border-brand-primary/30 hover:border-brand-accent hover:shadow-brand-accent/20 transition-all flex flex-col" onClick={() => onWorldSelected(world.id)}>
+                        {unifiedRealms.map(realm => (
+                            <div 
+                                key={realm.id} 
+                                className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden cursor-pointer shadow-lg bg-brand-surface border border-brand-primary/30 hover:border-brand-accent hover:shadow-brand-accent/20 transition-all flex flex-col" 
+                                onClick={() => handleRealmSelection(realm)}
+                            >
                                 {/* Placeholder Map/Setting Visual */}
                                 <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 via-transparent to-black/90 z-0 text-brand-primary opacity-20 flex items-center justify-center overflow-hidden mix-blend-overlay">
                                     <div className="w-[200%] h-[200%] absolute top-0 -left-1/2 rotate-12 bg-gradient-to-r from-transparent via-brand-text to-transparent blur-3xl opacity-10"></div>
                                 </div>
+                                
+                                {/* Status Icons & Badges */}
+                                <div className="absolute top-2 left-2 z-10 flex gap-1">
+                                    {(realm.status === 'synced' || realm.status === 'cloud-newer' || realm.status === 'local-newer') && (
+                                        <div className={`p-1.5 rounded-full backdrop-blur-md shadow-sm border border-brand-surface/20 ${realm.status === 'synced' ? 'bg-brand-accent/20 text-brand-accent' : (realm.status === 'cloud-newer' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400')}`} title={realm.status === 'synced' ? 'Synced to Cloud' : (realm.status === 'cloud-newer' ? 'Cloud version is newer' : 'Local changes not yet synced')}>
+                                            <Icon name="cloud" className="w-3 h-3" />
+                                        </div>
+                                    )}
+                                    {realm.status === 'cloud-only' && (
+                                        <div className="bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black text-brand-text/70 border border-brand-surface shadow-sm uppercase tracking-tighter">
+                                            Cloud Only
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteWorld(world.id); }} className="bg-black/40 hover:bg-brand-danger/20 text-brand-text-muted hover:text-brand-danger p-2 rounded-full backdrop-blur-sm transition-colors shadow-md">
+                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteWorld(realm.id); }} className="bg-black/40 hover:bg-brand-danger/20 text-brand-text-muted hover:text-brand-danger p-2 rounded-full backdrop-blur-sm transition-colors shadow-md">
                                         <Icon name="trash" className="w-4 h-4" />
                                     </button>
                                 </div>
+
                                 <div className="mt-auto p-4 z-10 w-full flex flex-col relative">
-                                    <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {world.name}</h5>
-                                    <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">Saved {new Date(parseInt(world.id.split('-').pop() || '0')).toLocaleDateString()}</p>
+                                    <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {realm.name}</h5>
+                                    <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">
+                                        {realm.local?.updatedAt ? `Saved ${new Date(realm.local.updatedAt).toLocaleDateString()}` : `Cloud Save ${new Date(realm.cloud?.updatedAt || 0).toLocaleDateString()}`}
+                                    </p>
                                     <div className="w-full bg-brand-accent text-black font-black text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
-                                        <Icon name="play" className="w-3 h-3" /> Play
+                                        {isRestoringCloud && (realm.status === 'cloud-only' || realm.status === 'cloud-newer') ? (
+                                            <Icon name="spinner" className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                            <><Icon name="play" className="w-3 h-3" /> {realm.status === 'cloud-only' ? 'Restore' : 'Play'}</>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -648,50 +741,6 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                     </div>
                 </section>
 
-                {/* Cloud Load Section Horizontal Scroll */}
-                <section className="mb-6">
-                    <div className="flex items-center justify-between px-6 mb-4">
-                        <h5 className="text-lg font-bold text-brand-text">Archives</h5>
-                        <button
-                            onClick={handleFetchCloudSaves}
-                            disabled={isLoadingCloud}
-                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1 px-3 rounded-full flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
-                        >
-                            {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
-                            Sync
-                        </button>
-                    </div>
-
-                    <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar min-h-[200px]">
-                        {cloudError && <div className="w-full shrink-0"><p className="text-body-sm text-brand-danger font-bold">{cloudError}</p></div>}
-
-                        {cloudSaves.length === 0 && !isLoadingCloud && !cloudError ? (
-                            <div className="w-36 md:w-44 aspect-[2/3] shrink-0 bg-brand-primary/5 border border-brand-surface border-dashed rounded-xl flex items-center justify-center p-4">
-                                <p className="text-brand-text-muted text-xs italic text-center opacity-60">No celestial archives found.</p>
-                            </div>
-                        ) : (
-                            cloudSaves.map(save => (
-                                <div key={save.id} className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden shadow-lg bg-brand-surface/40 border border-brand-primary/20 hover:border-brand-accent/50 transition-all flex flex-col">
-                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-bg/50 to-[#0a0f12] z-0 mix-blend-multiply border border-brand-accent/10"></div>
-                                    <div className="absolute top-3 left-3 z-10 bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-black text-brand-text/70 border border-brand-surface shadow-sm">
-                                        Cloud
-                                    </div>
-                                    <div className="mt-auto p-4 z-10 w-full flex flex-col items-start text-left">
-                                        <h5 className="text-sm font-bold text-brand-text truncate w-full mb-1 shadow-black drop-shadow-md"> {save.name}</h5>
-                                        <p className="text-[9px] text-brand-text-muted mb-4 opacity-70 border-b border-brand-primary/30 pb-2 w-full shadow-black drop-shadow-md">{new Date(save.updatedAt).toLocaleDateString()}</p>
-                                        <button
-                                            onClick={() => handleRestoreCloudSave(save)}
-                                            disabled={isRestoringCloud}
-                                            className="w-full bg-[#11181c] border border-brand-accent/50 text-brand-accent font-bold text-xs py-2 rounded flex items-center justify-center gap-1 hover:bg-brand-accent hover:text-black transition-colors shadow-lg"
-                                        >
-                                            {isRestoringCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin mx-auto" /> : 'Restore'}
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </section>
             </main>
 
             <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} title={previewData ? "World Preview" : "Forging a New World"}>

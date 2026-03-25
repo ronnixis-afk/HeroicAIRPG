@@ -25,7 +25,7 @@ export const cloudSaveService = {
         return await response.json();
     },
 
-    pushSaveToCloud: async (worldId: string, name: string, data: GameData): Promise<string> => {
+    pushSaveToCloud: async (worldId: string, name: string, data: GameData): Promise<{ id: string; updatedAt: string }> => {
         const response = await fetch('/api/cloud-save', {
             method: 'POST',
             headers: {
@@ -40,7 +40,7 @@ export const cloudSaveService = {
         }
 
         const result = await response.json();
-        return result.id;
+        return { id: result.id, updatedAt: result.updatedAt };
     },
 
     fetchCloudSaveContext: async (id: string): Promise<{ data: GameData; name: string; worldId: string }> => {

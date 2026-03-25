@@ -264,7 +264,19 @@ const getAllWorlds = async (): Promise<World[]> => {
         return [defaultWorld];
     }
 
-    return worlds.map(w => ({ ...w, gameData: hydrateWorldData(w.gameData) }));
+    return worlds.map(w => {
+        // Hydrate legacy updatedAt from ID if missing
+        if (!w.updatedAt) {
+            const tsMatch = w.id.split('-').pop();
+            const ts = parseInt(tsMatch || '');
+            if (!isNaN(ts)) {
+                w.updatedAt = new Date(ts).toISOString();
+            } else {
+                w.updatedAt = new Date().toISOString();
+            }
+        }
+        return { ...w, gameData: hydrateWorldData(w.gameData) };
+    });
 };
 
 const getWorldById = async (worldId: string): Promise<World | undefined> => {
@@ -275,14 +287,16 @@ const getWorldById = async (worldId: string): Promise<World | undefined> => {
     return undefined;
 };
 
-const saveWorld = async (updatedWorld: World): Promise<void> => {
+const saveWorld = async (updatedWorld: World, updatedAt?: string): Promise<void> => {
+    updatedWorld.updatedAt = updatedAt || new Date().toISOString();
     await dbService.put(updatedWorld);
 };
 
-const saveGameData = async (worldId: string, gameData: GameData): Promise<void> => {
+const saveGameData = async (worldId: string, gameData: GameData, updatedAt?: string): Promise<void> => {
     const world = await dbService.get<World>(worldId);
     if (world) {
         world.gameData = gameData;
+        world.updatedAt = updatedAt || new Date().toISOString();
         await dbService.put(world);
     }
 };
@@ -296,7 +310,13 @@ const createNewWorld = async (name: string, loreEntries: Omit<LoreEntry, 'id' | 
     }));
     newGameData.currentTime = startingDateTime;
     if (customGameData) Object.assign(newGameData, customGameData);
-    const newWorld: World = { id: `world-${Date.now()}`, name, gameData: hydrateWorldData(newGameData) };
+    const now = new Date();
+    const newWorld: World = { 
+        id: `world-${now.getTime()}`, 
+        name, 
+        updatedAt: now.toISOString(),
+        gameData: hydrateWorldData(newGameData) 
+    };
     await dbService.put(newWorld);
     return newWorld;
 };

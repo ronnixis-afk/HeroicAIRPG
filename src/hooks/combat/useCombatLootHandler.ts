@@ -126,10 +126,10 @@ export const useCombatLootHandler = (
                         dispatch({
                             type: 'ADD_KNOWLEDGE',
                             payload: [{
-                                title: `Death of ${npc.name}`,
+                                title: `${npc.name}'s Remains`,
                                 content: `The remains of ${npc.name} lie here, having fallen in battle.`,
                                 coordinates: gameData.playerCoordinates,
-                                tags: ['location', 'history', 'death'],
+                                tags: ['history', 'death'],
                                 isNew: true,
                                 visited: true
                             }]
