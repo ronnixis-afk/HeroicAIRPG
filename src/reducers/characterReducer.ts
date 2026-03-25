@@ -1,6 +1,7 @@
 // reducers/characterReducer.ts
 
 import { GameData, PlayerCharacter, Companion, Inventory, GameAction, ChatMessage } from '../types';
+import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNextLevelXP, getXPForLevel } from '../utils/mechanics';
 
 export const characterReducer = (state: GameData, action: GameAction): GameData => {
@@ -81,7 +82,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                 };
             }
 
-            return {
+            const newState = {
                 ...state,
                 companions: [...(state.companions ?? []), companionInstance],
                 companionInventories: {
@@ -89,6 +90,9 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     [companionInstance.id]: newInventory
                 }
             };
+            
+            // Automatic consolidation: ensure any currency received during companion creation is moved to player
+            return consolidateCurrencyToPlayer(newState);
         }
         
         case 'DELETE_COMPANION':

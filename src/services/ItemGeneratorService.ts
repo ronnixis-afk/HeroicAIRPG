@@ -205,9 +205,9 @@ export const formatAbilityEffect = (effect: AbilityEffect): string => {
     let parts: string[] = [];
 
     if (effect.type === 'Damage') {
-        parts.push(`${effect.damageDice} ${effect.damageType || 'Force'}`);
+        parts.push(`${effect.damageDice || '0'} ${effect.damageType || 'Force'}`);
     } else if (effect.type === 'Heal') {
-        parts.push(`${effect.healDice} Heal`);
+        parts.push(`${effect.healDice || '0'} Heal`);
     } else if (effect.type === 'Status') {
         parts.push(effect.status || 'Status');
     }

@@ -1,5 +1,6 @@
 
 import { GameData, Inventory, Item, GameAction } from '../types';
+import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 
 export const inventoryReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
@@ -282,7 +283,9 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                     };
                 }
             }
-            return newState;
+
+            // Automatic consolidation: ensure any currency received by companions is moved to player
+            return consolidateCurrencyToPlayer(newState);
         }
 
         case 'USE_ITEM': {
@@ -363,33 +366,7 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
         }
 
         case 'CONSOLIDATE_CURRENCY': {
-            const { itemId, ownerId } = action.payload;
-            const newState = { ...state };
-            const processConsolidate = (inv: Inventory): Inventory => {
-                const newCarried = [...inv.carried];
-                const primaryCurrencyIdx = newCarried.findIndex(i => i.tags?.includes('currency') && i.id !== itemId);
-                const targetItemIndex = newCarried.findIndex(i => i.id === itemId);
-                
-                if (primaryCurrencyIdx > -1 && targetItemIndex > -1) {
-                    const targetItem = newCarried[targetItemIndex];
-                    const primaryCurrency = newCarried[primaryCurrencyIdx];
-                    newCarried[primaryCurrencyIdx] = new Item({
-                        ...primaryCurrency,
-                        quantity: (primaryCurrency.quantity || 0) + (targetItem.quantity || 0)
-                    });
-                    newCarried.splice(targetItemIndex, 1);
-                }
-                return { ...inv, carried: newCarried };
-            };
-            if (ownerId === 'player') {
-                newState.playerInventory = processConsolidate(newState.playerInventory);
-            } else if (newState.companionInventories[ownerId]) {
-                newState.companionInventories = {
-                    ...newState.companionInventories,
-                    [ownerId]: processConsolidate(newState.companionInventories[ownerId])
-                };
-            }
-            return newState;
+            return consolidateCurrencyToPlayer(state);
         }
 
         case 'ADD_STORE_INVENTORY':
@@ -431,6 +408,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
 
                 newCarried.push(boughtItem);
                 newState.playerInventory = { ...newState.playerInventory, carried: newCarried };
+                // Ensure currency is merged and consolidated after purchase
+                return consolidateCurrencyToPlayer(newState);
             }
             return newState;
         }
@@ -481,6 +460,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                     }));
                 }
                 newState.playerInventory = { ...newState.playerInventory, carried: newCarried };
+                // Ensure currency is merged and consolidated after sale
+                return consolidateCurrencyToPlayer(newState);
             }
             return newState;
         }
@@ -531,7 +512,8 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                 }
             });
             newState.playerInventory = { ...newState.playerInventory, carried: newCarried };
-            return newState;
+            // Ensure currency is merged and consolidated after loot
+            return consolidateCurrencyToPlayer(newState);
         }
 
         default:

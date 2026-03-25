@@ -2,6 +2,7 @@
 
 import { GameData, GameAction, Item, LoreEntry, MapZone, Inventory, NPC } from '../types';
 import { PlayerCharacter, Companion } from '../types';
+import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
 
@@ -327,7 +328,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             // Cap current points
             pcData.heroicPoints = Math.min(pcData.heroicPoints || 0, pcData.maxHeroicPoints);
 
-            return {
+            const newState: GameData = {
                 ...state,
                 playerCharacter: pcData,
                 world: state.world,
@@ -360,6 +361,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 isPartyHidden: false,
                 partyStealthScore: 10
             };
+            return consolidateCurrencyToPlayer(newState);
         }
 
         case 'UPDATE_GM_SETTINGS':
@@ -552,6 +554,9 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 newState.companions.forEach(c => {
                     c.maxHeroicPoints = c.getMaxHeroicPoints(newState.companionInventories[c.id]);
                 });
+
+                // Automatic consolidation after AI inventory updates
+                newState = consolidateCurrencyToPlayer(newState);
             }
 
             if (updates.knowledge && Array.isArray(updates.knowledge)) {

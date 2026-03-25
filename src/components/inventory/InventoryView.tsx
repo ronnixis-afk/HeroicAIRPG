@@ -100,6 +100,21 @@ const InventoryView: React.FC = () => {
         return <div className="text-center p-8 text-body-base">Loading inventory...</div>;
     }
 
+    const playerGold = useMemo(() => {
+        return playerInventory.carried.reduce((acc, item) => {
+            if (item.tags?.includes('currency')) {
+                return acc + (item.quantity || 0);
+            }
+            return acc;
+        }, 0);
+    }, [playerInventory]);
+
+    const currencyName = useMemo(() => {
+        const currencyItem = playerInventory.carried.find(i => i.tags?.includes('currency'));
+        if (currencyItem) return currencyItem.name;
+        return mapSettings?.style === 'sci-fi' ? 'Credits' : 'Gold Pieces';
+    }, [playerInventory, mapSettings]);
+
     const combatStats = useMemo(() => {
         return activeCharacter.getCombatStats(activeInventory);
     }, [activeCharacter, activeInventory]);
@@ -233,6 +248,16 @@ const InventoryView: React.FC = () => {
                     </button>
                 )}
             </PageHeader>
+
+            {/* Currency Display - Main Player Only */}
+            {isPlayerView && (
+                <div className="flex justify-center items-center mb-4">
+                    <div className="flex items-center gap-1.5 text-brand-accent font-black text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                        <Icon name="currencyCoins" className="w-3.5 h-3.5" />
+                        <span>{playerGold.toLocaleString()} {currencyName}</span>
+                    </div>
+                </div>
+            )}
 
             <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-2'}`}>
                 <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-1 pb-1 gap-4 justify-around`}>

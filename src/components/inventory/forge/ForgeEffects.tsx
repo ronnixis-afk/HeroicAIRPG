@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '../../Icon';
 import { AbilityEffect, AbilityUsage, ABILITY_SCORES, DAMAGE_TYPES, STATUS_EFFECT_NAMES } from '../../../types';
+import { formatAbilityEffect } from '../../../services/ItemGeneratorService';
 
 interface ForgeEffectsProps {
     effectType: 'None' | 'Damage' | 'Status' | 'Heal';
@@ -18,29 +19,16 @@ interface ForgeEffectsProps {
 }
 
 const formatEffectLabel = (effect: AbilityEffect, usage: AbilityUsage | undefined, isSingleUse: boolean) => {
-    const usageLabel = isSingleUse ? '' : (usage?.type === 'per_short_rest' ? 'Short'
-        : usage?.type === 'per_long_rest' ? 'Long'
-            : usage?.type === 'charges' ? 'Chg' : '');
-    const uses = isSingleUse ? '' : (usage?.maxUses || 0);
-    const usagePart = isSingleUse ? '' : `${usageLabel} ${uses}`;
-    const target = effect.targetType === 'Multiple' ? 'Mul' : 'Sin';
+    const baseLabel = formatAbilityEffect(effect);
+    
+    if (isSingleUse) return baseLabel;
 
-    if (effect.type === 'Damage') {
-        const save = effect.saveAbility ? effect.saveAbility.slice(0, 3).charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3).toLowerCase() : 'Dex';
-        const eff = effect.saveEffect === 'half' ? 'Half' : 'Neg';
-        const dc = effect.dc || 10;
-        return `${effect.damageDice} ${effect.damageType || ''} ${target} ${save} ${eff} ${dc} ${usagePart} `.trim();
-    }
-    if (effect.type === 'Status') {
-        const save = effect.saveAbility ? effect.saveAbility.slice(0, 3).charAt(0).toUpperCase() + effect.saveAbility.slice(1, 3).toLowerCase() : 'Con';
-        const dc = effect.dc || 10;
-        return `${effect.status} ${target} ${save} ${dc} ${usagePart} `.trim();
-    }
-    if (effect.type === 'Heal') {
-        const healDisplay = effect.healDice?.includes('d') ? effect.healDice : `${effect.healDice} HP`;
-        return `${healDisplay} Heal ${target} ${usagePart} `.trim();
-    }
-    return `Effect: ${effect.type}`;
+    const usageTypeLabel = usage?.type === 'per_short_rest' ? 'Short'
+        : usage?.type === 'per_long_rest' ? 'Long'
+            : usage?.type === 'charges' ? 'Chg' : '';
+    
+    const usagePart = `${usageTypeLabel} ${usage?.maxUses || 0}`.trim();
+    return usagePart ? `${baseLabel} | ${usagePart}` : baseLabel;
 };
 
 export const ForgeEffects: React.FC<ForgeEffectsProps> = ({

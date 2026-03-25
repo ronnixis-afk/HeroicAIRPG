@@ -37,7 +37,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     item, ownerId, character, fromList, primaryCurrencyItemId,
     onEquipRequest, onUnequipRequest, onActionCompleted, hideName
 }) => {
-    const { gameData, dropItem, splitItem, updateItem, moveItem, useItem, transferItem, consolidateCurrency, performPlayerAttack } = useContext(GameDataContext) as GameDataContextType;
+    const { gameData, dropItem, splitItem, updateItem, moveItem, useItem, sellItem, transferItem, consolidateCurrency, performPlayerAttack } = useContext(GameDataContext) as GameDataContextType;
 
     const [localItem, setLocalItem] = useState(item);
     const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +46,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     const [isTransferDropdownOpen, setIsTransferDropdownOpen] = useState(false);
     const [isDropModalOpen, setIsDropModalOpen] = useState(false);
     const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
+    const [isSellModalOpen, setIsSellModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [isTargetDropdownOpen, setIsTargetDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -75,8 +76,27 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     const isBuff = safeLocalTags.some(tag => typeof tag === 'string' && tag.toLowerCase() === 'buff');
     const isMechanical = safeLocalTags.some(tag => typeof tag === 'string' && tag.toLowerCase() === 'mechanical');
     const isConsumable = safeLocalTags.some(tag => typeof tag === 'string' && tag.toLowerCase() === 'consumable');
+    const isQuestItem = safeLocalTags.some(tag => typeof tag === 'string' && tag.toLowerCase() === 'quest');
     const isConsolidatable = localItem?.tags?.some(tag => tag.toLowerCase() === 'currency') && item?.id !== primaryCurrencyItemId && primaryCurrencyItemId !== undefined;
     const canSplit = (item.quantity || 1) > 1;
+
+    const currentZone = useMemo(() => {
+        if (!gameData?.mapZones || !gameData?.playerCoordinates) return null;
+        return gameData.mapZones.find(z => z.coordinates === gameData.playerCoordinates);
+    }, [gameData?.mapZones, gameData?.playerCoordinates]);
+
+    const isMerchantAvailable = useMemo(() => {
+        if (gameData?.combatState?.isActive) return false;
+        const zoneFeatures = currentZone?.zoneFeatures || [];
+        const populationLevel = currentZone?.populationLevel || '';
+        return zoneFeatures.includes('Market') || ['Town', 'City', 'Capital'].includes(populationLevel);
+    }, [gameData?.combatState?.isActive, currentZone]);
+
+    const canSell = useMemo(() => {
+        return isMerchantAvailable && !isQuestItem && (item.price || 0) > 0 && !safeLocalTags.some(t => t.toLowerCase() === 'currency');
+    }, [isMerchantAvailable, isQuestItem, item.price, safeLocalTags]);
+
+    const sellPrice = Math.floor((item.price || 0) / 2);
 
     const isDirty = useMemo(() => {
         if (!localItem || !item) return false;
@@ -129,6 +149,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
 
     const handleMove = (toList: keyof Inventory) => {
         moveItem(item.id, fromList, toList, ownerId);
+        if (onActionCompleted) onActionCompleted();
+    };
+
+    const handleConfirmSell = async (quantity: number) => {
+        await sellItem(item, sellPrice, quantity);
         if (onActionCompleted) onActionCompleted();
     };
 
@@ -627,6 +652,16 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             {fromList === 'carried' && ownerId === 'player' && <ActionButton onClick={() => handleMove('storage')}>Store</ActionButton>}
                             {fromList === 'storage' && ownerId === 'player' && <ActionButton onClick={() => handleMove('carried')}>Carry</ActionButton>}
                             {canSplit && <ActionButton onClick={() => setIsSplitModalOpen(true)}>Split</ActionButton>}
+                            {canSell && (
+                                <Button
+                                    onClick={() => setIsSellModalOpen(true)}
+                                    variant="secondary"
+                                    className="w-full text-brand-danger border-brand-danger/30 hover:border-brand-danger hover:bg-brand-danger/10"
+                                    icon="currencyCoins"
+                                >
+                                    Sell ({sellPrice})
+                                </Button>
+                            )}
 
                             <div className="relative inline-block" ref={dropdownRef}>
                                  {fromList !== 'assets' && gameData && gameData.companions.length > 0 && (
@@ -701,6 +736,17 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
 
             {isDropModalOpen && <QuantityModal isOpen={isDropModalOpen} onClose={() => setIsDropModalOpen(false)} item={item} action="Drop" maxQuantity={item?.quantity || 1} onConfirm={handleConfirmDrop} />}
             {isSplitModalOpen && <QuantityModal isOpen={isSplitModalOpen} onClose={() => setIsSplitModalOpen(false)} item={item} action="Split" maxQuantity={(item?.quantity || 2) - 1} onConfirm={handleConfirmSplit} />}
+            {isSellModalOpen && (
+                <QuantityModal 
+                    isOpen={isSellModalOpen} 
+                    onClose={() => setIsSellModalOpen(false)} 
+                    item={item} 
+                    action="Sell" 
+                    maxQuantity={item?.quantity || 1} 
+                    onConfirm={handleConfirmSell} 
+                    balance={gameData?.playerInventory.carried.find(i => i.tags?.includes('currency'))?.quantity || 0}
+                />
+            )}
         </div >
     );
 };
