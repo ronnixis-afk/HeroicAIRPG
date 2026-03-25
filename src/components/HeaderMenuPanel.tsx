@@ -187,8 +187,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               onClick={() => { onSwitchWorldClick(); onClose(); }}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
-              <img src="/icons/change-realm.png" alt="Change Realm" className="w-5 h-5 object-contain shrink-0 scale-150 group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-body-sm font-bold text-brand-text">Change Realm</span>
+              <img src="/icons/change-realm.png" alt="Exit Realm" className="w-5 h-5 object-contain shrink-0 scale-150 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-body-sm font-bold text-brand-text">Exit Realm</span>
             </button>
           </div>
         </div>

@@ -49,6 +49,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const [isLoadingCloud, setIsLoadingCloud] = useState(false);
     const [isRestoringCloud, setIsRestoringCloud] = useState(false);
     const [cloudError, setCloudError] = useState('');
+    const [cloudMessage, setCloudMessage] = useState('');
 
     // Modal & Drawer State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -191,10 +192,53 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         setIsGenerating(false);
     };
 
-    const handleDeleteWorld = async (worldId: string) => {
-        if (window.confirm("Are you sure you want to permanently delete this world?")) {
-            await worldService.deleteWorld(worldId);
-            await fetchWorlds();
+    const handleDeleteRealm = async (realm: any) => {
+        const confirmMsg = realm.cloud 
+            ? `Are you sure you want to permanently delete "${realm.name}" from BOTH local and cloud storage? This cannot be undone.`
+            : `Are you sure you want to permanently delete "${realm.name}"?`;
+
+        if (window.confirm(confirmMsg)) {
+            setIsLoadingCloud(true);
+            try {
+                // Delete from cloud if it exists
+                if (realm.cloud) {
+                    await cloudSaveService.deleteCloudSave(realm.cloud.id);
+                }
+
+                // Delete local world if it exists
+                if (realm.local) {
+                    await worldService.deleteWorld(realm.id);
+                }
+
+                await fetchWorlds();
+                await handleFetchCloudSaves();
+                setCloudMessage('Realm extinguished from history.');
+            } catch (err: any) {
+                setCloudError(`Failed to delete realm: ${err.message}`);
+            } finally {
+                setIsLoadingCloud(false);
+                setTimeout(() => setCloudMessage(''), 3000);
+            }
+        }
+    };
+
+    const handleUploadToCloud = async (realm: any) => {
+        if (!realm.local) return;
+        setIsLoadingCloud(true);
+        setCloudMessage(`Archiving ${realm.name} to celestial cloud...`);
+        try {
+            const result = await cloudSaveService.pushSaveToCloud(realm.id, realm.name, realm.local.gameData);
+            // Sync local timestamp to match cloud for "synced" status
+            await worldService.saveGameData(realm.id, realm.local.gameData, result.updatedAt);
+            
+            await fetchWorlds(); // Refresh local list to get updated timestamp
+            await handleFetchCloudSaves(); // Refresh cloud list
+            setCloudMessage('Archive successful!');
+        } catch (e: any) {
+            setCloudError(e.message || 'Failed to sync with cloud.');
+        } finally {
+            setIsLoadingCloud(false);
+            setTimeout(() => setCloudMessage(''), 3000);
         }
     };
 
@@ -475,12 +519,13 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
             {/* User Account Drawer Overlay */}
             <div className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsDrawerOpen(false)}></div>
-            <div className={`fixed inset-y-0 right-0 w-80 bg-[#0c1114] border-l border-brand-primary/30 z-50 transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed inset-y-0 right-0 w-[368px] bg-[#0c1114] border-l border-brand-primary/30 z-50 transform transition-transform duration-300 ease-out shadow-2xl flex flex-col ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-brand-primary/10 bg-brand-surface/30">
-                    <div className="flex flex-col">
-                        <h2 className="text-lg font-bold text-brand-text mb-0.5 inter">User Menu</h2>
-                        <span className="text-[10px] text-brand-accent font-black tracking-widest opacity-80 inter">Profile & Settings</span>
+                    <div className="flex items-center gap-3">
+                        <div className="p-0.5 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-primary/20 border border-brand-accent/30 shadow-lg flex items-center justify-center overflow-hidden aspect-square">
+                            <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-10 h-10 rounded-full" } }} />
+                        </div>
                     </div>
                     <button onClick={() => setIsDrawerOpen(false)} className="text-brand-text-muted hover:text-brand-accent transition-colors p-2 rounded-full hover:bg-brand-primary/10">
                         <Icon name="close" className="w-5 h-5" />
@@ -523,10 +568,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         {/* 3. Account Profile */}
                         <div className="w-full flex flex-col gap-3 p-3 rounded-xl bg-brand-primary/5 border border-brand-primary/10 mt-2 mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="p-1 rounded-full bg-gradient-to-tr from-brand-accent/20 to-brand-primary/20 border border-brand-accent/30 shadow-lg">
-                                    <UserButton afterSignOutUrl="/" appearance={{ elements: { userButtonAvatarBox: "w-10 h-10 rounded-full" } }} />
-                                </div>
-                                <div className="flex flex-col">
+                                <div className="flex flex-col ml-1">
                                     <span className="text-sm font-bold text-brand-text inter">{userEmail?.split('@')[0] || 'User'}</span>
                                     <span className={`text-[10px] font-black ${tierInfo.color} inter tracking-tighter`}>{tierInfo.label}</span>
                                 </div>
@@ -669,16 +711,24 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             <main className="flex-1 pb-20 mt-2">
                 {/* Local Worlds Horizontal Scroll (Netflix Style) */}
                 <section className="mb-10">
-                    <div className="flex items-center justify-between px-6 mb-4">
-                        <h5 className="text-lg font-bold text-brand-text m-0">Your Realms</h5>
-                        <button
-                            onClick={handleFetchCloudSaves}
-                            disabled={isLoadingCloud}
-                            className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1 px-3 rounded-full flex items-center gap-1 hover:text-brand-accent hover:border-brand-accent/50 transition-colors shadow-sm"
-                        >
-                            {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
-                            Sync Cloud
-                        </button>
+                    <div className="flex flex-col px-6 mb-4">
+                        <div className="flex items-center justify-between">
+                            <h5 className="text-lg font-bold text-brand-text m-0 inter">Your Realms</h5>
+                            <button
+                                onClick={handleFetchCloudSaves}
+                                disabled={isLoadingCloud}
+                                className="bg-brand-surface border border-brand-primary/50 text-brand-text-muted text-[10px] font-bold py-1.5 px-3 rounded-full flex items-center gap-1.5 hover:text-brand-accent hover:border-brand-accent/50 transition-all shadow-sm active:scale-95"
+                            >
+                                {isLoadingCloud ? <Icon name="spinner" className="w-3 h-3 animate-spin" /> : <Icon name="cloud" className="w-3 h-3" />}
+                                Sync Cloud
+                            </button>
+                        </div>
+                        {(cloudMessage || cloudError) && (
+                            <p className={`text-[10px] font-bold mt-1.5 animate-fade-in ${cloudError ? 'text-brand-danger' : 'text-brand-accent'} inter tracking-tight`}>
+                                <Icon name={cloudError ? 'exclamation' : 'info'} className="w-2.5 h-2.5 inline mr-1" />
+                                {cloudError || cloudMessage}
+                            </p>
+                        )}
                     </div>
                     <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar">
                         {/* Forge New Realm Card */}
@@ -717,8 +767,22 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     )}
                                 </div>
 
-                                <div className="absolute top-2 right-2 z-10 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={(e) => { e.stopPropagation(); handleDeleteWorld(realm.id); }} className="bg-black/40 hover:bg-brand-danger/20 text-brand-text-muted hover:text-brand-danger p-2 rounded-full backdrop-blur-sm transition-colors shadow-md">
+                                <div className="absolute top-2 right-2 z-10 flex flex-col gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {(realm.status === 'local-only' || realm.status === 'local-newer') && (
+                                        <button 
+                                            disabled={isLoadingCloud}
+                                            onClick={(e) => { e.stopPropagation(); handleUploadToCloud(realm); }} 
+                                            className="bg-black/60 hover:bg-brand-accent/20 text-brand-text-muted hover:text-brand-accent p-2 rounded-full backdrop-blur-md transition-all shadow-md transform hover:scale-110"
+                                            title="Backup to Cloud"
+                                        >
+                                            <Icon name="upload" className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteRealm(realm); }} 
+                                        className="bg-black/60 hover:bg-brand-danger/20 text-brand-text-muted hover:text-brand-danger p-2 rounded-full backdrop-blur-md transition-all shadow-md transform hover:scale-110"
+                                        title="Delete Realm Everywhere"
+                                    >
                                         <Icon name="trash" className="w-4 h-4" />
                                     </button>
                                 </div>
