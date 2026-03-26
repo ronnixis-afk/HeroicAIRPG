@@ -114,7 +114,7 @@ const GameInterface: React.FC = () => {
     performAutomatedPlayerTurn,
     addGalleryEntry,
     useHeroicPoint
-  } = useGameDataContext();
+  } = useContext(GameDataContext);
 
   const {
     activeView, setActiveView,

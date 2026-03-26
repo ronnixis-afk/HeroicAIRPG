@@ -166,7 +166,7 @@ export const GameDataContext = createContext<GameDataContextType>({} as GameData
  */
 export function useGameDataContext(): GameDataContextType {
   const ctx = useContext(GameDataContext);
-  if (!ctx || !ctx.gameData) {
+  if (!ctx || !ctx.dispatch) {
     throw new Error('useGameDataContext must be used within a GameDataProvider');
   }
   return ctx;
