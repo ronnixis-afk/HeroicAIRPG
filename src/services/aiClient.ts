@@ -7,6 +7,7 @@ export const getAi = (): any => {
             generateContent: async (requestOptions: any) => {
                 const MAX_RETRIES = 3;
                 let attempt = 0;
+                let lastError: any = null;
 
                 while (attempt < MAX_RETRIES) {
                     try {
@@ -42,12 +43,21 @@ export const getAi = (): any => {
                         const data = await response.json();
                         return { text: data.text, usageMetadata: data.usageMetadata, candidates: data.candidates };
                     } catch (error: any) {
-                        // If it's the last attempt or NOT a 503 error, propogate it outwards
+                        lastError = error;
+                        attempt++;
+                        // If it's the last attempt or NOT a 503 error, propagate it outwards
                         if (attempt >= MAX_RETRIES || (!error.message?.includes('503') && !error.message?.includes('UNAVAILABLE'))) {
                             throw error;
                         }
+                        // 503 with retries remaining: exponential backoff before next attempt
+                        const delayMs = Math.pow(2, attempt - 1) * 1000 + Math.random() * 500;
+                        console.warn(`Gemini 503 (catch path). Retrying... (Attempt ${attempt}/${MAX_RETRIES} in ${Math.round(delayMs)}ms)`);
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
                     }
                 }
+
+                // Safety net: should never reach here, but prevents undefined return
+                throw lastError || new Error('AI request failed after all retry attempts.');
             }
         }
     };

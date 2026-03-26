@@ -124,6 +124,7 @@ export interface AIResponse {
   suggestedActors?: ActorSuggestion[];
   alignmentOptions?: { label: string; alignment: 'Good' | 'Evil' | 'Lawful' | 'Chaotic' }[];
   active_engagement?: boolean; // NEW: Specifically flags if the party is being attacked or attacking
+  _error?: string; // Internal: present when the narrator returned a fallback due to API failure
 }
 
 export type GameAction =

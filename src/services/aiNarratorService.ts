@@ -219,6 +219,12 @@ export const generateNarrativeResponse = async (
             }
         });
 
+        // Guard: Ensure the API returned a valid response object
+        if (!response || typeof response.text !== 'string') {
+            console.error("Narrator received empty or invalid response from API:", response);
+            throw new Error("AI returned an empty response. The service may be temporarily unavailable.");
+        }
+
         const usage = response.usageMetadata;
         if (usage) {
             totalPromptTokens += usage.promptTokenCount || 0;
@@ -235,8 +241,9 @@ export const generateNarrativeResponse = async (
 
         const parsedData = JSON.parse(cleanJson(response.text || "{}"));
         return { ...parsedData, usage: usageStats };
-    } catch (e) {
-        console.error("Failed to parse GM response:", e);
+    } catch (e: any) {
+        const errorMsg = e?.message || String(e);
+        console.error("Failed to generate GM narrative response:", errorMsg, e);
         return {
             narration: {
                 paragraph1: "The Game Master is gathering their thoughts...",
@@ -250,11 +257,13 @@ export const generateNarrativeResponse = async (
                 zone: gameData.currentLocale || "The Wilds",
                 site_name: gameData.current_site_name || "The Wilds",
                 site_id: gameData.current_site_id || "the-wilds",
-                is_new_site: false
+                is_new_site: false,
+                transition_type: "staying"
             },
             npc_resolution: [],
             suggestedActors: [],
-            usage: undefined
+            usage: undefined,
+            _error: errorMsg
         };
     }
 };

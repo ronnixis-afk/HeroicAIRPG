@@ -163,6 +163,21 @@ export const useNarrativeManager = (
             };
             dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
 
+            // --- ERROR RECOVERY: If the narrator returned a fallback error, skip auditing and notify ---
+            if (aiResponse._error) {
+                console.warn('Narrator returned error fallback, skipping Phase 4:', aiResponse._error);
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-err-${Date.now()}`,
+                        sender: 'system',
+                        content: `**Connection Issue**: The AI service encountered an error. Please try sending your message again.`,
+                        type: 'negative'
+                    }
+                });
+                return;
+            }
+
             // --- PHASE 4: EXTRACTION (Auditor/State Sync) - BACKGROUND ---
             // We trigger this without 'await' to allow the UI to unlock for the player
             setIsAuditing(true);
@@ -195,8 +210,17 @@ export const useNarrativeManager = (
                 setIsHousekeeping(false);
             });
 
-        } catch (e) {
-            console.error("Master Pipeline Failed", e);
+        } catch (e: any) {
+            console.error("Master Pipeline Failed:", e?.message || e, e);
+            dispatch({
+                type: 'ADD_MESSAGE',
+                payload: {
+                    id: `sys-pipeline-err-${Date.now()}`,
+                    sender: 'system',
+                    content: `**Error**: Something went wrong while processing your action. Please try again.`,
+                    type: 'negative'
+                }
+            });
         } finally {
             setIsAiGenerating(false);
             setIsAuditing(false);
