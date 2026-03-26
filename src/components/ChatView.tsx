@@ -324,11 +324,12 @@ const ChatView: React.FC = () => {
         return null;
     }, [processedMessages, gameData?.combatState?.isActive]);
 
-    const smoothScrollToBottom = () => {
+    const smoothScrollToBottom = (force = false) => {
         const container = document.querySelector('.chat-scroll-container');
         if (container) {
-            // Only scroll if we are within 150px of the bottom (user hasn't scrolled up to read)
-            const isNearBottom = (container.scrollHeight - container.scrollTop - container.clientHeight) < 150;
+            // Increase threshold to 500px to ensure we don't 'lose' the bottom during a long text reveal 
+            // where alignment buttons might push the scroll significantly
+            const isNearBottom = force || (container.scrollHeight - container.scrollTop - container.clientHeight) < 500;
             if (isNearBottom) {
                 if (chatEndRef.current) {
                     chatEndRef.current.scrollIntoView({
@@ -341,8 +342,9 @@ const ChatView: React.FC = () => {
     };
 
     useEffect(() => {
-        window.addEventListener('chat-reveal-update', smoothScrollToBottom);
-        return () => window.removeEventListener('chat-reveal-update', smoothScrollToBottom);
+        const handleRevealUpdate = () => smoothScrollToBottom(false);
+        window.addEventListener('chat-reveal-update', handleRevealUpdate);
+        return () => window.removeEventListener('chat-reveal-update', handleRevealUpdate);
     }, []);
 
     return (

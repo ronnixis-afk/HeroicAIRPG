@@ -86,12 +86,12 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
 
   const handleAction = (view: View) => {
     setActiveView(view);
-    // onClose(); // Removed to allow persistent menu
+    onClose();
   };
 
   const handleTimeClick = () => {
     onTimeManagementClick();
-    // onClose(); // Removed to allow persistent menu
+    onClose();
   };
 
   return (
@@ -117,7 +117,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               <div className="space-y-1">
                 <label className="text-body-tiny font-bold text-brand-text-muted opacity-60">Current Location</label>
                 <button
-                  onClick={() => { onLocationClick(); /* onClose(); removed */ }}
+                  onClick={() => { onLocationClick(); onClose(); }}
                   className="w-full text-left transition-all group flex flex-row items-center gap-3 p-2 bg-transparent rounded-xl hover:bg-brand-primary/10"
                 >
                   <Icon name="location" className="w-5 h-5 text-brand-accent shrink-0 group-hover:scale-110 transition-transform" />

@@ -194,6 +194,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                 setVisibleLines(Infinity);
                 setIsRevealing(false);
                 clearInterval(interval);
+                // Dispatch final update to ensure scroll reaches newly appeared alignment buttons
+                setTimeout(() => window.dispatchEvent(new CustomEvent('chat-reveal-update')), 50);
             } else {
                 setVisibleLines(current);
                 window.dispatchEvent(new CustomEvent('chat-reveal-update'));
