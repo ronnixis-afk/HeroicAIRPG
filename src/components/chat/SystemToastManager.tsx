@@ -264,7 +264,7 @@ export const SystemToastManager: React.FC = () => {
     };
 
     return (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 pointer-events-none w-full max-w-sm px-4">
+        <div className="fixed top-16 right-4 z-[100] flex flex-col items-end gap-2 pointer-events-none w-full max-w-sm px-4">
             {toasts.map(toast => (
                 <div
                     key={toast.id}

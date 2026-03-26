@@ -186,6 +186,7 @@ const GmNotesView: React.FC = () => {
             <PageHeader 
                 title="GM Notes" 
                 subtitle="Interconnect player choices, achievements, and secrets to guide the storyteller." 
+                showReturnButton={true}
             />
 
             {/* SECTION 0: THE GRAND DESIGN */}

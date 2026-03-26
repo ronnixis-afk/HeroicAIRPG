@@ -78,6 +78,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
     // Import/Export
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const generationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     // Consumption & Credits State
@@ -184,6 +185,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     };
 
     const resetForm = () => {
+        if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
         setPreviewData(null);
         setError('');
         setWorldName('');
@@ -261,6 +263,14 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         setProgress(20);
         setGenerationStep('Architecting World Blueprint...');
 
+        if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
+        generationTimeoutRef.current = setTimeout(() => {
+            if (isGenerating) {
+                setError("Architect was delayed in the void. Please try again.");
+                setIsGenerating(false);
+            }
+        }, 45000); // 45s timeout for architecting
+
         try {
             const preview = await generateWorldPreview(
                 setting,
@@ -271,9 +281,11 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 additionalContext
             );
 
+            if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
             setPreviewData(preview);
             setIsGenerating(false);
         } catch (err) {
+            if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
             console.error("Preview generation failed:", err);
             setError("Failed to generate world preview. Please try again.");
             setIsGenerating(false);
@@ -286,6 +298,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         setIsGenerating(true);
         setProgress(10);
         setGenerationStep('Assembling Chronicle...');
+
+        if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
+        generationTimeoutRef.current = setTimeout(() => {
+            setError("The chronicle forge is running cold. Please try again.");
+            setIsGenerating(false);
+        }, 60000); // 60s timeout for deep generation
 
         try {
             // 1. Build initial core lore entries
@@ -390,9 +408,11 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             };
 
             const newWorld = await worldService.createNewWorld(worldName, loreEntries, gameDateTime, customGameData);
+            if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
             onWorldSelected(newWorld.id);
 
         } catch (err) {
+            if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
             console.error("Deep generation failed:", err);
             setError("Failed to finalize world. Please try again.");
             setIsGenerating(false);
@@ -745,16 +765,21 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         {unifiedRealms.map(realm => (
                             <div 
                                 key={realm.id} 
-                                className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden cursor-pointer shadow-lg bg-brand-surface border border-brand-primary/30 hover:border-brand-accent hover:shadow-brand-accent/20 transition-all flex flex-col" 
-                                onClick={() => handleRealmSelection(realm)}
+                                className="w-36 md:w-44 aspect-[2/3] shrink-0 snap-start relative group rounded-xl overflow-hidden shadow-lg bg-brand-surface border border-brand-primary/30 hover:border-brand-accent hover:shadow-brand-accent/20 transition-all flex flex-col" 
                             >
-                                {/* Placeholder Map/Setting Visual */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 via-transparent to-black/90 z-0 text-brand-primary opacity-20 flex items-center justify-center overflow-hidden mix-blend-overlay">
-                                    <div className="w-[200%] h-[200%] absolute top-0 -left-1/2 rotate-12 bg-gradient-to-r from-transparent via-brand-text to-transparent blur-3xl opacity-10"></div>
-                                </div>
+                                <button
+                                    onClick={() => handleRealmSelection(realm)}
+                                    className="absolute inset-0 w-full h-full z-0 cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-xl"
+                                    aria-label={`Select realm ${realm.name}`}
+                                >
+                                    {/* Placeholder Map/Setting Visual */}
+                                    <div className="absolute inset-0 bg-gradient-to-b from-brand-primary/20 via-transparent to-black/90 z-0 text-brand-primary opacity-20 flex items-center justify-center overflow-hidden mix-blend-overlay">
+                                        <div className="w-[200%] h-[200%] absolute top-0 -left-1/2 rotate-12 bg-gradient-to-r from-transparent via-brand-text to-transparent blur-3xl opacity-10"></div>
+                                    </div>
+                                </button>
                                 
                                 {/* Status Icons & Badges */}
-                                <div className="absolute top-2 left-2 z-10 flex gap-1">
+                                <div className="absolute top-2 left-2 z-10 flex gap-1 pointer-events-none">
                                     {(realm.status === 'synced' || realm.status === 'cloud-newer' || realm.status === 'local-newer') && (
                                         <div className={`p-1.5 rounded-full backdrop-blur-md shadow-sm border border-brand-surface/20 ${realm.status === 'synced' ? 'bg-brand-accent/20 text-brand-accent' : (realm.status === 'cloud-newer' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400')}`} title={realm.status === 'synced' ? 'Synced to Cloud' : (realm.status === 'cloud-newer' ? 'Cloud version is newer' : 'Local changes not yet synced')}>
                                             <Icon name="cloud" className="w-3 h-3" />
@@ -787,7 +812,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     </button>
                                 </div>
 
-                                <div className="mt-auto p-4 z-10 w-full flex flex-col relative">
+                                <div className="mt-auto p-4 z-10 w-full flex flex-col relative pointer-events-none">
                                     <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {realm.name}</h5>
                                     <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">
                                         {realm.local?.updatedAt ? `Saved ${new Date(realm.local.updatedAt).toLocaleDateString()}` : `Cloud Save ${new Date(realm.cloud?.updatedAt || 0).toLocaleDateString()}`}
@@ -809,7 +834,15 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
             <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} title={previewData ? "World Preview" : "Forging a New World"}>
                 {isGenerating ? (
-                    <CharacterCreationLoader title="Forging World..." step={generationStep} progress={progress} />
+                    <CharacterCreationLoader 
+                        title="Forging World..." 
+                        step={generationStep} 
+                        progress={progress} 
+                        onCancel={() => {
+                            if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
+                            setIsGenerating(false);
+                        }}
+                    />
                 ) : previewData ? (
                     <div className="space-y-8 animate-page py-2">
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">

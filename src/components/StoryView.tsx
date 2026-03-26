@@ -194,6 +194,7 @@ const StoryView: React.FC = () => {
             <PageHeader 
                 title="Chronicle" 
                 subtitle="The recorded journey of your party across the ages." 
+                showReturnButton={true}
             />
 
             {sortedDays.length > 0 ? (

@@ -5,16 +5,27 @@ import { resolveUserTier } from '../../../lib/tierConfig';
 
 export async function GET() {
     try {
-        const { userId } = await auth();
+        const { userId: authUserId } = await auth();
+        let userId = authUserId;
+
+        if (!userId && process.env.NEXT_PUBLIC_SKIP_AUTH === 'true') {
+            userId = 'test-user-id';
+        }
+
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const client = await clerkClient();
-        const clerkUser = await client.users.getUser(userId);
-        const email = clerkUser.emailAddresses[0]?.emailAddress || '';
-        const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-        const tier = resolveUserTier(email, dbUser?.tier);
+        let email = 'test-hero@example.com';
+        let tier = 'super_admin';
+
+        if (userId !== 'test-user-id') {
+            const client = await clerkClient();
+            const clerkUser = await client.users.getUser(userId);
+            email = clerkUser.emailAddresses[0]?.emailAddress || '';
+            const dbUser = await prisma.user.findUnique({ where: { id: userId } });
+            tier = resolveUserTier(email, dbUser?.tier);
+        }
 
         return NextResponse.json({ email, tier });
     } catch (error: unknown) {

@@ -249,6 +249,7 @@ const WorldView: React.FC = () => {
             <PageHeader 
                 title="Lore" 
                 subtitle="The history, myths, and facts that define this realm." 
+                showReturnButton={true}
             />
 
             <div className="bg-brand-surface rounded-3xl border border-brand-primary/30 p-6 mb-12 shadow-xl animate-page overflow-hidden group">

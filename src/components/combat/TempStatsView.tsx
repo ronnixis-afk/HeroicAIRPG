@@ -113,6 +113,7 @@ const TempStatsView: React.FC = () => {
                 <PageHeader 
                     title="Scene"
                     subtitle={isActive ? 'Manage initiative, foes, and allies.' : 'Stage actors and prepare for the next encounter.'}
+                    showReturnButton={true}
                 >
                     <div className="absolute right-0 top-1 flex gap-1">
                         <button onClick={() => setIsTemplateModalOpen(true)} className="btn-icon text-brand-text-muted hover:text-brand-accent" title="Configure Templates">

@@ -30,28 +30,31 @@ const GalleryCard: React.FC<GalleryCardProps> = ({ metadata, onSelect, onDelete,
     };
 
     return (
-        <div
-            onClick={() => onSelect(metadata.id)}
-            className="group relative aspect-[9/16] bg-brand-surface rounded-xl overflow-hidden border border-brand-primary cursor-pointer hover:border-brand-accent transition-all shadow-lg"
-        >
-            {isLoading ? (
-                <div className="w-full h-full flex items-center justify-center bg-brand-primary/20">
-                    <Icon name="spinner" className="w-6 h-6 animate-spin text-brand-accent/40" />
-                </div>
-            ) : imageUrl ? (
-                <img
-                    src={getSafeUrl()}
-                    alt={metadata.description}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                />
-            ) : (
-                <div className="w-full h-full flex items-center justify-center bg-red-900/10">
-                    <Icon name="danger" className="w-6 h-6 text-red-500/40" />
-                </div>
-            )}
+        <div className="group relative aspect-[9/16] bg-brand-surface rounded-xl overflow-hidden border border-brand-primary hover:border-brand-accent transition-all shadow-lg">
+            <button
+                onClick={() => onSelect(metadata.id)}
+                className="absolute inset-0 w-full h-full z-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-xl appearance-none text-left"
+                aria-label={`View memory: ${metadata.description}`}
+            >
+                {isLoading ? (
+                    <div className="w-full h-full flex items-center justify-center bg-brand-primary/20">
+                        <Icon name="spinner" className="w-6 h-6 animate-spin text-brand-accent/40" />
+                    </div>
+                ) : imageUrl ? (
+                    <img
+                        src={getSafeUrl()}
+                        alt={metadata.description}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-red-900/10">
+                        <Icon name="danger" className="w-6 h-6 text-red-500/40" />
+                    </div>
+                )}
+            </button>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 pointer-events-none">
                 <span className="text-body-sm font-bold text-brand-accent mb-1">
                     {metadata.timestamp}
                 </span>
@@ -59,7 +62,7 @@ const GalleryCard: React.FC<GalleryCardProps> = ({ metadata, onSelect, onDelete,
                     {metadata.description}
                 </p>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pointer-events-auto">
                     <button
                         onClick={(e) => { e.stopPropagation(); onDownload(metadata.id); }}
                         className="btn-icon w-10 h-10 bg-white/10 hover:bg-brand-accent hover:text-black backdrop-blur-md"
@@ -167,6 +170,7 @@ const GalleryView: React.FC = () => {
             <PageHeader 
                 title="Gallery" 
                 subtitle="A visual record of your journey's most significant moments." 
+                showReturnButton={true}
             />
 
             {sortedGallery.length > 0 ? (

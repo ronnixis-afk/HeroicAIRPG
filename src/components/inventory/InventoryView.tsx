@@ -237,6 +237,7 @@ const InventoryView: React.FC = () => {
             <PageHeader
                 title="Backpack"
                 subtitle="Manage your equipment, wealth, and stored assets."
+                showReturnButton={true}
             >
                 {isSelectionMode && (
                     <button

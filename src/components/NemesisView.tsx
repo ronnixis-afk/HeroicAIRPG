@@ -187,6 +187,7 @@ const NemesisView: React.FC = () => {
             <PageHeader 
                 title="Nemesis" 
                 subtitle="Persistent individuals or factions actively working against your party." 
+                showReturnButton={true}
             />
 
             <div className="space-y-4 mb-16 animate-page">

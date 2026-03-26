@@ -242,6 +242,7 @@ const ObjectivesView: React.FC = () => {
             <PageHeader 
                 title="Quests" 
                 subtitle="Active pursuits and goals that drive your story forward." 
+                showReturnButton={true}
             />
 
             {trackedObjective && (

@@ -253,6 +253,7 @@ const SettingsView: React.FC = () => {
             <PageHeader 
                 title="Settings" 
                 subtitle="Configure your adventure and game system." 
+                showReturnButton={true}
             />
 
             <div className="flex justify-center mb-10 bg-brand-primary p-1 rounded-2xl w-full max-w-xs mx-auto border border-brand-surface shadow-sm">

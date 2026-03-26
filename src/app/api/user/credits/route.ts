@@ -4,7 +4,13 @@ import { prisma } from '../../../../lib/prisma';
 
 export async function GET(req: NextRequest) {
     try {
-        const { userId } = await auth();
+        const { userId: authUserId } = await auth();
+        let userId = authUserId;
+
+        if (!userId && process.env.NEXT_PUBLIC_SKIP_AUTH === 'true') {
+            return NextResponse.json({ currentCredits: 1000, maxCredits: 1000 });
+        }
+
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }

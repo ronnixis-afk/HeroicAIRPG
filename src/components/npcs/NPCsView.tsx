@@ -143,6 +143,7 @@ const NPCsView: React.FC = () => {
             <PageHeader 
                 title="People" 
                 subtitle="Allies, informants, and rivals encountered across the realms." 
+                showReturnButton={true}
             />
 
             {/* Search Box */}

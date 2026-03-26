@@ -48,6 +48,7 @@ const ItemForgeView: React.FC = () => {
                 title="Forge" 
                 subtitle="Create custom equipment infused with system power." 
                 className="mb-6 pb-4"
+                showReturnButton={true}
             />
                 <ForgeHeader
                     forgeScale={state.forgeScale}

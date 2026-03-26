@@ -89,14 +89,15 @@ const SlotBox: React.FC<{
     } : {};
 
     return (
-        <div 
+        <button 
             onClick={handleClick}
             className={`
                 relative flex flex-col justify-center items-center p-2 rounded-lg
-                transition-all duration-200 aspect-square text-center
+                transition-all duration-200 aspect-square text-center focus:outline-none focus:ring-2 focus:ring-brand-accent/50
                 ${baseStyle} ${selectionStyle} ${lockedStyle}
             `}
             style={bgStyle}
+            aria-label={item ? `${label}: ${item.name}` : `Empty ${label} slot`}
         >
             <span className="absolute top-1.5 w-full px-1 text-body-micro opacity-40 truncate pointer-events-none z-20">
                 {label}
@@ -120,7 +121,7 @@ const SlotBox: React.FC<{
                     <div className="w-6 h-6 rounded-full border-2 border-dashed border-current flex items-center justify-center opacity-20" />
                 </div>
             )}
-        </div>
+        </button>
     );
 };
 

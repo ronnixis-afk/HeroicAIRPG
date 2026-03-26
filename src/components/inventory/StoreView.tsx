@@ -224,6 +224,7 @@ const StoreView: React.FC = () => {
                     <PageHeader 
                         title="Merchant" 
                         subtitle="Buy equipment and supplies." 
+                        showReturnButton={true}
                     />
 
                     <div className="sticky top-0 z-20 bg-brand-bg pt-2 pb-3 -mx-4 px-4 border-b border-brand-primary/20 mb-4 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">

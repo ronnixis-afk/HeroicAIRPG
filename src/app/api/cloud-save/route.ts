@@ -4,7 +4,13 @@ import { prisma } from '../../../lib/prisma';
 
 export async function GET(req: NextRequest) {
     try {
-        const { userId } = await auth();
+        const { userId: authUserId } = await auth();
+        let userId = authUserId;
+
+        if (!userId && process.env.NEXT_PUBLIC_SKIP_AUTH === 'true') {
+            return NextResponse.json([]); // Return empty list in test mode
+        }
+
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -36,7 +42,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const { userId } = await auth();
+        const { userId: authUserId } = await auth();
+        let userId = authUserId;
+
+        if (!userId && process.env.NEXT_PUBLIC_SKIP_AUTH === 'true') {
+            return NextResponse.json({ success: true, id: 'test-save-id', updatedAt: new Date().toISOString() });
+        }
+
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
