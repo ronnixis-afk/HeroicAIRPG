@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Credit pre-check: reject if balance is insufficient
-        if (dbUser && dbUser.currentCredits <= 0) {
+        // Credit pre-check: reject if balance is insufficient (admins bypass)
+        if (dbUser && dbUser.currentCredits < 0 && tier !== 'super_admin') {
             return NextResponse.json(
                 { error: 'Insufficient credits. Please wait for your credits to replenish.' },
                 { status: 402 }
