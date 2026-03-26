@@ -146,7 +146,7 @@ export type GameAction =
   | { type: 'USE_ABILITY'; payload: { abilityId: string; ownerId: string } }
   | { type: 'CONSOLIDATE_CURRENCY'; payload: { itemId: string; ownerId: string } }
   | { type: 'ADD_STORE_INVENTORY'; payload: { category: string; items: StoreItem[] } }
-  | { type: 'BUY_ITEM'; payload: { item: StoreItem; quantity: number } }
+  | { type: 'BUY_ITEM'; payload: { item: StoreItem; quantity: number; recipientId?: string } }
   | { type: 'SELL_ITEM'; payload: { item: Item; sellPrice: number; quantity: number } }
   | { type: 'UPDATE_ITEM_PRICES'; payload: { id: string; price: number }[] }
   | { type: 'TAKE_LOOT'; payload: Item[] }

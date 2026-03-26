@@ -297,20 +297,26 @@ export const useInventoryActions = (
         }
     }, [gameData, dispatch]);
 
-    const buyItem = useCallback(async (item: StoreItem, quantity: number) => {
+    const buyItem = useCallback(async (item: StoreItem, quantity: number, recipientId?: string) => {
          const totalCost = (item.price || 0) * quantity;
-         dispatch({ type: 'BUY_ITEM', payload: { item, quantity } });
+         dispatch({ type: 'BUY_ITEM', payload: { item, quantity, recipientId } });
          
-         dispatch({ 
-            type: 'ADD_MESSAGE', 
-            payload: { 
-                id: `sys-buy-${Date.now()}`, 
-                sender: 'system', 
-                content: `Bought ${quantity}x ${item.name} for ${totalCost} gold.`, 
-                type: 'neutral' 
-            } 
-        });
-    }, [dispatch]);
+        let recipientName = 'you';
+        if (recipientId && recipientId !== 'player') {
+            const comp = gameData?.companions.find(c => c.id === recipientId);
+            if (comp) recipientName = comp.name;
+        }
+
+          dispatch({ 
+             type: 'ADD_MESSAGE', 
+             payload: { 
+                 id: `sys-buy-${Date.now()}`, 
+                 sender: 'system', 
+                 content: `Bought ${quantity}x ${item.name} for ${totalCost} gold (to ${recipientName}).`, 
+                 type: 'neutral' 
+             } 
+         });
+    }, [dispatch, gameData?.companions]);
 
     const sellItem = useCallback(async (item: Item, sellPrice: number, quantity: number) => {
           const totalValue = sellPrice * quantity;

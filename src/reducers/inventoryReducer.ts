@@ -379,7 +379,7 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
             };
 
         case 'BUY_ITEM': {
-            const { item, quantity } = action.payload;
+            const { item, quantity, recipientId } = action.payload;
             const newState = { ...state };
             const totalCost = (item.price || 0) * quantity;
             
@@ -387,11 +387,15 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
             const currencyIdx = newCarried.findIndex(i => i.tags?.includes('currency'));
             
             if (currencyIdx > -1 && (newCarried[currencyIdx].quantity || 0) >= totalCost) {
+                // Deduct from player
                 newCarried[currencyIdx] = new Item({
                     ...newCarried[currencyIdx],
                     quantity: (newCarried[currencyIdx].quantity || 0) - totalCost
                 });
                 
+                // Update player inventory (money was taken regardless of recipient)
+                newState.playerInventory = { ...newState.playerInventory, carried: newCarried };
+
                 const boughtItem = new Item(item);
                 boughtItem.quantity = quantity;
                 boughtItem.isNew = true;
@@ -406,8 +410,20 @@ export const inventoryReducer = (state: GameData, action: GameAction): GameData 
                      boughtItem.tags = [...boughtItem.tags, 'buff'];
                 }
 
-                newCarried.push(boughtItem);
-                newState.playerInventory = { ...newState.playerInventory, carried: newCarried };
+                // Deliver to recipient
+                const isPlayer = !recipientId || recipientId === 'player' || recipientId === state.playerCharacter.id;
+                if (isPlayer) {
+                    const finalCarried = [...newState.playerInventory.carried, boughtItem];
+                    newState.playerInventory = { ...newState.playerInventory, carried: finalCarried };
+                } else if (newState.companionInventories[recipientId]) {
+                    const compInv = { ...newState.companionInventories[recipientId] };
+                    compInv.carried = [...compInv.carried, boughtItem];
+                    newState.companionInventories = {
+                        ...newState.companionInventories,
+                        [recipientId]: compInv
+                    };
+                }
+
                 // Ensure currency is merged and consolidated after purchase
                 return consolidateCurrencyToPlayer(newState);
             }

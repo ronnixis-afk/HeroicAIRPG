@@ -1,11 +1,14 @@
 // components/QuantityModal.tsx
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { Icon } from './Icon';
 import Modal from './Modal';
-import { Item, StoreItem, AbilityEffect } from '../types';
-import { getBuffTag } from '../utils/itemModifiers';
+import { Item, StoreItem, AbilityEffect, BodySlot, PlayerCharacter, Companion } from '../types';
+import { getBuffTag, getActivePowerPill, getEnhancementPill } from '../utils/itemModifiers';
 import { getSlotSynonym } from '../utils/slotUtils';
+import { ActorAvatar } from './ActorAvatar';
+import { GameDataContext } from '../context/GameDataContext';
+import { getItemRarityColor } from '../types/Core';
 
 interface QuantityModalProps {
   isOpen: boolean;
@@ -13,8 +16,9 @@ interface QuantityModalProps {
   item: Item | StoreItem;
   action: 'Buy' | 'Sell' | 'Drop' | 'Split';
   maxQuantity: number;
-  onConfirm: (quantity: number) => Promise<void>;
+  onConfirm: (quantity: number, recipientId?: string) => Promise<void>;
   balance?: number; // for buying
+  characters?: (PlayerCharacter | Companion)[];
 }
 
 const formatEffectLabel = (effect: AbilityEffect) => {
@@ -32,10 +36,13 @@ const formatEffectLabel = (effect: AbilityEffect) => {
   return typeName.charAt(0).toUpperCase() + typeName.slice(1).toLowerCase();
 };
 
-const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, action, maxQuantity, onConfirm, balance }) => {
+const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, action, maxQuantity, onConfirm, balance, characters }) => {
+  const { gameData } = useContext(GameDataContext);
   const [quantity, setQuantity] = useState(1);
   const [loadingAction, setLoadingAction] = useState<'confirm' | 'all' | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [recipientId, setRecipientId] = useState<string>('player');
+  const [showCompare, setShowCompare] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -46,8 +53,41 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       }
       setLoadingAction(null);
       setIsSuccess(false);
+      setRecipientId('player');
+      setShowCompare(false);
     }
   }, [isOpen, item, action]);
+
+  const targetSlot = useMemo(() => {
+    if (item.bodySlotTag) return item.bodySlotTag;
+    const tags = (item.tags || []).map(t => t.toLowerCase());
+    
+    // Check if it's armor/shield from Forge Groups categorization
+    if (tags.some(t => t.includes('shield'))) return 'Off Hand' as BodySlot;
+    if (tags.some(t => t.includes('armor'))) return 'Body' as BodySlot;
+    if (tags.some(t => t.includes('weapon'))) return 'Main Hand' as BodySlot;
+    
+    // Mapping from Wondrous/Accessories
+    if (tags.some(t => t.includes('ring'))) return 'Ring 1' as BodySlot;
+    if (tags.some(t => t.includes('amulet') || t.includes('neck'))) return 'Neck' as BodySlot;
+    if (tags.some(t => t.includes('head'))) return 'Head' as BodySlot;
+    if (tags.some(t => t.includes('gloves') || t.includes('hand'))) return 'Gloves' as BodySlot;
+    if (tags.some(t => t.includes('boots') || t.includes('foot') || t.includes('feet') || t.includes('shoes'))) return 'Feet' as BodySlot;
+    if (tags.some(t => t.includes('legs'))) return 'Legs' as BodySlot;
+    if (tags.some(t => t.includes('back') || t.includes('cloak') || t.includes('shoulder'))) return 'Shoulders' as BodySlot;
+    if (tags.some(t => t.includes('waist') || t.includes('belt'))) return 'Waist' as BodySlot;
+    if (tags.some(t => t.includes('bracer') || t.includes('wrist'))) return 'Bracers' as BodySlot;
+    if (tags.some(t => t.includes('vest'))) return 'Vest' as BodySlot;
+    if (tags.some(t => t.includes('eyes') || t.includes('goggles'))) return 'Eyes' as BodySlot;
+
+    return undefined;
+  }, [item]);
+
+  const equippedInSlot = useMemo(() => {
+    if (!gameData || !targetSlot || action !== 'Buy') return null;
+    const inv = recipientId === 'player' ? gameData.playerInventory : gameData.companionInventories[recipientId];
+    return inv?.equipped.find(i => i.equippedSlot === targetSlot) || null;
+  }, [gameData, targetSlot, recipientId, action]);
 
   const { weaponTags, slotLabel } = useMemo(() => {
     let wTags: string[] = [];
@@ -77,7 +117,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
   const executeConfirm = async (qty: number, actionType: 'confirm' | 'all') => {
     setLoadingAction(actionType);
     try {
-      await onConfirm(qty);
+      await onConfirm(qty, action === 'Buy' ? recipientId : undefined);
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
@@ -113,48 +153,104 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
   }
 
   const footer = (
-    <div className="flex flex-col gap-4">
-      {/* Action Summary */}
-      <div className="flex items-center justify-center h-10">
-        {action === 'Buy' && (
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Total Cost</span>
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-lg border shadow-inner ${canAfford ? 'bg-brand-accent/5 border-brand-accent/20' : 'bg-brand-danger/5 border-brand-danger/20'}`}>
-              <Icon name="currencyCoins" className={`w-4 h-4 ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`} />
-              <span className={`text-[10px] font-bold tabular-nums ${canAfford ? 'text-brand-accent' : 'text-brand-danger'}`}>{totalPrice}</span>
-            </div>
-          </div>
-        )}
-        {action === 'Sell' && (
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-brand-text-muted font-bold opacity-60">Return Value</span>
-            <div className="flex items-center gap-2 bg-brand-accent/5 px-4 py-1.5 rounded-lg border border-brand-accent/20 shadow-inner">
-              <Icon name="currencyCoins" className="w-4 h-4 text-brand-accent" />
-              <span className="text-[10px] font-bold text-brand-accent tabular-nums">{Math.floor((('price' in item ? item.price : 0) || 0) / 2) * quantity}</span>
-            </div>
-          </div>
-        )}
-        {action === 'Drop' && <p className="text-sm text-brand-danger font-bold italic">Discarding {quantity} unit{quantity > 1 ? 's' : ''}</p>}
-        {action === 'Split' && <p className="text-sm text-brand-accent font-bold italic">New Stack: {quantity} unit{quantity > 1 ? 's' : ''}</p>}
-      </div>
+    <div className="flex flex-col gap-[10px]">
+      {/* Compare Section */}
 
-      <div className="flex gap-4">
-        {action === 'Sell' && maxQuantity > 1 && (
-          <button
-            onClick={handleAll}
-            disabled={isConfirmDisabled || isLoading}
-            className="btn-secondary h-12 flex-1 font-bold text-xs rounded-2xl"
-          >
-            {loadingAction === 'all' ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : `Sell All`}
-          </button>
+      <div className="flex flex-col gap-[10px]">
+        {action === 'Buy' && (
+          <div>
+            {equippedInSlot ? (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowCompare(!showCompare)}
+                  className="btn-secondary w-full h-12 font-bold text-xs rounded-2xl flex items-center justify-center gap-2"
+                >
+                  {showCompare ? "Hide Comparison" : "Compare"}
+                </button>
+                
+                {showCompare && (
+                  <div className="p-4 bg-brand-surface border border-white/10 rounded-2xl animate-modal shadow-xl">
+                    <p className="text-[10px] font-bold text-brand-text-muted mb-2 tracking-wider opacity-60">Currently Equipped</p>
+                    <div className="flex justify-between items-start mb-2">
+                      <h4 className={`text-sm mb-0 ${getItemRarityColor(equippedInSlot.rarity)}`}>{equippedInSlot.name}</h4>
+                      {equippedInSlot.armorStats && (
+                         <span className="text-[10px] font-bold text-brand-accent">AC {equippedInSlot.armorStats.baseAC + equippedInSlot.armorStats.plusAC}</span>
+                      )}
+                      {equippedInSlot.weaponStats && (
+                         <span className="text-[10px] font-bold text-brand-accent">{equippedInSlot.weaponStats.damages[0].dice} {equippedInSlot.weaponStats.damages[0].type}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-brand-text-muted line-clamp-2 italic leading-relaxed opacity-80 mb-3">{equippedInSlot.description}</p>
+                    
+                    <div className="flex flex-wrap gap-2">
+                        {/* Enhancement Pill */}
+                        {getEnhancementPill(equippedInSlot) && (
+                            <span className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${getEnhancementPill(equippedInSlot)!.colorClass}`}>
+                                {getEnhancementPill(equippedInSlot)!.label}
+                            </span>
+                        )}
+
+                        {/* Passive Buffs */}
+                        {equippedInSlot.buffs?.map((buff, idx) => {
+                            const { label, colorClass } = getBuffTag(buff);
+                            return (
+                                <span key={idx} className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${colorClass}`}>
+                                    {label}
+                                </span>
+                            );
+                        })}
+
+                        {/* Active Power Slot */}
+                        {equippedInSlot.effect && (
+                            <span className="text-[9px] font-bold text-purple-400 bg-brand-bg px-2 py-1 rounded-lg border border-purple-400/30 flex items-center gap-1.5 shadow-sm">
+                                <Icon name="sparkles" className="w-2.5 h-2.5" />
+                                {getActivePowerPill(equippedInSlot.effect).label}
+                            </span>
+                        )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+                <div className="text-center p-3 bg-white/5 rounded-xl border border-dashed border-white/10">
+                    <p className="text-[10px] font-bold text-brand-text-muted italic mb-0">No item equipped in this body slot yet</p>
+                </div>
+            )}
+          </div>
         )}
-        <button
-          onClick={handleConfirm}
-          disabled={isConfirmDisabled || isLoading}
-          className={`btn-primary h-12 ${action === 'Sell' && maxQuantity > 1 ? 'flex-[2]' : 'w-full'} gap-3 rounded-2xl font-bold transition-all`}
-        >
-          {loadingAction === 'confirm' ? <Icon name="spinner" className="w-5 h-5 animate-spin text-black" /> : action}
-        </button>
+
+        <div className="flex gap-4">
+          {action === 'Sell' && maxQuantity > 1 && (
+            <button
+              onClick={handleAll}
+              disabled={isConfirmDisabled || isLoading}
+              className="btn-secondary h-12 flex-1 font-bold text-xs rounded-2xl"
+            >
+              {loadingAction === 'all' ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : `Sell All`}
+            </button>
+          )}
+          <button
+            onClick={handleConfirm}
+            disabled={isConfirmDisabled || isLoading}
+            className={`btn-primary h-12 ${action === 'Sell' && maxQuantity > 1 ? 'flex-[2]' : 'w-full'} gap-3 rounded-2xl font-bold transition-all flex items-center justify-center`}
+          >
+            {loadingAction === 'confirm' ? (
+              <Icon name="spinner" className="w-5 h-5 animate-spin text-black" />
+            ) : (
+                <div className="flex items-center gap-2">
+                    <span>{action}</span>
+                    {(action === 'Buy' || action === 'Sell') && (
+                        <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-black/20">
+                            <Icon name="currencyCoins" className="w-3.5 h-3.5 text-black" />
+                            <span className="tabular-nums">
+                              {action === 'Buy' ? totalPrice : Math.floor((('price' in item ? item.price : 0) || 0) / 2) * quantity}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -167,7 +263,31 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       footer={footer}
       maxWidth="md"
     >
-      <div className="space-y-6">
+      {/* Character Selector row atop the modal content */}
+      {action === 'Buy' && characters && characters.length > 1 && (
+        <div className="absolute top-4 left-6 z-50 flex items-center gap-2">
+            {characters.map(char => {
+                const charId = char.id || (char instanceof PlayerCharacter ? 'player' : 'unknown');
+                const isSelected = recipientId === charId || (recipientId === 'player' && char instanceof PlayerCharacter);
+                
+                return (
+                    <div key={charId} className="relative group">
+                        <ActorAvatar 
+                            actor={char}
+                            size={32}
+                            showBars={false}
+                            isActive={isSelected}
+                            showGlow={false}
+                            onClick={() => setRecipientId(charId)}
+                            className={`cursor-pointer transition-all ${isSelected ? 'scale-110 opacity-100' : 'opacity-40 scale-100 hover:scale-110'}`}
+                        />
+                    </div>
+                );
+            })}
+        </div>
+      )}
+
+      <div className="space-y-6 pt-5">
         <div>
           <h3 className="text-brand-text leading-tight mb-2">{item.name}</h3>
 
@@ -240,8 +360,8 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
         )}
 
         {/* Stepper Controls */}
-        <div className="bg-white/5 p-4 rounded-3xl border border-white/5 shadow-inner flex flex-col items-center">
-          <label className="text-[10px] font-bold text-brand-text-muted mb-4 opacity-60 text-center">Select Quantity</label>
+        <div className="bg-white/5 p-2 rounded-2xl border border-white/5 shadow-inner flex flex-col items-center">
+          <label className="text-[9px] font-bold text-brand-text-muted mb-1 opacity-60 text-center">Select Quantity</label>
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={() => setQuantity(q => Math.max(1, q - 1))}

@@ -351,7 +351,7 @@ const GameInterface: React.FC = () => {
       {isCombatActive && activeView === 'chat' && <CombatStatusDisplay />}
 
       <main className="flex-1 overflow-hidden relative">
-        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery', 'item-forge'].includes(activeView) ? '' : 'animate-page p-2'}`}>
+        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery', 'item-forge', 'store', 'nemesis'].includes(activeView) ? '' : 'animate-page p-2'}`}>
           {renderView()}
         </div>
       </main>
@@ -422,7 +422,7 @@ const GameInterface: React.FC = () => {
       {gameData && (
         <ZoneDetailsPanel isOpen={isZonePanelOpen} onClose={() => setIsZonePanelOpen(false)} coordinates={gameData.playerCoordinates || '0-0'} />
       )}
-      <Modal isOpen={isTimeModalOpen} onClose={() => setIsTimeModalOpen(false)} title="Time Management">
+      <Modal isOpen={isTimeModalOpen} onClose={() => setIsTimeModalOpen(false)} title="Rest & Camp">
         <TimeManagementModalContent onClose={() => setIsTimeModalOpen(false)} />
       </Modal>
       {gameData && (

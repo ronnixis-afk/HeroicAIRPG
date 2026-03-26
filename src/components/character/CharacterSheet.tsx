@@ -100,20 +100,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
         return () => setUnsavedChanges(null);
     }, [charData, initialData, setUnsavedChanges, type]);
 
-    useEffect(() => {
-        const newProficiencyBonus = calculateProficiencyBonus(charData.level);
-        const newAttackCount = Math.ceil(charData.level / 5);
-        if (charData.proficiencyBonus !== newProficiencyBonus || charData.numberOfAttacks !== newAttackCount) {
-            setCharData(prev => {
-                const updatedData = {
-                    ...prev,
-                    proficiencyBonus: newProficiencyBonus,
-                    numberOfAttacks: newAttackCount
-                };
-                return type === 'player' ? new PlayerCharacter(updatedData) : new Companion(updatedData);
-            });
-        }
-    }, [charData.level, charData.proficiencyBonus, charData.numberOfAttacks, type]);
+
 
     const inventoryForStats = useMemo(() => {
         if (!gameData) return { equipped: [], carried: [], storage: [], assets: [] } as any;
@@ -124,10 +111,11 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
     }, [type, gameData, initialData.id]);
 
     useEffect(() => {
-        // CULPRIT FIX: Use getBuffedScore to include active buffs and items in the health calculation
+        // DERIVED STATS SYNC: Ensure Max values reflecting level, buffs from items, and traits are correctly synchronized with state
         const conScore = charData.getBuffedScore('constitution', inventoryForStats);
+        
+        // 1. Calculate new HP
         let newMaxHp: number;
-
         if (type === 'companion' && (charData as Companion).isShip) {
             const conMod = calculateModifier(conScore);
             const hpPerLevel = Math.max(1, 20 + (2 * conMod));
@@ -136,22 +124,58 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
             newMaxHp = calculateCharacterMaxHp(charData.level, conScore);
         }
 
-        const conMod = calculateModifier(conScore);
-        const newMaxStamina = Math.max(1, charData.level * (conMod + 3));
+        // 2. Use class-based logic for other capped values to ensure consistency
+        const newMaxStamina = charData.getMaxStamina(inventoryForStats);
+        const newMaxHeroicPoints = charData.getMaxHeroicPoints(inventoryForStats);
+        const newProficiencyBonus = calculateProficiencyBonus(charData.level);
+        const newAttackCount = Math.ceil(charData.level / 5);
 
-        if (charData.maxHitPoints !== newMaxHp || charData.maxStamina !== newMaxStamina) {
+        // 3. Check for any deviations
+        const hasStatChange = 
+            charData.maxHitPoints !== newMaxHp || 
+            charData.maxStamina !== newMaxStamina || 
+            charData.maxHeroicPoints !== newMaxHeroicPoints ||
+            charData.proficiencyBonus !== newProficiencyBonus ||
+            charData.numberOfAttacks !== newAttackCount;
+
+        if (hasStatChange) {
             setCharData(prev => {
-                const updatedData = { ...prev, maxHitPoints: newMaxHp, maxStamina: newMaxStamina };
+                const updatedData = { 
+                    ...prev, 
+                    maxHitPoints: newMaxHp, 
+                    maxStamina: newMaxStamina,
+                    maxHeroicPoints: newMaxHeroicPoints,
+                    proficiencyBonus: newProficiencyBonus,
+                    numberOfAttacks: newAttackCount
+                };
+                
+                // Safety Cap current values to new max values
                 if (updatedData.currentHitPoints > newMaxHp) {
                     updatedData.currentHitPoints = newMaxHp;
                 }
                 if ((updatedData.stamina || 0) > newMaxStamina) {
                     updatedData.stamina = newMaxStamina;
                 }
+                if ((updatedData.heroicPoints || 0) > newMaxHeroicPoints) {
+                    updatedData.heroicPoints = newMaxHeroicPoints;
+                }
+                
                 return type === 'player' ? new PlayerCharacter(updatedData) : new Companion(updatedData);
             });
         }
-    }, [charData.level, charData.abilityScores, charData.activeBuffs, charData.abilities, inventoryForStats, charData.maxHitPoints, charData.maxStamina, charData.currentHitPoints, type]);
+    }, [
+        charData.level, 
+        charData.abilityScores, 
+        charData.activeBuffs, 
+        charData.abilities, 
+        inventoryForStats, 
+        charData.maxHitPoints, 
+        charData.maxStamina, 
+        charData.maxHeroicPoints,
+        charData.proficiencyBonus,
+        charData.numberOfAttacks,
+        type
+    ]);
 
     useEffect(() => {
         if (imageCooldown > 0) {

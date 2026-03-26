@@ -40,16 +40,16 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
     if (isCombatActive) {
         return (
             <div className="p-8 flex flex-col items-center justify-center text-center animate-page">
-                <div className="w-16 h-16 rounded-full bg-brand-danger/10 flex items-center justify-center mb-6 border border-brand-danger/20">
-                    <Icon name="danger" className="w-8 h-8 text-brand-danger" />
+                <div className="w-20 h-20 rounded-full bg-brand-danger/10 flex items-center justify-center mb-6 border border-brand-danger/30 shadow-[0_0_35px_rgba(239,68,68,0.2)] animate-pulse">
+                    <Icon name="danger" className="w-10 h-10 text-brand-danger" />
                 </div>
-                <h3>Combat Active</h3>
-                <p className="text-body-base text-brand-text-muted mb-8 max-w-xs">
+                <h3 className="text-brand-text">Combat Active</h3>
+                <p className="text-body-base text-brand-text-muted mb-8 max-w-xs leading-relaxed">
                     You cannot rest or wait while in danger!
                 </p>
                 <button 
                     onClick={onClose}
-                    className="btn-secondary btn-md w-full"
+                    className="btn-secondary btn-md w-full rounded-xl"
                 >
                     Close
                 </button>
@@ -58,98 +58,95 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
     }
 
     return (
-        <div className="space-y-6 animate-page">
-            <p className="text-body-sm text-brand-text-muted border-b border-brand-primary/20 pb-4 mb-2 leading-relaxed italic">
-                Choose to rest to recover health and abilities, or wait for time to pass. The Gm will describe any events that occur.
-            </p>
+        <div className="flex flex-col items-center text-center space-y-8 py-4 animate-fade-in">
+            {/* Header Icon - 4x bigger dimension (w-40) */}
+            <div className="w-40 h-40 flex items-center justify-center relative group">
+                <div className="absolute inset-0 bg-brand-accent/5 rounded-full blur-2xl group-hover:bg-brand-accent/10 transition-colors" />
+                <img 
+                    src="/icons/rest-camp.png" 
+                    alt="Rest & Camp" 
+                    className="w-full h-full object-contain relative z-10 drop-shadow-2xl transition-transform duration-500 group-hover:scale-110" 
+                />
+            </div>
             
-            {/* Short Rest */}
-            <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface/50 shadow-inner transition-all hover:border-brand-accent/20">
-                <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-start">
-                        <div className="flex-1 pr-4">
-                            <h4>Short Rest (1 hour)</h4>
-                            <p className="text-body-sm text-brand-text-muted leading-relaxed">Recovers 1d8 Hp per level and resets short rest abilities.</p>
+            <div className="space-y-3 px-2">
+                <p className="text-body-lg text-brand-text italic leading-relaxed px-4">
+                    "Find a safe spot to catch your breath or establish a secure camp as the day turns to dusk."
+                </p>
+                <p className="text-body-sm text-brand-text-muted font-medium">
+                    Choose to recover health and abilities or wait for time to pass.
+                </p>
+            </div>
+            
+            {/* Action Grid */}
+            <div className="grid grid-cols-2 gap-4 w-full px-2">
+                <button 
+                    onClick={() => handleConfirmRest('short')}
+                    className="flex flex-col items-center justify-center py-8 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-2 shadow-inner text-center min-h-[160px]"
+                >
+                    <div className="flex flex-col gap-2">
+                        <span className="text-body-lg font-black text-brand-accent tracking-tight">Short Rest</span>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-[10px] text-brand-text font-medium leading-relaxed opacity-90">
+                                Recovers 1d8 hp per level and resets short rest abilities.
+                            </p>
+                            <span className="text-[9px] text-brand-text-muted font-bold opacity-50 mt-1">1 Hour • Ends at {formatGameTime(shortRestEndDate)}</span>
                         </div>
-                        <button
-                            onClick={() => handleConfirmRest('short')}
-                            className="btn-primary btn-md flex-shrink-0"
-                        >
-                            Confirm
-                        </button>
                     </div>
-                    <div className="pt-3 border-t border-brand-primary/20 flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-brand-text-muted opacity-60">Ends At:</span>
-                        <span className="text-body-sm font-bold text-brand-accent">{formatGameTime(shortRestEndDate)}</span>
+                </button>
+                
+                <button 
+                    onClick={() => handleConfirmRest('long')}
+                    className="flex flex-col items-center justify-center py-8 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-2 shadow-inner text-center min-h-[160px]"
+                >
+                    <div className="flex flex-col gap-2">
+                        <span className="text-body-lg font-black text-brand-accent tracking-tight">Long Rest</span>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-[10px] text-brand-text font-medium leading-relaxed opacity-90">
+                                Fully recovers hp and resets all abilities.
+                            </p>
+                            <span className="text-[9px] text-brand-text-muted font-bold opacity-50 mt-1">8 Hours • Ends at {formatGameTime(longRestEndDate)}</span>
+                        </div>
                     </div>
-                </div>
+                </button>
             </div>
 
-            {/* Long Rest */}
-            <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface/50 shadow-inner transition-all hover:border-brand-accent/20">
-                <div className="flex flex-col gap-4">
-                    <div className="flex justify-between items-start">
-                        <div className="flex-1 pr-4">
-                            <h4>Long Rest (8 hours)</h4>
-                            <p className="text-body-sm text-brand-text-muted leading-relaxed">Fully recovers Hp and resets all abilities.</p>
-                        </div>
-                        <button
-                            onClick={() => handleConfirmRest('long')}
-                            className="btn-primary btn-md flex-shrink-0"
-                        >
-                            Confirm
-                        </button>
-                    </div>
-                    <div className="pt-3 border-t border-brand-primary/20 flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-brand-text-muted opacity-60">Ends At:</span>
-                        <span className="text-body-sm font-bold text-brand-accent">{formatGameTime(longRestEndDate)}</span>
+            {/* Wait Section */}
+            <div className="w-full px-2 pt-4 space-y-4 border-t border-brand-primary/10">
+                <div className="flex justify-between items-center mb-2 px-2">
+                    <span className="text-body-sm font-bold text-brand-text">Wait For Time To Pass</span>
+                    <div className="bg-brand-surface px-3 py-1 rounded-full border border-brand-primary/30 flex items-center">
+                        <span className="text-body-base font-black text-brand-accent tabular-nums">{waitHours}</span>
+                        <span className="text-[10px] font-bold text-brand-text-muted ml-1.5 opacity-60">Hours</span>
                     </div>
                 </div>
-            </div>
-
-            {/* Wait Slider */}
-            <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface/50 shadow-inner transition-all hover:border-brand-accent/20">
-                <div className="flex flex-col gap-6">
-                    <div className="flex justify-between items-center">
-                        <h4>Wait</h4>
-                        <div className="bg-brand-bg/50 px-3 py-1 rounded-full border border-brand-surface shadow-sm">
-                            <span className="text-body-base font-black text-brand-accent tabular-nums">{waitHours}</span>
-                            <span className="text-[10px] font-bold text-brand-text-muted ml-1.5 opacity-60">Hours</span>
-                        </div>
+                
+                <div className="px-2 space-y-1">
+                    <input
+                        type="range"
+                        min="1"
+                        max="24"
+                        value={waitHours}
+                        onChange={(e) => setWaitHours(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-brand-primary/40 rounded-full appearance-none cursor-pointer accent-brand-accent"
+                    />
+                    <div className="flex justify-between px-1">
+                        <span className="text-[8px] font-bold text-brand-text-muted opacity-40">1h</span>
+                        <span className="text-[8px] font-bold text-brand-text-muted opacity-40">12h</span>
+                        <span className="text-[8px] font-bold text-brand-text-muted opacity-40">24h</span>
                     </div>
-                    
-                    <div className="space-y-1">
-                        <input
-                            type="range"
-                            min="1"
-                            max="24"
-                            value={waitHours}
-                            onChange={(e) => setWaitHours(parseInt(e.target.value))}
-                            className="w-full h-1.5 bg-brand-secondary rounded-full appearance-none cursor-pointer accent-brand-accent"
-                        />
-                        <div className="flex justify-between px-1">
-                            <span className="text-[8px] font-bold text-brand-text-muted opacity-40">1h</span>
-                            <span className="text-[8px] font-bold text-brand-text-muted opacity-40">12h</span>
-                            <span className="text-[8px] font-bold text-brand-text-muted opacity-40">24h</span>
-                        </div>
-                    </div>
+                </div>
 
-                    <p className="text-body-sm text-brand-text-muted italic leading-relaxed text-center px-2">
-                        Pass the time and see what happens. No Hp recovery occurs during a standard wait.
+                <div className="flex flex-col gap-3">
+                    <p className="text-[10px] text-brand-text-muted italic leading-tight text-center">
+                        Wait until {formatGameTime(waitEndDate)}
                     </p>
-
-                    <div className="pt-4 border-t border-brand-primary/20 flex flex-col gap-4">
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="text-[10px] font-bold text-brand-text-muted opacity-60">Ends At:</span>
-                            <span className="text-body-sm font-bold text-brand-accent">{formatGameTime(waitEndDate)}</span>
-                        </div>
-                        <button
-                            onClick={handleConfirmWait}
-                            className="btn-primary btn-md w-full"
-                        >
-                            Confirm Wait
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleConfirmWait}
+                        className="btn-primary btn-md w-full rounded-xl shadow-lg shadow-brand-accent/10"
+                    >
+                        Confirm Wait
+                    </button>
                 </div>
             </div>
         </div>

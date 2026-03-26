@@ -134,10 +134,11 @@ export class PlayerCharacter {
 
         // CULPRIT FIX: The constructor now always derives maxHeroicPoints from its abilities/level.
         // This prevents "Value Lock" where stale data.maxHeroicPoints from the state would override new trait effects.
-        this.maxHeroicPoints = this.getMaxHeroicPoints();
+        // Derive capacity values, but respect existing values from state if provided
+        this.maxHeroicPoints = Number(data.maxHeroicPoints) || this.getMaxHeroicPoints();
         this.heroicPoints = data.heroicPoints !== undefined ? Math.min(Number(data.heroicPoints), this.maxHeroicPoints) : this.maxHeroicPoints;
 
-        this.maxStamina = this.getMaxStamina();
+        this.maxStamina = Number(data.maxStamina) || this.getMaxStamina();
         this.stamina = data.stamina !== undefined ? Math.min(Number(data.stamina), this.maxStamina) : this.maxStamina;
 
         // Derived Vitality

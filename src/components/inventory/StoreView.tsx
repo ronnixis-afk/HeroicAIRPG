@@ -211,23 +211,24 @@ const StoreView: React.FC = () => {
         }
     };
 
-    const confirmTransaction = async (quantity: number) => {
+    const confirmTransaction = async (quantity: number, recipientId?: string) => {
         if (selectedItem && mode === 'buy') {
-            await buyItem(selectedItem as StoreItem, quantity);
+            await buyItem(selectedItem as StoreItem, quantity, recipientId);
         }
     };
 
     return (
         <div className="max-w-2xl mx-auto h-full flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 pb-24 pr-1">
-                <div className="animate-fade-in pt-8">
+            <div className="flex-1 overflow-y-auto custom-scroll px-4 pb-24 pr-1">
+                <div className="animate-fade-in pt-0">
                     <PageHeader 
                         title="Merchant" 
                         subtitle="Buy equipment and supplies." 
                         showReturnButton={true}
                     />
 
-                    <div className="sticky top-0 z-20 bg-brand-bg pt-2 pb-3 -mx-4 px-4 border-b border-brand-primary/20 mb-4 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
+                    <div className="sticky top-0 z-20 bg-brand-bg pb-3 -mx-4 px-4 border-b border-brand-primary/20 mb-4 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)]">
+
                         <div className="flex justify-center gap-8 mb-4">
                             <ScaleRadio label="Person" isActive={activeScale === 'Person'} onClick={() => setActiveScale('Person')} />
                             <ScaleRadio label="Mount" isActive={activeScale === 'Mount'} onClick={() => setActiveScale('Mount')} />
@@ -318,6 +319,7 @@ const StoreView: React.FC = () => {
                     maxQuantity={99}
                     onConfirm={confirmTransaction}
                     balance={playerGold}
+                    characters={[gameData.playerCharacter, ...gameData.companions]}
                 />
             )}
         </div>

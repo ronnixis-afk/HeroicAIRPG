@@ -22,6 +22,7 @@ interface ActorAvatarProps {
     maxTempHpOverride?: number;
     staminaOverride?: number;
     maxStaminaOverride?: number;
+    showGlow?: boolean;
 }
 
 /**
@@ -45,7 +46,8 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
     tempHpOverride,
     maxTempHpOverride,
     staminaOverride,
-    maxStaminaOverride
+    maxStaminaOverride,
+    showGlow = true
 }) => {
     const a = actor as any;
     const isStatusDead = a.status?.toLowerCase() === 'dead';
@@ -87,7 +89,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                 className={`
                     relative rounded-[var(--avatar-radius)] overflow-hidden flex items-center justify-center bg-brand-surface border transition-all duration-300 w-full aspect-square
                     ${isActive || isTargeted
-                        ? 'border-white border-[var(--avatar-border-width-active)] ring-4 ring-brand-accent/30 shadow-[0_0_20px_rgba(62,207,142,0.6)] z-30'
+                        ? `border-white border-[var(--avatar-border-width-active)] ${showGlow ? 'ring-4 ring-brand-accent/30 shadow-[0_0_20px_rgba(62,207,142,0.6)]' : ''} z-30`
                         : `border-brand-primary border-[var(--avatar-border-width)] ${showBars ? 'opacity-100' : 'opacity-80'}`
                     }
                     ${isDead ? 'grayscale brightness-50' : ''}

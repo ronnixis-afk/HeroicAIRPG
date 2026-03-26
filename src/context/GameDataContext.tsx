@@ -78,7 +78,7 @@ export interface GameDataContextType {
   summarizePastStoryLogs: () => Promise<void>;
   saveWorldProgress: () => Promise<void>;
   fetchStoreCategory: (category: string, scale?: string, forceRefresh?: boolean) => Promise<void>;
-  buyItem: (item: StoreItem, quantity: number) => Promise<void>;
+  buyItem: (item: StoreItem, quantity: number, recipientId?: string) => Promise<void>;
   sellItem: (item: Item, sellPrice: number, quantity: number) => Promise<void>;
   initiateRest: (type: 'short' | 'long') => void;
   initiateWait: (hours: number) => void;
