@@ -255,6 +255,7 @@ export const useCharacterActions = (
             if (isCompanion) {
                 const companion = character as Companion;
                 dispatch({ type: 'ADD_COMPANION', payload: { companion, inventory: processedInventory } });
+                dispatch({ type: 'ADD_NPC', payload: companionToNPC(companion) });
                 dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-join-${Date.now()}`, sender: 'system', content: `${companion.name} has joined the party. Starting funds: ${startingFunds.quantity} ${startingFunds.name}.`, type: 'positive' } });
 
                 setCreationProgress({ isActive: true, step: "Integration complete!", progress: 100 });

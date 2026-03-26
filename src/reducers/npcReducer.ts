@@ -20,7 +20,9 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
             // Prevent duplicating the player or companions as an NPC
             const isPlayer = state.playerCharacter?.name && state.playerCharacter.name.toLowerCase().trim() === normalizedNewName;
             const isCompanion = state.companions?.some(c => c.name && c.name.toLowerCase().trim() === normalizedNewName);
-            if (isPlayer || isCompanion) {
+            
+            // Allow if it's explicitly a companion being registered as an NPC
+            if ((isPlayer || isCompanion) && !newNpc.companionId) {
                 return state;
             }
 

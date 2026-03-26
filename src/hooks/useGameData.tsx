@@ -25,7 +25,7 @@ import { useNarrativeManager } from './narrative/useNarrativeManager';
 import { useNotificationActions } from './narrative/useNotificationActions';
 import { useSystemSettings } from './system/useSystemSettings';
 import { useUI } from '../context/UIContext';
-import { detectMentionedNpcs } from '../utils/npcUtils';
+import { detectMentionedNpcs, companionToNPC } from '../utils/npcUtils';
 import { dbService } from '../services/dbService';
 import { worldService } from '../services/worldService';
 import { useEffectLocaleSync } from './world/useEffectLocaleSync';
@@ -59,6 +59,18 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
 
     // Background Indexer: Scans GameData for missing vectors (retroactive indexing)
     useSemanticIndexer(gameData, dispatch);
+
+    // Social Registry Sync: Ensure all companions are registered as NPCs for relationship tracking
+    useEffect(() => {
+        if (!gameData || !gameData.companions) return;
+        const npcIds = new Set((gameData.npcs || []).map(n => n.id));
+        gameData.companions.forEach(comp => {
+            const npcId = `npc-${comp.id}`;
+            if (!npcIds.has(npcId)) {
+                dispatch({ type: 'ADD_NPC', payload: companionToNPC(comp) });
+            }
+        });
+    }, [gameData?.companions, gameData?.npcs?.length, dispatch]);
 
     const weaveGrandDesign = useCallback(async () => {
         if (!gameData) return;

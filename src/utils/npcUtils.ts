@@ -294,24 +294,22 @@ export const calculateAlignmentRelationshipShift = (
         const score = npcAlignment.goodEvil || 0;
         const label = getGoodEvilLabel(score);
         const index = GOOD_EVIL_ALIASES.findIndex(a => a.label === label);
-        if (index === -1 || index === 4) return 0; // 4 is Neutral
+        if (index === -1) return 0;
 
-        // Neutral is index 4
-        // Good action: 4 - index (Pure Good [0] -> +4, Pure Evil [8] -> -4)
-        // Evil action: index - 4 (Pure Good [0] -> -4, Pure Evil [8] -> +4)
-        return actionAlignment === 'Good' ? (4 - index) : (index - 4);
+        const baseShift = actionAlignment === 'Good' ? (4 - index) : (index - 4);
+        if (baseShift === 0) return actionAlignment === 'Good' ? 1 : -1;
+        return baseShift;
     }
 
     if (actionAlignment === 'Lawful' || actionAlignment === 'Chaotic') {
         const score = npcAlignment.lawChaos || 0;
         const label = getLawChaosLabel(score);
         const index = LAW_CHAOS_ALIASES.findIndex(a => a.label === label);
-        if (index === -1 || index === 4) return 0; // 4 is Neutral
+        if (index === -1) return 0;
 
-        // Neutral is index 4
-        // Lawful action: 4 - index
-        // Chaotic action: index - 4
-        return actionAlignment === 'Lawful' ? (4 - index) : (index - 4);
+        const baseShift = actionAlignment === 'Lawful' ? (4 - index) : (index - 4);
+        if (baseShift === 0) return actionAlignment === 'Lawful' ? 1 : -1;
+        return baseShift;
     }
 
     return 0;
