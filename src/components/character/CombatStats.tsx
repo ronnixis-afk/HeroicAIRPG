@@ -135,14 +135,14 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         <div className="col-span-1">
                             <label className="block text-body-sm font-bold text-brand-text-muted mb-1 px-1">Proficiency</label>
-                            <div className="w-full bg-brand-primary/40 h-11 px-2 rounded-md border border-brand-surface text-center font-black text-xl flex items-center justify-center text-brand-accent">
+                            <div className="w-full bg-brand-primary/40 h-11 px-2 rounded-md border border-brand-surface text-center font-bold text-xl flex items-center justify-center text-brand-accent">
                                 {formatModifier(character.proficiencyBonus)}
                             </div>
                         </div>
 
                         <div className="col-span-1">
                             <label className="block text-body-sm font-bold text-brand-text-muted mb-1 px-1">Attacks</label>
-                            <div className="w-full bg-brand-primary/40 h-11 px-2 rounded-md border border-brand-surface text-center font-black text-xl flex items-center justify-center text-brand-text-muted/80">
+                            <div className="w-full bg-brand-primary/40 h-11 px-2 rounded-md border border-brand-surface text-center font-bold text-xl flex items-center justify-center text-brand-text-muted/80">
                                 {character.numberOfAttacks || 1}
                             </div>
                         </div>
@@ -223,20 +223,20 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                     {thpDisplayLabel}
                                 </label>
                                 <div className="flex items-center gap-2 bg-brand-primary/20 p-2 rounded-xl border border-brand-primary/50">
-                                    <input
-                                        type="number"
-                                        value={character.temporaryHitPoints || 0}
-                                        onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)}
-                                        className="w-full input-md text-center font-black text-2xl text-emerald-400"
-                                        aria-label={thpLabel}
-                                    />
-                                    <span className="text-brand-text-muted text-xl font-black">/</span>
+                                        <input
+                                            type="number"
+                                            value={character.temporaryHitPoints || 0}
+                                            onChange={e => onChange(['temporaryHitPoints'], parseInt(e.target.value) || 0)}
+                                            className="w-full input-md text-center font-bold text-2xl text-emerald-400"
+                                            aria-label={thpLabel}
+                                        />
+                                    <span className="text-brand-text-muted text-xl font-bold">/</span>
                                     <div className="relative w-full">
                                         <input
                                             type="number"
                                             value={maxTempHP}
                                             readOnly
-                                            className="w-full input-md bg-brand-primary/50 text-center font-black text-2xl text-brand-text-muted cursor-not-allowed"
+                                            className="w-full input-md bg-brand-primary/50 text-center font-bold text-2xl text-brand-text-muted cursor-not-allowed"
                                             aria-label={`Maximum ${thpLabel}`}
                                         />
                                         <div className="absolute inset-y-0 right-2 flex items-center text-brand-text-muted" title="Calculated from equipment and traits">
@@ -254,16 +254,16 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                     type="number"
                                     value={character.currentHitPoints}
                                     onChange={e => onChange(['currentHitPoints'], parseInt(e.target.value) || 0)}
-                                    className="w-full input-md text-center font-black text-2xl text-brand-accent"
+                                    className="w-full input-md text-center font-bold text-2xl text-brand-accent"
                                     aria-label="Current Hit Points"
                                 />
-                                <span className="text-brand-text-muted text-xl font-black">/</span>
+                                <span className="text-brand-text-muted text-xl font-bold">/</span>
                                 <div className="relative w-full">
                                     <input
                                         type="number"
                                         value={character.maxHitPoints}
                                         readOnly
-                                        className="w-full input-md bg-brand-primary/50 text-center font-black text-2xl text-brand-text-muted cursor-not-allowed"
+                                        className="w-full input-md bg-brand-primary/50 text-center font-bold text-2xl text-brand-text-muted cursor-not-allowed"
                                         aria-label="Maximum Hit Points"
                                     />
                                     <div className="absolute inset-y-0 right-2 flex items-center text-brand-text-muted" title="Calculated based on Level and Con">
@@ -281,16 +281,16 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                     type="number"
                                     value={character.stamina ?? 0}
                                     onChange={e => onChange(['stamina'], parseInt(e.target.value) || 0)}
-                                    className="w-full input-md text-center font-black text-2xl text-[#f59e0b]"
+                                    className="w-full input-md text-center font-bold text-2xl text-[#f59e0b]"
                                     aria-label="Current Stamina"
                                 />
-                                <span className="text-brand-text-muted text-xl font-black">/</span>
+                                <span className="text-brand-text-muted text-xl font-bold">/</span>
                                 <div className="relative w-full">
                                     <input
                                         type="number"
                                         value={character.maxStamina ?? 0}
                                         readOnly
-                                        className="w-full input-md bg-brand-primary/50 text-center font-black text-2xl text-brand-text-muted cursor-not-allowed"
+                                        className="w-full input-md bg-brand-primary/50 text-center font-bold text-2xl text-brand-text-muted cursor-not-allowed"
                                         aria-label="Maximum Stamina"
                                     />
                                     <div className="absolute inset-y-0 right-2 flex items-center text-brand-text-muted" title="Calculated based on Level and Con">
@@ -345,7 +345,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         <div className="grid grid-cols-2 gap-4">
                             <StatCard label="Total AC" tooltip={acBreakdown} isBuffed={isAcBuffed}>
-                                <span className="text-3xl font-black">{totalAC}</span>
+                                <span className="text-3xl font-bold">{totalAC}</span>
                             </StatCard>
                             <StatCard
                                 label="To Hit Bonus"
@@ -357,15 +357,15 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                             >
                                 {isDualWielding ? (
                                     <div className="flex flex-col items-center">
-                                        <div className={`text-xl font-black ${isAttackBuffed ? 'text-brand-accent' : ''}`}>M: {toHitBonusString}</div>
-                                        <div className={`text-xl font-black ${isOffHandAttackBuffed ? 'text-brand-accent' : ''}`}>O: {offHandToHitBonusString}</div>
+                                        <div className={`text-xl font-bold ${isAttackBuffed ? 'text-brand-accent' : ''}`}>M: {toHitBonusString}</div>
+                                        <div className={`text-xl font-bold ${isOffHandAttackBuffed ? 'text-brand-accent' : ''}`}>O: {offHandToHitBonusString}</div>
                                     </div>
                                 ) : (
-                                    <span className="text-3xl font-black">{toHitBonusString}</span>
+                                    <span className="text-3xl font-bold">{toHitBonusString}</span>
                                 )}
                             </StatCard>
                             <StatCard label="Attacks/Round" tooltip="Calculated based on level. Dual wielding or flurry of blows increases your total attack count.">
-                                <span className="text-3xl font-black">{numberOfAttacks}</span>
+                                <span className="text-3xl font-bold">{numberOfAttacks}</span>
                             </StatCard>
                             <StatCard
                                 label="Primary Damage"
@@ -377,16 +377,16 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                             >
                                 {isDualWielding ? (
                                     <div className="flex flex-col items-start w-full px-2">
-                                        <div className={`text-body-sm font-black truncate w-full text-left ${isDamageBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
+                                        <div className={`text-body-sm font-bold truncate w-full text-left ${isDamageBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
                                             <span className="text-brand-text-muted mr-1.5">M:</span>{damageValue}
                                         </div>
-                                        <div className={`text-body-sm font-black mt-1.5 truncate w-full text-left ${isOffHandDamageBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
+                                        <div className={`text-body-sm font-bold mt-1.5 truncate w-full text-left ${isOffHandDamageBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
                                             <span className="text-brand-text-muted mr-1.5">O:</span>{offHandDamageValue}
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center">
-                                        <div className="text-2xl font-black">{damageValue}</div>
+                                        <div className="text-2xl font-bold">{damageValue}</div>
                                         <div className="text-[8px] font-bold text-brand-accent/70 capitalize">{damageType}</div>
                                     </div>
                                 )}
@@ -401,7 +401,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                     <h5 className="mb-0">Resistances & Defenses</h5>
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 shadow-inner">
                         <div className="mb-6">
-                            <label className="block text-body-sm font-black text-brand-text-muted mb-3">Immunities</label>
+                            <label className="block text-body-sm font-bold text-brand-text-muted mb-3">Immunities</label>
                             <div className="flex flex-wrap gap-2">
                                 {immunities.length > 0 ? (
                                     immunities.map(t => <DefenseTag key={t} label={t} />)
@@ -412,7 +412,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         </div>
 
                         <div className="mb-6">
-                            <label className="block text-body-sm font-black text-brand-text-muted mb-3">Resistances</label>
+                            <label className="block text-body-sm font-bold text-brand-text-muted mb-3">Resistances</label>
                             <div className="flex flex-wrap gap-2">
                                 {resistances.length > 0 ? (
                                     resistances.map(t => <DefenseTag key={t} label={t} />)
@@ -423,7 +423,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                         </div>
 
                         <div>
-                            <label className="block text-body-sm font-black text-brand-text-muted mb-3">Vulnerabilities</label>
+                            <label className="block text-body-sm font-bold text-brand-text-muted mb-3">Vulnerabilities</label>
                             <div className="flex flex-wrap gap-2">
                                 {vulnerabilities.length > 0 ? (
                                     vulnerabilities.map(t => <DefenseTag key={t} label={t} />)

@@ -10,7 +10,7 @@ import { TagEditor } from './TagEditor';
 import { KeywordEditor } from './KeywordEditor';
 
 const NewTag: React.FC = () => (
-    <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-bounce">New</span>
+    <span className="bg-brand-accent text-black text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-bounce">New</span>
 );
 
 import PageHeader from './PageHeader';
@@ -193,7 +193,7 @@ const WorldView: React.FC = () => {
 
                     const categoryTitle = (
                         <div className="flex items-center gap-2">
-                            <h4 className="text-brand-text tracking-tight font-black mb-0">{displayCategory}</h4>
+                            <h4 className="text-brand-text font-bold mb-0">{displayCategory}</h4>
                             {hasNew && <NewTag />}
                         </div>
                     );

@@ -156,7 +156,7 @@ const CombatConsensusPanel: React.FC = () => {
                             <img src="/icons/sneak.png" alt="Stealth" className="w-18 h-18 object-contain" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-brand-accent text-center">Stealth</span>
+                            <span className="text-[10px] font-bold text-brand-accent text-center">Stealth</span>
                             <span className="text-body-sm text-brand-text font-bold">Distract & Hide</span>
                         </div>
                     </button>
@@ -170,7 +170,7 @@ const CombatConsensusPanel: React.FC = () => {
                             <img src="/icons/persuade.png" alt="Persuade" className="w-18 h-18 object-contain" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-brand-accent text-center">Social</span>
+                            <span className="text-[10px] font-bold text-brand-accent text-center">Social</span>
                             <span className="text-body-sm text-brand-text font-bold">Charm Your Way</span>
                         </div>
                     </button>

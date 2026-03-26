@@ -36,7 +36,7 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         <div className="w-12 h-12 text-brand-accent animate-dice">
                             <Icon name="dice" className="w-full h-full drop-shadow-[0_0_8px_rgba(62,207,142,0.4)]" />
                         </div>
-                        <p className="text-body-base text-brand-accent font-black animate-pulse tracking-widest">Striking the iron...</p>
+                        <p className="text-body-base text-brand-accent font-bold animate-pulse">Striking the iron...</p>
                     </div>
                 ) : forgedItem ? (
                     <div className="w-full space-y-8 animate-fade-in">
@@ -48,12 +48,12 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         {(selectedModifiers.length > 0 && showModifiers) || forgedItem.effect ? (
                             <div className="flex flex-wrap justify-center gap-2 px-2">
                                 {selectedModifiers.map(mod => (
-                                    <div key={mod.id} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg border text-[10px] font-black bg-brand-bg shadow-sm ${MODIFIER_REGISTRY[mod.type].colorClass}`}>
+                                    <div key={mod.id} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg border text-[10px] font-bold bg-brand-bg shadow-sm ${MODIFIER_REGISTRY[mod.type].colorClass}`}>
                                         <span>{mod.tag}</span>
                                     </div>
                                 ))}
                                 {forgedItem.effect && (
-                                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border border-purple-500 text-purple-400 text-[10px] font-black bg-brand-bg shadow-sm">
+                                    <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border border-purple-500 text-purple-400 text-[10px] font-bold bg-brand-bg shadow-sm">
                                         <Icon name="sparkles" className="w-3 h-3" />
                                         <span>{formatEffectLabel(forgedItem.effect, forgedItem.usage, (forgedItem.tags || []).some(t => t === 'consumable' || t === 'throwable'))}</span>
                                     </div>
@@ -62,8 +62,8 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                         ) : null}
 
                         <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface text-center shadow-inner">
-                            <label className="block text-[10px] font-black text-brand-text-muted mb-1.5 opacity-60">Estimated Market Value</label>
-                            <div className="text-body-lg font-black text-brand-accent flex items-center justify-center gap-2">
+                            <label className="block text-[10px] font-bold text-brand-text-muted mb-1.5 opacity-60">Estimated Market Value</label>
+                            <div className="text-body-lg font-bold text-brand-accent flex items-center justify-center gap-2">
                                 <Icon name="currencyCoins" className="w-5 h-5" />
                                 <span>{forgedItem.price}</span>
                             </div>

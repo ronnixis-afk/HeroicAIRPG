@@ -52,12 +52,12 @@ const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warnin
         <Icon name={iconName} className={`w-6 h-6 mb-2 ${isHighlighted ? 'animate-pulse' : ''}`} />
       ) : null}
       {badgeCount !== undefined && badgeCount > 0 && (
-        <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-surface z-10 shadow-sm animate-fade-in">
+        <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-bold h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-surface z-10 shadow-sm animate-fade-in">
           {badgeCount > 9 ? '9+' : badgeCount}
         </span>
       )}
     </div>
-    <span className={`text-[9px] font-bold tracking-tight text-center leading-tight ${isHighlighted ? 'opacity-100' : ''}`}>{label}</span>
+    <span className={`text-[9px] font-bold text-center leading-tight ${isHighlighted ? 'opacity-100' : ''}`}>{label}</span>
   </button>
 );
 

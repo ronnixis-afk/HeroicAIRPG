@@ -228,7 +228,7 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
             <div className="max-h-[70vh] overflow-y-auto custom-scroll pr-1 space-y-5 pb-2">
                 
                 {/* Summary Banner */}
-                <div className={`text-center text-body-sm font-black py-3 border-y rounded-lg ${overallColor} transition-colors duration-500`}>
+                <div className={`text-center text-body-sm font-bold py-3 border-y rounded-lg ${overallColor} transition-colors duration-500`}>
                     {overallStatus}
                 </div>
 
@@ -236,7 +236,7 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
                 <div className="px-1">
                     <div className="flex justify-between items-center mb-1.5">
                         <span className="text-body-sm font-bold text-brand-text-muted">Scanning state...</span>
-                        <span className="text-body-sm font-black text-brand-accent">{overallProgress}%</span>
+                        <span className="text-body-sm font-bold text-brand-accent">{overallProgress}%</span>
                     </div>
                     <div className="w-full bg-brand-primary/30 h-1 rounded-full overflow-hidden border border-brand-surface">
                         <div 
@@ -246,7 +246,7 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-5 text-[10px] font-black text-brand-text-muted px-1 opacity-60">
+                <div className="flex justify-end gap-5 text-[10px] font-bold text-brand-text-muted px-1 opacity-60">
                     <span className="flex items-center gap-1.5"><Icon name="code" className="w-3.5 h-3.5 text-blue-400" /> System Logic</span>
                     <span className="flex items-center gap-1.5"><Icon name="sparkles" className="w-3.5 h-3.5 text-purple-400" /> Ai Creative</span>
                 </div>
@@ -254,7 +254,7 @@ const SystemCheckModal: React.FC<SystemCheckModalProps> = ({ isOpen, onClose }) 
                 {/* Categories */}
                 {Object.entries(CHECKS).map(([category, checks]) => (
                     <div key={category} className="bg-brand-surface/40 p-4 rounded-2xl border border-brand-primary shadow-sm">
-                        <h4 className="text-body-base font-black text-brand-accent mb-3 px-1 border-b border-brand-accent/10 pb-2">{category}</h4>
+                        <h4 className="text-body-base font-bold text-brand-accent mb-3 px-1 border-b border-brand-accent/10 pb-2">{category}</h4>
                         <div className="space-y-1">
                             {checks.map(check => (
                                 <CheckItem 

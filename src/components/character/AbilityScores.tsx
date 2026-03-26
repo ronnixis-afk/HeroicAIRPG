@@ -70,7 +70,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
                             return (
                                 <div key={ability} className={`flex flex-col items-center border p-4 rounded-2xl transition-all ${isBuffed ? 'border-brand-accent bg-brand-accent/5 shadow-lg shadow-brand-accent/5' : 'border-brand-primary bg-brand-primary/10'}`}>
                                     <label className="text-body-sm text-brand-text-muted capitalize mb-2">{ability}</label>
-                                    <div className={`text-3xl font-black tracking-tight ${isBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
+                                    <div className={`text-3xl font-bold ${isBuffed ? 'text-brand-accent' : 'text-brand-text'}`}>
                                         {formatModifier(modifier)}
                                     </div>
                                     <div className="flex items-center gap-3 mt-4">
@@ -139,7 +139,7 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
                                         className="custom-checkbox"
                                     />
                                     <span 
-                                        className={`font-mono font-black text-body-sm w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
+                                        className={`font-mono font-bold text-body-sm w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
                                         title={tooltipLines.join('\n')}
                                     >
                                         {formatModifier(totalBonus)}

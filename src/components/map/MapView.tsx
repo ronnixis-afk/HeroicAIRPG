@@ -228,7 +228,7 @@ const MapView: React.FC = () => {
                         )}
 
                         {(isVisited || isSelected || isPlayerHere) && (
-                            <span className="absolute top-0.5 left-1 text-[6px] font-mono text-brand-text-muted opacity-40 pointer-events-none select-none tracking-normal">{coordStr}</span>
+                            <span className="absolute top-0.5 left-1 text-[6px] font-mono text-brand-text-muted opacity-40 pointer-events-none select-none">{coordStr}</span>
                         )}
 
                         {zone && isVisited && (
@@ -286,7 +286,7 @@ const MapView: React.FC = () => {
                 <div className="flex flex-col">
                     <span className="text-xs font-mono text-brand-accent font-bold mb-1.5 tracking-normal">{selectedCoords || playerCoordinates}</span>
                     <div className="flex items-center gap-2 text-[10px] text-brand-text-muted border-t border-brand-primary/30 pt-1.5 mt-0.5">
-                        <div className="w-10 h-3 border border-brand-text-muted/30 flex items-center justify-center text-[7px] font-black tracking-tight">1 Cell</div>
+                        <div className="w-10 h-3 border border-brand-text-muted/30 flex items-center justify-center text-[7px] font-bold">1 Cell</div>
                         <span className="font-bold">≈ {mapSettings.gridDistance} {mapSettings.gridUnit}</span>
                     </div>
                 </div>

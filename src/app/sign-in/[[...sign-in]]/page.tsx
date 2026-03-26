@@ -20,7 +20,7 @@ export default function SignInPage() {
 
                 {/* Header */}
                 <header className="relative z-10 px-6 py-4 text-center lg:text-left flex justify-between items-center">
-                    <h3 className="font-merriweather text-brand-text tracking-tight mb-0">
+                    <h3 className="font-merriweather text-brand-text mb-0">
                         Heroic AI <span className="text-brand-accent">RPG</span>
                     </h3>
                     <Link href="/" className="text-brand-accent text-sm font-bold hover:text-brand-accent/80 transition-colors">
@@ -62,7 +62,7 @@ export default function SignInPage() {
                                     dividerText: 'text-brand-text-muted text-xs',
                                     formFieldLabel: 'text-brand-text-muted text-xs font-bold',
                                     formFieldInput: '!bg-brand-primary border-brand-surface text-brand-text rounded-xl h-12 font-bold text-sm',
-                                    formButtonPrimary: '!bg-brand-accent hover:!bg-brand-accent/80 !text-black font-black rounded-xl h-12 text-sm shadow-lg shadow-brand-accent/20 transition-all',
+                                    formButtonPrimary: '!bg-brand-accent hover:!bg-brand-accent/80 !text-black font-bold rounded-xl h-12 text-sm shadow-lg shadow-brand-accent/20 transition-all',
                                     footerAction: 'hidden',
                                     footer: 'hidden',
                                     identityPreview: '!bg-brand-primary/50 border-brand-primary rounded-xl',

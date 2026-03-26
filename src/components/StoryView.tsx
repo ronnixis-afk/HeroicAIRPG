@@ -11,7 +11,7 @@ import PageHeader from './PageHeader';
 import { toTitleCase, fixCasing } from '../utils/npcUtils';
 
 const NewTag: React.FC = () => (
-    <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0">New</span>
+    <span className="bg-brand-accent text-black text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 flex-shrink-0">New</span>
 );
 
 const StoryEditableContent: React.FC<{ log: StoryLog; onFinish: () => void }> = ({ log, onFinish }) => {
@@ -212,7 +212,7 @@ const StoryView: React.FC = () => {
                                 key={day}
                                 title={
                                     <div className="flex items-center gap-2">
-                                        <span className="font-black text-brand-text tracking-tight">{day}</span>
+                                        <span className="font-bold text-brand-text">{day}</span>
                                         {hasNewInDay && <NewTag />}
                                     </div>
                                 }
@@ -228,7 +228,7 @@ const StoryView: React.FC = () => {
 
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="flex items-center gap-3 flex-wrap">
-                                                        <span className="text-body-sm font-black text-brand-accent">{getTimeOnly(log.timestamp)}</span>
+                                                        <span className="text-body-sm font-bold text-brand-accent">{getTimeOnly(log.timestamp)}</span>
                                                         <span className="text-[10px] font-bold text-brand-text-muted opacity-60 flex items-center gap-1.5">
                                                             <Icon name="location" className="w-3 h-3" />
                                                             {toTitleCase(log.location)}

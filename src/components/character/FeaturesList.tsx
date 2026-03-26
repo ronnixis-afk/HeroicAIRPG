@@ -553,7 +553,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                         const val = parseInt(e.target.value) || 0;
                                         handleAbilityChange(editingIndex!, 'staminaCost', Math.max(0, val));
                                     }}
-                                    className="w-full input-md text-sm font-black text-center"
+                                    className="w-full input-md text-sm font-bold text-center"
                                     min="0"
                                 />
                             </div>

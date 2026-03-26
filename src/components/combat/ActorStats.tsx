@@ -38,12 +38,12 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
                 <div className="grid grid-cols-3 gap-3 pt-2">
                     {ABILITY_SCORES.map(score => (
                         <div key={score} className="flex flex-col items-center bg-brand-primary/20 p-3 rounded-xl border border-brand-surface shadow-inner">
-                            <label className="text-[10px] font-black text-brand-text-muted capitalize tracking-normal mb-1.5">{score.slice(0, 3)}</label>
+                            <label className="text-[10px] font-bold text-brand-text-muted capitalize mb-1.5">{score.slice(0, 3)}</label>
                             <input
                                 type="number"
                                 value={actor.abilityScores?.[score]?.score || 10}
                                 onChange={e => onChange(['abilityScores', score, 'score'], parseInt(e.target.value) || 10)}
-                                className="w-full bg-brand-primary text-center h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-sm font-black mb-3 shadow-inner"
+                                className="w-full bg-brand-primary text-center h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-sm font-bold mb-3 shadow-inner"
                             />
                             <div className="flex items-center gap-2 w-full justify-center">
                                 <input
@@ -71,8 +71,8 @@ export const ActorStats: React.FC<ActorStatsProps> = ({ actor, onChange }) => {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[9px] font-black text-brand-text-muted opacity-40 tracking-tight">Floor</span>
-                                    <span className={`text-body-base font-black tabular-nums ${skill.proficient ? 'text-brand-accent' : 'text-brand-text-muted'}`}>
+                                    <span className="text-[9px] font-bold text-brand-text-muted opacity-40">Floor</span>
+                                    <span className={`text-body-base font-bold tabular-nums ${skill.proficient ? 'text-brand-accent' : 'text-brand-text-muted'}`}>
                                         {skill.passiveScore}
                                     </span>
                                 </div>

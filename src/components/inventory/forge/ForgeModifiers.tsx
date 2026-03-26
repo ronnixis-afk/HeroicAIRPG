@@ -102,7 +102,7 @@ export const ForgeModifiers: React.FC<ForgeModifiersProps> = ({
                 placeholder="e.g. 1d6" 
                 value={modValue} 
                 onChange={e => onSetModValue(e.target.value)} 
-                className="w-full input-md text-center font-black" 
+                className="w-full input-md text-center font-bold" 
             />
         );
         

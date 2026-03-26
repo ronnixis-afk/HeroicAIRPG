@@ -53,7 +53,7 @@ const DiceRollRow: React.FC<{ roll: DiceRoll }> = ({ roll }) => {
         <div className="flex justify-between items-center py-1.5 group hover:bg-brand-primary/10 rounded px-2 transition-all font-sans font-normal text-brand-text text-body-sm">
             <div className="flex items-center min-w-0 gap-1.5 flex-grow pr-2">
                 {isHeroic && (
-                    <span className="text-[8px] font-black text-black bg-brand-accent px-1.5 py-0.5 rounded leading-none tracking-tighter shrink-0 animate-pulse shadow-[0_0_10px_rgba(62,207,142,0.6)]">
+                    <span className="text-[8px] font-bold text-black bg-brand-accent px-1.5 py-0.5 rounded leading-none shrink-0 animate-pulse shadow-[0_0_10px_rgba(62,207,142,0.6)]">
                         Heroic
                     </span>
                 )}
@@ -100,7 +100,7 @@ const DiceRollRow: React.FC<{ roll: DiceRoll }> = ({ roll }) => {
                         <span className="text-[10px] ml-0.5 grayscale-[0.2] font-normal">{isHealing ? '💚' : '💔'}</span>
                     </div>
                 ) : (
-                    <span className={`font-bold tracking-tight ${outcomeColor(roll.outcome)}`}>
+                    <span className={`font-bold ${outcomeColor(roll.outcome)}`}>
                         {roll.outcome}
                     </span>
                 )}

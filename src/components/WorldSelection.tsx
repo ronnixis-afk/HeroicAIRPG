@@ -527,7 +527,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
             <header className="flex flex-row items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
-                <h3 className="text-2xl font-black tracking-tighter text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h3>
+                <h3 className="text-2xl font-bold text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h3>
                 <button
                     onClick={() => setIsDrawerOpen(true)}
                     className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
@@ -560,7 +560,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
                                 <span className="text-xs font-bold text-brand-text tracking-wide inter">Credits & Usage</span>
                             </div>
-                            <button className="text-[10px] font-black text-brand-accent px-2 py-1 rounded-lg bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
+                            <button className="text-[10px] font-bold text-brand-accent px-2 py-1 rounded-lg bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
                                 Buy More
                             </button>
                         </div>
@@ -569,7 +569,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         </div>
                         <div className="flex justify-between mt-2">
                             <span className="text-[10px] text-brand-text-muted font-medium inter">Remaining Credits</span>
-                            <span className="text-[10px] text-brand-text font-black inter">{credits.currentCredits} / {credits.maxCredits}</span>
+                            <span className="text-[10px] text-brand-text font-bold inter">{credits.currentCredits} / {credits.maxCredits}</span>
                         </div>
                     </div>
 
@@ -590,7 +590,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             <div className="flex items-center gap-3">
                                 <div className="flex flex-col ml-1">
                                     <span className="text-sm font-bold text-brand-text inter">{userEmail?.split('@')[0] || 'User'}</span>
-                                    <span className={`text-[10px] font-black ${tierInfo.color} inter tracking-tighter`}>{tierInfo.label}</span>
+                                    <span className={`text-[10px] font-bold ${tierInfo.color} inter`}>{tierInfo.label}</span>
                                 </div>
                                 <button className="ml-auto p-2 text-brand-text-muted hover:text-brand-accent transition-colors">
                                     <Icon name="edit" className="w-4 h-4" />
@@ -666,7 +666,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     </div>
                                     <button 
                                         onClick={() => window.location.href = '/admin/consumption'}
-                                        className="text-[10px] font-black text-brand-accent hover:underline inter"
+                                        className="text-[10px] font-bold text-brand-accent hover:underline inter"
                                     >
                                         View Full Dashboard
                                     </button>
@@ -675,13 +675,13 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 <div className="px-3 space-y-2 mb-4">
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-[10px] text-brand-text-muted font-medium inter">Total Consumption</span>
-                                        <span className="text-xs font-black text-green-400 inter">
+                                        <span className="text-xs font-bold text-green-400 inter">
                                             ${consumptionData?.stats.totalCostUsd.toFixed(4) || '0.0000'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-[10px] text-brand-text-muted font-medium inter">Consumed Today</span>
-                                        <span className="text-[10px] font-black text-brand-text inter">
+                                        <span className="text-[10px] font-bold text-brand-text inter">
                                             ${consumptionData?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}
                                         </span>
                                     </div>
@@ -723,7 +723,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <span className="text-xs font-bold inter">Log Out</span>
                     </button>
                     <div className="mt-4 text-center opacity-30 select-none">
-                        <p className="text-[8px] text-brand-text-muted font-black tracking-[0.2em]">Powered By Gemini 3</p>
+                        <p className="text-[8px] text-brand-text-muted font-bold tracking-[0.2em]">Powered By Gemini 3</p>
                     </div>
                 </div>
             </div>
@@ -744,7 +744,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             </button>
                         </div>
                         {(cloudMessage || cloudError) && (
-                            <p className={`text-[10px] font-bold mt-1.5 animate-fade-in ${cloudError ? 'text-brand-danger' : 'text-brand-accent'} inter tracking-tight`}>
+                            <p className={`text-[10px] font-bold mt-1.5 animate-fade-in ${cloudError ? 'text-brand-danger' : 'text-brand-accent'} inter`}>
                                 <Icon name={cloudError ? 'exclamation' : 'info'} className="w-2.5 h-2.5 inline mr-1" />
                                 {cloudError || cloudMessage}
                             </p>
@@ -786,7 +786,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         </div>
                                     )}
                                     {realm.status === 'cloud-only' && (
-                                        <div className="bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-black text-brand-text/70 border border-brand-surface shadow-sm uppercase tracking-tighter">
+                                        <div className="bg-brand-primary/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-bold text-brand-text/70 border border-brand-surface shadow-sm">
                                             Cloud Only
                                         </div>
                                     )}
@@ -817,7 +817,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">
                                         {realm.local?.updatedAt ? `Saved ${new Date(realm.local.updatedAt).toLocaleDateString()}` : `Cloud Save ${new Date(realm.cloud?.updatedAt || 0).toLocaleDateString()}`}
                                     </p>
-                                    <div className="w-full bg-brand-accent text-black font-black text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
+                                    <div className="w-full bg-brand-accent text-black font-bold text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
                                         {isRestoringCloud && (realm.status === 'cloud-only' || realm.status === 'cloud-newer') ? (
                                             <Icon name="spinner" className="w-3 h-3 animate-spin" />
                                         ) : (
@@ -880,7 +880,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             <div className="space-y-4">
                                 {previewData.factions.map((faction, i) => (
                                     <div key={i} className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface">
-                                        <h5 className="font-black text-brand-text text-sm mb-2">{faction.name}</h5>
+                                        <h5 className="font-bold text-brand-text text-sm mb-2">{faction.name}</h5>
                                         <p className="text-body-sm text-brand-text mb-3 leading-relaxed">{faction.goals}</p>
                                         <div className="grid grid-cols-1 gap-2 pt-2 border-t border-brand-primary/30">
                                             <p className="text-body-sm"><span className="font-bold text-brand-text-muted">Standing:</span> <span className="text-brand-text">{faction.relationships}</span></p>
@@ -958,7 +958,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     min="0" max="10"
                                     value={numRaces}
                                     onChange={(e) => setNumRaces(parseInt(e.target.value))}
-                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-black border border-brand-surface focus:border-brand-accent focus:outline-none"
+                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-bold border border-brand-surface focus:border-brand-accent focus:outline-none"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -968,7 +968,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                     min="1" max="10"
                                     value={numFactions}
                                     onChange={(e) => setNumFactions(parseInt(e.target.value))}
-                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-black border border-brand-surface focus:border-brand-accent focus:outline-none"
+                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-bold border border-brand-surface focus:border-brand-accent focus:outline-none"
                                 />
                             </div>
                         </div>

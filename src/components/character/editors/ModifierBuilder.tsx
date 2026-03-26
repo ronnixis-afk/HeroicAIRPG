@@ -192,7 +192,7 @@ export const ModifierBuilder: React.FC<ModifierBuilderProps> = ({ buffs, onChang
                     placeholder="e.g. 1d6"
                     value={value} 
                     onChange={e => setValue(e.target.value)}
-                    className="w-full input-md text-body-sm font-black text-center"
+                    className="w-full input-md text-body-sm font-bold text-center"
                 />
             );
         }
@@ -260,7 +260,7 @@ export const ModifierBuilder: React.FC<ModifierBuilderProps> = ({ buffs, onChang
                                 <select 
                                     value={category} 
                                     onChange={e => setDefaultsForCategory(e.target.value as ModifierCategory)}
-                                    className="w-full input-md text-[10px] font-black appearance-none transition-all cursor-pointer"
+                                    className="w-full input-md text-[10px] font-bold appearance-none transition-all cursor-pointer"
                                 >
                                     {Object.values(MODIFIER_DEFS).map(def => (
                                         <option key={def.id} value={def.id}>{def.id === 'temp_hp' ? thpLabel : def.label}</option>
@@ -293,7 +293,7 @@ export const ModifierBuilder: React.FC<ModifierBuilderProps> = ({ buffs, onChang
                                 <select
                                     value={modDuration}
                                     onChange={e => setModDuration(e.target.value as BuffDuration)}
-                                    className="w-full input-md text-[10px] font-black appearance-none transition-all cursor-pointer"
+                                    className="w-full input-md text-[10px] font-bold appearance-none transition-all cursor-pointer"
                                 >
                                     <option value="Passive">Passive</option>
                                     <option value="Active">Active</option>

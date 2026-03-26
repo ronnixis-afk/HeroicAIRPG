@@ -85,7 +85,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                     className="flex flex-col items-center justify-center py-8 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-2 shadow-inner text-center min-h-[160px]"
                 >
                     <div className="flex flex-col gap-2">
-                        <span className="text-body-lg font-black text-brand-accent tracking-tight">Short Rest</span>
+                        <span className="text-body-lg font-bold text-brand-accent">Short Rest</span>
                         <div className="flex flex-col gap-1">
                             <p className="text-[10px] text-brand-text font-medium leading-relaxed opacity-90">
                                 Recovers 1d8 hp per level and resets short rest abilities.
@@ -100,7 +100,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                     className="flex flex-col items-center justify-center py-8 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-2 shadow-inner text-center min-h-[160px]"
                 >
                     <div className="flex flex-col gap-2">
-                        <span className="text-body-lg font-black text-brand-accent tracking-tight">Long Rest</span>
+                        <span className="text-body-lg font-bold text-brand-accent">Long Rest</span>
                         <div className="flex flex-col gap-1">
                             <p className="text-[10px] text-brand-text font-medium leading-relaxed opacity-90">
                                 Fully recovers hp and resets all abilities.
@@ -116,7 +116,7 @@ const TimeManagementModalContent: React.FC<TimeManagementModalContentProps> = ({
                 <div className="flex justify-between items-center mb-2 px-2">
                     <span className="text-body-sm font-bold text-brand-text">Wait For Time To Pass</span>
                     <div className="bg-brand-surface px-3 py-1 rounded-full border border-brand-primary/30 flex items-center">
-                        <span className="text-body-base font-black text-brand-accent tabular-nums">{waitHours}</span>
+                        <span className="text-body-base font-bold text-brand-accent tabular-nums">{waitHours}</span>
                         <span className="text-[10px] font-bold text-brand-text-muted ml-1.5 opacity-60">Hours</span>
                     </div>
                 </div>

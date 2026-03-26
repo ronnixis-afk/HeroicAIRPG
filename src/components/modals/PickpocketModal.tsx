@@ -83,7 +83,7 @@ export const PickpocketModal: React.FC = () => {
                         {/* High-stakes button styling */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                         <Icon name="photo" className="w-5 h-5 text-black" />
-                        <span className="font-black">Take Item</span>
+                        <span className="font-bold">Take Item</span>
                     </button>
                     
                     <button 

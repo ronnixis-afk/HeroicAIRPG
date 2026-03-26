@@ -143,10 +143,10 @@ export const BuffsEditor: React.FC<BuffsEditorProps> = ({ activeBuffs, onBuffsCh
             <div className="space-y-3">
                 {/* Column Headers */}
                 <div className="grid grid-cols-12 gap-x-3 px-2">
-                    <label className="col-span-3 text-[10px] font-black text-brand-text-muted tracking-normal">Type</label>
-                    <label className="col-span-4 text-[10px] font-black text-brand-text-muted tracking-normal">Subtype</label>
-                    <label className="col-span-2 text-[10px] font-black text-brand-text-muted tracking-normal text-center">Value</label>
-                    <label className="col-span-2 text-[10px] font-black text-brand-text-muted tracking-normal text-center">Rounds</label>
+                    <label className="col-span-3 text-[10px] font-bold text-brand-text-muted">Type</label>
+                    <label className="col-span-4 text-[10px] font-bold text-brand-text-muted">Subtype</label>
+                    <label className="col-span-2 text-[10px] font-bold text-brand-text-muted text-center">Value</label>
+                    <label className="col-span-2 text-[10px] font-bold text-brand-text-muted text-center">Rounds</label>
                     <div className="col-span-1" />
                 </div>
 
@@ -182,7 +182,7 @@ export const BuffsEditor: React.FC<BuffsEditorProps> = ({ activeBuffs, onBuffsCh
                                 type="number"
                                 value={buff.bonus}
                                 onChange={(e) => handleUpdateBuff(index, { bonus: parseInt(e.target.value, 10) || 0 })}
-                                className="w-full bg-brand-primary h-10 px-1 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-sm font-black tabular-nums shadow-inner"
+                                className="w-full bg-brand-primary h-10 px-1 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-sm font-bold tabular-nums shadow-inner"
                             />
                         </div>
 
@@ -192,7 +192,7 @@ export const BuffsEditor: React.FC<BuffsEditorProps> = ({ activeBuffs, onBuffsCh
                                 type="number"
                                 value={buff.duration}
                                 onChange={(e) => handleUpdateBuff(index, { duration: parseInt(e.target.value, 10) || 0 })}
-                                className="w-full bg-brand-primary h-10 px-1 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-sm font-black tabular-nums shadow-inner"
+                                className="w-full bg-brand-primary h-10 px-1 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-sm font-bold tabular-nums shadow-inner"
                             />
                         </div>
 

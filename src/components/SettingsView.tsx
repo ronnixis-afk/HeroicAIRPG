@@ -442,7 +442,7 @@ const SettingsView: React.FC = () => {
                         <div className="border-t border-brand-primary/20 pt-10">
                             <div className="bg-brand-danger/5 border border-brand-danger/20 rounded-3xl p-6 space-y-6">
                                 <div className="text-center">
-                                    <h4 className="text-brand-danger mb-0 font-black">Danger Zone</h4>
+                                    <h4 className="text-brand-danger mb-0 font-bold">Danger Zone</h4>
                                     <p className="text-body-sm text-brand-text-muted italic opacity-70">Irreversible actions that modify your save data.</p>
                                 </div>
                                  <Button

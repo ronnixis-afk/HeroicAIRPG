@@ -15,7 +15,7 @@ interface ActorActionsProps {
 
 const AbilitySaveEditor: React.FC<{ ability: CombatActorSpecialAbility, onChange: (val: string) => void }> = ({ ability, onChange }) => (
     <div className="space-y-1.5 flex-1">
-        <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Resisted By</label>
+        <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Resisted By</label>
         <select
             value={ability.saveAbility}
             onChange={e => onChange(e.target.value)}
@@ -46,12 +46,12 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
             <Accordion title="Combat Strikes" isOpen={openAttacks} onToggle={() => setOpenAttacks(!openAttacks)}>
                 <div className="space-y-4 pt-2">
                     <div className="flex justify-between items-center px-2 mb-2">
-                        <label className="text-[10px] font-black text-brand-text-muted tracking-normal">Strikes per Turn</label>
+                        <label className="text-[10px] font-bold text-brand-text-muted">Strikes per Turn</label>
                         <input
                             type="number"
                             value={actor.numberOfAttacks || 1}
                             onChange={e => onChange(['numberOfAttacks'], parseInt(e.target.value) || 1)}
-                            className="w-16 bg-brand-primary h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-base font-black tabular-nums shadow-inner"
+                            className="w-16 bg-brand-primary h-9 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-base font-bold tabular-nums shadow-inner"
                         />
                     </div>
                     {(actor.attacks || []).map((attack, index) => (
@@ -69,7 +69,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                     <InputField label="Damage Dice" value={attack.damageDice} onChange={e => onChange(['attacks', index, 'damageDice'], e.target.value)} placeholder="e.g. 1d8+4" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Type</label>
+                                    <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Type</label>
                                     <div className="relative">
                                         <select
                                             value={attack.damageType}
@@ -107,7 +107,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                 <InputField label="Ability Name" value={ability.name} onChange={e => onChange(['specialAbilities', index, 'name'], e.target.value)} />
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Logic</label>
+                                        <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Logic</label>
                                         <select
                                             value={ability.type}
                                             onChange={e => onChange(['specialAbilities', index, 'type'], e.target.value)}
@@ -119,7 +119,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Scope</label>
+                                        <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Scope</label>
                                         <select
                                             value={ability.targetType}
                                             onChange={e => onChange(['specialAbilities', index, 'targetType'], e.target.value)}
@@ -135,7 +135,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                     <div className="grid grid-cols-2 gap-4">
                                         <InputField label="Magnitude" value={ability.damageDice || ''} onChange={e => onChange(['specialAbilities', index, 'damageDice'], e.target.value)} placeholder="e.g. 3d6" />
                                         <div className="space-y-1.5">
-                                            <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Nature</label>
+                                            <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Nature</label>
                                             <select
                                                 value={ability.damageType}
                                                 onChange={e => onChange(['specialAbilities', index, 'damageType'], e.target.value)}
@@ -150,7 +150,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                                 {ability.type === 'Status' && (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
-                                            <label className="block text-[10px] font-black text-brand-text-muted tracking-normal ml-1">Effect</label>
+                                            <label className="block text-[10px] font-bold text-brand-text-muted ml-1">Effect</label>
                                             <select
                                                 value={ability.status}
                                                 onChange={e => onChange(['specialAbilities', index, 'status'], e.target.value)}

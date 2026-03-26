@@ -81,7 +81,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
                                 className="custom-checkbox"
                             />
                              <span 
-                                className={`font-mono font-black text-body-sm w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
+                                className={`font-mono font-bold text-body-sm w-12 text-center cursor-help border-b border-dotted border-brand-text-muted/30 mx-3 ${valueColor}`}
                                 title={tooltipLines.join('\n')}
                             >
                                 {formatModifier(totalBonus)}
@@ -89,7 +89,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
                              <div className="flex flex-col min-w-0 flex-grow">
                                  <span className="text-body-sm font-semibold truncate group-hover:text-brand-text transition-colors">{skill}</span>
                              </div>
-                             <span className="text-body-sm font-black text-brand-text-muted ml-3 opacity-40 capitalize tracking-normal">{ability.slice(0, 3)}</span>
+                             <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize tracking-normal">{ability.slice(0, 3)}</span>
                          </div>
                      );
                  })}

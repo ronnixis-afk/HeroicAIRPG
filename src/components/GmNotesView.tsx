@@ -225,7 +225,7 @@ const GmNotesView: React.FC = () => {
                     />
                     <div className="bg-brand-primary/20 px-6 py-3 border-t border-brand-primary/50 flex justify-between items-center">
                         <span className="text-[10px] font-bold text-brand-text-muted italic">This brief guides the storyteller during active encounters.</span>
-                        {isSavingNotes && <span className="text-brand-accent text-[10px] font-black animate-pulse">Saving...</span>}
+                        {isSavingNotes && <span className="text-brand-accent text-[10px] font-bold animate-pulse">Saving...</span>}
                     </div>
                 </div>
             </div>
@@ -257,7 +257,7 @@ const GmNotesView: React.FC = () => {
                                 <button
                                     key={type}
                                     onClick={() => setSelectedType(type)}
-                                    className={`px-4 py-2 rounded-full text-[10px] font-black border transition-all ${
+                                    className={`px-4 py-2 rounded-full text-[10px] font-bold border transition-all ${
                                         selectedType === type 
                                             ? 'bg-brand-accent text-black border-brand-accent shadow-md' 
                                             : 'bg-brand-bg text-brand-text-muted border-brand-primary hover:border-brand-secondary'
@@ -314,7 +314,7 @@ const GmNotesView: React.FC = () => {
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                 <div className="flex flex-col items-center gap-3 bg-brand-surface/90 p-6 rounded-2xl backdrop-blur-md border border-brand-accent/20 shadow-2xl">
                                     <Icon name="spinner" className="w-10 h-10 animate-spin text-brand-accent" />
-                                    <span className="text-[10px] text-brand-accent font-black tracking-normal animate-pulse">Architecting Fate...</span>
+                                    <span className="text-[10px] text-brand-accent font-bold animate-pulse">Architecting Fate...</span>
                                 </div>
                             </div>
                         )}
@@ -343,7 +343,7 @@ const GmNotesView: React.FC = () => {
                                                         <img src={npc.image} alt={npc.name} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center bg-brand-surface">
-                                                            <span className="text-sm font-black text-brand-text-muted">{npc.name.slice(0, 2).toUpperCase()}</span>
+                                                            <span className="text-sm font-bold text-brand-text-muted">{npc.name.slice(0, 2).toUpperCase()}</span>
                                                         </div>
                                                     )}
                                                     {isDead && (
@@ -356,7 +356,7 @@ const GmNotesView: React.FC = () => {
                                                     <p className={`text-[10px] font-bold truncate max-w-[90px] transition-colors ${isDead ? 'text-brand-danger' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
                                                         {npc.name}
                                                     </p>
-                                                    {isDead && <p className="text-[8px] font-black text-brand-danger/80 tracking-tighter mt-0.5">(Deceased)</p>}
+                                                    {isDead && <p className="text-[8px] font-bold text-brand-danger/80 mt-0.5">(Deceased)</p>}
                                                 </div>
                                             </button>
                                         );

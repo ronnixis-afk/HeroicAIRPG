@@ -328,7 +328,7 @@ const POIListItem: React.FC<{
                                 </h6>
                                 {popLevelLabel && (
                                     <div className="mb-2">
-                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 tracking-tight">
+                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30">
                                             {popLevelLabel}
                                         </span>
                                     </div>

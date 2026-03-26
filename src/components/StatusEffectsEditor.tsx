@@ -44,8 +44,8 @@ const StatusEffectsEditor: React.FC<StatusEffectsEditorProps> = ({ statusEffects
         <div className="bg-brand-primary/10 p-4 rounded-2xl space-y-4 border border-brand-primary/30 shadow-inner">
             <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-x-4 px-2">
-                    <label className="col-span-6 text-[10px] font-black text-brand-text-muted tracking-normal">Effect</label>
-                    <label className="col-span-4 text-[10px] font-black text-brand-text-muted tracking-normal">Rounds</label>
+                    <label className="col-span-6 text-[10px] font-bold text-brand-text-muted tracking-normal">Effect</label>
+                    <label className="col-span-4 text-[10px] font-bold text-brand-text-muted tracking-normal">Rounds</label>
                 </div>
                 {statusEffects.map((effect, index) => (
                     <div key={index} className="grid grid-cols-12 gap-3 items-center bg-brand-surface/40 p-2 rounded-xl border border-brand-primary/50 shadow-sm animate-fade-in">
@@ -70,7 +70,7 @@ const StatusEffectsEditor: React.FC<StatusEffectsEditorProps> = ({ statusEffects
                                 type="number"
                                 value={effect.duration}
                                 onChange={(e) => handleUpdateEffect(index, 'duration', e.target.value)}
-                                className="w-full bg-brand-primary h-10 px-2 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-base font-black tabular-nums shadow-inner"
+                                className="w-full bg-brand-primary h-10 px-2 rounded-lg border border-brand-surface focus:border-brand-accent text-center text-body-base font-bold tabular-nums shadow-inner"
                             />
                         </div>
                         <div className="col-span-2 flex justify-end">

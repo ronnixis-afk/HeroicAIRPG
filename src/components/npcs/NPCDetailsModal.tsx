@@ -352,7 +352,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
                         <div className="flex justify-between items-center mb-4">
                             <label className="text-xs font-bold text-brand-text-muted tracking-normal">Relationship Adjustment</label>
-                            <span className="text-body-sm font-black text-brand-accent tabular-nums">
+                            <span className="text-body-sm font-bold text-brand-accent tabular-nums">
                                 {editedNPC.relationship > 0 ? '+' : ''}{editedNPC.relationship}
                             </span>
                         </div>

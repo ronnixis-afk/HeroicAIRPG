@@ -221,7 +221,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                                     {key === 'Custom' ? 'Blank / Custom' : key}
                                 </div>
                                 {key !== 'Custom' && (
-                                    <div className="text-[10px] font-black text-brand-text-muted mt-auto opacity-60 tracking-tight">
+                                    <div className="text-[10px] font-bold text-brand-text-muted mt-auto opacity-60">
                                         {templates[key].attackType}
                                     </div>
                                 )}

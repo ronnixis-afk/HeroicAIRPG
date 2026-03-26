@@ -43,7 +43,7 @@ export default function AdminConsumptionPage() {
         return (
             <div className="min-h-screen bg-[#0c1114] flex flex-col items-center justify-center text-brand-text p-8 inter">
                 <Icon name="status" className="w-16 h-16 text-red-500 mb-6 opacity-80" />
-                <h1 className="text-3xl font-black mb-4 tracking-tight">Access Denied</h1>
+                <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
                 <p className="text-brand-text-muted text-center max-w-md mb-8">
                     This scroll is restricted. Only High Archivists of the Order (Super Admins) may view the consumption logs.
                 </p>

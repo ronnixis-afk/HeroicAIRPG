@@ -67,7 +67,7 @@ export default function LandingPage() {
 
                     {/* Hero Section (Centered) */}
                     <div className="flex-1 flex flex-col items-center justify-center px-4 py-20 text-center min-h-[70vh]">
-                        <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text tracking-tight mb-2 drop-shadow-xl">
+                        <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text mb-2 drop-shadow-xl">
                             Heroic AI <span className="text-brand-accent">RPG</span>
                         </h3>
                         <p className="text-lg md:text-2xl text-brand-text-muted font-medium mb-10 drop-shadow-md">

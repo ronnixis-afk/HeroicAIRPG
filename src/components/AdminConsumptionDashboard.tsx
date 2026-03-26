@@ -92,7 +92,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h3 className="text-2xl font-black text-brand-text mb-1">Consumption Dashboard</h3>
+                        <h3 className="text-2xl font-bold text-brand-text mb-1">Consumption Dashboard</h3>
                         <p className="text-brand-text-muted text-xs">Monitor AI Usage and Real-Time Infrastructure Costs</p>
                     </div>
                 </div>
@@ -102,7 +102,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-4 text-brand-accent">
                             <Icon name="currencyCoins" className="w-5 h-5" />
-                            <span className="text-xs font-black opacity-60">Total Cost</span>
+                            <span className="text-xs font-bold opacity-60">Total Cost</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">
                             {loading && !data ? <SkeletonValue /> : `$${data?.stats.totalCostUsd.toFixed(4) || '0.0000'}`}
@@ -113,7 +113,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl border-t-green-500/30">
                         <div className="flex items-center gap-3 mb-4 text-green-400">
                             <Icon name="sparkles" className="w-5 h-5" />
-                            <span className="text-xs font-black opacity-60">Period Cost</span>
+                            <span className="text-xs font-bold opacity-60">Period Cost</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">
                             {loading && !data ? <SkeletonValue /> : `$${data?.stats.totalTodayCostUsd.toFixed(4) || '0.0000'}`}
@@ -124,7 +124,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-4 text-blue-400">
                             <Icon name="status" className="w-5 h-5" />
-                            <span className="text-xs font-black opacity-60">Total Tokens</span>
+                            <span className="text-xs font-bold opacity-60">Total Tokens</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">
                             {loading && !data ? <SkeletonValue /> : `${(data?.stats.totalTokens ? data.stats.totalTokens / 1000000 : 0).toFixed(2)}M`}
@@ -135,7 +135,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                     <div className="bg-brand-surface border border-brand-primary/20 rounded-2xl p-6 shadow-xl">
                         <div className="flex items-center gap-3 mb-4 text-purple-400">
                             <Icon name="users" className="w-5 h-5" />
-                            <span className="text-xs font-black opacity-60">Period Activity</span>
+                            <span className="text-xs font-bold opacity-60">Period Activity</span>
                         </div>
                         <div className="text-3xl font-bold text-brand-text mb-1">
                             {loading && !data ? <SkeletonValue className="w-16 h-8" /> : (data?.logs.length || 0)}
@@ -153,7 +153,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                                 key={p}
                                 onClick={() => setPeriod(p)}
                                 disabled={loading}
-                                className={`px-6 h-full rounded-xl text-[10px] font-black transition-all ${
+                                className={`px-6 h-full rounded-xl text-[10px] font-bold transition-all ${
                                     period === p 
                                     ? 'bg-brand-accent text-black shadow-lg shadow-brand-accent/20' 
                                     : 'text-brand-text-muted hover:text-brand-text'
@@ -166,7 +166,7 @@ const AdminConsumptionDashboard: React.FC = () => {
 
                     {/* Dropdown Filters */}
                     <div className="flex-1 bg-brand-surface border border-brand-primary/10 rounded-2xl p-4 md:p-1.5 flex flex-col md:flex-row gap-2 shadow-lg items-center">
-                        <div className="md:px-4 text-[10px] font-black text-brand-accent/40 hidden md:block">
+                        <div className="md:px-4 text-[10px] font-bold text-brand-accent/40 hidden md:block">
                             Filters
                         </div>
                         <select 
@@ -192,7 +192,7 @@ const AdminConsumptionDashboard: React.FC = () => {
                         {(typeFilter || modelFilter) && (
                             <button 
                                 onClick={() => { setTypeFilter(''); setModelFilter(''); }}
-                                className="px-4 text-[10px] font-black text-red-400 hover:text-red-300 transition-colors"
+                                className="px-4 text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
                             >
                                 Reset
                             </button>
@@ -211,13 +211,13 @@ const AdminConsumptionDashboard: React.FC = () => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-brand-primary/5 border-b border-brand-primary/20">
-                                    <th className="p-4 text-xs font-black text-brand-text-muted">Timestamp</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted">User Email</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted">Activity Type</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted">Model Used</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted text-right">Duration</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted text-right">Tokens</th>
-                                    <th className="p-4 text-xs font-black text-brand-text-muted text-right">Estimated Cost</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted">Timestamp</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted">User Email</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted">Activity Type</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted">Model Used</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted text-right">Duration</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted text-right">Tokens</th>
+                                    <th className="p-4 text-xs font-bold text-brand-text-muted text-right">Estimated Cost</th>
                                 </tr>
                             </thead>
                             <tbody className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>

@@ -8,7 +8,7 @@ import type { Nemesis } from '../types';
 import PageHeader from './PageHeader';
 
 const NewTag: React.FC = () => (
-    <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-pulse">New</span>
+    <span className="bg-brand-accent text-black text-[9px] font-bold px-1.5 py-0.5 rounded ml-2 flex-shrink-0 animate-pulse">New</span>
 );
 
 const EditableNemesisContent: React.FC<{

@@ -149,12 +149,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                     <div className="grid grid-cols-3 gap-4">
                                         {['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].map((stat, idx) => (
                                             <div key={stat} className="space-y-1.5">
-                                                <label className="block text-[10px] font-black text-brand-text-muted mb-1 text-center capitalize tracking-tight">{stat}</label>
+                                                <label className="block text-[10px] font-bold text-brand-text-muted mb-1 text-center capitalize">{stat}</label>
                                                 <input
                                                     type="number"
                                                     value={templates[selectedTemplate].mods[idx]}
                                                     onChange={e => handleTemplateModChange(selectedTemplate, idx, parseInt(e.target.value) || 0)}
-                                                    className="w-full bg-brand-primary h-11 rounded-xl text-sm border border-brand-surface focus:border-brand-accent focus:outline-none text-center font-black shadow-inner"
+                                                    className="w-full bg-brand-primary h-11 rounded-xl text-sm border border-brand-surface focus:border-brand-accent focus:outline-none text-center font-bold shadow-inner"
                                                 />
                                             </div>
                                         ))}
@@ -199,13 +199,13 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                     <div className="grid grid-cols-4 gap-3">
                                         {['ground', 'climb', 'swim', 'fly'].map((type) => (
                                             <div key={type} className="space-y-1.5">
-                                                <label className="text-[10px] font-black text-brand-text-muted block text-center capitalize tracking-tight">{type}</label>
+                                                <label className="text-[10px] font-bold text-brand-text-muted block text-center capitalize">{type}</label>
                                                 <div className="relative">
                                                     <input
                                                         type="number"
                                                         value={(speeds as any)[type]}
                                                         onChange={e => handleArchetypeSpeedChange(arch, type as any, parseInt(e.target.value) || 0)}
-                                                        className="w-full bg-brand-primary h-10 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
+                                                        className="w-full bg-brand-primary h-10 rounded-xl text-center text-sm font-bold border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
                                                     />
                                                     <span className="absolute right-1 bottom-1 text-[8px] text-brand-text-muted opacity-40 font-bold">ft</span>
                                                 </div>
@@ -273,12 +273,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                                     <div className="grid grid-cols-4 gap-3">
                                         {['str', 'dex', 'con', 'ac'].map((field) => (
                                             <div key={field} className="space-y-1.5">
-                                                <label className="text-[10px] font-black text-brand-text-muted block text-center capitalize tracking-tight">{field}</label>
+                                                <label className="text-[10px] font-bold text-brand-text-muted block text-center capitalize">{field}</label>
                                                 <input
                                                     type="number"
                                                     value={(mods as any)[field]}
                                                     onChange={e => handleSizeModChange(size, field as any, parseInt(e.target.value) || 0)}
-                                                    className="w-full bg-brand-primary h-11 rounded-xl text-center text-sm font-black border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
+                                                    className="w-full bg-brand-primary h-11 rounded-xl text-center text-sm font-bold border border-brand-surface focus:border-brand-accent focus:outline-none shadow-inner"
                                                 />
                                             </div>
                                         ))}
@@ -299,12 +299,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                             </p>
                         </div>
                         <div className="flex flex-col items-center p-8 bg-brand-primary/20 rounded-3xl border border-brand-surface shadow-inner">
-                            <label className="text-xs font-black text-brand-accent mb-4 tracking-normal">Global Base Score</label>
+                            <label className="text-xs font-bold text-brand-accent mb-4">Global Base Score</label>
                             <input
                                 type="number"
                                 value={baseScore}
                                 onChange={e => onUpdateBaseScore(parseInt(e.target.value) || 8)}
-                                className="w-24 h-16 text-center bg-brand-surface rounded-2xl border-2 border-brand-primary focus:border-brand-accent text-3xl font-black text-brand-text focus:outline-none transition-all shadow-lg"
+                                className="w-24 h-16 text-center bg-brand-surface rounded-2xl border-2 border-brand-primary focus:border-brand-accent text-3xl font-bold text-brand-text focus:outline-none transition-all shadow-lg"
                             />
                         </div>
                     </div>

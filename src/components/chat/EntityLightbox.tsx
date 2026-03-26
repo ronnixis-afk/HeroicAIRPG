@@ -98,7 +98,7 @@ export const EntityLightbox: React.FC = () => {
                                 </div>
                                 <div className="text-right flex-shrink-0 ml-4">
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-1">Threat</label>
-                                    <span className={`text-xs font-black ${hInfo.color}`}>{hInfo.label}</span>
+                                    <span className={`text-xs font-bold ${hInfo.color}`}>{hInfo.label}</span>
                                 </div>
                             </div>
 
@@ -147,7 +147,7 @@ export const EntityLightbox: React.FC = () => {
                         </div>
                         {entry.milestones && entry.milestones.length > 0 && (
                             <div className="space-y-3">
-                                <label className="text-body-sm font-black text-brand-text-muted">Chronicle History</label>
+                                <label className="text-body-sm font-bold text-brand-text-muted">Chronicle History</label>
                                 <div className="space-y-2 pl-3 border-l-2 border-brand-accent/30 ml-1">
                                     {entry.milestones.map((m, i) => (
                                         <p key={i} className="text-body-sm text-brand-text italic leading-relaxed">{fixCasing(m)}</p>

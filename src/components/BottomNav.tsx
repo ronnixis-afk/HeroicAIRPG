@@ -39,12 +39,12 @@ const NavButton: React.FC<{
             ) : null}
         </div>
         {badgeCount !== undefined && badgeCount > 0 && (
-          <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-black h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-50 pointer-events-none shadow-sm animate-pulse">
+          <span className="absolute -top-1 -right-2 bg-brand-accent text-black text-[8px] font-bold h-3.5 min-w-[14px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-50 pointer-events-none shadow-sm animate-pulse">
             {badgeCount > 9 ? '9+' : badgeCount}
           </span>
         )}
     </div>
-    <span className={`text-[10px] font-normal mt-1 tracking-tight ${isActive ? '' : 'opacity-60'}`}>
+    <span className={`text-[10px] font-normal mt-1 ${isActive ? '' : 'opacity-60'}`}>
         {label}
     </span>
   </button>

@@ -232,7 +232,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     />
 
                     {/* Heroic Points Badge */}
-                    <span className="absolute -top-1 -right-1 bg-brand-accent text-black text-[8px] font-black h-4 min-w-[20px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-10 shadow-sm transition-transform duration-300 tabular-nums">
+                    <span className="absolute -top-1 -right-1 bg-brand-accent text-black text-[8px] font-bold h-4 min-w-[20px] px-1 rounded-full flex items-center justify-center border border-brand-bg z-10 shadow-sm transition-transform duration-300 tabular-nums">
                         {heroicPoints}/{maxHeroicPoints}
                     </span>
                 </button>

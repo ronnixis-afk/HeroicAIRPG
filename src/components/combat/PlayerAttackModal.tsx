@@ -295,9 +295,9 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                 <div className="space-y-3">
                     <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Action Type</label>
                     <div className="flex gap-2 bg-brand-primary/50 p-1 rounded-xl shadow-inner border border-brand-surface">
-                        <button onClick={() => { setMode('weapon'); setAssignments([]); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-black transition-all ${mode === 'weapon' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Attack</button>
-                        <button onClick={() => { setMode('ability'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-black transition-all ${mode === 'ability' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Ability</button>
-                        <button onClick={() => { setMode('item'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-black transition-all ${mode === 'item' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Item</button>
+                        <button onClick={() => { setMode('weapon'); setAssignments([]); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'weapon' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Attack</button>
+                        <button onClick={() => { setMode('ability'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'ability' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Ability</button>
+                        <button onClick={() => { setMode('item'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'item' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Item</button>
                     </div>
                 </div>
 

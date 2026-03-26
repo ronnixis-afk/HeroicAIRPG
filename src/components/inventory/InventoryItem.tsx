@@ -21,13 +21,13 @@ export const InventoryItem: React.FC<InventoryItemProps> = (props) => {
         <div className="flex justify-between items-center w-full">
             <div className="flex items-center min-w-0 gap-2">
                 <span className={`text-[10px] flex-shrink-0 ${getItemRarityColor(props.item.rarity)}`}>⬤</span>
-                <span className="text-body-base font-bold text-brand-text truncate tracking-tight">{props.item.getDisplayName()}</span>
+                <span className="text-body-base font-bold text-brand-text truncate">{props.item.getDisplayName()}</span>
                 {props.item.isNew && (
-                  <span className="bg-brand-accent text-black text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm flex-shrink-0 animate-bounce">New</span>
+                  <span className="bg-brand-accent text-black text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm flex-shrink-0 animate-bounce">New</span>
                 )}
             </div>
             {props.item.price && props.item.price > 0 && !props.item.tags?.includes('currency') && (
-                 <span className="font-black text-brand-accent flex items-center gap-1 text-body-sm ml-2 flex-shrink-0 tabular-nums">
+                 <span className="font-bold text-brand-accent flex items-center gap-1 text-body-sm ml-2 flex-shrink-0 tabular-nums">
                     <span>💰</span>
                     <span>{props.item.price}</span>
                 </span>

@@ -35,7 +35,7 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
             {/* Text Content */}
             <div className="flex-grow flex flex-col justify-center min-w-0 h-full py-3 relative z-10">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h5 className={`mb-0 truncate tracking-tight transition-colors ${isDead ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
+                    <h5 className={`mb-0 truncate transition-colors ${isDead ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
                         {toTitleCase(npc.name)}
                     </h5>
 
@@ -77,7 +77,7 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                         <span className="text-brand-accent tabular-nums bg-brand-accent/5 px-2 py-1 rounded-lg border border-brand-accent/20">
                             {npc.relationship > 0 ? `+${npc.relationship}` : npc.relationship}
                         </span>
-                        <span className="text-brand-text-muted uppercase tracking-wider text-[9px]">
+                        <span className="text-brand-text-muted text-[9px]">
                             {relationshipData.label}
                         </span>
                     </div>

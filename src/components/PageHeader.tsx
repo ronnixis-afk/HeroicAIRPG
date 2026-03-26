@@ -47,7 +47,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     title="Return to Story"
                 >
                     <Icon name="arrowLeft" className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Story</span>
+                    <span className="text-[10px] font-bold hidden sm:inline">Story</span>
                 </button>
             )}
             

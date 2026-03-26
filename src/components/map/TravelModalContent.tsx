@@ -115,8 +115,8 @@ const TravelModalContent: React.FC<TravelModalContentProps> = ({ gameData, onSub
                     <Icon name="location" className="w-6 h-6 text-brand-accent flex-shrink-0" />
                 </div>
                 <div>
-                    <h5 className="text-[10px] font-black text-brand-text-muted mb-1 tracking-normal normal-case">Current Location</h5>
-                    <p className="text-body-lg font-black text-brand-text tracking-tight">{currentLocation}</p>
+                    <h5 className="text-[10px] font-bold text-brand-text-muted mb-1 normal-case">Current Location</h5>
+                    <p className="text-body-lg font-bold text-brand-text">{currentLocation}</p>
                 </div>
             </div>
             
@@ -124,7 +124,7 @@ const TravelModalContent: React.FC<TravelModalContentProps> = ({ gameData, onSub
                 <div className="bg-brand-danger/10 border border-brand-danger/20 p-4 rounded-xl flex items-center gap-3 animate-pulse">
                     <Icon name="danger" className="w-5 h-5 text-brand-danger" />
                     <div className="flex-1">
-                        <p className="text-body-sm font-black text-brand-danger">Combat Active</p>
+                        <p className="text-body-sm font-bold text-brand-danger">Combat Active</p>
                         <p className="text-[10px] text-brand-text-muted font-bold">You cannot travel while engaged in battle.</p>
                     </div>
                 </div>

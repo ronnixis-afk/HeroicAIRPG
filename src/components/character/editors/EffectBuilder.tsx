@@ -168,7 +168,7 @@ export const EffectBuilder: React.FC<{
                                 <div className="col-span-1">
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">DC</label>
                                     {standardDC !== undefined ? (
-                                        <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-black text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
+                                        <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-bold text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
                                             {standardDC}
                                         </div>
                                     ) : (
@@ -207,7 +207,7 @@ export const EffectBuilder: React.FC<{
                                 <div className="col-span-1">
                                     <label className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">DC</label>
                                     {standardDC !== undefined ? (
-                                        <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-black text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
+                                        <div className="w-full bg-brand-primary/50 h-11 rounded-xl border border-brand-accent/30 flex items-center justify-center text-brand-accent font-bold text-lg cursor-help" title="Standardized DC: 8 + Prof + Max Stat Mod">
                                             {standardDC}
                                         </div>
                                     ) : (

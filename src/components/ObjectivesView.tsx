@@ -13,7 +13,7 @@ const toTitleCase = (str: string) => {
 };
 
 const NewTag: React.FC = () => (
-    <span className="bg-brand-accent text-black text-[10px] font-black px-1.5 py-0.5 rounded-lg ml-2 flex-shrink-0">New</span>
+    <span className="bg-brand-accent text-black text-[10px] font-bold px-1.5 py-0.5 rounded-lg ml-2 flex-shrink-0">New</span>
 );
 
 const EditableObjectiveContent: React.FC<{

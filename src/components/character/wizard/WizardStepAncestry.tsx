@@ -35,7 +35,7 @@ export const WizardStepAncestry: React.FC<WizardStepAncestryProps> = ({ races, s
                             <div className={`mt-auto pt-3 border-t ${selectedRace === r.name ? 'border-brand-accent/20' : 'border-brand-primary/40'}`}>
                                 <div className="flex items-center gap-2">
                                     <Icon name="sparkles" className={`w-3 h-3 ${selectedRace === r.name ? 'text-brand-accent' : 'text-brand-text-muted'}`} />
-                                    <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedRace === r.name ? 'text-brand-accent' : 'text-brand-text-muted'}`}>
+                                    <span className={`text-[10px] font-bold ${selectedRace === r.name ? 'text-brand-accent' : 'text-brand-text-muted'}`}>
                                         {r.racialTrait.name}
                                     </span>
                                 </div>

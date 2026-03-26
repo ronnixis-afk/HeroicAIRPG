@@ -253,7 +253,7 @@ const InventoryView: React.FC = () => {
             {/* Currency Display - Main Player Only */}
             {isPlayerView && (
                 <div className="flex justify-center items-center mb-4">
-                    <div className="flex items-center gap-1.5 text-brand-accent font-black text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
+                    <div className="flex items-center gap-1.5 text-brand-accent font-bold text-xs tabular-nums bg-brand-accent/5 px-3 py-1 rounded-full border border-brand-accent/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                         <Icon name="currencyCoins" className="w-3.5 h-3.5" />
                         <span>{playerGold.toLocaleString()} {currencyName}</span>
                     </div>
