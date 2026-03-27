@@ -1,6 +1,6 @@
 
 import { GameData, GameAction, LoreEntry, GalleryMetadata } from '../types';
-import { getPOITheme, resolveSettlementTags } from '../utils/mapUtils';
+import { getPOITheme, resolveSettlementTags, normalizeCoords } from '../utils/mapUtils';
 
 export const narrativeReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
@@ -60,7 +60,8 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
             let entry = action.payload;
             if (entry.tags?.includes('population-center')) {
                 const theme = getPOITheme(state.worldSummary || '');
-                const zone = state.mapZones?.find(z => z.coordinates === entry.coordinates);
+                const entryCoords = normalizeCoords(entry.coordinates || '');
+                const zone = state.mapZones?.find(z => normalizeCoords(z.coordinates) === entryCoords);
                 const settlementTags = resolveSettlementTags(zone, theme);
                 entry = { ...entry, tags: [...new Set([...(entry.tags || []), ...settlementTags])] };
             }
@@ -75,7 +76,8 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
                 .map((k, i) => {
                     let tags = [...(k.tags || [])];
                     if (tags.includes('population-center')) {
-                        const zone = state.mapZones?.find(z => z.coordinates === k.coordinates);
+                        const entryCoords = normalizeCoords(k.coordinates || '');
+                        const zone = state.mapZones?.find(z => normalizeCoords(z.coordinates) === entryCoords);
                         const settlementTags = resolveSettlementTags(zone, theme);
                         tags = [...new Set([...tags, ...settlementTags])];
                     }

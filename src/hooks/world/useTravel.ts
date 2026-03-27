@@ -54,6 +54,8 @@ export const useTravel = (
                     name: details.name || effectiveHint,
                     description: details.description,
                     hostility: parseHostility(details.hostility),
+                    populationLevel: details.populationLevel as any,
+                    zoneFeatures: details.zoneFeatures,
                     visited: true,
                     tags: ['location'],
                     keywords: details.keywords || []

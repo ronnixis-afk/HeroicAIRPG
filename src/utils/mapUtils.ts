@@ -25,6 +25,12 @@ export const parseCoords = (coords: string): { x: number, y: number } | null => 
     return { x, y };
 };
 
+export const normalizeCoords = (coords: string): string => {
+    const parsed = parseCoords(coords);
+    if (!parsed) return (coords || "").trim();
+    return `${parsed.x}-${parsed.y}`;
+};
+
 /**
  * Robustly parses hostility. AI sometimes returns strings like "High" or "Low".
  * This ensures the rest of the app receives a valid integer.
@@ -206,28 +212,28 @@ export const SETTLEMENT_TAG_MAP: Record<string, Record<string, string>> = {
 export const resolveSettlementTags = (zone: MapZone | undefined, theme: string): string[] => {
     if (!zone) return [];
     const tags: string[] = [];
-    const mapping = SETTLEMENT_TAG_MAP[theme] || SETTLEMENT_TAG_MAP.fantasy;
-    const features = zone.zoneFeatures || [];
-    const pop = zone.populationLevel || 'Barren';
+    const mapping = SETTLEMENT_TAG_MAP[theme.toLowerCase()] || SETTLEMENT_TAG_MAP.fantasy;
+    const features = (zone.zoneFeatures || []).map(f => f.toLowerCase());
+    const pop = (zone.populationLevel || 'Barren').toLowerCase();
 
     // 1. Tavern / Recruitment (Settlement+)
-    if (['Settlement', 'Town', 'City', 'Capital'].includes(pop) || features.includes('Tavern')) {
+    if (['settlement', 'town', 'city', 'capital'].includes(pop) || features.includes('tavern')) {
         tags.push(mapping.tavern);
     }
     // 2. Stable / Mounts (Start at Town)
-    if (['Town', 'City', 'Capital'].includes(pop)) {
+    if (['town', 'city', 'capital'].includes(pop) || features.includes('stable')) {
         tags.push(mapping.stable);
     }
     // 3. Merchant (Start at Town or via Market feature)
-    if (['Town', 'City', 'Capital'].includes(pop) || features.includes('Market')) {
+    if (['town', 'city', 'capital'].includes(pop) || features.includes('market') || features.includes('marketplace')) {
         tags.push(mapping.merchant);
     }
     // 4. Forge (Start at City or via Item Forge feature)
-    if (['City', 'Capital'].includes(pop) || features.includes('Item Forge')) {
+    if (['city', 'capital'].includes(pop) || features.includes('item forge')) {
         tags.push(mapping.forge);
     }
     // 5. Shipyard (Feature based)
-    if (features.includes('Shipyard')) {
+    if (features.includes('shipyard')) {
         tags.push(mapping.shipyard);
     }
 

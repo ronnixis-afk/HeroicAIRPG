@@ -5,10 +5,26 @@ import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
-import { parseCoords, isNameTooSimilar, getPOITheme } from '../utils/mapUtils';
+import { parseCoords, isNameTooSimilar, getPOITheme, normalizeCoords } from '../utils/mapUtils';
 import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
 import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
+
+/**
+ * Roll for zone population and features.
+ */
+export const rollZonePopulation = (): { popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital', features: string[] } => {
+    const popRoll = Math.floor(Math.random() * 20) + 1;
+    let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
+    let features: string[] = [];
+    
+    if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
+    else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
+    else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
+    else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
+    
+    return { popLevel, features };
+};
 
 /**
  * THE PLOT EXPANDER (Tactical Specialist)
@@ -394,7 +410,7 @@ export const generateZoneDetails = async (
     mapSettings?: MapSettings,
     worldSummary?: string,
     existingNames: string[] = []
-): Promise<{ name: string, description: string, hostility: number, keywords: string[] }> => {
+): Promise<{ name: string, description: string, hostility: number, keywords: string[], populationLevel: string, zoneFeatures: string[] }> => {
 
     // Extract theme from worldSummary or mapSettings (usually derived from skillConfiguration)
     // The preload function could pass it, but analyzing worldSummary is a safe fallback.
@@ -454,7 +470,14 @@ export const generateZoneDetails = async (
         finalDetails.keywords = finalDetails.keywords.slice(0, randomProperties.length);
     }
 
-    return finalDetails as { name: string, description: string, hostility: number, keywords: string[] };
+    // ROLL Population and Features for the new zone
+    const { popLevel, features } = rollZonePopulation();
+
+    return { 
+        ...finalDetails, 
+        populationLevel: popLevel, 
+        zoneFeatures: features 
+    } as any;
 };
 
 /**
@@ -570,16 +593,10 @@ export const preloadAdjacentZones = async (
     const allInhabitedNames = [...new Set([...runningZoneNames, ...poiNames])];
 
     for (const d of directions) {
-        const targetCoords = `${p.x + d.dx}-${p.y + d.dy}`;
-        const existing = existingZones.find(z => z.coordinates === targetCoords);
+        const targetCoords = normalizeCoords(`${p.x + d.dx}-${p.y + d.dy}`);
+        const existing = existingZones.find(z => normalizeCoords(z.coordinates) === targetCoords);
         if (!existing || existing.isLoading) {
-            const popRoll = Math.floor(Math.random() * 20) + 1;
-            let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
-            let features: string[] = [];
-            if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
-            else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
-            else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
-            else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
+            const { popLevel, features } = rollZonePopulation();
             
             missingNeighbors.push({ coords: targetCoords, popLevel, features });
 
