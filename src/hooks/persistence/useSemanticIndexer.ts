@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { GameData, GameAction } from '../../types';
 import { generateEmbedding } from '../../services/geminiService';
 
@@ -13,14 +13,17 @@ export const useSemanticIndexer = (
     dispatch: React.Dispatch<GameAction>
 ) => {
     const [isIndexing, setIsIndexing] = useState(false);
+    const hasStartedRef = useRef(false);
 
     useEffect(() => {
         // Prevent indexing if the game hasn't loaded or an index is already running
-        if (!gameData || isIndexing) return;
+        if (!gameData || isIndexing || hasStartedRef.current) return;
     
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         const runBackgroundIndexing = async () => {
+            if (hasStartedRef.current) return;
+            hasStartedRef.current = true;
             setIsIndexing(true);
             try {
                 let requiresStateUpdate = false;
@@ -33,7 +36,7 @@ export const useSemanticIndexer = (
                         const textToEmbed = `${entry.title || ''} ${entry.content || ''}`.trim();
                         if (textToEmbed) {
                             const vec = await generateEmbedding(textToEmbed);
-                            await sleep(500); // Throttling to prevent 429
+                            await sleep(2000); // Increased throttle to prevent 429
                             if (vec) {
                                 knowledgeToUpdate[i] = { ...entry, embedding: vec };
                                 requiresStateUpdate = true;
@@ -60,7 +63,7 @@ export const useSemanticIndexer = (
                         const textToEmbed = `${obj.title || ''} ${obj.content || ''}`.trim();
                         if (textToEmbed) {
                             const vec = await generateEmbedding(textToEmbed);
-                            await sleep(500); // Throttling
+                            await sleep(2000); // Increased throttle
                             if (vec) {
                                 objectivesToUpdate[i] = { ...obj, embedding: vec };
                                 requiresStateUpdate = true;
@@ -88,7 +91,7 @@ export const useSemanticIndexer = (
                             for (const mem of npc.memories) {
                                 if (!mem.embedding && mem.content) {
                                     const vec = await generateEmbedding(mem.content);
-                                    await sleep(500); // Throttling
+                                    await sleep(2000); // Increased throttle
                                     if (vec) {
                                         memoryUpdates.push({
                                             npcId: npc.id,
@@ -120,6 +123,7 @@ export const useSemanticIndexer = (
                         const textToEmbed = `${entry.summary || ''} ${entry.content || ''}`.trim();
                         if (textToEmbed) {
                             const vec = await generateEmbedding(textToEmbed);
+                            await sleep(2000); // Increased throttle
                             if (vec) {
                                 storyToUpdate[i] = { ...entry, embedding: vec };
                                 requiresStateUpdate = true;
@@ -146,6 +150,7 @@ export const useSemanticIndexer = (
                             for (const mem of poi.memories) {
                                 if (!mem.embedding && mem.content) {
                                     const vec = await generateEmbedding(mem.content);
+                                    await sleep(2000); // Increased throttle
                                     if (vec) {
                                         poiMemoryUpdates.push({
                                             poiId: poi.id,
