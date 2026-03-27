@@ -58,7 +58,7 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
 
         case 'UPDATE_KNOWLEDGE': {
             let entry = action.payload;
-            if (entry.tags?.includes('population-center')) {
+            if (entry.tags?.some(t => t.toLowerCase().trim().replace(/\s+/g, '-') === 'population-center')) {
                 const theme = getPOITheme(state.worldSummary || '');
                 const entryCoords = normalizeCoords(entry.coordinates || '');
                 const zone = state.mapZones?.find(z => normalizeCoords(z.coordinates) === entryCoords);
@@ -75,7 +75,7 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
                 .filter(k => !existingKeys.has(`${k.title?.toLowerCase()}|${k.coordinates}`))
                 .map((k, i) => {
                     let tags = [...(k.tags || [])];
-                    if (tags.includes('population-center')) {
+                    if (tags.some(t => t.toLowerCase().trim().replace(/\s+/g, '-') === 'population-center')) {
                         const entryCoords = normalizeCoords(k.coordinates || '');
                         const zone = state.mapZones?.find(z => normalizeCoords(z.coordinates) === entryCoords);
                         const settlementTags = resolveSettlementTags(zone, theme);

@@ -8,7 +8,7 @@ import { MapZone, LoreEntry, StoryLog, POIMemory } from '../../types';
 import { KeywordEditor } from '../KeywordEditor';
 import AutoResizingTextarea from '../../components/AutoResizingTextarea';
 import Accordion from '../Accordion';
-import { isLocaleMatch, parseHostility } from '../../utils/mapUtils';
+import { isLocaleMatch, parseHostility, resolveSettlementTags, getPOITheme } from '../../utils/mapUtils';
 import { toTitleCase, fixCasing } from '../../utils/npcUtils';
 import Modal from '../Modal';
 import { StatusAvatar } from '../chat/StatusAvatar';
@@ -62,8 +62,8 @@ const POIListItem: React.FC<{
     isPlayerHere?: boolean;
     isInSameZone?: boolean;
     isZoneVisited?: boolean;
-    populationLevel?: string;
-}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, isInSameZone, isZoneVisited, populationLevel }) => {
+    zone?: MapZone;
+}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, isInSameZone, isZoneVisited, zone }) => {
     const { updateKnowledge, gameData } = useContext(GameDataContext);
     const { setInspectedEntity, setPendingTravelConfirmation } = useUI();
     const [isEditing, setIsEditing] = useState(false);
@@ -96,7 +96,7 @@ const POIListItem: React.FC<{
     if (activeIsPopCenter) {
         const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
         const levelFromTags = activeTags.find(t => possibleLevels.includes(t.toLowerCase()));
-        const lv = (levelFromTags || populationLevel || 'settlement').toLowerCase();
+        const lv = (levelFromTags || zone?.populationLevel || 'settlement').toLowerCase();
         
         // Map village to settlement if no native village icon
         const iconName = lv === 'village' ? 'settlement' : 
@@ -333,11 +333,22 @@ const POIListItem: React.FC<{
                                             {popLevelLabel}
                                         </span>
                                     )}
-                                    {entry.tags?.filter(t => t !== 'location' && t !== 'population-center' && !['village', 'settlement', 'town', 'city', 'capital'].includes(t.toLowerCase())).map(tag => (
-                                        <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 whitespace-nowrap">
-                                            {toTitleCase(tag.replace(/-/g, ' '))}
-                                        </span>
-                                    ))}
+                                    {(() => {
+                                        const possibleLevels = ['village', 'settlement', 'town', 'city', 'capital'];
+                                        const theme = getPOITheme(gameData?.worldSummary || '');
+                                        const dynamicTags = activeIsPopCenter ? resolveSettlementTags(zone || undefined, theme) : [];
+                                        const allTags = [...new Set([...activeTags, ...dynamicTags])];
+                                        
+                                        return allTags.filter(t => 
+                                            t !== 'location' && 
+                                            t !== 'population-center' && 
+                                            !possibleLevels.includes(t.toLowerCase())
+                                        ).map(tag => (
+                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 whitespace-nowrap">
+                                                {toTitleCase(tag.replace(/-/g, ' '))}
+                                            </span>
+                                        ));
+                                    })()}
                                 </div>
                                 <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
                                     {fixCasing(entry.content)}
@@ -700,7 +711,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     isPlayerHere={isPlayerHere && currentLocale === entry.title}
                                                     isInSameZone={isPlayerHere}
                                                     isZoneVisited={zone?.visited}
-                                                    populationLevel={zone?.populationLevel}
+                                                    zone={zone || undefined}
                                                 />
                                             ))
                                         ) : (

@@ -14,8 +14,8 @@ export const parseCoords = (coords: string): { x: number, y: number } | null => 
     if (!coords) return null;
     
     // Use regex to capture integers that might include leading negative signs
-    // This allows coordinates like "-1-2" or "0--5" to be parsed correctly.
-    const match = coords.match(/^(-?\d+)-(-?\d+)$/);
+    // Flexible regex to allow optional spaces and common delimiters
+    const match = coords.trim().match(/^(-?\d+)\s*[-,\u2013\u2014]\s*(-?\d+)$/);
     if (!match) return null;
 
     const x = parseInt(match[1], 10);
@@ -210,11 +210,11 @@ export const SETTLEMENT_TAG_MAP: Record<string, Record<string, string>> = {
 };
 
 export const resolveSettlementTags = (zone: MapZone | undefined, theme: string): string[] => {
-    if (!zone) return [];
     const tags: string[] = [];
-    const mapping = SETTLEMENT_TAG_MAP[theme.toLowerCase()] || SETTLEMENT_TAG_MAP.fantasy;
-    const features = (zone.zoneFeatures || []).map(f => f.toLowerCase());
-    const pop = (zone.populationLevel || 'Barren').toLowerCase();
+    const themeKey = theme.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const mapping = SETTLEMENT_TAG_MAP[themeKey] || SETTLEMENT_TAG_MAP.fantasy;
+    const features = zone ? (zone.zoneFeatures || []).map(f => f.toLowerCase()) : [];
+    const pop = (zone?.populationLevel || 'Settlement').toLowerCase(); // Fallback to Settlement if zone missing but tagged as pop-center
 
     // 1. Tavern / Recruitment (Settlement+)
     if (['settlement', 'town', 'city', 'capital'].includes(pop) || features.includes('tavern')) {
