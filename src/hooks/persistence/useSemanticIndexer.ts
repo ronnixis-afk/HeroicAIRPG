@@ -17,6 +17,8 @@ export const useSemanticIndexer = (
     useEffect(() => {
         // Prevent indexing if the game hasn't loaded or an index is already running
         if (!gameData || isIndexing) return;
+    
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         const runBackgroundIndexing = async () => {
             setIsIndexing(true);
@@ -31,6 +33,7 @@ export const useSemanticIndexer = (
                         const textToEmbed = `${entry.title || ''} ${entry.content || ''}`.trim();
                         if (textToEmbed) {
                             const vec = await generateEmbedding(textToEmbed);
+                            await sleep(500); // Throttling to prevent 429
                             if (vec) {
                                 knowledgeToUpdate[i] = { ...entry, embedding: vec };
                                 requiresStateUpdate = true;
@@ -57,6 +60,7 @@ export const useSemanticIndexer = (
                         const textToEmbed = `${obj.title || ''} ${obj.content || ''}`.trim();
                         if (textToEmbed) {
                             const vec = await generateEmbedding(textToEmbed);
+                            await sleep(500); // Throttling
                             if (vec) {
                                 objectivesToUpdate[i] = { ...obj, embedding: vec };
                                 requiresStateUpdate = true;
@@ -84,6 +88,7 @@ export const useSemanticIndexer = (
                             for (const mem of npc.memories) {
                                 if (!mem.embedding && mem.content) {
                                     const vec = await generateEmbedding(mem.content);
+                                    await sleep(500); // Throttling
                                     if (vec) {
                                         memoryUpdates.push({
                                             npcId: npc.id,

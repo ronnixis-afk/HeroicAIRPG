@@ -33,7 +33,7 @@ export const AI_MODELS = {
      * Semantic Embedding model.
      * Used for RAG, lore retrieval, and vector search.
      */
-    EMBEDDING: 'text-embedding-004',
+    EMBEDDING: 'models/embedding-001',
 };
 
 /**

@@ -114,6 +114,7 @@ export const useCharacterActions = (
         // Set both current and max HP to the correctly scaled value before integration
         character.maxHitPoints = startingMaxHp;
         character.currentHitPoints = startingMaxHp;
+        character.isInitialized = true;
 
         const knowledgeUpdates: LoreEntry[] = [];
         let mapZonesUpdate: MapZone[] = [...(gameData.mapZones || [])];

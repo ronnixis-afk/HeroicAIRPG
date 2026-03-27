@@ -47,6 +47,7 @@ export const useNarrativeManager = (
     const { generateNarrative } = useNarrationStep();
 
     const isPipelineActiveRef = React.useRef(false);
+    const lastPipelineStartTime = React.useRef(0);
 
     const notifyInventoryChanges = useCallback((inventoryUpdates: InventoryUpdatePayload[]) => {
         if (!gameData || !Array.isArray(inventoryUpdates)) return;
@@ -79,8 +80,19 @@ export const useNarrativeManager = (
     const executePipeline = useCallback(async (
         input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean, targetCoordinates?: string }
     ) => {
-        if (!gameData || (isPipelineActiveRef.current && !input.bypassLock)) return;
+        if (!gameData) return;
+
+        // Safety Guard: Reset lock if it's been active for more than 30 seconds (emergency recovery)
+        const now = Date.now();
+        if (isPipelineActiveRef.current && (now - lastPipelineStartTime.current) > 30000) {
+            console.warn("Chat pipeline safety reset triggered after timeout.");
+            isPipelineActiveRef.current = false;
+        }
+
+        if (isPipelineActiveRef.current && !input.bypassLock) return;
+
         isPipelineActiveRef.current = true;
+        lastPipelineStartTime.current = now;
         const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false, targetCoordinates } = input;
 
         try {

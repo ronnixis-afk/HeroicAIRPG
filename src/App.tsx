@@ -177,9 +177,9 @@ const GameInterface: React.FC = () => {
 
   const hasPlayer = useMemo(() => {
     if (!gameData?.playerCharacter) return false;
-    return gameData.playerCharacter.name !== 'Adventurer' && 
-           gameData.playerCharacter.name !== 'New Hero';
-  }, [gameData?.playerCharacter?.name]);
+    return !!gameData.playerCharacter.isInitialized || 
+           (gameData.playerCharacter.name !== 'Adventurer' && gameData.playerCharacter.name !== 'New Hero');
+  }, [gameData?.playerCharacter?.isInitialized, gameData?.playerCharacter?.name]);
 
   // Enforce Hero Creation View
   useEffect(() => {

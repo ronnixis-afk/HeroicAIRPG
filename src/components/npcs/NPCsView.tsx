@@ -1,4 +1,3 @@
-
 import React, { useContext, useMemo, useState } from 'react';
 import { GameDataContext } from '../../context/GameDataContext';
 import { Icon } from '../Icon';
@@ -25,15 +24,25 @@ const NPCsView: React.FC = () => {
             .map(c => companionToNPC(c));
 
         const partyNames = new Set(party.map(p => p.name.toLowerCase().trim()));
+        const partyIds = new Set(party.map(p => p.id));
 
-        // Registry NPCs excluding those already in party
+        // Registry NPCs excluding those already in party (by name or ID)
         const registry = (gameData.npcs || [])
             .filter(npc => {
                 const name = npc.name?.toLowerCase().trim() || '';
-                return name && !partyNames.has(name) && !npc.isShip;
+                return name && !partyNames.has(name) && !partyIds.has(npc.id) && !npc.isShip;
             });
 
-        const all = [...party, ...registry];
+        const allRaw = [...party, ...registry];
+        
+        // Ensure absolute uniqueness by ID to prevent duplicate React keys
+        const uniqueMap = new Map();
+        allRaw.forEach(npc => {
+            if (!uniqueMap.has(npc.id)) {
+                uniqueMap.set(npc.id, npc);
+            }
+        });
+        const all = Array.from(uniqueMap.values());
 
         // 2. Filter based on essential status or party membership
         const filtered = all.filter(npc => {

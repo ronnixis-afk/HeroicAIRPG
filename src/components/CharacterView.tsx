@@ -55,7 +55,7 @@ const CharacterView: React.FC = () => {
 
     // Initial characters have default names from mockSheetService
     const isPreGame = gameData.story.length === 0;
-    const hasPlayer = playerCharacter.name !== 'Adventurer' && playerCharacter.name !== 'New Hero';
+    const hasPlayer = !!playerCharacter.isInitialized || (playerCharacter.name !== 'Adventurer' && playerCharacter.name !== 'New Hero');
 
     const handleAddHero = (type: 'player' | 'companion') => {
         setWizardType(type);

@@ -78,6 +78,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
     // Import/Export
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const worldNameInputRef = useRef<HTMLInputElement>(null);
     const generationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -193,6 +194,15 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         setAdditionalContext('');
         setIsGenerating(false);
     };
+    
+    // Auto-focus world name input when modal opens
+    useEffect(() => {
+        if (isCreateModalOpen && !previewData) {
+            setTimeout(() => {
+                worldNameInputRef.current?.focus();
+            }, 100);
+        }
+    }, [isCreateModalOpen, previewData]);
 
     const handleDeleteRealm = async (realm: any) => {
         const confirmMsg = realm.cloud 
@@ -911,6 +921,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <div className="space-y-2">
                             <label className="text-body-sm font-bold text-brand-text-muted ml-1">World Name</label>
                             <input
+                                ref={worldNameInputRef}
                                 value={worldName}
                                 onChange={(e) => setWorldName(e.target.value)}
                                 placeholder="e.g. Eldoria, Neo-Tokyo, Sector 7..."
