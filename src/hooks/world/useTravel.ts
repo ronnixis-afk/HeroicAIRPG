@@ -67,7 +67,6 @@ export const useTravel = (
                     const tags = ['location'];
                     if (p.isPopulationCenter) tags.push('population-center');
                     if (p.baseType) tags.push(p.baseType);
-                    if (p.dynamicTags) tags.push(...p.dynamicTags);
                     
                     return {
                         title: p.title,
@@ -119,7 +118,6 @@ export const useTravel = (
                         const tags = ['location'];
                         if (p.isPopulationCenter) tags.push('population-center');
                         if (p.baseType) tags.push(p.baseType);
-                        if (p.dynamicTags) tags.push(...p.dynamicTags);
                         
                         return {
                             id: `know-lazy-${Date.now()}-${Math.random()}`,

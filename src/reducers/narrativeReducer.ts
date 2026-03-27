@@ -1,5 +1,6 @@
 
 import { GameData, GameAction, LoreEntry, GalleryMetadata } from '../types';
+import { getPOITheme, resolveSettlementTags } from '../utils/mapUtils';
 
 export const narrativeReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
@@ -55,18 +56,36 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
         case 'MARK_LORE_SEEN':
             return { ...state, world: state.world.map(l => l.id === action.payload ? { ...l, isNew: false } : l) };
 
-        case 'UPDATE_KNOWLEDGE':
-            return { ...state, knowledge: state.knowledge.map(k => k.id === action.payload.id ? action.payload : k) };
+        case 'UPDATE_KNOWLEDGE': {
+            let entry = action.payload;
+            if (entry.tags?.includes('population-center')) {
+                const theme = getPOITheme(state.worldSummary || '');
+                const zone = state.mapZones?.find(z => z.coordinates === entry.coordinates);
+                const settlementTags = resolveSettlementTags(zone, theme);
+                entry = { ...entry, tags: [...new Set([...(entry.tags || []), ...settlementTags])] };
+            }
+            return { ...state, knowledge: state.knowledge.map(k => k.id === entry.id ? entry : k) };
+        }
 
         case 'ADD_KNOWLEDGE': {
+            const theme = getPOITheme(state.worldSummary || '');
             const existingKeys = new Set(state.knowledge.map(k => `${k.title?.toLowerCase()}|${k.coordinates}`));
             const newKn = action.payload
                 .filter(k => !existingKeys.has(`${k.title?.toLowerCase()}|${k.coordinates}`))
-                .map((k, i) => ({ 
-                    ...k, 
-                    id: `know-${Date.now()}-${i}`,
-                    isNew: true 
-                } as LoreEntry));
+                .map((k, i) => {
+                    let tags = [...(k.tags || [])];
+                    if (tags.includes('population-center')) {
+                        const zone = state.mapZones?.find(z => z.coordinates === k.coordinates);
+                        const settlementTags = resolveSettlementTags(zone, theme);
+                        tags = [...new Set([...tags, ...settlementTags])];
+                    }
+                    return { 
+                        ...k, 
+                        id: `know-${Date.now()}-${i}`,
+                        isNew: true,
+                        tags
+                    } as LoreEntry;
+                });
             return { ...state, knowledge: [...state.knowledge, ...newKn] };
         }
 
