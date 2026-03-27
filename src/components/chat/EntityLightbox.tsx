@@ -136,8 +136,10 @@ export const EntityLightbox: React.FC = () => {
                 return (
                     <div className="space-y-4 p-2">
                         <div className="flex flex-wrap gap-2">
-                            {entry.tags?.map(t => (
-                                <span key={t} className="bg-brand-primary text-brand-text-muted text-body-sm font-bold px-2.5 py-0.5 rounded-full border border-brand-surface capitalize">{t}</span>
+                            {entry.tags?.filter(t => t !== 'location').map(t => (
+                                <span key={t} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-full border border-brand-text-muted/30 whitespace-nowrap capitalize">
+                                    {t.replace(/-/g, ' ')}
+                                </span>
                             ))}
                         </div>
                         <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-primary/50">

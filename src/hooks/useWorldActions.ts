@@ -67,14 +67,20 @@ export const useWorldActions = (
         try {
             const pois = await generatePoisForZone(zone, gameData.worldSummary || '', gameData.mapSettings);
             const validPois = Array.isArray(pois) ? pois : [];
-            const newKnowledge: Omit<LoreEntry, 'id'>[] = validPois.map(p => ({ 
-                title: p.title, 
-                content: p.content, 
-                coordinates: coords, 
-                tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'], 
-                isNew: true, 
-                visited: p.title.toLowerCase().includes('open area') 
-            }));
+            const newKnowledge: Omit<LoreEntry, 'id'>[] = validPois.map(p => {
+                const tags = ['location'];
+                if (p.isPopulationCenter) tags.push('population-center');
+                if (p.baseType) tags.push(p.baseType);
+                
+                return { 
+                    title: p.title, 
+                    content: p.content, 
+                    coordinates: coords, 
+                    tags: tags, 
+                    isNew: true, 
+                    visited: p.title.toLowerCase().includes('open area') 
+                };
+            });
             dispatch({ type: 'ADD_KNOWLEDGE', payload: newKnowledge });
         } catch (e) {
             console.error(e);

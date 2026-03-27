@@ -63,14 +63,20 @@ export const useTravel = (
 
                 // Generate POIs on-the-fly for the newly discovered zone
                 currentPois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings);
-                const knowledgeEntries: Omit<LoreEntry, 'id'>[] = currentPois.map(p => ({
-                    title: p.title,
-                    content: p.content,
-                    coordinates: newZone.coordinates,
-                    tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
-                    isNew: true,
-                    visited: p.title.toLowerCase().includes('open area')
-                }));
+                const knowledgeEntries: Omit<LoreEntry, 'id'>[] = currentPois.map(p => {
+                    const tags = ['location'];
+                    if (p.isPopulationCenter) tags.push('population-center');
+                    if (p.baseType) tags.push(p.baseType);
+                    
+                    return {
+                        title: p.title,
+                        content: p.content,
+                        coordinates: newZone.coordinates,
+                        tags: tags,
+                        isNew: true,
+                        visited: p.title.toLowerCase().includes('open area')
+                    };
+                });
                 dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledgeEntries });
 
                 // If no target locale was specified, land in the newly created "Open Area"

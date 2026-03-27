@@ -4,6 +4,7 @@ import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS, AbilityScoreName } from '../types';
 import { STORY_HOOKS } from '../constants/storyHooks';
+import { POI_MATRIX } from '../constants';
 
 /**
  * Common helper to format world context for AI prompts.
@@ -410,6 +411,27 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     else if (popRoll2 >= 10) { popLevel2 = 'Settlement'; features2 = ['Tavern']; }
     else { popLevel2 = 'Barren'; features2 = []; }
 
+    const worldSummary = gameData.worldSummary || "";
+    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
+    const summaryLower = worldSummary.toLowerCase();
+    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
+    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
+    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+
+    const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
+    const generateThemes = () => [1, 2, 3, 4].map(() => {
+        const r1 = Math.floor(Math.random() * 10);
+        const r2 = Math.floor(Math.random() * 10);
+        const r3 = Math.floor(Math.random() * 10);
+        return {
+            baseType: matrix.baseTypes[r1],
+            themeStr: `${matrix.baseTypes[r1]} | ${matrix.modifiers[r2]} | ${matrix.flavors[r3]}`
+        };
+    });
+
+    const themes1 = generateThemes();
+    const themes2 = generateThemes();
+
     const prompt = `Establish 2 new geographical locations significant to ${character.name}'s past.
     These locations MUST be anchored immediately around the starting coordinates (0-0).
     
@@ -423,6 +445,20 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     [MAP CONTEXT]
     ${worldContext}
     
+    [SYSTEM DIRECTIVE: POI THEMES]
+    You MUST generate the POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
+    ZONE 1 (Scale: ${popLevel1}):
+    1. Theme: ${themes1[0].themeStr}
+    2. Theme: ${themes1[1].themeStr}
+    3. Theme: ${themes1[2].themeStr}
+    4. Theme: ${themes1[3].themeStr}
+
+    ZONE 2 (Scale: ${popLevel2}):
+    1. Theme: ${themes2[0].themeStr}
+    2. Theme: ${themes2[1].themeStr}
+    3. Theme: ${themes2[2].themeStr}
+    4. Theme: ${themes2[3].themeStr}
+
     [INSTRUCTIONS]
     1. Provide exactly 2 Zones.
        - Zone 1 MUST have a Population Scale of ${popLevel1}.
@@ -431,8 +467,8 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     2. 'hostility' MUST be an INTEGER between -10 and 10 (as these are known home-territory or past locations).
     3. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
     4. 'pois': You MUST generate exactly 4 entries per zone.
-       - The first entry MUST be a thematic Population Center landmark (or wilderness landmark for Barren scales).
-       - The remaining 3 entries MUST be specific locations surrounding that center.
+       - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). You MUST incorporate Theme 1 into this entry.
+       - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
     
     Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
 
@@ -457,17 +493,25 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
             // Filter out any AI-generated "Open Area" to avoid duplicates
             const filteredPois = (z.pois || []).filter((p: any) => !p.title?.toLowerCase().includes("open area"));
             
-            if (filteredPois.length > 0) {
+            if (filteredPois.length > 0 && z.populationLevel !== 'Barren') {
                  filteredPois[0].isPopulationCenter = true;
             }
 
             const isFirstZone = index === 0;
+            const currentThemes = isFirstZone ? themes1 : themes2;
+            const poisWithTypes = filteredPois.map((p: any, i: number) => {
+                // All entries (0-3) now map to rolled themes.
+                if (i < currentThemes.length) {
+                    return { ...p, baseType: currentThemes[i]?.baseType };
+                }
+                return p;
+            });
 
             return {
                 ...z,
                 populationLevel: isFirstZone ? popLevel1 : popLevel2,
                 zoneFeatures: isFirstZone ? features1 : features2,
-                pois: [systemOpenArea, ...filteredPois]
+                pois: [systemOpenArea, ...poisWithTypes]
             };
         });
 
@@ -497,6 +541,24 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
         ? `\n[COMPANION PROFILES]\n${companions.map(c => `Name: ${c.name}, Race: ${c.race}, Level: ${c.level}, Profession: ${c.profession}, Background: ${c.background}`).join('\n')}`
         : '';
 
+    const worldSummary = gameData.worldSummary || "";
+    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
+    const summaryLower = worldSummary.toLowerCase();
+    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
+    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
+    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+
+    const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
+    const rolledThemes = [1, 2, 3, 4].map(() => {
+        const r1 = Math.floor(Math.random() * 10);
+        const r2 = Math.floor(Math.random() * 10);
+        const r3 = Math.floor(Math.random() * 10);
+        return {
+            baseType: matrix.baseTypes[r1],
+            themeStr: `${matrix.baseTypes[r1]} | ${matrix.modifiers[r2]} | ${matrix.flavors[r3]}`
+        };
+    });
+
     const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
 
 [WORLD CONTEXT]
@@ -514,6 +576,13 @@ ${companionContext}
 You MUST base the catalyst of this adventure on the following scenario:
 "${selectedHook}"
 
+[SYSTEM DIRECTIVE: POI THEMES]
+You MUST generate the starting zone's POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
+1. Theme: ${rolledThemes[0].themeStr}
+2. Theme: ${rolledThemes[1].themeStr}
+3. Theme: ${rolledThemes[2].themeStr}
+4. Theme: ${rolledThemes[3].themeStr}
+
 [INSTRUCTIONS]
 1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
    - narrativeLens: A colourful blend of ${character.name}'s background based on their race (${character.race}) and traits (${character.background}). Use evocative, sensory language.
@@ -524,12 +593,12 @@ You MUST base the catalyst of this adventure on the following scenario:
 4. startingZone: Create a safe haven or starting area with unique points of interest.
    - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
    - You MUST generate exactly 4 'knowledge' entries (POIs).
-     - The first entry MUST be a thematic Population Center landmark (or a solitary wilderness landmark if Barren).
-     - The remaining 3 entries MUST be specific locations surrounding or connected to that Population Center.
+     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). You MUST incorporate Theme 1 into this entry.
+     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
 5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
    - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
-
+ 
 Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "startingZone": { "name", "description", "hostility", "knowledge": [{ "title", "content", "isBackgroundRelated" }] }, "alignmentOptions": [{ "label", "alignment" }] }`;
 
     try {
@@ -566,11 +635,18 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             // Filter out any AI-generated "Open Area"
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
-            if (filteredKnowledge.length > 0) {
-                 filteredKnowledge[0].isPopulationCenter = true;
+            const poisWithTypes = filteredKnowledge.map((p: any, i: number) => {
+                if (i < rolledThemes.length) {
+                    return { ...p, baseType: rolledThemes[i]?.baseType };
+                }
+                return p;
+            });
+
+            if (poisWithTypes.length > 0 && popLevel !== 'Barren') {
+                 poisWithTypes[0].isPopulationCenter = true;
             }
 
-            data.startingZone.knowledge = [systemOpenArea, ...filteredKnowledge];
+            data.startingZone.knowledge = [systemOpenArea, ...poisWithTypes];
             data.startingZone.populationLevel = popLevel;
             data.startingZone.zoneFeatures = features;
         }

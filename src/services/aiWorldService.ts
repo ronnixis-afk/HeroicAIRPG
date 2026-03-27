@@ -7,6 +7,7 @@ import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, Lo
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
 import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
 import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
+import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
 
 /**
@@ -225,53 +226,93 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     const hostilityDesc = typeof zone.hostility === 'number' ? `Threat level: ${zone.hostility} (negative is safe, positive is dangerous).` : '';
     const keywordsDesc = zone.keywords && zone.keywords.length > 0 ? `Zone attributes: ${zone.keywords.join(', ')}.` : '';
     
-    // 1. Generate Population Center POI (or Barren Landmark)
+    // 1. Generate Population Center POI (only if NOT barren)
     const popLevel = zone.populationLevel || 'Barren';
-    const popPrompt = `Generate a specific, thematic Point of Interest that represents the Population Center (or a solitary landmark if barren) for the zone "${zone.name}" (${zone.description}).
-    World: ${worldSummary}
-    ${hostilityDesc}
-    Population Scale: ${popLevel}. Make sure the scale of this POI matches this density.
-    [STRICT CONSTRAINTS]
-    - title: MAX 3 WORDS.
-    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
-    - title: MUST be a distinct name for a settlement (if populated) or a wilderness landmark (if Barren).
-    - content: MAX 30 WORDS.
-    Return JSON: { "title": "string", "content": "string" }`;
+    let popCenterPoi: any = null;
 
-    let popCenterPoi = { title: "Desolate Marker", content: "A mysterious standing stone in the middle of nowhere." };
-    let popAttempts = 0;
-    while (popAttempts <= 2) {
-        const popRes = await ai.models.generateContent({
-            type: 'World Building',
-            model: 'gemini-3.1-flash-lite-preview',
-            contents: popPrompt + (popAttempts > 0 ? `\n\n[RETRY ATTEMPT ${popAttempts}] The previous title was too similar to existing locations: [${existingNames.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
-            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
-        });
-        const result = JSON.parse(cleanJson(popRes.text || '{}'));
-        if (result.title) {
-            popCenterPoi = result;
-            if (!isNameTooSimilar(result.title, existingNames) && !isNameTooSimilar(result.title, [zone.name])) {
-                break;
+    if (popLevel !== 'Barren') {
+        const popPrompt = `Generate a specific, thematic Point of Interest that represents the Population Center for the zone "${zone.name}" (${zone.description}).
+        World: ${worldSummary}
+        ${hostilityDesc}
+        Population Scale: ${popLevel}. Make sure the scale of this POI matches this density.
+        [STRICT CONSTRAINTS]
+        - title: MAX 3 WORDS.
+        - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}". Choose distinct nouns/adjectives.
+        - title: MUST be a distinct name for a settlement.
+        - content: MAX 30 WORDS.
+        Return JSON: { "title": "string", "content": "string" }`;
+
+        popCenterPoi = { title: "Local Settlement", content: "A small gathering of dwellings indicating civilization." };
+        let popAttempts = 0;
+        while (popAttempts <= 2) {
+            try {
+                const popRes = await ai.models.generateContent({
+                    type: 'World Building',
+                    model: 'gemini-3.1-flash-lite-preview',
+                    contents: popPrompt + (popAttempts > 0 ? `\n\n[RETRY ATTEMPT ${popAttempts}] The previous title was too similar to existing locations: [${existingNames.join(', ')}]. Choose a DIFFERENT, DISTINCT name.` : ''),
+                    config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+                });
+                const result = JSON.parse(cleanJson(popRes.text || '{}'));
+                if (result.title) {
+                    popCenterPoi = result;
+                    if (!isNameTooSimilar(result.title, existingNames) && !isNameTooSimilar(result.title, [zone.name])) {
+                        break;
+                    }
+                }
+            } catch (e) {
+                console.error("Pop center generation failed", e);
             }
+            popAttempts++;
         }
-        popAttempts++;
     }
 
     // Update existing names to include the new pop center so we don't repeat it
-    const updatedExistingNames = [...existingNames, popCenterPoi.title];
+    const updatedExistingNames = popCenterPoi ? [...existingNames, popCenterPoi.title] : [...existingNames];
 
-    // 2. Generate 3 generic POIs using the pop center as context
-    const input = `Generate 3 specific POIs for the zone "${zone.name}" (${zone.description}).
+    // 2. Generate 4 generic POIs using the pop center or zone as context
+    // SYSTEM MANAGED: Roll 4d10 for each of the 4 POIs using the POI_MATRIX
+    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
+    const summaryLower = (worldSummary || '').toLowerCase();
+    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
+    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
+    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+
+    const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
+    const rolledThemesData = [1, 2, 3, 4].map(() => {
+        const r1 = Math.floor(Math.random() * 10);
+        const r2 = Math.floor(Math.random() * 10);
+        const r3 = Math.floor(Math.random() * 10);
+        return {
+            baseType: matrix.baseTypes[r1],
+            themeStr: `${matrix.baseTypes[r1]} | ${matrix.modifiers[r2]} | ${matrix.flavors[r3]}`
+        };
+    });
+
+    const mainContext = popCenterPoi 
+        ? `[MAIN CONTEXT]: The central landmark of this area is "${popCenterPoi.title}" - ${popCenterPoi.content}. The new POIs should thematically connect to or exist around this main feature.`
+        : `[MAIN CONTEXT]: This is a barren wilderness area called "${zone.name}" (${zone.description}). The new POIs should be isolated landmarks, natural anomalies, or points of interest for travelers in the wilds.`;
+
+    const input = `Generate EXACTLY 4 specific POIs for the zone "${zone.name}" (${zone.description}).
     World: ${worldSummary}
     ${hostilityDesc}
     ${keywordsDesc}
-    [MAIN CONTEXT]: The central landmark of this area is "${popCenterPoi.title}" - ${popCenterPoi.content}. The new POIs should thematically connect to or exist around this main feature.
-    [STRICT CONSTRAINTS]
-    - title: MAX 3 WORDS.
-    - title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}" or the main landmark "${popCenterPoi.title}".
-    - title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
-    - content: MAX 30 WORDS.
-    - Generate EXACTLY 3 POIs.
+    ${mainContext}
+    
+    [SYSTEM DIRECTIVE: POI THEMES]
+    You MUST generate the POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
+    1. Theme: ${rolledThemesData[0].themeStr}
+    2. Theme: ${rolledThemesData[1].themeStr}
+    3. Theme: ${rolledThemesData[2].themeStr}
+    4. Theme: ${rolledThemesData[3].themeStr}
+
+    [INSTRUCTIONS]
+    1. Entry 1: [MANDATORY] Thematic Population Center landmark (matching the ${zone.populationLevel} scale). You MUST incorporate Theme 1 above into this center.
+    2. Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
+    3. title: MAX 3 WORDS.
+    4. title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}" or (if it exists) the main landmark "${popCenterPoi?.title || ''}".
+    5. title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
+    6. content: MAX 30 WORDS.
+    
     Return JSON array: [{ "title": "string", "content": "string" }]`;
 
     const maxRetries = 2;
@@ -286,17 +327,20 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
             config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
         });
 
-        const result = JSON.parse(cleanJson(response.text || '[]'));
-        const pois = Array.isArray(result) ? result : [];
+        const data = JSON.parse(cleanJson(response.text || '[]'));
+        let pois = Array.isArray(data) ? data : (data.pois || []);
         
+        // Attach base types to each generated POI
+        pois = pois.map((p: any, i: number) => ({ ...p, baseType: rolledThemesData[i]?.baseType }));
+
         if (attempts === 0) finalPois = pois;
 
-        const hasCollision = pois.some(p => {
+        const hasCollision = pois.some((p: any) => {
             const title = p.title || "";
             return isNameTooSimilar(title, updatedExistingNames) || isNameTooSimilar(title, [zone.name]);
         });
 
-        if (!hasCollision && pois.length > 0) {
+        if (!hasCollision && pois.length === 4) { // Ensure exactly 4 POIs are returned
             finalPois = pois;
             break;
         }
@@ -309,7 +353,15 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         content: `The immediate arrival area of ${zone.name}. ${zone.description || "A localized region in the world."}`
     };
 
-    return [openArea, { ...popCenterPoi, isPopulationCenter: true }, ...finalPois];
+    const results = [openArea, ...finalPois];
+    
+    // The first generated POI (results[1]) is mapped to the Pop Center theme in the prompt.
+    // We mark it as the population center if the zone isn't barren.
+    if (zone.populationLevel !== 'Barren' && results.length > 1) {
+        results[1].isPopulationCenter = true;
+    }
+
+    return results;
 };
 
 /**
@@ -566,14 +618,26 @@ export const preloadAdjacentZones = async (
                 if (dispatchKnowledgeUpdate) {
                     try {
                         const pois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings, allInhabitedNames);
-                        const knowledgeEntries: Omit<LoreEntry, 'id'>[] = pois.map(p => ({
-                            title: p.title,
-                            content: p.content,
-                            coordinates: newZone.coordinates,
-                            tags: p.isPopulationCenter ? ['location', 'population-center'] : ['location'],
-                            isNew: true,
-                            visited: p.title.toLowerCase().includes('open area')
-                        }));
+                        const knowledgeEntries: Omit<LoreEntry, 'id'>[] = pois.map(p => {
+                            // All entries (0-3) now map to rolled themes.
+                            if (p.baseType) {
+                                return { ...p, baseType: p.baseType };
+                            }
+                            return p;
+                        }).map(p => {
+                            const tags = ['location'];
+                            if (p.isPopulationCenter) tags.push('population-center');
+                            if (p.baseType) tags.push(p.baseType);
+                            
+                            return {
+                                title: p.title,
+                                content: p.content,
+                                coordinates: newZone.coordinates,
+                                tags: tags,
+                                isNew: true,
+                                visited: p.title.toLowerCase().includes('open area')
+                            };
+                        });
                         dispatchKnowledgeUpdate(knowledgeEntries);
                         
                         // Add new POIs to our global list

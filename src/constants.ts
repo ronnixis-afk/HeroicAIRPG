@@ -107,3 +107,125 @@ export const ENCOUNTER_MATRIX = {
         "Victory requires healing/saving the enemy rather than killing them."
     ]
 };
+
+export const POI_MATRIX = {
+    fantasy: {
+        baseTypes: [
+            "Cave / Cavern",
+            "Ancient Ruin",
+            "Shrine / Altar",
+            "Encampment",
+            "Tower / Spire",
+            "Excavation Site",
+            "Tunnel / Shaft",
+            "Bridge / Crossing",
+            "Monolith / Obelisk",
+            "Crossroads"
+        ],
+        modifiers: [
+            "Bandit Hideout",
+            "Haunted / Cursed",
+            "Abandoned / Forgotten",
+            "Heavily Trapped",
+            "Monster Lair",
+            "Secret Stash",
+            "Guarded / Patrolled",
+            "Illusionary / Shifting",
+            "Sealed / Locked",
+            "Smuggler's Den"
+        ],
+        flavors: [
+            "A trail of fresh, glistening blood leads into the darkness.",
+            "Strange, glowing runes are etched haphazardly around the perimeter.",
+            "An eerie, resonant magical hum can be felt vibrating in the teeth.",
+            "The bleached skeletons of previous adventurers are scattered nearby.",
+            "A crude, blood-stained wooden sign reads \"Turn Back or Die.\"",
+            "Unnatural flora grows here in vibrant, pulsing, unnatural colors.",
+            "Faint, maddening whispers echo continuously from the depths.",
+            "Rusted metallic scraps and shattered weapons litter the ground.",
+            "The air surrounding the immediate area feels unnaturally freezing.",
+            "A peculiar, sweet incense burns nearby, failing to mask a foul odor."
+        ]
+    },
+    modern: {
+        baseTypes: [
+            "Industrial Warehouse",
+            "Transit Station",
+            "Corporate Office / Clinic",
+            "Underground Network / Sewer",
+            "Parking Structure",
+            "Construction Site",
+            "Recreation Area / Park",
+            "Intersection / Overpass",
+            "Disposal Site / Junkyard",
+            "Rooftop / Helipad"
+        ],
+        modifiers: [
+            "Quarantined / Biohazard",
+            "Gang-Controlled",
+            "Heavily Surveilled",
+            "Abandoned / Condemned",
+            "Secretly Fortified",
+            "Black Market / Smuggler Den",
+            "Pitch Black / Grid Failure",
+            "Active Crime Scene",
+            "Cultist Front",
+            "Structurally Unstable"
+        ],
+        flavors: [
+            "A discarded, blood-stained burner phone rings incessantly on the ground.",
+            "Flickering neon lights cast long, erratic shadows across the walls.",
+            "The constant, low hum of a heavy hidden generator vibrates through the floor.",
+            "Thick, choking smog hangs heavy in the air, smelling sharply of ozone.",
+            "Shattered safety glass crunches loudly underfoot with every step.",
+            "A heavily modified, idling vehicle sits nearby with its doors wide open.",
+            "Faint police sirens wail in the distance, slowly but surely growing closer.",
+            "Fresh spray paint on the wall forms a strange, unsettling symbol.",
+            "Stacks of redacted corporate documents are hastily burning in a rusted barrel.",
+            "Distorted elevator muzak plays softly from a sparking, half-broken speaker."
+        ]
+    },
+    scifi: {
+        baseTypes: [
+            "Derelict Vessel",
+            "Research Outpost",
+            "Mining Extraction Facility",
+            "Spatial Anomaly",
+            "Relay Station / Comm Buoy",
+            "Orbital Habitat",
+            "Debris Field / Wreckage",
+            "Automated Drone Hive",
+            "Smuggler's Cache",
+            "Alien Monolith / Precursor Ruin"
+        ],
+        modifiers: [
+            "Controlled by Rogue AI",
+            "Quarantined / Locked Down",
+            "Overrun by Bio-Horrors",
+            "Heavily Irradiated",
+            "Caught in a Gravity Well",
+            "Stripped by Scavengers",
+            "Broadcasting a Distress Signal",
+            "Cloaked / Stealth-Activated",
+            "Protected by Active Turrets",
+            "Caught in a Temporal Distortion"
+        ],
+        flavors: [
+            "Faint, bioluminescent spores cling suspiciously to the bulkheads.",
+            "Holographic warning signs flicker rapidly in a dead, unknown language.",
+            "A rhythmic, metallic banging echoes eerily over the open comms channel.",
+            "The area is littered with frozen, perfectly preserved crew corpses.",
+            "Artificial gravity fluctuates wildly, causing loose debris to float and crash.",
+            "Strange, geometric shadows seem to move independently of the light sources.",
+            "The local starlight is unnaturally warped and bent around the location.",
+            "A looping audio log plays a terrifying, corrupted final testament.",
+            "Unidentified, fibrous biological webbing covers the main access points.",
+            "The unmistakable, deep hum of an overloading power core vibrates the teeth."
+        ]
+    },
+    magitech: {
+        baseTypes: [],
+        modifiers: [],
+        flavors: []
+    }
+};

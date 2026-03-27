@@ -326,27 +326,22 @@ const POIListItem: React.FC<{
                                 <h6 className={`text-[15px] leading-tight mb-1 font-bold transition-colors ${isPlayerHere ? 'text-brand-accent' : entry.visited ? 'text-[#FAF9F6] opacity-90' : 'text-brand-text'}`}>
                                     {toTitleCase(entry.title)}
                                 </h6>
-                                {popLevelLabel && (
-                                    <div className="mb-2">
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                    {popLevelLabel && (
                                         <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30">
                                             {popLevelLabel}
                                         </span>
-                                    </div>
-                                )}
+                                    )}
+                                    {entry.tags?.filter(t => t !== 'location' && t !== 'population-center' && !['village', 'settlement', 'town', 'city', 'capital'].includes(t.toLowerCase())).map(tag => (
+                                        <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 whitespace-nowrap">
+                                            {toTitleCase(tag.replace(/-/g, ' '))}
+                                        </span>
+                                    ))}
+                                </div>
                                 <p className={`text-[12px] leading-[1.4] text-brand-text-muted italic opacity-80 ${isExpanded ? '' : 'line-clamp-2'}`}>
                                     {fixCasing(entry.content)}
                                 </p>
                                 
-                                {isExpanded && entry.tags && entry.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5 mt-3">
-                                        {entry.tags.filter(t => t !== 'location' && t !== 'population-center').map(tag => (
-                                            <span key={tag} className="px-2 py-0.5 bg-brand-primary/40 border border-brand-surface rounded text-[9px] text-brand-text-muted">
-                                                {toTitleCase(tag.replace(/-/g, ' '))}
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-
                                  {/* POI Memories Section */}
                                 {isExpanded && sortedPoiMemories.length > 0 && (
                                     <div className="mt-4 space-y-2">
