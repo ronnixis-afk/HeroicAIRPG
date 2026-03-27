@@ -10,6 +10,67 @@ import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
 import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
 
+const SETTLEMENT_TAG_MAP: Record<string, Record<string, string>> = {
+    fantasy: {
+        tavern: 'Tavern',
+        stable: 'Stables',
+        merchant: 'Marketplace',
+        forge: 'Item Forge',
+        shipyard: 'Shipyard'
+    },
+    modern: {
+        tavern: 'Bar',
+        stable: 'Garage',
+        merchant: 'Store',
+        forge: 'Workshop',
+        shipyard: 'Harbor'
+    },
+    scifi: {
+        tavern: 'Cantina',
+        stable: 'Hangar',
+        merchant: 'Trading Hub',
+        forge: 'Nanofabricator',
+        shipyard: 'Spaceport'
+    },
+    magitech: {
+        tavern: 'Social Hub',
+        stable: 'Mech Bay',
+        merchant: 'Trade Depot',
+        forge: 'Tech Forge',
+        shipyard: 'Dock'
+    }
+};
+
+const resolveSettlementTags = (zone: MapZone, theme: string): string[] => {
+    const tags: string[] = [];
+    const mapping = SETTLEMENT_TAG_MAP[theme] || SETTLEMENT_TAG_MAP.fantasy;
+    const features = zone.zoneFeatures || [];
+    const pop = zone.populationLevel || 'Barren';
+
+    // 1. Tavern / Recruitment (Settlement+)
+    if (['Settlement', 'Town', 'City', 'Capital'].includes(pop) || features.includes('Tavern')) {
+        tags.push(mapping.tavern);
+    }
+    // 2. Stable / Mounts (Start at Town)
+    if (['Town', 'City', 'Capital'].includes(pop)) {
+        tags.push(mapping.stable);
+    }
+    // 3. Merchant (Start at Town or via Market feature)
+    if (['Town', 'City', 'Capital'].includes(pop) || features.includes('Market')) {
+        tags.push(mapping.merchant);
+    }
+    // 4. Forge (Start at City or via Item Forge feature)
+    if (['City', 'Capital'].includes(pop) || features.includes('Item Forge')) {
+        tags.push(mapping.forge);
+    }
+    // 5. Shipyard (Feature based)
+    if (features.includes('Shipyard')) {
+        tags.push(mapping.shipyard);
+    }
+
+    return tags;
+};
+
 /**
  * THE PLOT EXPANDER (Tactical Specialist)
  * Uses Gemini 3 Flash to expand raw system matrix rolls into 3 concise tactical sentences.
@@ -358,6 +419,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     // We mark it as the population center if the zone isn't barren.
     if (zone.populationLevel !== 'Barren' && results.length > 1) {
         results[1].isPopulationCenter = true;
+        results[1].dynamicTags = resolveSettlementTags(zone, currentTheme);
     }
 
     return results;
