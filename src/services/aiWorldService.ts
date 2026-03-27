@@ -5,7 +5,7 @@ import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
-import { parseCoords, isNameTooSimilar } from '../utils/mapUtils';
+import { parseCoords, isNameTooSimilar, getPOITheme } from '../utils/mapUtils';
 import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
 import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
@@ -271,11 +271,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
 
     // 2. Generate 4 generic POIs using the pop center or zone as context
     // SYSTEM MANAGED: Roll 4d10 for each of the 4 POIs using the POI_MATRIX
-    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
-    const summaryLower = (worldSummary || '').toLowerCase();
-    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
-    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
-    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+    const currentTheme = getPOITheme(worldSummary);
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
     const rolledThemesData = [1, 2, 3, 4].map(() => {
@@ -399,11 +395,10 @@ export const generateZoneDetails = async (
 
     // Extract theme from worldSummary or mapSettings (usually derived from skillConfiguration)
     // The preload function could pass it, but analyzing worldSummary is a safe fallback.
-    let currentTheme = 'Fantasy';
-    const summaryLower = (worldSummary || '').toLowerCase();
-    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'Sci-Fi';
-    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'Modern';
-    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'Magitech';
+    const themeKey = getPOITheme(worldSummary || '');
+    const currentTheme = themeKey === 'scifi' ? 'Sci-Fi' : 
+                         themeKey === 'modern' ? 'Modern' : 
+                         themeKey === 'magitech' ? 'Magitech' : 'Fantasy';
 
     const randomProperties = getRandomZoneProperties(currentTheme);
     const propertiesContext = `

@@ -5,6 +5,7 @@ import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
 import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS, AbilityScoreName } from '../types';
 import { STORY_HOOKS } from '../constants/storyHooks';
 import { POI_MATRIX } from '../constants';
+import { getPOITheme } from '../utils/mapUtils';
 
 /**
  * Common helper to format world context for AI prompts.
@@ -411,12 +412,8 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     else if (popRoll2 >= 10) { popLevel2 = 'Settlement'; features2 = ['Tavern']; }
     else { popLevel2 = 'Barren'; features2 = []; }
 
-    const worldSummary = gameData.worldSummary || "";
-    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
-    const summaryLower = worldSummary.toLowerCase();
-    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
-    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
-    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+    const currentTheme = getPOITheme(gameData.worldSummary || "");
+
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
     const generateThemes = () => [1, 2, 3, 4].map(() => {
@@ -541,12 +538,8 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
         ? `\n[COMPANION PROFILES]\n${companions.map(c => `Name: ${c.name}, Race: ${c.race}, Level: ${c.level}, Profession: ${c.profession}, Background: ${c.background}`).join('\n')}`
         : '';
 
-    const worldSummary = gameData.worldSummary || "";
-    let currentTheme: 'fantasy' | 'modern' | 'scifi' | 'magitech' = 'fantasy';
-    const summaryLower = worldSummary.toLowerCase();
-    if (summaryLower.includes('sci-fi') || summaryLower.includes('spaceship') || summaryLower.includes('futuristic')) currentTheme = 'scifi';
-    else if (summaryLower.includes('modern') || summaryLower.includes('cyberpunk') || summaryLower.includes('city')) currentTheme = 'modern';
-    else if (summaryLower.includes('magitech') || summaryLower.includes('clockwork')) currentTheme = 'magitech';
+    const currentTheme = getPOITheme(gameData.worldSummary || "");
+
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
     const rolledThemes = [1, 2, 3, 4].map(() => {

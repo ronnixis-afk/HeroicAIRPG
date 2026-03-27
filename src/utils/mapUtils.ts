@@ -111,3 +111,61 @@ export const isNameTooSimilar = (newName: string, existingNames: string[], thres
     if (!newName || !existingNames.length) return false;
     return existingNames.some(existing => checkNameSimilarity(newName, existing) >= threshold);
 };
+
+/**
+ * Detects the POI theme based on the world summary.
+ * Priority: Sci-Fi > Magitech > Modern > Fantasy
+ */
+export const getPOITheme = (worldSummary: string): 'fantasy' | 'modern' | 'scifi' | 'magitech' => {
+    const summaryLower = (worldSummary || '').toLowerCase();
+    
+    // 1. Sci-Fi (includes Cyberpunk)
+    if (
+        summaryLower.includes('sci-fi') || 
+        summaryLower.includes('scifi') || 
+        summaryLower.includes('spaceship') || 
+        summaryLower.includes('futuristic') || 
+        summaryLower.includes('galaxy') || 
+        summaryLower.includes('space') || 
+        summaryLower.includes('cyberpunk') || 
+        summaryLower.includes('neon') || 
+        summaryLower.includes('high-tech') || 
+        summaryLower.includes('plasma') ||
+        summaryLower.includes('void') ||
+        summaryLower.includes('orbit')
+    ) {
+        return 'scifi';
+    }
+
+    // 2. Magitech (includes Steampunk/Clockwork)
+    if (
+        summaryLower.includes('magitech') || 
+        summaryLower.includes('clockwork') || 
+        summaryLower.includes('steampunk') || 
+        summaryLower.includes('manapunk') || 
+        summaryLower.includes('arcane techn') || 
+        summaryLower.includes('aether') || 
+        summaryLower.includes('alchemical engine') ||
+        summaryLower.includes('steam engine')
+    ) {
+        return 'magitech';
+    }
+
+    // 3. Modern (Narrowed to prevent false positives from Sci-Fi/Magitech cities)
+    if (
+        summaryLower.includes('modern day') || 
+        summaryLower.includes('contemporary') || 
+        summaryLower.includes('today') || 
+        summaryLower.includes('earth') || 
+        summaryLower.includes('21st century') || 
+        summaryLower.includes('urban fantasy') ||
+        summaryLower.includes('noir') ||
+        summaryLower.includes('smartphone') ||
+        summaryLower.includes('internet')
+    ) {
+        return 'modern';
+    }
+
+    // 4. Fantasy (Default)
+    return 'fantasy';
+};
