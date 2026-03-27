@@ -391,13 +391,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             setProgress(95);
 
             const customGameData: Partial<GameData> = {
-                story: [{
-                    id: `story-start-${Date.now()}`,
-                    timestamp: gameDateTime,
-                    location: startingLocationName,
-                    content: `You arrive in ${startingLocationName}. The World Of ${worldName} lies before you, waiting to be explored.`,
-                    isNew: true
-                }],
+                story: [],
                 objectives: [],
                 knowledge: [],
                 gmNotes: "",

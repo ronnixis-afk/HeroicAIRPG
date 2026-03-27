@@ -181,9 +181,10 @@ const GameInterface: React.FC = () => {
            (gameData.playerCharacter.name !== 'Adventurer' && gameData.playerCharacter.name !== 'New Hero');
   }, [gameData?.playerCharacter?.isInitialized, gameData?.playerCharacter?.name]);
 
-  // Enforce Hero Creation View
+  // Enforce Hero Creation View (Allow Settings and World Lore)
   useEffect(() => {
-    if (!hasPlayer && gameData && activeView !== 'character') {
+    const allowedViewsWithoutPlayer: View[] = ['character', 'settings', 'world'];
+    if (!hasPlayer && gameData && !allowedViewsWithoutPlayer.includes(activeView)) {
       setActiveView('character');
     }
   }, [hasPlayer, gameData, activeView, setActiveView]);
