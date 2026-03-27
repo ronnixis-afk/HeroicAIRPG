@@ -269,12 +269,11 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     // Update existing names to include the new pop center so we don't repeat it
     const updatedExistingNames = popCenterPoi ? [...existingNames, popCenterPoi.title] : [...existingNames];
 
-    // 2. Generate 4 generic POIs using the pop center or zone as context
-    // SYSTEM MANAGED: Roll 4d10 for each of the 4 POIs using the POI_MATRIX
+    // 2. Generate generic POIs using the pop center or zone as context
+    // SYSTEM MANAGED: Roll 3d10 for the 3 surrounding landmarks using the POI_MATRIX
     const currentTheme = getPOITheme(worldSummary);
-
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const rolledThemesData = [1, 2, 3, 4].map(() => {
+    const rolledThemesData = [1, 2, 3].map(() => {
         const r1 = Math.floor(Math.random() * 10);
         const r2 = Math.floor(Math.random() * 10);
         const r3 = Math.floor(Math.random() * 10);
@@ -299,11 +298,10 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     1. Theme: ${rolledThemesData[0].themeStr}
     2. Theme: ${rolledThemesData[1].themeStr}
     3. Theme: ${rolledThemesData[2].themeStr}
-    4. Theme: ${rolledThemesData[3].themeStr}
 
     [INSTRUCTIONS]
-    1. Entry 1: [MANDATORY] Thematic Population Center landmark (matching the ${zone.populationLevel} scale). You MUST incorporate Theme 1 above into this center.
-    2. Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
+    1. Entry 1: [MANDATORY] Thematic Population Center landmark (matching the ${zone.populationLevel} scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
+    2. Entries 2-4: The 3 surrounding landmarks. Each MUST correspond to its numbered theme provided above (Themes 1-3).
     3. title: MAX 3 WORDS.
     4. title: MUST NOT be identical OR SIMILAR to the zone name "${zone.name}" or (if it exists) the main landmark "${popCenterPoi?.title || ''}".
     5. title: EACH POI MUST HAVE A UNIQUE AND DISTINCT NAME. Do not repeat words across titles.
@@ -326,8 +324,13 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
         const data = JSON.parse(cleanJson(response.text || '[]'));
         let pois = Array.isArray(data) ? data : (data.pois || []);
         
-        // Attach base types to each generated POI
-        pois = pois.map((p: any, i: number) => ({ ...p, baseType: rolledThemesData[i]?.baseType }));
+        // Attach base types to each generated POI (Skipping pop center index 0)
+        pois = pois.map((p: any, i: number) => {
+            if (i > 0 && i - 1 < rolledThemesData.length) {
+                return { ...p, baseType: rolledThemesData[i - 1]?.baseType };
+            }
+            return p;
+        });
 
         if (attempts === 0) finalPois = pois;
 
@@ -454,6 +457,58 @@ export const generateZoneDetails = async (
     return finalDetails as { name: string, description: string, hostility: number, keywords: string[] };
 };
 
+/**
+ * Generates details for multiple zones in a single batch call.
+ * Optimized for preloading adjacent territories.
+ */
+export const generateBatchZoneDetails = async (
+    zonesToGenerate: { coords: string, popLevel: string }[],
+    worldSummary: string,
+    existingNames: string[] = []
+): Promise<any[]> => {
+    const ai = getAi();
+    const themeKey = getPOITheme(worldSummary);
+    const currentTheme = themeKey === 'scifi' ? 'Sci-Fi' : 
+                         themeKey === 'modern' ? 'Modern' : 
+                         themeKey === 'magitech' ? 'Magitech' : 'Fantasy';
+
+    const input = `Generate unique details for ${zonesToGenerate.length} new map zones.
+    World context: ${worldSummary}
+    
+    [ZONES TO GENERATE]
+    ${zonesToGenerate.map((z, i) => `${i + 1}. Coords: ${z.coords}, Population Density: ${z.popLevel}`).join('\n')}
+    
+    [STRICT CONSTRAINTS PER ZONE]
+    - name: MAX 3 WORDS.
+    - name: MUST NOT match or be highly similar to existing zones: [${existingNames.join(', ')}].
+    - description: MAX 30 WORDS.
+    - hostility: A number between -5 and 10.
+    
+    Return JSON array of objects: [{ "coordinates", "name", "description", "hostility" }]`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: AI_MODELS.DEFAULT,
+            contents: input,
+            config: { 
+                responseMimeType: "application/json",
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }
+            }
+        });
+
+        const data = JSON.parse(cleanJson(response.text || '[]'));
+        return Array.isArray(data) ? data : (data.zones || []);
+    } catch (e) {
+        console.error("Batch zone generation failed", e);
+        return zonesToGenerate.map(z => ({
+            coordinates: z.coords,
+            name: "Uncharted Wilds",
+            description: "A mysterious region awaiting exploration.",
+            hostility: 0
+        }));
+    }
+};
+
 import { getTravelDestinationsContext } from './aiContextService';
 
 /**
@@ -506,149 +561,84 @@ export const preloadAdjacentZones = async (
     if (!p) return;
 
     const directions = [
-        { dx: 0, dy: -1 }, // north
-        { dx: 0, dy: 1 },  // south
-        { dx: 1, dy: 0 },  // east
-        { dx: -1, dy: 0 }, // west
-        { dx: 1, dy: -1 }, // northeast
-        { dx: -1, dy: -1 },// northwest
-        { dx: 1, dy: 1 },  // southeast
-        { dx: -1, dy: 1 }  // southwest
+        { dx: 0, dy: -1 }, { dx: 0, dy: 1 }, { dx: 1, dy: 0 }, { dx: -1, dy: 0 },
+        { dx: 1, dy: -1 }, { dx: -1, dy: -1 }, { dx: 1, dy: 1 }, { dx: -1, dy: 1 }
     ];
 
-    // Maintain a running list of all names to avoid generating duplicates
+    const missingNeighbors: { coords: string, popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital', features: string[] }[] = [];
     const runningZoneNames = existingZones.map(z => z.name);
     const poiNames = existingPois.map(p => p.title);
     const allInhabitedNames = [...new Set([...runningZoneNames, ...poiNames])];
 
     for (const d of directions) {
-        const targetX = p.x + d.dx;
-        const targetY = p.y + d.dy;
-        const targetCoords = `${targetX}-${targetY}`;
-
-        const existing = existingZones.find(z => z.coordinates === targetCoords);
-        if (!existing) {
-            // Uncharted zone. Preload it.
-
-            // Gather immediate neighbor names for context
-            const neighborNames = existingZones
-                .filter((z: MapZone) => {
-                    const zp = parseCoords(z.coordinates);
-                    if (!zp) return false;
-                    return Math.abs(zp.x - targetX) <= 1 && Math.abs(zp.y - targetY) <= 1;
-                })
-                .map((z: MapZone) => z.name);
-
-            const contextStr = neighborNames.length > 0
-                ? `Adjacent to: ${neighborNames.join(', ')}.`
-                : '';
-
-            // D20 Pop Roll
+        const targetCoords = `${p.x + d.dx}-${p.y + d.dy}`;
+        if (!existingZones.find(z => z.coordinates === targetCoords)) {
             const popRoll = Math.floor(Math.random() * 20) + 1;
             let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
             let features: string[] = [];
-
             if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
             else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
             else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
             else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
-            else { popLevel = 'Barren'; features = []; }
+            
+            missingNeighbors.push({ coords: targetCoords, popLevel, features });
 
-            // Emit Shimmer UI Zone immediately
-            const shimmerZone: MapZone = {
+            // Emit Shimmer UI
+            dispatchZoneUpdate({
                 id: `zone-${targetCoords}-loading`,
                 coordinates: targetCoords,
-                name: "...", // Placeholder
-                hostility: 0,
+                name: "...",
                 visited: false,
                 isNew: false,
                 isLoading: true
-            };
-            dispatchZoneUpdate(shimmerZone);
-
-            // Fetch actual details sequentially
-            try {
-                // Determine uniqueness context
-                const allNamesList = allInhabitedNames.join(', ');
-                const validationContext = `
-                CRITICAL UNIQUENESS VALIDATION:
-                The new zone name MUST NOT match or be highly similar to ANY of these existing zones: [${allNamesList}].
-                If there is too much similarity, choose a completely different noun or adjective.
-                Additionally, the name must fit the thematic tone of the world summary: ${gameData.worldSummary || 'Fantasy'}.
-                `;
-
-                const completeContext = `${contextStr}\n${validationContext}\nThis zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.`;
-
-                const details = await generateZoneDetails(
-                    targetCoords,
-                    "Uncharted Lands",
-                    completeContext,
-                    gameData.mapSettings,
-                    gameData.worldSummary,
-                    allInhabitedNames
-                );
-
-                const newZone: MapZone = {
-                    id: `zone-${targetCoords}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-                    coordinates: targetCoords,
-                    name: details.name || "Uncharted Lands",
-                    description: details.description,
-                    hostility: typeof details.hostility === 'number' ? details.hostility : 0,
-                    populationLevel: popLevel,
-                    zoneFeatures: features,
-                    visited: false,
-                    isNew: false,
-                    isLoading: false,
-                    tags: ['location'],
-                    keywords: details.keywords || []
-                };
-
-                // Add to our running list so subsequent loops avoid duplicating this newly generated name
-                if (newZone.name) allInhabitedNames.push(newZone.name);
-
-                // Dispatch resolved zone
-                dispatchZoneUpdate(newZone);
-
-                // Generate and dispatch POIs for the preloaded zone
-                if (dispatchKnowledgeUpdate) {
-                    try {
-                        const pois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings, allInhabitedNames);
-                        const knowledgeEntries: Omit<LoreEntry, 'id'>[] = pois.map(p => {
-                            // All entries (0-3) now map to rolled themes.
-                            if (p.baseType) {
-                                return { ...p, baseType: p.baseType };
-                            }
-                            return p;
-                        }).map(p => {
-                            const tags = ['location'];
-                            if (p.isPopulationCenter) tags.push('population-center');
-                            if (p.baseType) tags.push(p.baseType);
-                            
-                            return {
-                                title: p.title,
-                                content: p.content,
-                                coordinates: newZone.coordinates,
-                                tags: tags,
-                                isNew: true,
-                                visited: p.title.toLowerCase().includes('open area')
-                            };
-                        });
-                        dispatchKnowledgeUpdate(knowledgeEntries);
-                        
-                        // Add new POIs to our global list
-                        knowledgeEntries.forEach(ke => {
-                            if (!ke.title.toLowerCase().includes('open area')) {
-                                allInhabitedNames.push(ke.title);
-                            }
-                        });
-                    } catch (poiError) {
-                        console.error("POI preloading failed for:", targetCoords, poiError);
-                    }
-                }
-            } catch (e) {
-                console.error("Silent sequential preload failed for:", targetCoords, e);
-                // Optionally remove the shimmer if it fails, or leave it to be retried by the redundancy check
-            }
+            } as MapZone);
         }
+    }
+
+    if (missingNeighbors.length === 0) return;
+
+    try {
+        const batchDetails = await generateBatchZoneDetails(
+            missingNeighbors.map(m => ({ coords: m.coords, popLevel: m.popLevel })),
+            gameData.worldSummary || "",
+            allInhabitedNames
+        );
+
+        batchDetails.forEach(details => {
+            const config = missingNeighbors.find(m => m.coords === details.coordinates);
+            if (!config) return;
+
+            const newZone: MapZone = {
+                id: `zone-${details.coordinates}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+                coordinates: details.coordinates,
+                name: details.name || "Uncharted Lands",
+                description: details.description,
+                hostility: typeof details.hostility === 'number' ? details.hostility : 0,
+                populationLevel: config.popLevel,
+                zoneFeatures: config.features,
+                visited: false,
+                isNew: false,
+                isLoading: false,
+                tags: ['location'],
+                keywords: []
+            };
+
+            dispatchZoneUpdate(newZone);
+
+            // Inject "Open Area" immediately so the zone is technically landing-ready
+            if (dispatchKnowledgeUpdate) {
+                const openArea: Omit<LoreEntry, 'id'> = {
+                    title: "Open Area",
+                    content: `The immediate arrival area of ${newZone.name}. ${newZone.description}`,
+                    coordinates: newZone.coordinates,
+                    tags: ['location'],
+                    isNew: true,
+                    visited: true
+                };
+                dispatchKnowledgeUpdate([openArea]);
+            }
+        });
+    } catch (e) {
+        console.error("Batch preload failed:", e);
     }
 };

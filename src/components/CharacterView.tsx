@@ -35,8 +35,11 @@ const CharacterView: React.FC = () => {
     const { playerCharacter, companions, mapZones, playerCoordinates } = gameData;
 
     const currentZone = mapZones?.find(z => z.coordinates === playerCoordinates);
-    const isRecruitmentAvailable = currentZone?.zoneFeatures?.includes('Tavern') || 
-        ['Settlement', 'Town', 'City', 'Capital'].includes(currentZone?.populationLevel || '');
+    const currentPoi = gameData.knowledge?.find(k => k.coordinates === playerCoordinates && k.title === gameData.currentLocale);
+    const isAtPopCenter = currentPoi?.tags?.includes('population-center');
+
+    const isRecruitmentAvailable = isAtPopCenter && (currentZone?.zoneFeatures?.includes('Tavern') || 
+        ['Settlement', 'Town', 'City', 'Capital'].includes(currentZone?.populationLevel || ''));
 
     // Fallback logic if selectedCharacterId points to nothing
     const activeCharacter = selectedCharacterId === 'player'

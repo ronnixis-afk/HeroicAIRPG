@@ -86,27 +86,59 @@ export const useTravel = (
                         localeEntry = openArea as LoreEntry;
                     }
                 }
-            } else if (!zone.visited) {
-                isDiscovery = true;
-                generatedDescription = zone.description || "";
-                dispatch({ type: 'UPDATE_MAP_ZONE', payload: { ...zone, visited: true } });
-            }
-
-            if (localeEntry && !localeEntry.visited) {
-                isDiscovery = true;
-                dispatch({ type: 'UPDATE_KNOWLEDGE', payload: { ...localeEntry, visited: true } });
-            } else if (!localeEntry && zone.visited) {
-                // Case: returning to a visited zone but no specific locale target
-                // Attempt to snap to existing "Open Area" if it exists
-                const existingOpenArea = gameData.knowledge?.find(k => k.coordinates === coordinates && k.title.toLowerCase().includes('open area'));
-                if (existingOpenArea) {
-                    localeEntry = existingOpenArea;
+            } else {
+                // Return visit or Preloaded zone
+                if (!zone.visited) {
+                    isDiscovery = true;
+                    generatedDescription = zone.description || "";
+                    dispatch({ type: 'UPDATE_MAP_ZONE', payload: { ...zone, visited: true } });
                 }
-            }
 
-            if (!isDiscovery) {
-                // Fetch existing POIs for return visits
-                currentPois = gameData.knowledge?.filter(k => k.coordinates === coordinates && k.tags?.includes('location')) || [];
+                // CHECK FOR LAZY POIs: If knowledge only has "Open Area", trigger generation
+                const existingPoisAtCoords = gameData.knowledge?.filter(k => k.coordinates === coordinates && k.tags?.includes('location')) || [];
+                const hasDetailedPois = existingPoisAtCoords.some(k => !k.title.toLowerCase().includes('open area'));
+
+                if (!hasDetailedPois) {
+                    dispatch({
+                        type: 'ADD_MESSAGE',
+                        payload: {
+                            id: `sys-poi-gen-${Date.now()}`,
+                            sender: 'system',
+                            content: `Generating local landmarks for ${zone.name}...`,
+                            type: 'neutral'
+                        }
+                    });
+
+                    const allKnownNames = [
+                        ...(gameData.mapZones || []).map(z => z.name),
+                        ...(gameData.knowledge || []).map(k => k.title)
+                    ];
+                    currentPois = await generatePoisForZone(zone, gameData.worldSummary || "", gameData.mapSettings, allKnownNames);
+                    const knowledgeEntries: LoreEntry[] = currentPois.map(p => {
+                        const tags = ['location'];
+                        if (p.isPopulationCenter) tags.push('population-center');
+                        if (p.baseType) tags.push(p.baseType);
+                        
+                        return {
+                            id: `know-lazy-${Date.now()}-${Math.random()}`,
+                            title: p.title,
+                            content: p.content,
+                            coordinates: zone?.coordinates || coordinates,
+                            tags: tags,
+                            isNew: true,
+                            visited: p.title.toLowerCase().includes('open area')
+                        };
+                    });
+                    
+                    // Deduplicate "Open Area" before dispatching
+                    const filteredEntries = knowledgeEntries.filter(ke => !existingPoisAtCoords.some(ep => ep.title === ke.title));
+                    dispatch({ type: 'ADD_KNOWLEDGE', payload: filteredEntries });
+                    
+                    // Update our local reference for narration
+                    currentPois = [...existingPoisAtCoords, ...filteredEntries];
+                } else {
+                    currentPois = existingPoisAtCoords;
+                }
             }
 
             const poisText = currentPois.map(p => `- ${p.title}: ${p.content}`).join('\n');

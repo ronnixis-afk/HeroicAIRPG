@@ -416,7 +416,7 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const generateThemes = () => [1, 2, 3, 4].map(() => {
+    const generateThemes = () => [1, 2, 3].map(() => {
         const r1 = Math.floor(Math.random() * 10);
         const r2 = Math.floor(Math.random() * 10);
         const r3 = Math.floor(Math.random() * 10);
@@ -448,13 +448,11 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     1. Theme: ${themes1[0].themeStr}
     2. Theme: ${themes1[1].themeStr}
     3. Theme: ${themes1[2].themeStr}
-    4. Theme: ${themes1[3].themeStr}
 
     ZONE 2 (Scale: ${popLevel2}):
     1. Theme: ${themes2[0].themeStr}
     2. Theme: ${themes2[1].themeStr}
     3. Theme: ${themes2[2].themeStr}
-    4. Theme: ${themes2[3].themeStr}
 
     [INSTRUCTIONS]
     1. Provide exactly 2 Zones.
@@ -464,8 +462,8 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
     2. 'hostility' MUST be an INTEGER between -10 and 10 (as these are known home-territory or past locations).
     3. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
     4. 'pois': You MUST generate exactly 4 entries per zone.
-       - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). You MUST incorporate Theme 1 into this entry.
-       - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
+       - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
+       - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1-3).
     
     Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
 
@@ -497,9 +495,9 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
             const isFirstZone = index === 0;
             const currentThemes = isFirstZone ? themes1 : themes2;
             const poisWithTypes = filteredPois.map((p: any, i: number) => {
-                // All entries (0-3) now map to rolled themes.
-                if (i < currentThemes.length) {
-                    return { ...p, baseType: currentThemes[i]?.baseType };
+                // Attach base types to each generated POI (Skipping pop center index 0)
+                if (i > 0 && i - 1 < currentThemes.length) {
+                    return { ...p, baseType: currentThemes[i - 1]?.baseType };
                 }
                 return p;
             });
@@ -542,7 +540,7 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
 
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const rolledThemes = [1, 2, 3, 4].map(() => {
+    const rolledThemes = [1, 2, 3].map(() => {
         const r1 = Math.floor(Math.random() * 10);
         const r2 = Math.floor(Math.random() * 10);
         const r3 = Math.floor(Math.random() * 10);
@@ -574,7 +572,6 @@ You MUST generate the starting zone's POIs following these specific rolled theme
 1. Theme: ${rolledThemes[0].themeStr}
 2. Theme: ${rolledThemes[1].themeStr}
 3. Theme: ${rolledThemes[2].themeStr}
-4. Theme: ${rolledThemes[3].themeStr}
 
 [INSTRUCTIONS]
 1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
@@ -586,8 +583,8 @@ You MUST generate the starting zone's POIs following these specific rolled theme
 4. startingZone: Create a safe haven or starting area with unique points of interest.
    - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
    - You MUST generate exactly 4 'knowledge' entries (POIs).
-     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). You MUST incorporate Theme 1 into this entry.
-     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 2-4).
+     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
+     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1-3).
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
 5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
    - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
@@ -629,8 +626,9 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
             const poisWithTypes = filteredKnowledge.map((p: any, i: number) => {
-                if (i < rolledThemes.length) {
-                    return { ...p, baseType: rolledThemes[i]?.baseType };
+                // Attach base types to each generated POI (Skipping pop center index 0)
+                if (i > 0 && i - 1 < rolledThemes.length) {
+                    return { ...p, baseType: rolledThemes[i - 1]?.baseType };
                 }
                 return p;
             });

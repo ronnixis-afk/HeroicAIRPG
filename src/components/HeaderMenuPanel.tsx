@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Icon } from './Icon';
 import { View } from '../types';
+import { getPOITheme } from '../utils/mapUtils';
 
 interface HeaderMenuPanelProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ interface HeaderMenuPanelProps {
   badges?: Record<string, number>;
   zoneFeatures?: string[];
   populationLevel?: string;
+  worldSummary?: string;
+  isAtPopulationCenter?: boolean;
 }
 
 const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
@@ -77,8 +80,21 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   isCombatActive = false,
   badges = {} as Record<string, number>,
   zoneFeatures = [],
-  populationLevel = ''
+  populationLevel = '',
+  worldSummary = '',
+  isAtPopulationCenter = false
 }) => {
+  const currentTheme = useMemo(() => getPOITheme(worldSummary), [worldSummary]);
+  
+  const themeLabel = useMemo(() => {
+    switch (currentTheme) {
+      case 'scifi': return 'Sci-Fi';
+      case 'magitech': return 'Magitech';
+      case 'modern': return 'Modern';
+      default: return 'Fantasy';
+    }
+  }, [currentTheme]);
+
   const formattedWorldName = useMemo(() => {
     if (!worldName) return 'Details';
     return worldName.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -105,7 +121,14 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-brand-primary/10 flex items-center justify-between gap-4">
-            <h2 className="text-brand-text line-clamp-1 overflow-hidden m-0 flex-1">{formattedWorldName}</h2>
+            <div className="flex-1 flex flex-col gap-1 min-w-0">
+              <h2 className="text-brand-text line-clamp-1 overflow-hidden m-0 text-body-lg font-bold">{formattedWorldName}</h2>
+              <div className="flex">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-primary/40 text-brand-accent border border-brand-accent/30 tracking-tight">
+                  {themeLabel}
+                </span>
+              </div>
+            </div>
             <button onClick={onClose} className="btn-icon text-brand-text-muted hover:text-brand-text transition-colors shrink-0">
               <Icon name="close" className="w-6 h-6" />
             </button>
@@ -146,8 +169,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     label="Merchant"
                     imageUrl="/icons/merchant.png"
                     onClick={() => handleAction('store')}
-                    disabled={isCombatActive || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
-                    warning={isCombatActive ? "The Merchant is hiding during combat." : "No Market available in this zone."}
+                    disabled={isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
+                    warning={isCombatActive ? "The Merchant is hiding during combat." : !isAtPopulationCenter ? "You must enter the settlement to trade." : "No Market available in this zone."}
                   />
 
                   <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
@@ -155,8 +178,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     label="Forge" 
                     imageUrl="/icons/forge.png" 
                     onClick={() => handleAction('item-forge')} 
-                    disabled={isCombatActive || (!zoneFeatures.includes('Item Forge') && !['City', 'Capital'].includes(populationLevel || ''))}
-                    warning={isCombatActive ? "The Forge is unsafe during combat." : "No Forge available in this zone."}
+                    disabled={isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Item Forge') && !['City', 'Capital'].includes(populationLevel || ''))}
+                    warning={isCombatActive ? "The Forge is unsafe during combat." : !isAtPopulationCenter ? "You must enter the settlement to use the forge." : "No Forge available in this zone."}
                   />
                   <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} />
                   <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} />

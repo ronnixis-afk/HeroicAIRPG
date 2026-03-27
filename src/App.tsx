@@ -205,6 +205,15 @@ const GameInterface: React.FC = () => {
     const zone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
     return zone?.populationLevel;
   }, [gameData?.playerCoordinates, gameData?.mapZones]);
+  
+  const isAtPopulationCenter = useMemo(() => {
+    if (!gameData || !gameData.playerCoordinates || !gameData.currentLocale || !gameData.knowledge) return false;
+    const currentPoi = gameData.knowledge.find(k => 
+      k.coordinates === gameData.playerCoordinates && 
+      k.title === gameData.currentLocale
+    );
+    return currentPoi?.tags?.includes('population-center') ?? false;
+  }, [gameData?.playerCoordinates, gameData?.currentLocale, gameData?.knowledge]);
 
   const handleLocationSubmit = (prompt: string) => {
     submitUserMessage({
@@ -409,6 +418,8 @@ const GameInterface: React.FC = () => {
              badges={menuBadges}
             zoneFeatures={currentZoneFeatures}
             populationLevel={currentPopulationLevel}
+            worldSummary={gameData?.worldSummary}
+            isAtPopulationCenter={isAtPopulationCenter}
           />
           <PlayerAttackModal
             isOpen={activePanel === 'abilities'}

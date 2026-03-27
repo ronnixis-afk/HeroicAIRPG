@@ -61,8 +61,9 @@ const POIListItem: React.FC<{
     onToggleExpand: () => void;
     isPlayerHere?: boolean;
     isInSameZone?: boolean;
+    isZoneVisited?: boolean;
     populationLevel?: string;
-}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, isInSameZone, populationLevel }) => {
+}> = ({ entry, zoneName, onDelete, onInvestigate, onEdit, isExpanded, onToggleExpand, isPlayerHere, isInSameZone, isZoneVisited, populationLevel }) => {
     const { updateKnowledge, gameData } = useContext(GameDataContext);
     const { setInspectedEntity, setPendingTravelConfirmation } = useUI();
     const [isEditing, setIsEditing] = useState(false);
@@ -456,7 +457,8 @@ const POIListItem: React.FC<{
                         ) : (
                             <button
                                 onClick={handleInteract}
-                                className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold"
+                                className={`btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold transition-all ${isInSameZone && !isZoneVisited ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                                disabled={isInSameZone && !isZoneVisited}
                             >
                                 {toTitleCase(isInSameZone ? 'Enter' : 'Travel Here')}
                             </button>
@@ -697,6 +699,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     onToggleExpand={() => setExpandedPoiId(expandedPoiId === entry.id ? null : entry.id)}
                                                     isPlayerHere={isPlayerHere && currentLocale === entry.title}
                                                     isInSameZone={isPlayerHere}
+                                                    isZoneVisited={zone?.visited}
                                                     populationLevel={zone?.populationLevel}
                                                 />
                                             ))

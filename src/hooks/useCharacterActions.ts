@@ -146,6 +146,9 @@ export const useCharacterActions = (
 
                     if (pz.pois) {
                         pz.pois.forEach((poi: any, j: number) => {
+                            const isDuplicate = knowledgeUpdates.some(k => k.coordinates === pz.coordinates && k.title === poi.title);
+                            if (isDuplicate) return;
+
                             const tags = poi.isBackgroundRelated ? ['location', 'background'] : ['location'];
                             if (poi.isPopulationCenter) tags.push('population-center');
                             knowledgeUpdates.push({
@@ -236,6 +239,9 @@ export const useCharacterActions = (
                 else mapZonesUpdate.push(startingZone);
 
                 scenario.startingZone.knowledge.forEach((k: any, i: number) => {
+                    const isDuplicate = knowledgeUpdates.some(kn => kn.coordinates === coords && kn.title === k.title);
+                    if (isDuplicate) return;
+
                     const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
                     if (k.isPopulationCenter) tags.push('population-center');
                     knowledgeUpdates.push({
@@ -397,6 +403,9 @@ export const useCharacterActions = (
 
             let knowledgeUpdates = [...(gameData.knowledge || [])];
             scenario.startingZone.knowledge.forEach((k: any, i: number) => {
+                const isDuplicate = knowledgeUpdates.some(kn => kn.coordinates === coords && kn.title === k.title);
+                if (isDuplicate) return;
+
                 const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
                 if (k.isPopulationCenter) tags.push('population-center');
                 knowledgeUpdates.push({
