@@ -27,6 +27,7 @@ interface HeaderMenuPanelProps {
   populationLevel?: string;
   worldSummary?: string;
   isAtPopulationCenter?: boolean;
+  hasPlayer: boolean;
 }
 
 const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
@@ -82,7 +83,8 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   zoneFeatures = [],
   populationLevel = '',
   worldSummary = '',
-  isAtPopulationCenter = false
+  isAtPopulationCenter = false,
+  hasPlayer
 }) => {
   const currentTheme = useMemo(() => getPOITheme(worldSummary), [worldSummary]);
   
@@ -124,7 +126,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
             <div className="flex-1 flex flex-col gap-1 min-w-0">
               <h2 className="text-brand-text line-clamp-1 overflow-hidden m-0 text-body-lg font-bold">{formattedWorldName}</h2>
               <div className="flex">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-primary/40 text-brand-accent border border-brand-accent/30 tracking-tight">
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-brand-primary/40 text-brand-accent border border-brand-accent/30 tracking-normal">
                   {themeLabel}
                 </span>
               </div>
@@ -157,40 +159,40 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               <div className="flex-1 flex flex-col justify-center gap-4 py-4 min-min-h-0">
                 <label className="text-body-tiny font-bold text-brand-text-muted opacity-60 block mb-1">Menu</label>
                 <div className="grid grid-cols-3 gap-y-4 sm:gap-y-6 md:gap-y-8 gap-x-2 pb-2">
-                  <MenuItem label="Heroes" imageUrl="/icons/heroes.png" onClick={() => handleAction('character')} />
-                  <MenuItem label="Backpack" imageUrl="/icons/backpack.png" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} />
-                  <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} />
-                  <MenuItem label="Quests" imageUrl="/icons/quests.png" onClick={() => handleAction('objectives')} badgeCount={badges.quests} />
+                  <MenuItem label="Heroes" imageUrl="/icons/heroes.png" onClick={() => handleAction('character')} disabled={!hasPlayer} />
+                  <MenuItem label="Backpack" imageUrl="/icons/backpack.png" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} disabled={!hasPlayer} />
+                  <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} disabled={!hasPlayer} />
+                  <MenuItem label="Quests" imageUrl="/icons/quests.png" onClick={() => handleAction('objectives')} badgeCount={badges.quests} disabled={!hasPlayer} />
 
-                  <MenuItem label="Lore" imageUrl="/icons/lore.png" onClick={() => handleAction('world')} badgeCount={badges.world} />
-                  <MenuItem label="People" imageUrl="/icons/people.png" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} />
-                  <MenuItem label="Map" imageUrl="/icons/map.png" onClick={() => handleAction('knowledge')} badgeCount={badges.map} />
+                  <MenuItem label="Lore" imageUrl="/icons/lore.png" onClick={() => handleAction('world')} badgeCount={badges.world} disabled={!hasPlayer} />
+                  <MenuItem label="People" imageUrl="/icons/people.png" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} disabled={!hasPlayer} />
+                  <MenuItem label="Map" imageUrl="/icons/map.png" onClick={() => handleAction('knowledge')} badgeCount={badges.map} disabled={!hasPlayer} />
                   <MenuItem
                     label="Merchant"
                     imageUrl="/icons/merchant.png"
                     onClick={() => handleAction('store')}
-                    disabled={isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
-                    warning={isCombatActive ? "The Merchant is hiding during combat." : !isAtPopulationCenter ? "You must enter the settlement to trade." : "No Market available in this zone."}
+                    disabled={!hasPlayer || isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
+                    warning={!hasPlayer ? "Create a hero first." : isCombatActive ? "The Merchant is hiding during combat." : !isAtPopulationCenter ? "You must enter the settlement to trade." : "No Market available in this zone."}
                   />
 
-                  <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
+                  <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} disabled={!hasPlayer} />
                   <MenuItem 
                     label="Forge" 
                     imageUrl="/icons/forge.png" 
                     onClick={() => handleAction('item-forge')} 
-                    disabled={isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Item Forge') && !['City', 'Capital'].includes(populationLevel || ''))}
-                    warning={isCombatActive ? "The Forge is unsafe during combat." : !isAtPopulationCenter ? "You must enter the settlement to use the forge." : "No Forge available in this zone."}
+                    disabled={!hasPlayer || isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Item Forge') && !['City', 'Capital'].includes(populationLevel || ''))}
+                    warning={!hasPlayer ? "Create a hero first." : isCombatActive ? "The Forge is unsafe during combat." : !isAtPopulationCenter ? "You must enter the settlement to use the forge." : "No Forge available in this zone."}
                   />
-                  <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} />
-                  <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} />
+                  <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} disabled={!hasPlayer} />
+                  <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} disabled={!hasPlayer} />
 
-                  <MenuItem label="Rivals" imageUrl="/icons/rivals.png" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} />
+                  <MenuItem label="Rivals" imageUrl="/icons/rivals.png" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} disabled={!hasPlayer} />
                   <MenuItem
                     label="Rest & Camp"
                     imageUrl="/icons/rest-camp.png"
                     onClick={handleTimeClick}
-                    disabled={isCombatActive}
-                    warning="Cannot rest while in danger."
+                    disabled={!hasPlayer || isCombatActive}
+                    warning={!hasPlayer ? "Create a hero first." : "Cannot rest while in danger."}
                   />
                 </div>
               </div>

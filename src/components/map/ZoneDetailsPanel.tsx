@@ -329,7 +329,7 @@ const POIListItem: React.FC<{
                                 </h6>
                                 <div className="flex flex-wrap gap-2 mb-2">
                                     {popLevelLabel && (
-                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30">
+                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 tracking-normal">
                                             {popLevelLabel}
                                         </span>
                                     )}
@@ -344,7 +344,7 @@ const POIListItem: React.FC<{
                                             t !== 'population-center' && 
                                             !possibleLevels.includes(t.toLowerCase())
                                         ).map(tag => (
-                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-full border border-brand-text-muted/30 whitespace-nowrap">
+                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 whitespace-nowrap tracking-normal">
                                                 {toTitleCase(tag.replace(/-/g, ' '))}
                                             </span>
                                         ));
@@ -666,14 +666,14 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                         )}
                                         <h3 className="mb-2 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded border border-brand-accent/20 tracking-normal">
+                                            <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20 tracking-normal">
                                                 {coordinates}
                                             </span>
-                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded border tracking-normal ${hInfo.bg} ${hInfo.color} ${hInfo.border}`}>
+                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border tracking-normal ${hInfo.bg} ${hInfo.color} ${hInfo.border}`}>
                                                 {toTitleCase(hInfo.label)}
                                             </span>
                                             {keywords.map((kw, i) => (
-                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded border tracking-normal ${getPropertyColor(kw)} whitespace-nowrap`}>
+                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border tracking-normal ${getPropertyColor(kw)} whitespace-nowrap`}>
                                                     {toTitleCase(kw.split(':')[0].trim())}
                                                 </span>
                                             ))}

@@ -10,7 +10,7 @@ import { CharacterCreationWizard } from './character/CharacterCreationWizard';
 import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
-    const { gameData, updateCompanion, startJourney } = useContext(GameDataContext);
+    const { gameData, updateCompanion, startJourney, switchWorld } = useContext(GameDataContext);
     const { selectedCharacterId, setSelectedCharacterId, creationProgress } = useUI();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
@@ -192,13 +192,21 @@ const CharacterView: React.FC = () => {
                             })}
                         </div>
 
-                        <button
-                            onClick={() => startJourney(10)}
-                            disabled={!hasPlayer}
-                            className={`btn-lg rounded-lg px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
-                        >
-                            Begin Journey
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={switchWorld}
+                                className="btn-md btn-secondary rounded-lg px-8 transition-all"
+                            >
+                                Exit World
+                            </button>
+                            <button
+                                onClick={() => startJourney(10)}
+                                disabled={!hasPlayer}
+                                className={`btn-md rounded-lg px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
+                            >
+                                Begin Journey
+                            </button>
+                        </div>
                     </div>
                 )
             ) : (

@@ -27,6 +27,7 @@ interface ChatInputBarProps {
     isChatViewActive: boolean;
     mode: 'CHAR' | 'OOC';
     onModeChange: (mode: 'CHAR' | 'OOC') => void;
+    hasPlayer: boolean;
 }
 
 export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
@@ -220,9 +221,9 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
             <div className={`flex items-center gap-2 transition-all duration-500 ease-in-out overflow-visible whitespace-nowrap ${isFocused ? 'max-w-0 opacity-0 -translate-x-10 pointer-events-none' : 'max-w-[150px] opacity-100 translate-x-0'}`}>
                 <button
                     onClick={handleHeroicToggle}
-                    disabled={!canActivateHeroic}
-                    className={`btn-icon relative transition-all duration-300 ${!canActivateHeroic ? 'opacity-20 cursor-not-allowed' : ''} ${isHeroicModeActive ? 'scale-[1.15]' : ''}`}
-                    title={canActivateHeroic
+                    disabled={!canActivateHeroic || !props.hasPlayer}
+                    className={`btn-icon relative transition-all duration-300 ${(!canActivateHeroic || !props.hasPlayer) ? 'opacity-20 cursor-not-allowed' : ''} ${isHeroicModeActive ? 'scale-[1.15]' : ''}`}
+                    title={!props.hasPlayer ? "Create a hero first" : canActivateHeroic
                         ? `${isHeroicModeActive ? "Heroic Mode Active" : "Enable Heroic Mode"} (${heroicPoints}/${maxHeroicPoints} Available)`
                         : `No Heroic Points Remaining (0/${maxHeroicPoints})`}
                 >
@@ -260,17 +261,24 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     setTimeout(() => setIsFocused(false), 200);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder={isHeroicModeActive ? "Say or Do" : (props.mode === 'CHAR' ? "Say or Do" : "Ask The Game Master")}
-                className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''}`}
+                placeholder={!props.hasPlayer ? "Create your hero to begin..." : isHeroicModeActive ? "Say or Do" : (props.mode === 'CHAR' ? "Say or Do" : "Ask The Game Master")}
+                className={`flex-1 bg-transparent p-2 focus:outline-none w-full min-w-[100px] text-body-base transition-all duration-300 ${isHeroicModeActive ? 'font-medium' : ''} ${!props.hasPlayer ? 'opacity-50' : ''}`}
                 style={{ maxHeight: '120px' }}
+                disabled={!props.hasPlayer}
             />
 
             <div className="flex items-center self-center gap-1">
                 <div className={`flex items-center gap-1 transition-all duration-500 ease-in-out overflow-hidden whitespace-nowrap ${isFocused ? 'max-w-0 opacity-0 translate-x-10' : 'max-w-[100px] opacity-100 translate-x-0'}`}>
-                    <button onClick={props.onViewScene} disabled={props.isGeneratingImage} className="btn-icon">
+                    <button onClick={props.onViewScene} disabled={props.isGeneratingImage || !props.hasPlayer} className="btn-icon">
                         {props.isGeneratingImage ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : <Icon name="eye" className="w-5 h-5 text-brand-text-muted hover:text-brand-accent transition-colors" />}
                     </button>
-                    <SpeechToTextButton onClick={props.onMicClick} className="btn-icon" />
+                    {!props.hasPlayer ? (
+                         <button disabled className="btn-icon opacity-40">
+                            <Icon name="microphone" className="w-5 h-5 text-brand-text-muted" />
+                         </button>
+                    ) : (
+                        <SpeechToTextButton onClick={props.onMicClick} className="btn-icon" />
+                    )}
                 </div>
                 <button
                     onClick={props.onSubmit}

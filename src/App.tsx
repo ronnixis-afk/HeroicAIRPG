@@ -175,6 +175,19 @@ const GameInterface: React.FC = () => {
     gameData?.mapZones?.length
   ]);
 
+  const hasPlayer = useMemo(() => {
+    if (!gameData?.playerCharacter) return false;
+    return gameData.playerCharacter.name !== 'Adventurer' && 
+           gameData.playerCharacter.name !== 'New Hero';
+  }, [gameData?.playerCharacter?.name]);
+
+  // Enforce Hero Creation View
+  useEffect(() => {
+    if (!hasPlayer && gameData && activeView !== 'character') {
+      setActiveView('character');
+    }
+  }, [hasPlayer, gameData, activeView, setActiveView]);
+
   const handlePanelClose = () => setActivePanel(null);
   const isCombatActive = gameData?.combatState?.isActive ?? false;
 
@@ -379,12 +392,13 @@ const GameInterface: React.FC = () => {
             isCombatActive={isCombatActive}
             isPlayerTurn={isPlayerTurn}
             onAutoResolve={performAutomatedPlayerTurn}
-            isLocked={isLoading || isAiGenerating || isAssessing || isAuditing || !!pendingCombat}
+            isLocked={isLoading || isAiGenerating || isAssessing || isAuditing || !!pendingCombat || !hasPlayer}
             onMenuClick={() => setIsHeaderMenuOpen(true)}
             onInteraction={ensureChatView}
             isChatViewActive={activeView === 'chat'}
             mode={chatMode}
             onModeChange={setChatMode}
+            hasPlayer={hasPlayer}
           />
         </div>
       </div>
@@ -420,7 +434,9 @@ const GameInterface: React.FC = () => {
             populationLevel={currentPopulationLevel}
             worldSummary={gameData?.worldSummary}
             isAtPopulationCenter={isAtPopulationCenter}
+            hasPlayer={hasPlayer}
           />
+
           <PlayerAttackModal
             isOpen={activePanel === 'abilities'}
             onClose={handlePanelClose}
