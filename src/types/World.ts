@@ -87,6 +87,9 @@ export interface LoreEntry {
 
   // Racial Trait: Ability score bonus trait for races
   racialTrait?: Ability;
+  
+  // Naming/Language technique for generated races
+  languageConfig?: string;
 }
 
 export interface GalleryEntry {
@@ -408,6 +411,7 @@ export interface Race {
   faction?: string;
   keywords?: string[];
   racialTrait?: Ability;
+  languageConfig?: string;
 }
 
 export interface Faction {

@@ -5,6 +5,7 @@ import { PlayerCharacter, Companion } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
+import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
 
 /**
  * Decrements the duration of active buffs on an actor based on time passed.
@@ -59,8 +60,35 @@ const decayCorpses = (npcs: NPC[] | undefined, mapZones: MapZone[] | undefined, 
 
 export const systemReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
-        case 'SET_GAME_DATA':
-            return action.payload;
+        case 'SET_GAME_DATA': {
+            const loadedData = action.payload;
+            
+            // Backwards compatibility: Assign language config to old races
+            if (loadedData && Array.isArray(loadedData.knowledge)) {
+                const shuffledLanguages = [...LANGUAGE_TECHNIQUES].sort(() => 0.5 - Math.random());
+                let languageIndex = 0;
+                
+                let modified = false;
+                const updatedKnowledge = loadedData.knowledge.map(lore => {
+                    if (lore.tags && lore.tags.includes('race') && !lore.languageConfig) {
+                        modified = true;
+                        let config = HUMAN_LANGUAGE_TECHNIQUE;
+                        if (lore.title.toLowerCase() !== 'humans' && lore.title.toLowerCase() !== 'human') {
+                            config = shuffledLanguages[languageIndex % shuffledLanguages.length];
+                            languageIndex++;
+                        }
+                        return { ...lore, languageConfig: config };
+                    }
+                    return lore;
+                });
+                
+                if (modified) {
+                    return { ...loadedData, knowledge: updatedKnowledge };
+                }
+            }
+            
+            return loadedData;
+        }
 
         case 'SET_NARRATION_VOICE':
             return { ...state, narrationVoice: action.payload };

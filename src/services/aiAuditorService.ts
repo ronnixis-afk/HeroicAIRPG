@@ -40,7 +40,7 @@ export const auditSystemState = async (
     // 1. Extract Valid Ancestries from World Lore
     const availableRaces = (gameData.world || [])
         .filter(l => l.tags?.includes('race'))
-        .map(l => l.title);
+        .map(l => `${l.title} (Naming Style: ${l.languageConfig || 'English'})`);
     
     const raceListStr = availableRaces.length > 0 
         ? availableRaces.join(', ') 

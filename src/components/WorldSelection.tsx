@@ -332,7 +332,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                     content: `${r.description}\n\nAppearance: ${r.appearance}\nQualities: ${r.qualities}\nAllegiance: ${r.faction || 'None'}`,
                     tags: ['race', 'npc'],
                     keywords: r.keywords || [],
-                    racialTrait: r.racialTrait
+                    racialTrait: r.racialTrait,
+                    languageConfig: r.languageConfig
                 });
             });
 

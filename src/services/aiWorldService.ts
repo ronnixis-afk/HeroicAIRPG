@@ -7,6 +7,7 @@ import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, Lo
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
 import { parseCoords, isNameTooSimilar, getPOITheme, normalizeCoords } from '../utils/mapUtils';
 import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
+import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
 import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
 
@@ -162,8 +163,11 @@ export const generateWorldPreview = async (
         const rawData = JSON.parse(cleanJson(response.text || '{}')) || {};
         const rawRaces = Array.isArray(rawData.races) ? rawData.races : [];
 
-        // Distribute racial traits
+        // Distribute racial traits and assign language techniques
         const shuffledTraits = [...RACIAL_TRAIT_BLUEPRINTS].sort(() => 0.5 - Math.random());
+        const shuffledLanguages = [...LANGUAGE_TECHNIQUES].sort(() => 0.5 - Math.random());
+        let languageIndex = 0;
+
         const racesWithTraits = rawRaces.map((race: any, index: number) => {
             const blueprint = shuffledTraits[index % shuffledTraits.length];
             const racialTrait: Ability = {
@@ -171,7 +175,14 @@ export const generateWorldPreview = async (
                 id: `racial-${race.name.toLowerCase()}-${Date.now()}`,
                 name: `${race.name} Trait`
             } as Ability;
-            return { ...race, racialTrait };
+            
+            let languageConfig = HUMAN_LANGUAGE_TECHNIQUE;
+            if (race.name.toLowerCase() !== 'humans' && race.name.toLowerCase() !== 'human') {
+                languageConfig = shuffledLanguages[languageIndex % shuffledLanguages.length];
+                languageIndex++;
+            }
+
+            return { ...race, racialTrait, languageConfig };
         });
 
         return {

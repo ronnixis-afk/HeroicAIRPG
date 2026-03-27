@@ -75,13 +75,13 @@ export const generateNarrativeResponse = async (
         - If hostiles are present, focus on their routine behavior, conversation, or environmental presence.`;
     }
 
-    const availableRaces = (gameData.world || []).filter(l => l.tags?.includes('race')).map(l => l.title);
+    const availableRaces = (gameData.world || []).filter(l => l.tags?.includes('race')).map(l => `${l.title} (Naming Style: ${l.languageConfig || 'English'})`);
     const raceListStr = availableRaces.length > 0 ? availableRaces.join(', ') : 'Human, Elf, Dwarf, Orc';
 
     if (systemGeneratedCombatants && systemGeneratedCombatants.length > 0) {
         promptContent += `\n\n[MANDATORY SYSTEM DIRECTIVE - POTENTIAL COMBAT]: 
         The world logic dictates potential hostiles are engaging. If the narrative confirms the start of battle, you MUST populate the 'suggestedActors' field and set 'active_engagement' to true.
-        - ANCESTRY ENFORCEMENT: Choose from [${raceListStr}].
+        - ANCESTRY ENFORCEMENT & NAMING: Choose from [${raceListStr}]. You MUST apply the matching Naming Style whenever an NPC name is created for that race.
         - Use unique names and match them to these mechanical slots:
         ${systemGeneratedCombatants.map((s, i) => `Slot ${i + 1}: [Difficulty: ${s.difficulty}, Template: ${s.template}]`).join('\n')}`;
     }
