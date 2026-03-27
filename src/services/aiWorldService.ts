@@ -572,7 +572,8 @@ export const preloadAdjacentZones = async (
 
     for (const d of directions) {
         const targetCoords = `${p.x + d.dx}-${p.y + d.dy}`;
-        if (!existingZones.find(z => z.coordinates === targetCoords)) {
+        const existing = existingZones.find(z => z.coordinates === targetCoords);
+        if (!existing || existing.isLoading) {
             const popRoll = Math.floor(Math.random() * 20) + 1;
             let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
             let features: string[] = [];
@@ -604,13 +605,15 @@ export const preloadAdjacentZones = async (
             allInhabitedNames
         );
 
+        const updatedCoords = new Set<string>();
         batchDetails.forEach(details => {
-            const config = missingNeighbors.find(m => m.coords === details.coordinates);
+            const sanitizedCoords = (details.coordinates || "").toString().trim();
+            const config = missingNeighbors.find(m => m.coords === sanitizedCoords);
             if (!config) return;
 
             const newZone: MapZone = {
-                id: `zone-${details.coordinates}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-                coordinates: details.coordinates,
+                id: `zone-${sanitizedCoords}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+                coordinates: sanitizedCoords,
                 name: details.name || "Uncharted Lands",
                 description: details.description,
                 hostility: typeof details.hostility === 'number' ? details.hostility : 0,
@@ -624,6 +627,7 @@ export const preloadAdjacentZones = async (
             };
 
             dispatchZoneUpdate(newZone);
+            updatedCoords.add(sanitizedCoords);
 
             // Inject "Open Area" immediately so the zone is technically landing-ready
             if (dispatchKnowledgeUpdate) {
@@ -636,6 +640,26 @@ export const preloadAdjacentZones = async (
                     visited: true
                 };
                 dispatchKnowledgeUpdate([openArea]);
+            }
+        });
+
+        // Fallback for any missing entries in the batch
+        missingNeighbors.forEach(m => {
+            if (!updatedCoords.has(m.coords)) {
+                dispatchZoneUpdate({
+                    id: `zone-${m.coords}-fallback-${Date.now()}`,
+                    coordinates: m.coords,
+                    name: "Uncharted Wilds",
+                    description: "A mysterious region awaiting exploration.",
+                    hostility: 0,
+                    populationLevel: m.popLevel,
+                    zoneFeatures: m.features,
+                    visited: false,
+                    isNew: false,
+                    isLoading: false,
+                    tags: ['location'],
+                    keywords: []
+                } as MapZone);
             }
         });
     } catch (e) {

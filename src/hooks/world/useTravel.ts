@@ -91,7 +91,7 @@ export const useTravel = (
                 if (!zone.visited) {
                     isDiscovery = true;
                     generatedDescription = zone.description || "";
-                    dispatch({ type: 'UPDATE_MAP_ZONE', payload: { ...zone, visited: true } });
+                    dispatch({ type: 'UPDATE_MAP_ZONE', payload: { ...zone, visited: true, isLoading: false } });
                 }
 
                 // CHECK FOR LAZY POIs: If knowledge only has "Open Area", trigger generation
