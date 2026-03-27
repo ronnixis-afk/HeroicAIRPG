@@ -236,7 +236,14 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 });
             }
             const skins = await generateRecruitSkins(gameData, seeds);
-            setRecruits(seeds.map((s, i) => ({ ...s, name: skins[i]?.name || `${s.race} Adventurer`, description: skins[i]?.description || "A wanderer looking for coin and glory.", personality: skins[i]?.personality || "Quirky and reliable." })));
+            setRecruits(seeds.map((s, i) => ({
+                ...s,
+                name: skins[i]?.name || `${s.race} Adventurer`,
+                description: skins[i]?.description || "A wanderer looking for coin and glory.",
+                personality: skins[i]?.personality || "Quirky and reliable.",
+                moralAlignment: skins[i]?.moralAlignment || { goodEvil: 0, lawChaos: 0 }
+            })));
+
         } catch (e) {
             console.error("Recruitment generation failed", e);
             setCreationMethod(null);
@@ -275,8 +282,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
-            const baseCharData = { id: `comp-${Date.now()}`, name: recruit.name, gender: recruit.gender, race: recruit.race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: recruit.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level: playerLevel, experiencePoints: getXpForLevel(playerLevel) };
+            const baseCharData = { id: `comp-${Date.now()}`, name: recruit.name, gender: recruit.gender, race: recruit.race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: recruit.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level: playerLevel, experiencePoints: getXpForLevel(playerLevel), alignment: recruit.moralAlignment || wovenData.moralAlignment };
             await integrateCharacter(new Companion(baseCharData), true, isPreGame);
+
             onClose();
         } catch (e) { 
             console.error("Recruit selection failed", e); 
@@ -318,8 +326,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
 
-            const baseCharData = { id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), name, gender: isShip ? 'Unspecified' : gender, race: isShip ? 'Vessel' : race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: isShip ? '' : wovenData.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level, experiencePoints: getXpForLevel(level), isShip, isSentient: !isShip };
+            const baseCharData = { id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), name, gender: isShip ? 'Unspecified' : gender, race: isShip ? 'Vessel' : race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: isShip ? '' : wovenData.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level, experiencePoints: getXpForLevel(level), isShip, isSentient: !isShip, alignment: wovenData.moralAlignment };
             const finalChar = type === 'player' ? new PlayerCharacter(baseCharData) : new Companion(baseCharData);
+
             await integrateCharacter(finalChar, isCompanion, isPreGame);
             onClose();
         } catch (e) { 

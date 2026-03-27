@@ -520,6 +520,19 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
         if (char.statusEffects?.length && requiredKeys.includes('core_stats')) {
             details += ` | STATUS EFFECTS: ${char.statusEffects.map(e => e.name).join(', ')}`;
         }
+
+        // NEW: Possessed Items (Unequipped, non-equippable utilities/consumables)
+        if (inventory && requiredKeys.includes('inventory')) {
+            const possessed = inventory.carried
+                .filter(item => !item.bodySlotTag)
+                .map(item => item.getDisplayName())
+                .join(', ');
+            
+            if (possessed) {
+                details += ` | [POSSESSED ITEMS]: ${possessed}`;
+            }
+        }
+
         return details;
     };
 

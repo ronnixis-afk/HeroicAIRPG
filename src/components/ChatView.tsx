@@ -37,7 +37,7 @@ const ChatView: React.FC = () => {
         dispatch
     } = useContext(GameDataContext);
 
-    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActivePanel, setActingCharacterId, isHeroicModeActive } = useUI();
+    const { isAssessing, isAiGenerating, isAuditing, isHousekeeping, pendingCombat, setActiveView, setActivePanel, setActingCharacterId, isHeroicModeActive, setSelectedCharacterId, setActiveCharacterSection } = useUI();
 
     const chatEndRef = useRef<HTMLDivElement>(null);
     const isInitialRender = useRef(true);
@@ -319,6 +319,30 @@ const ChatView: React.FC = () => {
         return null;
     }, [processedMessages, gameData?.combatState?.isActive]);
 
+    const charactersWithUnspentTraits = useMemo(() => {
+        if (!gameData) return [];
+        const result: { id: string, name: string }[] = [];
+
+        const check = (char: any, id: string) => {
+            const level = char.level || 1;
+            const total = Math.floor(level / 3);
+            const used = (char.abilities || []).filter((a: any) => a.isLevelUpTrait).length;
+            if (total > used) {
+                result.push({ id, name: char.name });
+            }
+        };
+
+        if (gameData.playerCharacter) {
+            check(gameData.playerCharacter, 'player');
+        }
+
+        (gameData.companions || []).forEach(comp => {
+            check(comp, comp.id);
+        });
+
+        return result;
+    }, [gameData]);
+
     const smoothScrollToBottom = (force = false) => {
         const container = document.querySelector('.chat-scroll-container');
         if (container) {
@@ -432,6 +456,23 @@ const ChatView: React.FC = () => {
                     <div ref={chatEndRef} className="h-1" />
                 </div>
             </div>
+            {charactersWithUnspentTraits.length > 0 && (
+                <div 
+                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce-subtle cursor-pointer"
+                    onClick={() => {
+                        const first = charactersWithUnspentTraits[0];
+                        setSelectedCharacterId(first.id);
+                        setActiveCharacterSection('Abilities');
+                        setActiveView('character');
+                    }}
+                >
+                    <div className="bg-brand-accent/90 backdrop-blur-md text-black px-4 py-2 rounded-full shadow-2xl border border-white/20 flex items-center gap-2 hover:scale-105 transition-transform active:scale-95 group">
+                        <Icon name="sparkles" className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                        <span className="text-xs font-bold whitespace-nowrap">Your party has unspent trait points</span>
+                    </div>
+                </div>
+            )}
+
             <SystemToastManager />
             <EntityLightbox />
         </div>

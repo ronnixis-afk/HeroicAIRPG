@@ -260,6 +260,18 @@ export const LAW_CHAOS_ALIASES = [
     { label: 'Pure Chaos', value: -100 }
 ];
 
+export const ALIGNMENT_SYSTEM_PROMPT = `
+[ALIGNMENT SCALES]
+1. Moral (Good vs Evil):
+${GOOD_EVIL_ALIASES.map(a => `- ${a.label} (Value: ${a.value})`).join('\n')}
+
+2. Ethical (Law vs Chaos):
+${LAW_CHAOS_ALIASES.map(a => `- ${a.label} (Value: ${a.value})`).join('\n')}
+
+Choose an alignment that best matches the character's background and personality.
+`;
+
+
 export const getGoodEvilLabel = (score: number) => {
     if (score >= 100) return 'Pure Good';
     if (score >= 75) return 'Altruistic';

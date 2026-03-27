@@ -6,6 +6,8 @@ import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFIN
 import { STORY_HOOKS } from '../constants/storyHooks';
 import { POI_MATRIX } from '../constants';
 import { getPOITheme } from '../utils/mapUtils';
+import { ALIGNMENT_SYSTEM_PROMPT, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../utils/npcUtils';
+
 
 /**
  * Common helper to format world context for AI prompts.
@@ -17,8 +19,10 @@ const getWorldContext = (gameData: GameData) => {
     const races = (gameData.world || []).filter(l => l.tags?.includes('race')).map(r => `- ${r.title} (Naming Style: ${r.languageConfig || 'English'})`).join('\n');
     const mapConfig = gameData.mapSettings ? `[Map Scale]: Each ${gameData.mapSettings.zoneLabel} on the grid represents ${gameData.mapSettings.gridDistance} ${gameData.mapSettings.gridUnit}.` : "";
     const tone = `[Narration Tone]: ${gameData.narrationTone || 'Standard'}. ${gameData.isMature ? '(Mature Content Allowed)' : ''}`;
-    return `[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[Established Races & Naming Styles]\n${races}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}`;
+    const alignment = ALIGNMENT_SYSTEM_PROMPT;
+    return `[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[Established Races & Naming Styles]\n${races}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}\n\n${alignment}`;
 };
+
 
 /**
  * Maps a user's natural language prompt and recent chat history to specific library traits and metadata.
@@ -35,9 +39,11 @@ export const draftCompanionFromPrompt = async (
     generalTraitNames: string[],
     combatAbilityName: string,
     level: number,
-    personality: string
+    personality: string,
+    moralAlignment: { lawChaos: number, goodEvil: number }
 }> => {
     const worldContext = getWorldContext(gameData);
+
     const recentHistory = gameData.messages.slice(-5).map(m => `${m.sender.toUpperCase()}: ${m.content}`).join('\n');
 
     const traitList = availableTraits.map(t => `- [${t.category.toUpperCase()}]: ${t.name} (${t.description})`).join('\n');
@@ -63,8 +69,8 @@ export const draftCompanionFromPrompt = async (
     3. Race & Gender: Match the chat context or prompt. Default to "Human" and "Unspecified" if unclear. You MUST use the [Established Races & Naming Styles] provided in World Context. Every name generated MUST be consistent with the character's gender (Male/Female).
     4. Trait Selection: Choose EXACTLY 2 'BACKGROUND' traits, 2 'GENERAL' traits, and 1 'COMBAT' trait from the library that best fit the character's vibe.
     5. Level: Determine a fitting level. If not specified, default to 1. Max level 20.
-    6. personality: Create a short list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL).
-    7. Return ONLY the JSON object.
+    7. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos based on the [ALIGNMENT SCALES].
+    8. Return ONLY the JSON object.
 
     [OUTPUT JSON SCHEMA]
     {
@@ -75,9 +81,11 @@ export const draftCompanionFromPrompt = async (
         "generalTraitNames": ["Trait 1", "Trait 2"],
         "combatAbilityName": "Trait Name",
         "level": number,
-        "personality": "string"
+        "personality": "string",
+        "moralAlignment": { "goodEvil": number, "lawChaos": number }
     }
     `;
+
 
     try {
         const ai = getAi();
@@ -97,8 +105,10 @@ export const draftCompanionFromPrompt = async (
             generalTraitNames: Array.isArray(data.generalTraitNames) ? data.generalTraitNames : [],
             combatAbilityName: data.combatAbilityName || (availableTraits.length > 0 ? availableTraits[0].name : ""),
             level: Number(data.level) || 1,
-            personality: data.personality || "A mysterious traveler."
+            personality: data.personality || "A mysterious traveler.",
+            moralAlignment: data.moralAlignment || { goodEvil: 0, lawChaos: 0 }
         };
+
     } catch (e) {
         console.error("Companion drafting failed", e);
         throw e;
@@ -112,8 +122,9 @@ export const draftCompanionFromPrompt = async (
 export const generateRecruitSkins = async (
     gameData: GameData,
     seeds: { race: string, gender: string, traits: string[] }[]
-): Promise<{ name: string, description: string, personality: string }[]> => {
+): Promise<{ name: string, description: string, personality: string, moralAlignment: { goodEvil: number, lawChaos: number } }[]> => {
     const worldContext = getWorldContext(gameData);
+
 
     const prompt = `
     You are a Master Storyteller and Tavern Recruiter. Provide thematic names, short descriptions, and quirky personalities for 6 potential companions.
@@ -131,14 +142,21 @@ export const generateRecruitSkins = async (
     4. personality: Create a short list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
     5. Use Title Case for names and Sentence Case for descriptions.
     6. NO ALL CAPS allowed for any text.
-    7. Return exactly 6 results in a JSON array.
+    7. moralAlignment: For EACH recruit, pick appropriate numerical values for goodEvil and lawChaos from the [ALIGNMENT SCALES] (-100 to 100).
+    8. Return exactly 6 results in a JSON array.
 
     [Mandatory Json Structure]
     [
-      { "name": "string", "description": "string", "personality": "string" },
+      { 
+        "name": "string", 
+        "description": "string", 
+        "personality": "string",
+        "moralAlignment": { "goodEvil": number, "lawChaos": number }
+      },
       ...
     ]
     `;
+
 
     try {
         const ai = getAi();
@@ -169,8 +187,10 @@ export const generateRecruitSkins = async (
         return seeds.map(s => ({
             name: `${s.race} Adventurer`,
             description: "A mysterious traveler seeking purpose in the uncharted lands.",
-            personality: "Quiet, observant, and reliable."
+            personality: "Quiet, observant, and reliable.",
+            moralAlignment: { goodEvil: 0, lawChaos: 0 }
         }));
+
     }
 };
 
@@ -204,9 +224,11 @@ export const weaveHero = async (
     abilityScores: any,
     savingThrows: any,
     skills: any,
-    skinnedAbility: Ability
+    skinnedAbility: Ability,
+    moralAlignment: { lawChaos: number, goodEvil: number }
 }> => {
     const worldContext = getWorldContext(gameData);
+
     const config = gameData.skillConfiguration || 'Fantasy';
 
     // Performance Update: Always prioritize gemini-3.1-flash-lite for companion recruitment to ensure snappy UI.
@@ -256,7 +278,8 @@ export const weaveHero = async (
     9. skinnedAbility: Transform the Combat Blueprint into a unique thematic signature power for ${selections.name}. 
        - Rename it evocatively.
        - Rewrite the description to match the flavor.
-    10. NO ALL CAPS.
+    10. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos from the [ALIGNMENT SCALES] that match this character's background and personality.
+    11. NO ALL CAPS.
 
     [Mandatory Json Structure]
     {
@@ -279,9 +302,11 @@ export const weaveHero = async (
         "skinnedAbility": {
             "name": "string",
             "description": "string"
-        }
+        },
+        "moralAlignment": { "goodEvil": number, "lawChaos": number }
     }
     `;
+
 
     try {
         const ai = getAi();
@@ -315,8 +340,10 @@ export const weaveHero = async (
             skinnedAbility: {
                 ...selections.combatAbility,
                 ...(result.skinnedAbility || {})
-            }
+            },
+            moralAlignment: result.moralAlignment || { goodEvil: 0, lawChaos: 0 }
         };
+
     } catch (e) {
         console.error("Hero weaving failed", e);
         return {
@@ -328,8 +355,10 @@ export const weaveHero = async (
             abilityScores: { strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
             savingThrows: { strength: { proficient: true }, constitution: { proficient: true }, dexterity: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
             skills: {},
-            skinnedAbility: selections.combatAbility
+            skinnedAbility: selections.combatAbility,
+            moralAlignment: { goodEvil: 0, lawChaos: 0 }
         };
+
     }
 };
 

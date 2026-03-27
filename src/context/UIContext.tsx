@@ -44,12 +44,16 @@ export interface PendingTravel {
     method: string;
 }
 
+export type CharSection = 'General' | 'Stats' | 'Defenses' | 'Abilities';
+
 interface UIContextType {
     // Navigation
     activeView: View;
     setActiveView: (view: View) => void;
     activePanel: 'menu' | 'abilities' | null;
     setActivePanel: (panel: 'menu' | 'abilities' | null) => void;
+    activeCharacterSection: CharSection;
+    setActiveCharacterSection: (section: CharSection) => void;
     selectedCharacterId: string;
     setSelectedCharacterId: (id: string) => void;
     navigateToCharacter: (id: string) => void;
@@ -126,6 +130,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [activeView, setActiveViewInternal] = useState<View>('chat');
     const [activePanel, setActivePanelInternal] = useState<'menu' | 'abilities' | null>(null);
     const [selectedCharacterId, setSelectedCharacterIdInternal] = useState<string>('player');
+    const [activeCharacterSection, setActiveCharacterSection] = useState<CharSection>('General');
     const [actingCharacterId, setActingCharacterId] = useState<string>('player');
 
     // Navigation Guard
@@ -211,6 +216,7 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const value = {
         activeView, setActiveView,
         activePanel, setActivePanel,
+        activeCharacterSection, setActiveCharacterSection,
         selectedCharacterId, setSelectedCharacterId,
         navigateToCharacter,
         actingCharacterId, setActingCharacterId,

@@ -269,11 +269,13 @@ export const useNpcActions = (
                     level: gameData.playerCharacter.level,
                     experiencePoints: getXPForLevel(gameData.playerCharacter.level),
                     relationship: npc.relationship,
+                    alignment: npc.moralAlignment || { lawChaos: 0, goodEvil: 0 },
                     isShip: !!npc.isShip,
                     isMount: !!npc.isMount,
                     isSentient: npc.isSentient,
                     isInParty: true
                 };
+
 
                 await integrateCharacter(new Companion(companionData), true);
 

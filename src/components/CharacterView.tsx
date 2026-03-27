@@ -262,6 +262,7 @@ const CharacterView: React.FC = () => {
                                 key={activeCharacter.id}
                                 initialData={activeCharacter}
                                 type={selectedCharacterId === 'player' ? 'player' : 'companion'}
+                                isScrolled={isScrolled}
                             />
                         </div>
                     )}

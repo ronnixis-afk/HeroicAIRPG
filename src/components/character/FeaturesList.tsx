@@ -168,7 +168,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [libraryTab, setLibraryTab] = useState<'general' | 'combat'>('general');
-    const [notification, setNotification] = useState<string | null>(null);
 
     // Phase 2: Calculate Trait Point Metrics
     const metrics = useMemo(() => {
@@ -178,13 +177,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         return { total: 0, used: 0, available: 0 };
     }, [character, character.abilities, character.level]);
 
-    // Phase 3: Cleanup notification timer
-    useEffect(() => {
-        if (notification) {
-            const timer = setTimeout(() => setNotification(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [notification]);
 
     const handleAbilityChange = (index: number, field: string, value: any) => {
         onChange(['abilities', index, field], value);
@@ -222,8 +214,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         onChange(['abilities'], newAbilities);
         setIsLibraryOpen(false);
 
-        // Phase 3: Visual Feedback
-        setNotification(`${trait.name} Trait Assigned`);
 
         if (isCombat) {
             try {
@@ -431,15 +421,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 )}
             </div>
 
-            {/* Phase 3: Trait Assigned Notification */}
-            {notification && (
-                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-page pointer-events-none">
-                    <div className="bg-brand-accent text-black px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-3 border border-white/20">
-                        <Icon name="check" className="w-5 h-5" />
-                        <span>{notification}</span>
-                    </div>
-                </div>
-            )}
 
             <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title={`Trait Library (${skillConfig || 'Universal'})`}>
                 <div className="flex flex-col h-[75vh]">

@@ -29,9 +29,9 @@ const calculateProficiencyBonus = (level: number) => Math.ceil(1 + level / 4);
 interface CharacterSheetProps {
     initialData: PlayerCharacter | Companion;
     type: 'player' | 'companion';
+    isScrolled?: boolean;
 }
 
-type CharSection = 'General' | 'Stats' | 'Defenses' | 'Abilities';
 
 const TabButton: React.FC<{ label: string, isActive: boolean, onClick: () => void }> = ({ label, isActive, onClick }) => (
     <button
@@ -45,7 +45,7 @@ const TabButton: React.FC<{ label: string, isActive: boolean, onClick: () => voi
     </button>
 );
 
-export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, type }) => {
+export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, type, isScrolled = false }) => {
     /* Fix: Explicitly cast GameDataContext result to GameDataContextType to resolve multiple "Property does not exist" errors on inferred return type */
     const {
         gameData,
@@ -54,7 +54,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
         deleteCompanion,
     } = useContext(GameDataContext) as GameDataContextType;
 
-    const { setUnsavedChanges } = useUI();
+    const { setUnsavedChanges, activeCharacterSection, setActiveCharacterSection } = useUI();
 
     const [charData, setCharData] = useState(initialData);
     const [isDirty, setIsDirty] = useState(false);
@@ -64,8 +64,6 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
     const [isGeneratingImage, setIsGeneratingImage] = useState(false);
     const [generationError, setGenerationError] = useState('');
     const [imageCooldown, setImageCooldown] = useState(0);
-
-    const [activeSection, setActiveSection] = useState<CharSection>('General');
 
     const setting = useMemo(() => gameData?.mapSettings?.style || 'fantasy', [gameData?.mapSettings]);
 
@@ -416,18 +414,18 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
             </div>
 
             {/* Navigation Grid */}
-            <div className="mt-8 mb-12 py-8 border-y border-brand-primary/30">
+            <div className={`sticky ${isScrolled ? 'top-[70px]' : 'top-[126px]'} z-30 transition-all duration-300 -mx-4 px-4 bg-brand-bg/95 backdrop-blur-sm py-4 border-b border-brand-primary/30 mb-8`}>
                 <div className="grid grid-cols-4 gap-3">
-                    <TabButton label="General" isActive={activeSection === 'General'} onClick={() => setActiveSection('General')} />
-                    <TabButton label="Stats" isActive={activeSection === 'Stats'} onClick={() => setActiveSection('Stats')} />
-                    <TabButton label="Defenses" isActive={activeSection === 'Defenses'} onClick={() => setActiveSection('Defenses')} />
-                    <TabButton label="Abilities" isActive={activeSection === 'Abilities'} onClick={() => setActiveSection('Abilities')} />
+                    <TabButton label="General" isActive={activeCharacterSection === 'General'} onClick={() => setActiveCharacterSection('General')} />
+                    <TabButton label="Stats" isActive={activeCharacterSection === 'Stats'} onClick={() => setActiveCharacterSection('Stats')} />
+                    <TabButton label="Defenses" isActive={activeCharacterSection === 'Defenses'} onClick={() => setActiveCharacterSection('Defenses')} />
+                    <TabButton label="Abilities" isActive={activeCharacterSection === 'Abilities'} onClick={() => setActiveCharacterSection('Abilities')} />
                 </div>
             </div>
 
             {/* Active Content Section */}
             <div className="min-h-[400px]">
-                {activeSection === 'General' && (
+                {activeCharacterSection === 'General' && (
                     <div className="space-y-12 animate-fade-in">
                         <CharacterHeader
                             character={charData}
@@ -475,7 +473,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                     </div>
                 )}
 
-                {activeSection === 'Stats' && (
+                {activeCharacterSection === 'Stats' && (
                     <div className="animate-fade-in space-y-12">
                         <AbilityScores
                             character={charData}
@@ -498,7 +496,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                     </div>
                 )}
 
-                {activeSection === 'Defenses' && (
+                {activeCharacterSection === 'Defenses' && (
                     <div className="animate-fade-in space-y-12">
                         <AbilityScores
                             character={charData}
@@ -525,7 +523,7 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
                     </div>
                 )}
 
-                {activeSection === 'Abilities' && (
+                {activeCharacterSection === 'Abilities' && (
                     <div className="animate-fade-in">
                         <FeaturesList
                             character={charData}

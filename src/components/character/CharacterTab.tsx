@@ -52,21 +52,21 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     const displayName = name.length > 9 ? name.slice(0, 8) + '..' : name;
 
     return (
-        <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 w-20 ${isShrunk ? 'gap-1' : 'gap-2'}`}>
+        <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 ${isShrunk ? 'w-10 gap-1' : 'w-20 gap-2'}`}>
             <div className="relative w-full">
                 <button
                     onClick={onClick}
                     title={`${name} (${currentHp}/${maxHp} Hp)`}
-                    className={`relative flex flex-col items-center justify-center transition-all duration-300 w-full ${
+                    className={`relative flex flex-col items-center justify-center transition-all duration-300 ${
                         isActive ? 'scale-100 z-10' : 'opacity-80 hover:opacity-100 hover:scale-105'
-                    }`}
+                    } ${isShrunk ? 'w-10 h-10' : 'w-20 h-20'}`}
                 >
-                    <div className={`relative transition-all duration-300 w-full aspect-square rounded-xl overflow-hidden border-2 bg-brand-surface ${isActive ? 'border-brand-text' : 'border-brand-primary'} ${isDead ? 'grayscale brightness-50' : ''}`}>
+                    <div className={`relative transition-all duration-300 w-full h-full rounded-xl overflow-hidden border-2 bg-brand-surface ${isActive ? 'border-brand-text' : 'border-brand-primary'} ${isDead ? 'grayscale brightness-50' : ''}`}>
                          {imageUrl ? (
                             <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                         ) : (
                             <div className="flex items-center justify-center w-full h-full">
-                                <span className={`font-bold text-brand-text-muted transition-all duration-300 ${isShrunk ? 'text-body-micro' : 'text-xl'}`}>{initials.slice(0, 2)}</span>
+                                <span className={`font-bold text-brand-text-muted transition-all duration-300 ${isShrunk ? 'text-[10px]' : 'text-xl'}`}>{initials.slice(0, 2)}</span>
                             </div>
                         )}
                         
