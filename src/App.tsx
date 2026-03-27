@@ -12,7 +12,8 @@ import ObjectivesView from './components/ObjectivesView';
 import StoreView from './components/inventory/StoreView';
 import TempStatsView from './components/combat/TempStatsView';
 import HeaderMenuPanel from './components/HeaderMenuPanel';
-import NemesisView from './components/NemesisView';
+import RecruitView from './components/character/RecruitView';
+
 import GmNotesView from './components/GmNotesView';
 import SettingsView from './components/SettingsView';
 import ItemForgeView from './components/inventory/ItemForgeView';
@@ -183,7 +184,7 @@ const GameInterface: React.FC = () => {
 
   // Enforce Hero Creation View (Allow Settings and World Lore)
   useEffect(() => {
-    const allowedViewsWithoutPlayer: View[] = ['character', 'settings', 'world'];
+    const allowedViewsWithoutPlayer: View[] = ['character', 'settings', 'world', 'knowledge', 'gm-notes'];
     if (!hasPlayer && gameData && !allowedViewsWithoutPlayer.includes(activeView)) {
       setActiveView('character');
     }
@@ -257,7 +258,7 @@ const GameInterface: React.FC = () => {
       story: gameData.story.filter(l => l.isNew).length,
       world: gameData.world.filter(l => l.isNew).length,
       npcs: (gameData.npcs || []).filter(n => n.isNew).length,
-      nemesis: gameData.nemeses.filter(n => n.isNew).length,
+
       gmNotes: (gameData.plotPoints || []).filter(p => p.isNew).length,
       map: (gameData.mapZones || []).filter(z => z.isNew).length
     };
@@ -352,11 +353,12 @@ const GameInterface: React.FC = () => {
       case 'settings': return <SettingsView />;
       case 'store': return <StoreView />;
       case 'temp-stats': return <TempStatsView />;
-      case 'nemesis': return <NemesisView />;
+
       case 'gm-notes': return <GmNotesView />;
       case 'item-forge': return <ItemForgeView />;
       case 'npcs': return <NPCsView />;
       case 'gallery': return <GalleryView />;
+      case 'recruit': return <RecruitView />;
       default: return <MemoizedChatView />;
     }
   };
@@ -374,7 +376,7 @@ const GameInterface: React.FC = () => {
       {isCombatActive && activeView === 'chat' && <CombatStatusDisplay />}
 
       <main className="flex-1 overflow-hidden relative">
-        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery', 'item-forge', 'store', 'nemesis'].includes(activeView) ? '' : 'animate-page p-2'}`}>
+        <div key={activeView} className={`h-full overflow-y-auto custom-scroll ${['knowledge', 'chat', 'inventory', 'character', 'gallery', 'item-forge', 'store'].includes(activeView) ? '' : 'animate-page p-2'}`}>
           {renderView()}
         </div>
       </main>

@@ -100,7 +100,7 @@ export const auditSystemState = async (
       "currentLocale": "string (Site Name)",
       "currentSubLocation": "string",
       "timePassedMinutes": number,
-      "newNPCs": [ { "name", "description", "race", "gender", "is_essential" } ],
+      "newNPCs": [ { "name": "Full Name (First and Last/Family Name) CONSISTENT with their gender (minimum 2 words)", "description", "race", "gender", "is_essential" } ],
       "npcUpdates": [ { "id", "currentPOI", "status" } ],
       "activeEngagement": boolean,
       "turnSummary": "string (Max 10 words)",

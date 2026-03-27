@@ -164,9 +164,9 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                   <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} disabled={!hasPlayer} />
                   <MenuItem label="Quests" imageUrl="/icons/quests.png" onClick={() => handleAction('objectives')} badgeCount={badges.quests} disabled={!hasPlayer} />
 
-                  <MenuItem label="Lore" imageUrl="/icons/lore.png" onClick={() => handleAction('world')} badgeCount={badges.world} disabled={!hasPlayer} />
+                  <MenuItem label="Lore" imageUrl="/icons/lore.png" onClick={() => handleAction('world')} badgeCount={badges.world} />
                   <MenuItem label="People" imageUrl="/icons/people.png" onClick={() => handleAction('npcs')} badgeCount={badges.npcs} disabled={!hasPlayer} />
-                  <MenuItem label="Map" imageUrl="/icons/map.png" onClick={() => handleAction('knowledge')} badgeCount={badges.map} disabled={!hasPlayer} />
+                  <MenuItem label="Map" imageUrl="/icons/map.png" onClick={() => handleAction('knowledge')} badgeCount={badges.map} />
                   <MenuItem
                     label="Merchant"
                     imageUrl="/icons/merchant.png"
@@ -174,8 +174,15 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                     disabled={!hasPlayer || isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Market') && !['Town', 'City', 'Capital'].includes(populationLevel || ''))}
                     warning={!hasPlayer ? "Create a hero first." : isCombatActive ? "The Merchant is hiding during combat." : !isAtPopulationCenter ? "You must enter the settlement to trade." : "No Market available in this zone."}
                   />
+                  <MenuItem
+                    label="Recruit"
+                    imageUrl="/icons/recruit.png"
+                    onClick={() => handleAction('recruit')}
+                    disabled={!hasPlayer || isCombatActive || !isAtPopulationCenter || (!zoneFeatures.includes('Tavern') && !['Settlement', 'Town', 'City', 'Capital'].includes(populationLevel || ''))}
+                    warning={!hasPlayer ? "Create a hero first." : isCombatActive ? "No one wants to join a party under fire." : !isAtPopulationCenter ? "You must enter the settlement to recruit." : "No Tavern available in this zone."}
+                  />
 
-                  <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} disabled={!hasPlayer} />
+                  <MenuItem label="GM Notes" imageUrl="/icons/gm-notes.png" onClick={() => handleAction('gm-notes')} badgeCount={badges.gmNotes} />
                   <MenuItem 
                     label="Forge" 
                     imageUrl="/icons/forge.png" 
@@ -186,7 +193,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
                   <MenuItem label="Scene" imageUrl="/icons/scene.png" onClick={() => handleAction('temp-stats')} disabled={!hasPlayer} />
                   <MenuItem label="Gallery" imageUrl="/icons/gallery.png" onClick={() => handleAction('gallery')} disabled={!hasPlayer} />
 
-                  <MenuItem label="Rivals" imageUrl="/icons/rivals.png" onClick={() => handleAction('nemesis')} badgeCount={badges.nemesis} disabled={!hasPlayer} />
+
                   <MenuItem
                     label="Rest & Camp"
                     imageUrl="/icons/rest-camp.png"

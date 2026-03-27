@@ -148,21 +148,7 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
         case 'MARK_ALL_PLOT_POINTS_SEEN':
             return { ...state, plotPoints: (state.plotPoints || []).map(p => ({ ...p, isNew: false })) };
 
-        // Nemesis Actions
-        case 'ADD_NEMESIS':
-            return { ...state, nemeses: [...state.nemeses, action.payload] };
 
-        case 'UPDATE_NEMESIS':
-            return { ...state, nemeses: state.nemeses.map(n => n.id === action.payload.id ? action.payload : n) };
-
-        case 'DELETE_NEMESIS':
-            return { ...state, nemeses: state.nemeses.filter(n => n.id !== action.payload) };
-
-        case 'MARK_NEMESIS_SEEN':
-            return { ...state, nemeses: state.nemeses.map(n => n.id === action.payload ? { ...n, isNew: false } : n) };
-
-        case 'UPDATE_ALL_NEMESES':
-            return { ...state, nemeses: action.payload };
 
         // Gallery Actions
         case 'ADD_GALLERY_ENTRY': {

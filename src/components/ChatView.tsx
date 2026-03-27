@@ -275,11 +275,6 @@ const ChatView: React.FC = () => {
         return () => window.removeEventListener('alignment-action', handleAlignmentAction);
     }, [gameData, submitUserMessage, updatePlayerCharacter, updateNPC, updateCompanion, dispatch]);
 
-    const handleFollowUp = async () => {
-        if (trackedObjective) {
-            await generateObjectiveFollowUp(trackedObjective.id);
-        }
-    };
 
     const handleClearPrevious = (messageId: string) => {
         if (!gameData || !gameData.messages) return;
@@ -434,14 +429,6 @@ const ChatView: React.FC = () => {
                         />
                     )}
 
-                    {!gameData?.combatState?.isActive && trackedObjective && !loadingConfig && (
-                        <div className="flex justify-center my-4 pb-4 animate-fade-in">
-                            <button onClick={handleFollowUp} className="btn-primary btn-sm rounded-full gap-2 shadow-md">
-                                <Icon name="target" className="w-3 h-3" />
-                                Follow Up Quest: {trackedObjective.title}
-                            </button>
-                        </div>
-                    )}
                     <div ref={chatEndRef} className="h-1" />
                 </div>
             </div>

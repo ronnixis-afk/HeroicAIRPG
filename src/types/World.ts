@@ -309,14 +309,7 @@ export interface LootState {
   defeatedEnemies: CombatActor[];
 }
 
-export interface Nemesis {
-  id: string;
-  title: string;
-  description: string;
-  currentHeat: number;
-  maxHeat: number;
-  isNew?: boolean;
-}
+
 
 export interface EnemyTemplate {
   name: string;

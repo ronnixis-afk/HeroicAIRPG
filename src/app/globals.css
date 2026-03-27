@@ -197,7 +197,7 @@
   }
 
   .btn-icon-refresh {
-    @apply p-2 rounded-icon transition-all duration-200 active:scale-90 flex items-center justify-center bg-brand-primary text-brand-text-muted hover:text-brand-accent hover:border-brand-accent border border-brand-surface;
+    @apply p-2 rounded-icon transition-all duration-200 active:scale-90 flex items-center justify-center bg-brand-primary text-brand-accent hover:opacity-80 border border-brand-accent/30;
   }
 }
 

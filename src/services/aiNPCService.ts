@@ -54,12 +54,13 @@ export const extractNPCsFromNarrative = async (
     6. **ESSENTIAL STATUS RULE**: Determine if the NPC is "is_essential" (boolean). 
        - SET TRUE for unique named characters important to the plot, quest givers, or significant individuals.
        - SET FALSE for generic numbered units, bystanders, or minor background characters.
-    7. Return a JSON array of objects. EVERY field must be filled.
+    7. FULL NAME & GENDER RULE: You MUST generate a "First Name" and a "Last Name or Family Name" for every unique NPC (minimum 2 words). The name MUST be consistent with the NPC's gender (Male/Female). Generic units (e.g. "Guard 1") are exempt.
+    8. Return a JSON array of objects. EVERY field must be filled.
 
     [MANDATORY JSON STRUCTURE]
     [
       {
-        "name": "Full Name or Unit Name (e.g. Guard 1)",
+        "name": "Full Name (First and Last/Family Name) or Unit Name (e.g. Guard 1)",
         "description": "Max 30 words summary of role.",
         "appearance": "Max 30 words physical description.",
         "race": "STRICT MATCH FROM VALID ANCESTRIES",
@@ -149,7 +150,7 @@ export const refineNPCDetails = async (
 
     Return ONLY this JSON object:
     {
-      "name": "${npc.name}",
+      "name": "Full Name (First and Last/Family Name)",
       "description": "...",
       "appearance": "...",
       "race": "STRICT MATCH FROM VALID ANCESTRIES",

@@ -111,6 +111,7 @@ const WorldView: React.FC = () => {
     const [generationPrompt, setGenerationPrompt] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [summarySuccess, setSummarySuccess] = useState(false);
     const [error, setError] = useState('');
 
     if (!gameData) return <div className="text-center p-8 animate-pulse text-brand-text-muted text-body-base">Loading world data...</div>;
@@ -142,9 +143,12 @@ const WorldView: React.FC = () => {
 
     const handleGenerateSummary = async () => {
         setIsGeneratingSummary(true);
+        setSummarySuccess(false);
         try {
             const summary = await generateGlobalWorldSummary(gameData.world);
             updateWorldSummary(summary);
+            setSummarySuccess(true);
+            setTimeout(() => setSummarySuccess(false), 2000);
         } catch (e) {
             console.error("Failed to generate summary", e);
         } finally {
@@ -263,16 +267,39 @@ const WorldView: React.FC = () => {
                     <button
                         onClick={handleGenerateSummary}
                         disabled={isGeneratingSummary}
-                        className="btn-icon-refresh shadow-sm"
+                        className={`btn-icon-refresh shadow-sm transition-all duration-300 ${summarySuccess ? 'bg-brand-accent/20 border-brand-accent scale-110' : ''}`}
                         title={gameData.worldSummary ? 'Regenerate summary' : 'Generate summary'}
                     >
-                        {isGeneratingSummary ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : <Icon name="refresh" className="w-5 h-5" />}
+                        {isGeneratingSummary ? (
+                            <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" />
+                        ) : summarySuccess ? (
+                            <Icon name="check" className="w-5 h-5 text-brand-accent" />
+                        ) : (
+                            <Icon name="refresh" className="w-5 h-5 text-brand-accent" />
+                        )}
                     </button>
                 </div>
 
                 {gameData.worldSummary ? (
-                    <div className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap pl-4 border-l-2 border-brand-accent/30 italic opacity-90">
-                        {gameData.worldSummary}
+                    <div className="space-y-4 animate-page">
+                        {gameData.worldSummary.split('\n\n').map((paragraph, i) => {
+                            const [header, ...rest] = paragraph.split(':');
+                            if (rest.length > 0) {
+                                return (
+                                    <div key={i} className="pl-4 border-l-2 border-brand-accent/20">
+                                        <div className="text-[10px] font-bold text-brand-accent uppercase tracking-wider mb-1">{header}</div>
+                                        <div className="text-body-base text-brand-text leading-relaxed opacity-90 italic">
+                                            {rest.join(':').trim()}
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return (
+                                <div key={i} className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap pl-4 border-l-2 border-brand-accent/30 italic opacity-90">
+                                    {paragraph}
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="text-center py-10 bg-brand-primary/10 rounded-2xl border border-dashed border-brand-surface">

@@ -76,7 +76,7 @@ const defaultGameData: GameData = {
   ],
   knowledge: [],
   objectives: [],
-  nemeses: [],
+
   messages: [],
   gmSettings: "",
   gmNotes: "",
@@ -183,7 +183,7 @@ export const getNewGameData = (): GameData => {
     world: [], // This will be populated with the generated context
     knowledge: [],
     objectives: [],
-    nemeses: [],
+
     messages: [
       { id: `sys-${Date.now()}`, sender: 'system', content: 'Your new adventure begins!', type: 'neutral' }
     ],

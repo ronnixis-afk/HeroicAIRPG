@@ -3,7 +3,7 @@
 import React, { createContext, ReactNode, useContext } from 'react';
 // FIX: Imported GroupCheckResult for process DiceRolls return type definition
 import { GroupCheckResult } from '../utils/diceRolls';
-import type { GameData, PlayerCharacter, StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, AIUpdatePayload, Item, Companion, NarrationTone, Inventory, NarrationVoice, ImageGenerationStyle, StoreItem, CombatActor, Difficulty, Nemesis, EnemyTemplate, CombatActorSize, Ability, PlotPoint, MapZone, MapSettings, ActorSuggestion, AffinityDefinition, RollMode, BodySlot, SkillConfiguration, NPC, ArchetypeName, CombatConfiguration, StatusEffect, DiceRoll, DiceRollRequest, GameAction } from '../types';
+import type { GameData, PlayerCharacter, StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, AIUpdatePayload, Item, Companion, NarrationTone, Inventory, NarrationVoice, ImageGenerationStyle, StoreItem, CombatActor, Difficulty, EnemyTemplate, CombatActorSize, Ability, PlotPoint, MapZone, MapSettings, ActorSuggestion, AffinityDefinition, RollMode, BodySlot, SkillConfiguration, NPC, ArchetypeName, CombatConfiguration, StatusEffect, DiceRoll, DiceRollRequest, GameAction } from '../types';
 import { useGameData } from '../hooks/useGameData';
 // FIX: Imported CombatTriggerSource for initiateCombatSequence signature
 import { useUI, CombatTriggerSource } from './UIContext';
@@ -59,7 +59,7 @@ export interface GameDataContextType {
   markLoreAsSeen: (loreId: string) => void;
   markKnowledgeAsSeen: (knowledgeId: string) => void;
   markObjectiveAsSeen: (objectiveId: string) => void;
-  markNemesisAsSeen: (nemesisId: string) => void;
+
   markAllStoryLogsAsSeen: () => void;
   markAllNpcsAsSeen: () => void;
   markAllPlotPointsAsSeen: () => void;
@@ -105,9 +105,7 @@ export interface GameDataContextType {
   clearScene: () => void;
   removeActorFromTurnOrder: (actorId: string) => void;
   takeAllLoot: (items: Item[], defeatedNames?: string[], defeatedIds?: string[]) => void;
-  generateAndAddNemesis: (prompt: string) => Promise<void>;
-  deleteNemesis: (nemesisId: string) => void;
-  updateNemesis: (nemesis: Nemesis) => Promise<void>;
+
   playNpcTurn: (actorId: string) => Promise<void>;
   performPlayerAttack: (source: Item | Ability, targetIds: string[], flavorText?: string, mode?: RollMode, sourceActorId?: string) => Promise<void>;
   performAutomatedPlayerTurn: () => Promise<void>;

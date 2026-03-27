@@ -232,7 +232,10 @@ const iconPaths: { [key: string]: React.ReactElement } = {
   ),
   refresh: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.664 0l3.181-3.183m-11.664 0-3.181 3.183m0 0-3.181-3.183m11.664 0-3.181-3.183" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 3v5h-5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 21v-5h5" />
     </svg>
   ),
   rocket: (

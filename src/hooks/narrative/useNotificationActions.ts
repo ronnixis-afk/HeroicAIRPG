@@ -33,9 +33,7 @@ export const useNotificationActions = (
         dispatch({ type: 'MARK_OBJECTIVE_SEEN', payload: objectiveId });
     }, [dispatch]);
 
-    const markNemesisAsSeen = useCallback((nemesisId: string) => {
-        dispatch({ type: 'MARK_NEMESIS_SEEN', payload: nemesisId });
-    }, [dispatch]);
+
 
     const markAllNpcsAsSeen = useCallback(() => { 
         dispatch({ type: 'MARK_ALL_NPCS_SEEN' }); 
@@ -59,7 +57,7 @@ export const useNotificationActions = (
         markLoreAsSeen,
         markKnowledgeAsSeen,
         markObjectiveAsSeen,
-        markNemesisAsSeen,
+
         markAllNpcsAsSeen,
         markAllPlotPointsAsSeen,
         markAllMapZonesAsSeen,

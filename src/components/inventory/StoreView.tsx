@@ -296,7 +296,7 @@ const StoreView: React.FC = () => {
                                 {isLoading ? (
                                     <><Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> Stocking...</>
                                 ) : (
-                                    <><Icon name="refresh" className="w-4 h-4 mr-2" /> Request Shipment</>
+                                    <><Icon name="refresh" className="w-4 h-4 mr-2 text-brand-accent" /> Request Shipment</>
                                 )}
                             </button>
                         </div>

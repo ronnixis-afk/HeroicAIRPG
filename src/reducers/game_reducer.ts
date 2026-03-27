@@ -115,12 +115,7 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'MARK_ALL_PLOT_POINTS_SEEN':
             return narrativeReducer(state, action);
 
-        case 'ADD_NEMESIS':
-        case 'UPDATE_NEMESIS':
-        case 'DELETE_NEMESIS':
-        case 'MARK_NEMESIS_SEEN':
-        case 'UPDATE_ALL_NEMESES':
-            return narrativeReducer(state, action);
+
 
         // NPC Actions
         case 'ADD_NPC':

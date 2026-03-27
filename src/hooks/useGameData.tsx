@@ -10,7 +10,6 @@ import {
     StoryLog
 } from '../types';
 import {
-    generateNemesis,
     generateActionSuggestions,
     generateGrandDesign
 } from '../services/geminiService';
@@ -144,24 +143,7 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
 
     const weaveNarrative = useCallback(async () => { }, []);
 
-    const generateAndAddNemesis = useCallback(async (prompt: string) => {
-        if (!gameData) return;
-        setIsLoading(true);
-        try {
-            const nemesis = await generateNemesis(prompt, gameData);
-            dispatch({ type: 'ADD_NEMESIS', payload: { ...nemesis, id: `nem-${Date.now()}`, isNew: true } });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [gameData, dispatch, setIsLoading]);
 
-    const deleteNemesis = useCallback((nemesisId: string) => {
-        dispatch({ type: 'DELETE_NEMESIS', payload: nemesisId });
-    }, [dispatch]);
-
-    const updateNemesis = useCallback(async (nemesis: any) => {
-        dispatch({ type: 'UPDATE_NEMESIS', payload: nemesis });
-    }, [dispatch]);
 
     const addGalleryEntry = useCallback(async (entry: Omit<GalleryEntry, 'worldId'>) => {
         if (!worldId) return;
@@ -217,9 +199,7 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         addGalleryEntry,
         deleteGalleryEntry,
         weaveGrandDesign,
-        generateAndAddNemesis,
-        deleteNemesis,
-        updateNemesis,
+
         dispatch
     };
 };

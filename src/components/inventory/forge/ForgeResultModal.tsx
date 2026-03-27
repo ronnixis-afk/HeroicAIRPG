@@ -81,7 +81,7 @@ export const ForgeResultModal: React.FC<ForgeResultModalProps> = ({
                                     onClick={onRetry}
                                     className="btn-secondary btn-md flex-1"
                                 >
-                                    <Icon name="refresh" className="w-4 h-4 mr-2" />
+                                    <Icon name="refresh" className="w-4 h-4 mr-2 text-brand-accent" />
                                     <span>Retry</span>
                                 </button>
                                 <button

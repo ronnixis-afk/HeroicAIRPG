@@ -123,47 +123,7 @@ export const useCharacterActions = (
             if (!isCompanion) {
                 setCreationProgress({ isActive: true, step: "Establishing world resonance...", progress: 15 });
 
-                const personalZones = await generatePersonalDiscoveries(character, gameData);
-
-                setCreationProgress({ isActive: true, step: "Anchoring origins...", progress: 45 });
-
-                personalZones.forEach((pz: any, i: number) => {
-                    if (!pz.coordinates) return;
-                    const newZone: MapZone = {
-                        id: `zone-personal-${Date.now()}-${i}`,
-                        coordinates: pz.coordinates,
-                        name: pz.name || "A Discovery",
-                        description: pz.description || "A thematic location.",
-                        hostility: pz.hostility || 0,
-                        populationLevel: pz.populationLevel,
-                        zoneFeatures: pz.zoneFeatures,
-                        visited: true,
-                        tags: ['location', 'origin'],
-                        keywords: pz.keywords || []
-                    };
-                    const existingIdx = mapZonesUpdate.findIndex(z => z.coordinates === pz.coordinates);
-                    if (existingIdx > -1) mapZonesUpdate[existingIdx] = newZone;
-                    else mapZonesUpdate.push(newZone);
-
-                    if (pz.pois) {
-                        pz.pois.forEach((poi: any, j: number) => {
-                            const isDuplicate = knowledgeUpdates.some(k => k.coordinates === pz.coordinates && k.title === poi.title);
-                            if (isDuplicate) return;
-
-                            const tags = poi.isBackgroundRelated ? ['location', 'background'] : ['location'];
-                            if (poi.isPopulationCenter) tags.push('population-center');
-                            knowledgeUpdates.push({
-                                id: `know-pers-${Date.now()}-${i}-${j}`,
-                                title: poi.title,
-                                content: poi.content,
-                                coordinates: pz.coordinates,
-                                visited: poi.isBackgroundRelated === true,
-                                tags: tags,
-                                isNew: true
-                            } as LoreEntry);
-                        });
-                    }
-                });
+            /* Removal: No longer generating additional personal zones outside 0-0. Consolidating background POI into starting scenario. */
             }
 
             setCreationProgress({ isActive: true, step: "Calculating starting assets...", progress: 60 });
@@ -473,6 +433,16 @@ export const useCharacterActions = (
 
             setTimeout(() => {
                 weaveGrandDesign();
+
+                const dispatchZoneUpdate = (zone: MapZone) => {
+                    dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
+                };
+                const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => {
+                    dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
+                };
+
+                preloadAdjacentZones(coords, mapZonesUpdate, gameData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData!.knowledge || [])
+                    .catch(e => console.error("Initial preloading failed:", e));
             }, 150);
 
         } catch (e) {

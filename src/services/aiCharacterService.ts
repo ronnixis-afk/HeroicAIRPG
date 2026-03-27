@@ -14,9 +14,10 @@ const getWorldContext = (gameData: GameData) => {
     const summary = gameData.worldSummary || "A mysterious world.";
     const history = (gameData.world || []).slice(0, 10).map(l => `[${l.title}]: ${l.content}`).join('\n');
     const factions = (gameData.world || []).filter(l => l.tags?.includes('faction')).map(f => `- ${f.title}: ${f.content}`).join('\n');
+    const races = (gameData.world || []).filter(l => l.tags?.includes('race')).map(r => `- ${r.title} (Naming Style: ${r.languageConfig || 'English'})`).join('\n');
     const mapConfig = gameData.mapSettings ? `[Map Scale]: Each ${gameData.mapSettings.zoneLabel} on the grid represents ${gameData.mapSettings.gridDistance} ${gameData.mapSettings.gridUnit}.` : "";
     const tone = `[Narration Tone]: ${gameData.narrationTone || 'Standard'}. ${gameData.isMature ? '(Mature Content Allowed)' : ''}`;
-    return `[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}`;
+    return `[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[Established Races & Naming Styles]\n${races}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}`;
 };
 
 /**
@@ -58,8 +59,8 @@ export const draftCompanionFromPrompt = async (
 
     [INSTRUCTIONS]
     1. Identify if the user is referring to a specific character from the chat (e.g. "Add the goblin from earlier").
-    2. Name: If a character was named in chat, use that name. Otherwise, invent a thematic one.
-    3. Race & Gender: Match the chat context or prompt. Default to "Human" and "Unspecified" if unclear.
+    2. Name: If a character was named in chat, use that name. Otherwise, invent a thematic one. You MUST generate a FULL NAME (First Name + Last Name/Family Name) for the companion.
+    3. Race & Gender: Match the chat context or prompt. Default to "Human" and "Unspecified" if unclear. You MUST use the [Established Races & Naming Styles] provided in World Context. Every name generated MUST be consistent with the character's gender (Male/Female).
     4. Trait Selection: Choose EXACTLY 2 'BACKGROUND' traits, 2 'GENERAL' traits, and 1 'COMBAT' trait from the library that best fit the character's vibe.
     5. Level: Determine a fitting level. If not specified, default to 1. Max level 20.
     6. personality: Create a short list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL).
@@ -124,12 +125,13 @@ export const generateRecruitSkins = async (
     ${seeds.map((s, i) => `Recruit ${i + 1}: Race: ${s.race}, Gender: ${s.gender}, Traits: ${s.traits.join(', ')}`).join('\n')}
 
     [Instructions]
-    1. For each Recruit, generate a unique name appropriate for their Race and Gender.
-    2. description: Write a short backstory summary (Max 25 words).
-    3. personality: Create a short list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
-    4. Use Title Case for names and Sentence Case for descriptions.
-    5. NO ALL CAPS allowed for any text.
-    6. Return exactly 6 results in a JSON array.
+    1. For each Recruit, generate a unique name appropriate for their Race, Gender, and the specific [Established Races & Naming Styles] provided in World Context.
+    2. FULL NAME & GENDER RULE: Every name generated MUST be a "First Name" and a "Last Name or Family Name" (minimum 2 words). The name MUST be consistent with the recruit's gender (Male/Female).
+    3. description: Write a short backstory summary (Max 25 words).
+    4. personality: Create a short list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
+    5. Use Title Case for names and Sentence Case for descriptions.
+    6. NO ALL CAPS allowed for any text.
+    7. Return exactly 6 results in a JSON array.
 
     [Mandatory Json Structure]
     [
@@ -235,7 +237,8 @@ export const weaveHero = async (
     ${selections.customBackground ? `Custom Background Context: "${selections.customBackground}"` : ''}
 
     [Instructions]
-    1. profession: Deduce a fitting class or profession name (Title Case).
+    1. Name Consistency: You MUST generate a FULL NAME (First Name + Last Name or Family Name/Surname) that reflects the character's race, gender, and the [Established Races & Naming Styles] provided in World Lore. If a partial name was provided (e.g. "${selections.name}"), expand it into a full name that matches their gender.
+    2. profession: Deduce a fitting class or profession name (Title Case).
     2. appearance: Describe ${possessiveTerm} unique physical appearance. Max 40 words.
     3. background: Synthesize a cohesive history explaining ${possessiveTerm} traits and origins. 
        ${selections.customBackground ? 'IMPORTANT: Incorporate the provided Custom Background Context into this narrative.' : ''} 
@@ -376,145 +379,14 @@ export const generateCompanionDetails = async (world: any[], prompt: string, com
     return JSON.parse(cleanJson(response.text || '{}'));
 };
 
-export const generateNemesis = async (prompt: string, gameData: GameData) => {
-    const input = `Create a Nemesis based on: "${prompt}".
-    World: ${gameData.gmSettings}
-    Return JSON: { title, description, maxHeat (10-20) }`;
 
-    const ai = getAi();
-    const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
-        contents: input,
-        config: {
-                thinkingConfig: { thinkingBudget: 512 }, responseMimeType: "application/json" }
-    });
-    return JSON.parse(cleanJson(response.text || '{}'));
-};
 
+/**
+ * [DEPRECATED]: This logic has been consolidated into generateStartingScenario to ensure
+ * all background-related POIs are anchored in the starting zone (0-0), reducing map bloat.
+ */
 export const generatePersonalDiscoveries = async (character: any, gameData: GameData) => {
-    const worldContext = getWorldContext(gameData);
-
-    const popRoll1 = Math.floor(Math.random() * 20) + 1;
-    let popLevel1: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
-    let features1: string[] = [];
-    if (popRoll1 >= 20) { popLevel1 = 'Capital'; features1 = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
-    else if (popRoll1 >= 18) { popLevel1 = 'City'; features1 = ['Tavern', 'Market', 'Shipyard']; }
-    else if (popRoll1 >= 15) { popLevel1 = 'Town'; features1 = ['Tavern', 'Market']; }
-    else if (popRoll1 >= 10) { popLevel1 = 'Settlement'; features1 = ['Tavern']; }
-    else { popLevel1 = 'Barren'; features1 = []; }
-
-    const popRoll2 = Math.floor(Math.random() * 20) + 1;
-    let popLevel2: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
-    let features2: string[] = [];
-    if (popRoll2 >= 20) { popLevel2 = 'Capital'; features2 = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
-    else if (popRoll2 >= 18) { popLevel2 = 'City'; features2 = ['Tavern', 'Market', 'Shipyard']; }
-    else if (popRoll2 >= 15) { popLevel2 = 'Town'; features2 = ['Tavern', 'Market']; }
-    else if (popRoll2 >= 10) { popLevel2 = 'Settlement'; features2 = ['Tavern']; }
-    else { popLevel2 = 'Barren'; features2 = []; }
-
-    const currentTheme = getPOITheme(gameData.worldSummary || "");
-
-
-    const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const generateThemes = () => [1, 2, 3].map(() => {
-        const r1 = Math.floor(Math.random() * 10);
-        const r2 = Math.floor(Math.random() * 10);
-        const r3 = Math.floor(Math.random() * 10);
-        return {
-            baseType: matrix.baseTypes[r1],
-            themeStr: `${matrix.baseTypes[r1]} | ${matrix.modifiers[r2]} | ${matrix.flavors[r3]}`
-        };
-    });
-
-    const themes1 = generateThemes();
-    const themes2 = generateThemes();
-
-    const prompt = `Establish 2 new geographical locations significant to ${character.name}'s past.
-    These locations MUST be anchored immediately around the starting coordinates (0-0).
-    
-    [ALLOWED COORDINATES]
-    Pick 2 unique coordinates from: (0,1), (0,-1), (1,0), (1,-1), (1,1), (-1,1), (-1,-1), (-1,0).
-    Format them exactly as "X-Y" (e.g. "0-1", "1--1").
-    
-    [Character Info]
-    Name: ${character.name}. Background: ${character.background}
-    
-    [MAP CONTEXT]
-    ${worldContext}
-    
-    [SYSTEM DIRECTIVE: POI THEMES]
-    You MUST generate the POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
-    ZONE 1 (Scale: ${popLevel1}):
-    1. Theme: ${themes1[0].themeStr}
-    2. Theme: ${themes1[1].themeStr}
-    3. Theme: ${themes1[2].themeStr}
-
-    ZONE 2 (Scale: ${popLevel2}):
-    1. Theme: ${themes2[0].themeStr}
-    2. Theme: ${themes2[1].themeStr}
-    3. Theme: ${themes2[2].themeStr}
-
-    [INSTRUCTIONS]
-    1. Provide exactly 2 Zones.
-       - Zone 1 MUST have a Population Scale of ${popLevel1}.
-       - Zone 2 MUST have a Population Scale of ${popLevel2}.
-       Ensure the zone description logically accounts for its Population Scale.
-    2. 'hostility' MUST be an INTEGER between -10 and 10 (as these are known home-territory or past locations).
-    3. **UNIQUENESS RULE**: For each zone, the 'title' of its 'pois' MUST NOT be the same as the zone 'name'.
-    4. 'pois': You MUST generate exactly 4 entries per zone.
-       - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
-       - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1-3).
-    
-    Return JSON: { "zones": [ { "name", "description", "coordinates", "hostility", "pois": [ { "title", "content", "isBackgroundRelated" } ] } ] }`;
-
-    try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: AI_MODELS.DEFAULT,
-            contents: prompt,
-            config: {
-                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
-        });
-        const data = JSON.parse(cleanJson(response.text || '{}'));
-        const rawZones = Array.isArray(data.zones) ? data.zones : [];
-
-        const processedZones = rawZones.map((z: any, index: number) => {
-            const systemOpenArea = {
-                title: "Open Area",
-                content: `Open area of ${z.name}. ${z.description || "A location from your past."}`,
-                isBackgroundRelated: true
-            };
-            
-            // Filter out any AI-generated "Open Area" to avoid duplicates
-            const filteredPois = (z.pois || []).filter((p: any) => !p.title?.toLowerCase().includes("open area"));
-            
-            if (filteredPois.length > 0 && z.populationLevel !== 'Barren') {
-                 filteredPois[0].isPopulationCenter = true;
-            }
-
-            const isFirstZone = index === 0;
-            const currentThemes = isFirstZone ? themes1 : themes2;
-            const poisWithTypes = filteredPois.map((p: any, i: number) => {
-                // Attach base types to each generated POI (Skipping pop center index 0)
-                if (i > 0 && i - 1 < currentThemes.length) {
-                    return { ...p, baseType: currentThemes[i - 1]?.baseType };
-                }
-                return p;
-            });
-
-            return {
-                ...z,
-                populationLevel: isFirstZone ? popLevel1 : popLevel2,
-                zoneFeatures: isFirstZone ? features1 : features2,
-                pois: [systemOpenArea, ...poisWithTypes]
-            };
-        });
-
-        return processedZones;
-    } catch (e) {
-        console.error("Personal discoveries generation failed", e);
-        return [];
-    }
+    return []; // Return empty array to signal no additional zones are needed
 };
 
 
@@ -540,7 +412,7 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
 
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const rolledThemes = [1, 2, 3].map(() => {
+    const rolledThemes = [1, 2].map(() => {
         const r1 = Math.floor(Math.random() * 10);
         const r2 = Math.floor(Math.random() * 10);
         const r3 = Math.floor(Math.random() * 10);
@@ -571,7 +443,6 @@ You MUST base the catalyst of this adventure on the following scenario:
 You MUST generate the starting zone's POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
 1. Theme: ${rolledThemes[0].themeStr}
 2. Theme: ${rolledThemes[1].themeStr}
-3. Theme: ${rolledThemes[2].themeStr}
 
 [INSTRUCTIONS]
 1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
@@ -584,7 +455,8 @@ You MUST generate the starting zone's POIs following these specific rolled theme
    - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
    - You MUST generate exactly 4 'knowledge' entries (POIs).
      - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
-     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1-3).
+     - Entry 2: [MANDATORY] Background-related landmark. This POI MUST be directly tied to ${character.name}'s past, origin, or background as a ${character.race} ${character.profession}.
+     - Entries 3-4: The 2 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1 and 2).
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
 5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
    - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
@@ -626,11 +498,15 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
             const poisWithTypes = filteredKnowledge.map((p: any, i: number) => {
-                // Attach base types to each generated POI (Skipping pop center index 0)
-                if (i > 0 && i - 1 < rolledThemes.length) {
-                    return { ...p, baseType: rolledThemes[i - 1]?.baseType };
+                // Entry 0 (Pop Center) and Entry 1 (Background) don't use rolled themes
+                // Entry 2 and 3 use Themes 1 and 2
+                if (i === 1) {
+                    return { ...p, isBackgroundRelated: true };
                 }
-                return p;
+                if (i >= 2 && i - 2 < rolledThemes.length) {
+                    return { ...p, baseType: rolledThemes[i - 2]?.baseType, isBackgroundRelated: false };
+                }
+                return { ...p, isBackgroundRelated: false };
             });
 
             if (poisWithTypes.length > 0 && popLevel !== 'Barren') {

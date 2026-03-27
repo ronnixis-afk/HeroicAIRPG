@@ -62,10 +62,6 @@ const CharacterView: React.FC = () => {
         setIsWizardOpen(true);
     };
 
-    const handleAddCompanion = () => {
-        setWizardType('companion');
-        setIsWizardOpen(true);
-    };
 
     const toggleCompanionParty = async (companionId: string) => {
         const companion = companions.find(c => c.id === companionId);
@@ -257,22 +253,6 @@ const CharacterView: React.FC = () => {
                                 />
                             ))}
 
-                            <div className={`flex flex-col items-center gap-2 group flex-shrink-0 transition-all duration-300 w-20 ${isScrolled ? 'hidden' : 'flex'}`}>
-                                <button
-                                    onClick={isRecruitmentAvailable ? handleAddCompanion : undefined}
-                                    disabled={!isRecruitmentAvailable}
-                                    className={`w-20 h-20 flex items-center justify-center rounded-lg transition-colors shrink-0 border-2 border-dashed 
-                                        ${isRecruitmentAvailable 
-                                            ? 'bg-brand-primary/30 text-brand-text-muted hover:text-brand-accent hover:bg-brand-primary border-brand-primary/50 hover:border-brand-accent cursor-pointer' 
-                                            : 'bg-brand-surface/50 text-brand-text-muted/30 border-brand-primary/20 cursor-not-allowed'}`}
-                                    title={isRecruitmentAvailable ? "Recruit Companion" : "No Tavern available in this zone to recruit companions."}
-                                >
-                                    <Icon name="plus" className="w-8 h-8" />
-                                </button>
-                                <span className={`font-bold truncate text-[10px] ${isRecruitmentAvailable ? 'text-brand-text-muted' : 'text-brand-text-muted/50'} opacity-100`}>
-                                    Recruit
-                                </span>
-                            </div>
                         </div>
                     </div>
 

@@ -225,15 +225,32 @@ export const generateAdditionalLore = async (prompt: string, existingLore: LoreE
  */
 export const generateGlobalWorldSummary = async (lore: LoreEntry[]): Promise<string> => {
     const ai = getAi();
-    const input = `You are a Grand Master Lorekeeper. Based on the following established lore fragments, write a cohesive, atmospheric 2-paragraph world overview. 
-    Focus on the current state of conflict, technology/magic level, and the overarching aesthetic.
     
-    Lore Data: ${JSON.stringify(lore.slice(0, 20))}
+    // Combine foundational lore (first 15 entries) with recent developments (last 25 entries)
+    // This provides the AI with both the world's origins and its current state.
+    const foundationalLore = lore.slice(0, 15);
+    const recentLore = lore.length > 15 ? lore.slice(-25) : [];
+    const loreContext = [...foundationalLore, ...recentLore];
     
-    [STRICT RULE]
+    const input = `You are a Grand Master Lorekeeper. Based on the following established lore fragments, provide a highly structured, concise, yet detailed Realm Overview.
+    
+    [LORE DATA]
+    ${JSON.stringify(loreContext)}
+    
+    [OUTPUT STRUCTURE]
+    You MUST follow this exact format with these specific headers:
+    
+    CURRENT STATE: (A concise paragraph on the world's immediate situation)
+    THEMATIC PILLARS: (Bullet points for Conflict, Technology/Magic, and Aesthetic)
+    KEY FACTIONS: (Brief mention of major organizations and their roles)
+    RECENT DEVELOPMENTS: (Summary of the most significant recent events from lore)
+    
+    [STRICT RULES]
     - Return ONLY plain text. 
-    - NO Markdown formatting.
-    - MAXIMUM 200 WORDS.`;
+    - NO Markdown formatting (no asterisks, hash signs, etc.).
+    - Use Title Case for headers.
+    - MAXIMUM 150 WORDS.
+    - Be atmospheric but precise.`;
 
     const response = await ai.models.generateContent({
         model: AI_MODELS.DEFAULT,

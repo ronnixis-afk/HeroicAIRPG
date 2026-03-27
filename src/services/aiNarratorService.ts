@@ -82,6 +82,7 @@ export const generateNarrativeResponse = async (
         promptContent += `\n\n[MANDATORY SYSTEM DIRECTIVE - POTENTIAL COMBAT]: 
         The world logic dictates potential hostiles are engaging. If the narrative confirms the start of battle, you MUST populate the 'suggestedActors' field and set 'active_engagement' to true.
         - ANCESTRY ENFORCEMENT & NAMING: Choose from [${raceListStr}]. You MUST apply the matching Naming Style whenever an NPC name is created for that race.
+        - FULL NAME & GENDER RULE: You MUST generate a "First Name" and a "Last Name or Family Name" for every unique NPC (minimum 2 words). Generated names MUST be consistent with the NPC's assigned gender (Male/Female). Generic units (e.g. "Guard 1") are exempt.
         - Use unique names and match them to these mechanical slots:
         ${systemGeneratedCombatants.map((s, i) => `Slot ${i + 1}: [Difficulty: ${s.difficulty}, Template: ${s.template}]`).join('\n')}`;
     }

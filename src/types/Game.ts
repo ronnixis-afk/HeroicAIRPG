@@ -3,7 +3,7 @@
 
 import { PlayerCharacter, Companion } from './Characters';
 import { Inventory, Item, StoreItem, InventoryUpdatePayload } from './Items';
-import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, Nemesis, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution, POIMemory } from './World';
+import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution, POIMemory } from './World';
 import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillConfiguration, BodySlot, CombatActorSize, StatusEffect, ArchetypeName, ActiveBuff } from './Core';
 
 export interface CombatConfiguration {
@@ -26,7 +26,7 @@ export interface GameData {
   world: LoreEntry[];
   knowledge: LoreEntry[];
   objectives: LoreEntry[];
-  nemeses: Nemesis[];
+
   messages: ChatMessage[];
   gmSettings?: string;
   gmNotes?: string;
@@ -200,11 +200,7 @@ export type GameAction =
   | { type: 'UPDATE_PLOT_POINT'; payload: PlotPoint }
   | { type: 'DELETE_PLOT_POINT'; payload: string }
   | { type: 'MARK_ALL_PLOT_POINTS_SEEN' }
-  | { type: 'ADD_NEMESIS'; payload: Nemesis }
-  | { type: 'UPDATE_NEMESIS'; payload: Nemesis }
-  | { type: 'DELETE_NEMESIS'; payload: string }
-  | { type: 'MARK_NEMESIS_SEEN'; payload: string }
-  | { type: 'UPDATE_ALL_NEMESES'; payload: Nemesis[] }
+
   | { type: 'ADD_NPC'; payload: NPC }
   | { type: 'UPDATE_NPC'; payload: NPC }
   | { type: 'DELETE_NPC'; payload: string }

@@ -445,7 +445,7 @@ export enum Difficulty {
 /**
  * Valid view types for navigation in the application.
  */
-export type View = 'character' | 'inventory' | 'chat' | 'story' | 'world' | 'knowledge' | 'settings' | 'objectives' | 'store' | 'temp-stats' | 'nemesis' | 'gm-notes' | 'item-forge' | 'npcs' | 'gallery';
+export type View = 'character' | 'inventory' | 'chat' | 'story' | 'world' | 'knowledge' | 'settings' | 'objectives' | 'store' | 'temp-stats' | 'gm-notes' | 'item-forge' | 'npcs' | 'gallery' | 'recruit';
 
 export type WorldStyle = 'fantasy' | 'modern' | 'sci-fi' | 'historical' | 'custom';
 
