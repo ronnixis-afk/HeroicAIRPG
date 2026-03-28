@@ -280,7 +280,7 @@ export const useCharacterActions = (
             let scenario = null;
             const coords = '0-0';
 
-            if (!isCompanion) {
+            if (!isCompanion && !deferGameStart) {
                 setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 75 });
 
                 const hookIndex = getFairSystemRandom(1, 20, 'starting_hook', 10);
@@ -345,7 +345,6 @@ export const useCharacterActions = (
                     mapZones: mapZonesUpdate
                 };
 
-                dispatch({ type: 'PLOT_POINT', payload: { id: `bg-pp-${Date.now()}`, content: `[Origin] ${character.background || "An explorer with no past."}`, type: 'Background', isNew: true } } as any);
                 dispatch({ type: 'SET_PRE_GAME_STATE', payload: preGamePayload });
 
                 setCreationProgress({ isActive: true, step: "Integration complete!", progress: 100 });
