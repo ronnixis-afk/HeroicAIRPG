@@ -38,15 +38,15 @@ export const ZONE_PROPERTIES = {
         "Anomalous Phenomenon: A sci-fi mystery for the AI to exploit. (Variants: Time dilation field, Psionic echo chamber, Derelict Dyson Sphere)"
     ],
     Magitech: [
-        "Aetheric Resonance: The frequency of the magical field in the zone. (Variants: Harmonic/Empowering, Dissonant/Damaging, Null-Magic Void)",
-        "Technomantic Infrastructure: The scale of magical engineering. (Variants: Clockwork Solar System, Rune-gate Hub, Continental Mana-forges)",
-        "Power Source: What fuels the planets and space stations. (Variants: Captured Dying Star, Mass Soul Engines, Churned Ley-crystal Cores)",
-        "Ruling Caste: Who holds the reigns of the magitech. (Variants: Arch-Mage Syndicate, Cyber-Lich Dynasty, Artificer Guilds, Inquisition of the Gear)",
-        "Construct Population: The synthetic lifeforms present. (Variants: Sentient Brass Golems, Bound Stellar Elementals, Homunculi workforce)",
+        "Etheric Vibrancy: The frequency of the magical field in the zone. (Variants: Harmonic/Empowering, Dissonant/Damaging, Null-Magic Void)",
+        "Technomantic Infrastructure: The scale of magical engineering. (Variants: Automated Celestial Network, Rune-gate Hub, Continental Resonance-forges)",
+        "Power Source: What fuels the planets and space stations. (Variants: Captured Dying Star, Mass Essence-Extractors, Churned Crystal-Flux Cores)",
+        "Ruling Caste: Who holds the reigns of the magitech. (Variants: Arch-Mage Syndicate, Cyber-Lich Dynasty, Artificer Guilds, Order of the Prime-Logic)",
+        "Construct Population: The synthetic lifeforms present. (Variants: Sentient Reinforced Colossi, Bound Stellar Elementals, Homunculi workforce)",
         "Astral Alignment: How the system touches other dimensions. (Variants: Planar Convergence, Void-touched/Eldritch, Celestially Shielded)",
         "Space-Time Stability: The side effects of combining magic and warp tech. (Variants: Temporal Echoes, Warped Gravity Wells, Stasis Fields)",
-        "Travel Medium: How ships navigate the zone. (Variants: Aether-currents, Ancient Warp-gates, Spelljammer docks, Astral Rifts)",
-        "Arcane Hazard: The 'pollution' of magitech. (Variants: Wild Magic Storms, Mana Fallout Zones, Ethereal Parasite Swarms)",
+        "Travel Medium: How ships navigate the zone. (Variants: Flux-currents, Ancient Warp-gates, Void-skimmer docks, Astral Rifts)",
+        "Arcane Hazard: The 'pollution' of magitech. (Variants: Wild Magic Storms, Resonance Fallout Zones, Ethereal Parasite Swarms)",
         "Planetary Biome (Magitech): The physical state of the planets. (Variants: Biomechanical Flora, Liquid Mercury Oceans, Crystalline Forests)"
     ]
 };

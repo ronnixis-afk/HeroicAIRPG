@@ -127,36 +127,39 @@ export const isNameTooSimilar = (newName: string, existingNames: string[], thres
 export const getPOITheme = (worldSummary: string): 'fantasy' | 'modern' | 'scifi' | 'magitech' => {
     const summaryLower = (worldSummary || '').toLowerCase();
     
-    // 1. Sci-Fi (includes Cyberpunk)
+    // 1. Magitech (Arcane-Tech) - Check FIRST to prevent Tech/Energy keywords from being caught by Sci-Fi
+    if (
+        summaryLower.includes('magitech') || 
+        summaryLower.includes('synchronized') || 
+        summaryLower.includes('arcane-tech') || 
+        summaryLower.includes('etheric') || 
+        summaryLower.includes('arcane electro') || 
+        summaryLower.includes('prime-logic') || 
+        summaryLower.includes('resonance-forge') ||
+        summaryLower.includes('mana-vapor') ||
+        summaryLower.includes('flux-') ||
+        summaryLower.includes('techno-arcane')
+    ) {
+        return 'magitech';
+    }
+
+    // 2. Sci-Fi (includes Cyberpunk)
     if (
         summaryLower.includes('sci-fi') || 
         summaryLower.includes('scifi') || 
         summaryLower.includes('spaceship') || 
         summaryLower.includes('futuristic') || 
         summaryLower.includes('galaxy') || 
-        summaryLower.includes('space') || 
+        summaryLower.includes('space ') || // Space as a word
+        summaryLower.includes('interstellar') ||
         summaryLower.includes('cyberpunk') || 
         summaryLower.includes('neon') || 
-        summaryLower.includes('high-tech') || 
         summaryLower.includes('plasma') ||
         summaryLower.includes('void') ||
-        summaryLower.includes('orbit')
+        summaryLower.includes('orbit') ||
+        summaryLower.includes('high-tech')
     ) {
         return 'scifi';
-    }
-
-    // 2. Magitech (includes Steampunk/Clockwork)
-    if (
-        summaryLower.includes('magitech') || 
-        summaryLower.includes('clockwork') || 
-        summaryLower.includes('steampunk') || 
-        summaryLower.includes('manapunk') || 
-        summaryLower.includes('arcane techn') || 
-        summaryLower.includes('aether') || 
-        summaryLower.includes('alchemical engine') ||
-        summaryLower.includes('steam engine')
-    ) {
-        return 'magitech';
     }
 
     // 3. Modern (Narrowed to prevent false positives from Sci-Fi/Magitech cities)

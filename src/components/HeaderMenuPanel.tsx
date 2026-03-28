@@ -28,6 +28,7 @@ interface HeaderMenuPanelProps {
   worldSummary?: string;
   isAtPopulationCenter?: boolean;
   hasPlayer: boolean;
+  skillConfiguration?: string;
 }
 
 const MenuItem = ({ label, iconName, imageUrl, onClick, disabled = false, warning, isHighlighted, highlightColor, badgeCount }: {
@@ -84,18 +85,31 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
   populationLevel = '',
   worldSummary = '',
   isAtPopulationCenter = false,
-  hasPlayer
+  hasPlayer,
+  skillConfiguration
 }) => {
   const currentTheme = useMemo(() => getPOITheme(worldSummary), [worldSummary]);
   
   const themeLabel = useMemo(() => {
+    // 1. Use skillConfiguration (Ground Truth) if available
+    if (skillConfiguration) {
+      const config = skillConfiguration.toLowerCase();
+      if (config === 'magitech') return 'Magitech';
+      if (config === 'scifi' || config === 'sci-fi') return 'Sci-Fi';
+      if (config === 'modern') return 'Modern';
+      if (config === 'fantasy') return 'Fantasy';
+      // If it's something else but we have the string, Title Case it
+      return skillConfiguration.charAt(0).toUpperCase() + skillConfiguration.slice(1);
+    }
+
+    // 2. Fallback to heuristic
     switch (currentTheme) {
       case 'scifi': return 'Sci-Fi';
       case 'magitech': return 'Magitech';
       case 'modern': return 'Modern';
       default: return 'Fantasy';
     }
-  }, [currentTheme]);
+  }, [currentTheme, skillConfiguration]);
 
   const formattedWorldName = useMemo(() => {
     if (!worldName) return 'Details';

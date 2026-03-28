@@ -438,6 +438,7 @@ const GameInterface: React.FC = () => {
             worldSummary={gameData?.worldSummary}
             isAtPopulationCenter={isAtPopulationCenter}
             hasPlayer={hasPlayer}
+            skillConfiguration={gameData?.skillConfiguration}
           />
 
           <PlayerAttackModal

@@ -224,8 +224,41 @@ export const POI_MATRIX = {
         ]
     },
     magitech: {
-        baseTypes: [],
-        modifiers: [],
-        flavors: []
+        baseTypes: [
+            "Etheric Spire",
+            "Synchronized Citadel",
+            "Prime-Logic Depot",
+            "Essence-Forge Precinct",
+            "Crystal-Link Relay",
+            "Arcane Factory",
+            "Golemetric Lab",
+            "Pneumatic Transit Hub",
+            "Alchemical Refinery",
+            "Levitation Platform"
+        ],
+        modifiers: [
+            "Leaking Raw Resonance",
+            "Overclocked / Unstable",
+            "Abandoned / Corroded",
+            "Highly Pressurized",
+            "Automated / Guarded",
+            "Flux-Corrupted",
+            "Techno-Arcane Shielded",
+            "Drained of Power",
+            "Vibrating with Resonance",
+            "Experimental / Top-Secret"
+        ],
+        flavors: [
+            "Glowing blue fluid pulses through translucent pipes in the walls.",
+            "The rhythmic hiss of escaping mana-vapor nearly drowns out the heavy clanking.",
+            "Sparks of wild magic jump between copper coils and floating crystals.",
+            "A faint scent of ozone and lavender oil hangs heavy in the air.",
+            "Automated linkages turn overhead, casting shifting, complex shadows.",
+            "A discarded schematic for a sentient machine lies charred on the floor.",
+            "The air feels thick and static, making hair stand on end.",
+            "Broken golem parts litter the entrance, their eyes flickering dimly.",
+            "Small, floating maintenance drones buzz erratically around the area.",
+            "Ancient runes and digital displays overlap in a confusing symbology."
+        ]
     }
 };

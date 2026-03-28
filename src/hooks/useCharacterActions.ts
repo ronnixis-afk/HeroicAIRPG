@@ -129,43 +129,141 @@ export const useCharacterActions = (
 
             setCreationProgress({ isActive: true, step: "Calculating starting assets...", progress: 60 });
 
-            let base = 100;
-            let multiplier = 10;
-            if (character.level >= 17) { base = 20000; multiplier = 250; }
+            let base = 50;
+            let multiplier = 15;
+            if (character.level >= 17) { base = 20000; multiplier = 500; }
             else if (character.level >= 11) { base = 5000; multiplier = 250; }
             else if (character.level >= 5) { base = 500; multiplier = 25; }
             const roll = getSystemRandom(1, 10);
             const total = base + (roll * multiplier);
             const style = gameData.mapSettings?.style || 'fantasy';
-            const curName = style.includes('sci-fi') ? 'Credits' : 'Gold Pieces';
+            const curName = (style.includes('sci-fi') || style.includes('modern')) ? 'Credits' : 'Gold Pieces';
             const startingFunds = new Item({
                 id: `start-funds-${Date.now()}`,
                 name: curName, quantity: total, tags: ['currency'],
                 description: 'Initial wealth.', rarity: 'Common', isNew: true
             });
 
-            const blueprints = [
-                new Item({
-                    name: 'Primary Sidearm',
-                    tags: ['Light Weapon', 'melee'],
-                    weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Slashing' }], enhancementBonus: 0, critRange: 20 },
-                    rarity: 'Common',
-                    equippedSlot: 'Main Hand'
-                }),
-                new Item({
-                    name: 'Standard Ranged Utility',
-                    tags: ['Light Weapon', 'ranged'],
-                    weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Piercing' }], enhancementBonus: 0, critRange: 20 },
-                    rarity: 'Common'
-                }),
-                new Item({
-                    name: 'Protective Layer',
-                    tags: ['Light Armor'],
-                    armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
-                    rarity: 'Common',
-                    equippedSlot: 'Body'
-                })
-            ];
+            // Thematic starting blueprints based on world style
+            let blueprints: Item[] = [];
+            
+            if (style.includes('modern')) {
+                blueprints = [
+                    new Item({
+                        name: 'Combat Knife',
+                        tags: ['Light Weapon', 'melee'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d4', type: 'Slashing' }], enhancementBonus: 0, critRange: 19 },
+                        rarity: 'Common',
+                        equippedSlot: 'Main Hand'
+                    }),
+                    new Item({
+                        name: 'Tactical Handgun',
+                        tags: ['Light Weapon', 'ranged'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Piercing' }], enhancementBonus: 0, critRange: 20 },
+                        rarity: 'Common'
+                    }),
+                    new Item({
+                        name: 'Kevlar Vest',
+                        tags: ['Light Armor'],
+                        armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
+                        rarity: 'Common',
+                        equippedSlot: 'Body'
+                    })
+                ];
+            } else if (style.includes('sci-fi') || style.includes('futuristic')) {
+                blueprints = [
+                    new Item({
+                        name: 'Laser Blade',
+                        tags: ['Light Weapon', 'melee'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Fire' }], enhancementBonus: 0, critRange: 19 },
+                        rarity: 'Common',
+                        equippedSlot: 'Main Hand'
+                    }),
+                    new Item({
+                        name: 'Ion Pistol',
+                        tags: ['Light Weapon', 'ranged'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Electric' }], enhancementBonus: 0, critRange: 20 },
+                        rarity: 'Common'
+                    }),
+                    new Item({
+                        name: 'Mesh Underlay',
+                        tags: ['Light Armor'],
+                        armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
+                        rarity: 'Common',
+                        equippedSlot: 'Body'
+                    })
+                ];
+            } else if (style.includes('magitech')) {
+                blueprints = [
+                    new Item({
+                        name: 'Rune Blade',
+                        tags: ['Light Weapon', 'melee'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Force' }], enhancementBonus: 0, critRange: 19 },
+                        rarity: 'Common',
+                        equippedSlot: 'Main Hand'
+                    }),
+                    new Item({
+                        name: 'Aether Caster',
+                        tags: ['Light Weapon', 'ranged'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Radiant' }], enhancementBonus: 0, critRange: 20 },
+                        rarity: 'Common'
+                    }),
+                    new Item({
+                        name: 'Infused Vest',
+                        tags: ['Light Armor'],
+                        armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
+                        rarity: 'Common',
+                        equippedSlot: 'Body'
+                    })
+                ];
+            } else if (style.includes('historical')) {
+                blueprints = [
+                    new Item({
+                        name: 'Dagger',
+                        tags: ['Light Weapon', 'melee'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d4', type: 'Piercing' }], enhancementBonus: 0, critRange: 19 },
+                        rarity: 'Common',
+                        equippedSlot: 'Main Hand'
+                    }),
+                    new Item({
+                        name: 'Sling',
+                        tags: ['Light Weapon', 'ranged'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d4', type: 'Bludgeoning' }], enhancementBonus: 0, critRange: 20 },
+                        rarity: 'Common'
+                    }),
+                    new Item({
+                        name: 'Padded Jack',
+                        tags: ['Light Armor'],
+                        armorStats: { baseAC: 11, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
+                        rarity: 'Common',
+                        equippedSlot: 'Body'
+                    })
+                ];
+            } else {
+                // Fantasy fallback
+                blueprints = [
+                    new Item({
+                        name: 'Dagger',
+                        tags: ['Light Weapon', 'melee'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d4', type: 'Piercing' }], enhancementBonus: 0, critRange: 19 },
+                        rarity: 'Common',
+                        equippedSlot: 'Main Hand'
+                    }),
+                    new Item({
+                        name: 'Shortbow',
+                        tags: ['Light Weapon', 'ranged'],
+                        weaponStats: { ability: 'dexterity', damages: [{ dice: '1d6', type: 'Piercing' }], enhancementBonus: 0, critRange: 20 },
+                        rarity: 'Common'
+                    }),
+                    new Item({
+                        name: 'Leather Armor',
+                        tags: ['Light Armor'],
+                        armorStats: { baseAC: 11, armorType: 'light', plusAC: 0, strengthRequirement: 0 },
+                        rarity: 'Common',
+                        equippedSlot: 'Body'
+                    })
+                ];
+            }
 
             let skinnedEquipment = blueprints;
             if (!deferGameStart && !character.unwovenDetails) {
@@ -365,24 +463,6 @@ export const useCharacterActions = (
                 const tempPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
                 delete tempPlayerCharacter.unwovenDetails;
                 delete gameData.playerCharacter.unwovenDetails;
-
-                const playerInvTarget = gameData.playerInventory;
-                if (playerInvTarget) {
-                    const unskinned = [...playerInvTarget.equipped, ...playerInvTarget.carried].filter(i => i.name === 'Primary Sidearm' || i.name === 'Standard Ranged Utility' || i.name === 'Protective Layer');
-                    if (unskinned.length > 0) {
-                        setCreationProgress({ isActive: true, step: "Forging starting assets...", progress: 15 });
-                        const skinnedWeps = await skinItemsForCharacter(unskinned, tempPlayerCharacter, gameData.worldSummary || '');
-                        
-                        const mergeSkinned = (items: Item[]) => items.map(oldItem => {
-                             // Try to find the newly skinned version that matches the old slot or generic tag design
-                             const match = skinnedWeps.find((sw: any) => (sw.equippedSlot === oldItem.equippedSlot || sw.tags?.[0] === oldItem.tags?.[0]) && sw.name !== oldItem.name);
-                             return match ? new Item({...match, id: oldItem.id, quantity: oldItem.quantity}) : oldItem;
-                        });
-                        
-                        playerInvTarget.equipped = mergeSkinned(playerInvTarget.equipped);
-                        playerInvTarget.carried = mergeSkinned(playerInvTarget.carried);
-                    }
-                }
             }
             const finalPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
 
@@ -409,23 +489,6 @@ export const useCharacterActions = (
                         matchedComp.abilities[combatIdx] = { ...wovenData.skinnedAbility, id: matchedComp.abilities[combatIdx].id };
                     }
                     delete matchedComp.unwovenDetails;
-                    
-                    const compInvTarget = gameData.companionInventories?.[comp.id];
-                    if (compInvTarget) {
-                        const unskinned = [...compInvTarget.equipped, ...compInvTarget.carried].filter(i => i.name === 'Primary Sidearm' || i.name === 'Standard Ranged Utility' || i.name === 'Protective Layer');
-                        if (unskinned.length > 0) {
-                            setCreationProgress({ isActive: true, step: `Forging assets for ${comp.name}...`, progress: 10 + Math.floor((i + 1) * 10 / Math.max(1, pendingCompanions.length)) });
-                            const skinnedWeps = await skinItemsForCharacter(unskinned, matchedComp, gameData.worldSummary || '');
-                            
-                            const mergeSkinned = (items: Item[]) => items.map(oldItem => {
-                                 const match = skinnedWeps.find((sw: any) => (sw.equippedSlot === oldItem.equippedSlot || sw.tags?.[0] === oldItem.tags?.[0]) && sw.name !== oldItem.name);
-                                 return match ? new Item({...match, id: oldItem.id, quantity: oldItem.quantity}) : oldItem;
-                            });
-                            
-                            compInvTarget.equipped = mergeSkinned(compInvTarget.equipped);
-                            compInvTarget.carried = mergeSkinned(compInvTarget.carried);
-                        }
-                    }
                 }
             }
 

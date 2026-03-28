@@ -65,11 +65,11 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         description: 'Staying on your feet, diving, and balancing.',
         keywords: ['tumble', 'balance', 'flip', 'dodge', 'land', 'parkour', 'jump', 'gymnastics']
     },
-    'Aether Sense': {
+    'Etheric Resonance': {
         ability: 'wisdom',
         usedIn: ['Magitech'],
-        description: 'Detecting magical radiation, ley lines, or mana leaks.',
-        keywords: ['sense magic', 'aura', 'detect', 'resonance', 'tune', 'feel mana', 'vibe']
+        description: 'Detecting etheric radiation, ley lines, or flux leaks.',
+        keywords: ['sense magic', 'aura', 'detect', 'resonance', 'flux', 'vibe']
     },
     'Animal Handling': {
         ability: 'wisdom',
@@ -81,12 +81,12 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         ability: 'intelligence',
         usedIn: ['Fantasy', 'Magitech'],
         description: 'Knowledge of spells, magical theory, and runes.',
-        keywords: ['magic', 'spellcraft', 'runes', 'mystic', 'occult', 'mana', 'wizardry', 'theory']
+        keywords: ['magic', 'spellcraft', 'runes', 'mystic', 'occult', 'flux', 'wizardry', 'theory']
     },
     'Artifice': {
         ability: 'intelligence',
         usedIn: ['Magitech'],
-        description: 'Engineering magical devices, goggles, and constructs.',
+        description: 'Engineering magi-tech devices, goggles, and constructs.',
         keywords: ['construct', 'infuse', 'tinker', 'magic item', 'golem', 'schematic', 'enchant']
     },
     'Astrography': {
@@ -188,7 +188,7 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
     'Operate Vehicle': {
         ability: 'dexterity',
         usedIn: ['Magitech'],
-        description: 'Piloting maglevs, airships, or steam-tanks.',
+        description: 'Piloting maglevs, airships, or magi-tanks.',
         keywords: ['pilot', 'steer', 'drive', 'airship', 'train', 'control', 'throttle']
     },
     'Perception': {
@@ -447,7 +447,7 @@ export enum Difficulty {
  */
 export type View = 'character' | 'inventory' | 'chat' | 'story' | 'world' | 'knowledge' | 'settings' | 'objectives' | 'store' | 'temp-stats' | 'gm-notes' | 'item-forge' | 'npcs' | 'gallery' | 'recruit';
 
-export type WorldStyle = 'fantasy' | 'modern' | 'sci-fi' | 'historical' | 'custom';
+export type WorldStyle = 'fantasy' | 'modern' | 'sci-fi' | 'magitech' | 'historical' | 'custom';
 
 export type CombatActorSize = 'Small' | 'Medium' | 'Large' | 'Huge' | 'Gargantuan' | 'Colossal';
 
