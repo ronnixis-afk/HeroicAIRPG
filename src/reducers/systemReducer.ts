@@ -437,7 +437,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 newState.currentLocale = loc.site_name; // Legacy compatibility
 
                 // Update coordinates if pattern matches
-                if (loc.coordinates && /^-?\d+--?\d+$/.test(loc.coordinates)) {
+                if (loc.coordinates && /^-?\d+-(-?\d+)$/.test(loc.coordinates)) {
                     newState.playerCoordinates = loc.coordinates;
                 }
 

@@ -126,12 +126,16 @@ export const useExtractionStep = (
                         ...narratorLoc,
                         coordinates: newCoords,
                         zone: targetZone.name,
+                        site_name: narratorLoc.site_name || 'Open Area',
+                        site_id: narratorLoc.site_id || `open-area-${newCoords}`,
                         is_new_site: true,
                         transition_type: 'zone_change'
                     };
                 } else {
-                    // Generate new offset coordinate only if NOT forced
-                    if (!forcedCoordinates) {
+                    // Use forced coordinates if available, otherwise generate new offset
+                    if (forcedCoordinates) {
+                        newCoords = forcedCoordinates;
+                    } else {
                         const p = newCoords.split('-');
                         let nx = parseInt(p[0]) || 0;
                         let ny = parseInt(p[1]) || 0;
@@ -180,16 +184,21 @@ export const useExtractionStep = (
             } else if (narratorLoc.transition_type === 'staying' || isEventName) {
                 // Snap back to current location — no physical movement occurred.
                 const snapCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
+                
+                // If we just traveled (forcedCoordinates present) but the narrator says we are 'staying',
+                // we should still be at the NEW coordinates and use the NEW zone's info.
+                const currentZone = (gameData.mapZones || []).find(z => z.coordinates === snapCoords);
+                
                 finalUpdates.location_update = {
                     ...narratorLoc,
                     coordinates: snapCoords,
-                    zone: gameData.current_site_name || 'The Wilds',
-                    site_name: gameData.current_site_name || 'Open Area',
-                    site_id: gameData.current_site_id || `open-area-${snapCoords}`,
+                    zone: currentZone?.name || gameData.current_site_name || 'The Wilds',
+                    site_name: (snapCoords !== gameData.playerCoordinates) ? 'Open Area' : (gameData.current_site_name || 'Open Area'),
+                    site_id: (snapCoords !== gameData.playerCoordinates) ? `open-area-${snapCoords}` : (gameData.current_site_id || `open-area-${snapCoords}`),
                     is_new_site: false,
                     transition_type: 'staying'
                 };
-                resolvedLocale = gameData.current_site_name || '';
+                resolvedLocale = finalUpdates.location_update.site_name;
             } else if (narratorLoc.transition_type === 'returning') {
                 // Try to find the existing location in knowledge
                 const lookupCoords = forcedCoordinates || gameData.playerCoordinates;
@@ -491,6 +500,9 @@ export const useExtractionStep = (
 
         // 5. Resolve Auditor Result Metadata
         if (resolvedLocale) finalUpdates.currentLocale = resolvedLocale;
+        if (finalUpdates.location_update?.coordinates) {
+            finalUpdates.playerCoordinates = finalUpdates.location_update.coordinates;
+        }
         if (auditResult.timePassedMinutes > 0) {
             const currentDate = parseGameTime(gameData.currentTime);
             if (currentDate) {
