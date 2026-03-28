@@ -4,6 +4,7 @@ import { GameDataContext } from '../context/GameDataContext';
 import { useUI } from '../context/UIContext';
 import { Companion } from '../types';
 import { Icon } from './Icon';
+import Modal from './Modal';
 import { CharacterSheet } from './character/CharacterSheet';
 import { CharacterTab } from './character/CharacterTab';
 import { CharacterCreationWizard } from './character/CharacterCreationWizard';
@@ -16,6 +17,8 @@ const CharacterView: React.FC = () => {
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardType, setWizardType] = useState<'player' | 'companion'>('player');
     const [editingId, setEditingId] = useState<string | undefined>(undefined);
+    const [isAvatarModalOpen, setIsAvatarModalOpen]= useState(false);
+    const [avatarSelectionTarget, setAvatarSelectionTarget] = useState<{ type: 'player' | 'companion', id?: string } | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -89,6 +92,35 @@ const CharacterView: React.FC = () => {
         }
     };
 
+    const handleAvatarClick = (type: 'player' | 'companion', id?: string) => {
+        setAvatarSelectionTarget({ type, id });
+        setIsAvatarModalOpen(true);
+    };
+
+    const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && avatarSelectionTarget) {
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const imageUrl = reader.result as string;
+                if (avatarSelectionTarget.type === 'player') {
+                    dispatch({ type: 'UPDATE_PLAYER', payload: { ...playerCharacter, imageUrl } as any });
+                } else if (avatarSelectionTarget.id) {
+                    const companion = companions.find(c => c.id === avatarSelectionTarget.id);
+                    if (companion) {
+                        await updateCompanion(new Companion({ ...companion, imageUrl }));
+                    }
+                }
+                setIsAvatarModalOpen(false);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const avatarTargetImage = avatarSelectionTarget?.type === 'player' 
+        ? playerCharacter.imageUrl 
+        : companions.find(c => c.id === avatarSelectionTarget?.id)?.imageUrl;
+
     const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
     return (
@@ -129,7 +161,10 @@ const CharacterView: React.FC = () => {
                             >
                                 {hasPlayer ? (
                                     <>
-                                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30">
+                                        <div 
+                                            className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30 cursor-pointer hover:border-brand-accent transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); handleAvatarClick('player'); }}
+                                        >
                                             {playerCharacter.imageUrl ? (
                                                 <img src={playerCharacter.imageUrl} alt={playerCharacter.name} className="w-full h-full object-cover" />
                                             ) : (
@@ -181,7 +216,10 @@ const CharacterView: React.FC = () => {
                                             key={companion.id} 
                                             className="relative h-28 rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex items-center p-4 gap-6 transition-all shadow-md"
                                         >
-                                            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30">
+                                            <div 
+                                                className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30 cursor-pointer hover:border-brand-accent transition-colors"
+                                                onClick={(e) => { e.stopPropagation(); handleAvatarClick('companion', companion.id); }}
+                                            >
                                                 {companion.imageUrl ? (
                                                     <img src={companion.imageUrl} alt={companion.name} className="w-full h-full object-cover" />
                                                 ) : (
@@ -322,6 +360,43 @@ const CharacterView: React.FC = () => {
                 type={isPreGame ? wizardType : 'companion'}
                 existingId={editingId}
             />
+
+            <Modal 
+                isOpen={isAvatarModalOpen} 
+                onClose={() => setIsAvatarModalOpen(false)} 
+                title="Update Portrait"
+            >
+                <div className="p-8 flex flex-col items-center gap-8">
+                    <p className="text-center text-brand-text-muted text-sm leading-relaxed max-w-[240px]">
+                        Select a new image to represent your hero in the chronicles.
+                    </p>
+                    
+                    <div className="w-32 h-32 rounded-2xl overflow-hidden bg-brand-primary/10 border-2 border-brand-surface shadow-inner flex items-center justify-center">
+                        {avatarTargetImage ? (
+                            <img src={avatarTargetImage} className="w-full h-full object-cover" />
+                        ) : (
+                            <Icon name="character" className="w-12 h-12 text-brand-text-muted/30" />
+                        )}
+                    </div>
+                    
+                    <div className="flex flex-col w-full gap-3">
+                        <label className="w-full">
+                            <div className="btn-md btn-primary w-full flex items-center justify-center gap-2 cursor-pointer transition-all">
+                                <Icon name="upload" className="w-5 h-5" />
+                                <span>{avatarTargetImage ? 'Replace Image' : 'Upload Image'}</span>
+                            </div>
+                            <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} />
+                        </label>
+                        
+                        <button 
+                            onClick={() => setIsAvatarModalOpen(false)}
+                            className="btn-md btn-secondary w-full"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
