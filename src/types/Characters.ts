@@ -106,6 +106,7 @@ export class PlayerCharacter {
     isMount?: boolean;
     isSentient?: boolean;
     isInitialized?: boolean;
+    unwovenDetails?: any;
     alignment?: { lawChaos: number; goodEvil: number };
     combatLoadout?: {
         primaryAbilityId?: string;
@@ -158,6 +159,7 @@ export class PlayerCharacter {
         this.isMount = data.isMount;
         this.isSentient = data.isSentient;
         this.isInitialized = data.isInitialized || false;
+        this.unwovenDetails = data.unwovenDetails;
         this.alignment = data.alignment || { lawChaos: 0, goodEvil: 0 };
         this.combatLoadout = data.combatLoadout || { primaryAbilityId: '', secondaryAbilityId: '' };
 

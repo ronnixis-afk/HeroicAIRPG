@@ -267,12 +267,12 @@ export const weaveHero = async (
        Max 100 words.
     4. personality: Provide a list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
     5. keywords: Provide 4-6 thematic keywords.
-    6. abilityScores: ${selections.abilityScores ? `Use these EXACT ability scores: ${JSON.stringify(selections.abilityScores)}` : `Use a "Standard Array" logic (16, 14, 14, 12, 10, 8) distributed to fit the profession.`}
+    ${selections.abilityScores ? '6. abilityScores: [OMIT THIS FIELD]' : '6. abilityScores: Use a "Standard Array" logic (16, 14, 14, 12, 10, 8) distributed to fit the profession.'}
 
-    7. skills: You MUST allocate proficiency to at least 4 skills.
+    ${selections.abilityScores ? '7. skills: [OMIT THIS FIELD]' : `7. skills: You MUST allocate proficiency to at least 4 skills.
        ${selections.guaranteedSkills && selections.guaranteedSkills.length > 0 ? `- IMPORTANT: These skills are provided by the character's traits and MUST be marked as proficient: [${selections.guaranteedSkills.join(', ')}].` : ''}
        - Any skills mentioned in the "Background Seeds", "General Qualities", or "Custom Background Context" MUST also be marked as proficient.
-       - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].
+       - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].`}
     8. savingThrows: ${selections.savingThrows ? `Use these EXACT saving throw proficiencies: ${selections.savingThrows.join(', ')}` : "Choose exactly 2 Saving Throw proficiencies."}
 
     9. skinnedAbility: Transform the Combat Blueprint into a unique thematic signature power for ${selections.name}. 
@@ -288,17 +288,17 @@ export const weaveHero = async (
         "background": "string",
         "personality": "string",
         "keywords": ["string"],
-        "abilityScores": {
+${selections.abilityScores ? '' : `        "abilityScores": {
             "strength": { "score": number }, "dexterity": { "score": number }, "constitution": { "score": number },
             "intelligence": { "score": number }, "wisdom": { "score": number }, "charisma": { "score": number }
-        },
+        },`}
         "savingThrows": {
             "strength": { "proficient": boolean }, "dexterity": { "proficient": boolean }, "constitution": { "proficient": boolean },
             "intelligence": { "proficient": boolean }, "wisdom": { "proficient": boolean }, "charisma": { "proficient": boolean }
         },
-        "skills": {
+${selections.abilityScores ? '' : `        "skills": {
             ${availableSkillsList.map(s => `"${s}": { "proficient": boolean }`).join(',\n            ')}
-        },
+        },`}
         "skinnedAbility": {
             "name": "string",
             "description": "string"

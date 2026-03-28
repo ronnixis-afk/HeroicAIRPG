@@ -11,6 +11,7 @@ import {
     preloadAdjacentZones
 } from '../services/geminiService';
 import { forgeSkins } from '../services/ItemGeneratorService';
+import { weaveHero } from '../services/aiCharacterService';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
 import { useUI } from '../context/UIContext';
 import { companionToNPC } from '../utils/npcUtils';
@@ -166,7 +167,10 @@ export const useCharacterActions = (
                 })
             ];
 
-            const skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
+            let skinnedEquipment = blueprints;
+            if (!deferGameStart && !character.unwovenDetails) {
+                skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
+            }
 
             const processedInventory: Inventory = {
                 equipped: skinnedEquipment.filter((i: Item) => i.equippedSlot),
@@ -337,9 +341,96 @@ export const useCharacterActions = (
     const startJourney = useCallback(async (hookIndex: number = 10) => {
         if (!gameData || !gameData.playerCharacter || gameData.playerCharacter.name === 'Adventurer') return;
         
-        setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
+        setCreationProgress({ isActive: true, step: "Finalizing Party Data...", progress: 5 });
         try {
-            const scenario = await generateStartingScenario(gameData.playerCharacter, gameData, hookIndex, gameData.companions || []);
+            // First pass: Weave any pending characters
+            let playerUpdates: Partial<PlayerCharacter> = {};
+            if (gameData.playerCharacter.unwovenDetails) {
+                setCreationProgress({ isActive: true, step: "Forging Main Hero backstory...", progress: 10 });
+                const wovenData = await weaveHero(gameData as any, gameData.playerCharacter.unwovenDetails, false);
+                playerUpdates = {
+                    profession: wovenData.profession,
+                    appearance: wovenData.appearance,
+                    background: wovenData.background,
+                    keywords: wovenData.keywords,
+                    alignment: wovenData.moralAlignment
+                };
+                const abilities = [...gameData.playerCharacter.abilities];
+                const combatIdx = abilities.findIndex(a => a.id.startsWith('combat-'));
+                if (combatIdx > -1) {
+                    abilities[combatIdx] = { ...wovenData.skinnedAbility, id: abilities[combatIdx].id };
+                    playerUpdates.abilities = abilities;
+                }
+                
+                const tempPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
+                delete tempPlayerCharacter.unwovenDetails;
+                delete gameData.playerCharacter.unwovenDetails;
+
+                const playerInvTarget = gameData.playerInventory;
+                if (playerInvTarget) {
+                    const unskinned = [...playerInvTarget.equipped, ...playerInvTarget.carried].filter(i => i.name === 'Primary Sidearm' || i.name === 'Standard Ranged Utility' || i.name === 'Protective Layer');
+                    if (unskinned.length > 0) {
+                        setCreationProgress({ isActive: true, step: "Forging starting assets...", progress: 15 });
+                        const skinnedWeps = await skinItemsForCharacter(unskinned, tempPlayerCharacter, gameData.worldSummary || '');
+                        
+                        const mergeSkinned = (items: Item[]) => items.map(oldItem => {
+                             // Try to find the newly skinned version that matches the old slot or generic tag design
+                             const match = skinnedWeps.find((sw: any) => (sw.equippedSlot === oldItem.equippedSlot || sw.tags?.[0] === oldItem.tags?.[0]) && sw.name !== oldItem.name);
+                             return match ? new Item({...match, id: oldItem.id, quantity: oldItem.quantity}) : oldItem;
+                        });
+                        
+                        playerInvTarget.equipped = mergeSkinned(playerInvTarget.equipped);
+                        playerInvTarget.carried = mergeSkinned(playerInvTarget.carried);
+                    }
+                }
+            }
+            const finalPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
+
+            const pendingCompanions = gameData.companions?.filter(c => c.unwovenDetails) || [];
+            const finalCompanions = [...(gameData.companions || [])];
+            
+            for (let i = 0; i < pendingCompanions.length; i++) {
+                const comp = pendingCompanions[i];
+                setCreationProgress({ isActive: true, step: `Enrolling ${comp.name}...`, progress: 10 + Math.floor((i + 1) * 10 / Math.max(1, pendingCompanions.length)) });
+                const wovenData = await weaveHero(gameData as any, comp.unwovenDetails, true);
+                
+                const compIdx = finalCompanions.findIndex(c => c.id === comp.id);
+                if (compIdx > -1) {
+                    const matchedComp = finalCompanions[compIdx];
+                    matchedComp.profession = wovenData.profession;
+                    matchedComp.appearance = wovenData.appearance;
+                    matchedComp.background = wovenData.background;
+                    matchedComp.personality = comp.unwovenDetails.personality || wovenData.personality || matchedComp.personality;
+                    matchedComp.keywords = wovenData.keywords;
+                    matchedComp.alignment = wovenData.moralAlignment;
+                    
+                    const combatIdx = matchedComp.abilities.findIndex(a => a.id.startsWith('combat-'));
+                    if (combatIdx > -1) {
+                        matchedComp.abilities[combatIdx] = { ...wovenData.skinnedAbility, id: matchedComp.abilities[combatIdx].id };
+                    }
+                    delete matchedComp.unwovenDetails;
+                    
+                    const compInvTarget = gameData.companionInventories?.[comp.id];
+                    if (compInvTarget) {
+                        const unskinned = [...compInvTarget.equipped, ...compInvTarget.carried].filter(i => i.name === 'Primary Sidearm' || i.name === 'Standard Ranged Utility' || i.name === 'Protective Layer');
+                        if (unskinned.length > 0) {
+                            setCreationProgress({ isActive: true, step: `Forging assets for ${comp.name}...`, progress: 10 + Math.floor((i + 1) * 10 / Math.max(1, pendingCompanions.length)) });
+                            const skinnedWeps = await skinItemsForCharacter(unskinned, matchedComp, gameData.worldSummary || '');
+                            
+                            const mergeSkinned = (items: Item[]) => items.map(oldItem => {
+                                 const match = skinnedWeps.find((sw: any) => (sw.equippedSlot === oldItem.equippedSlot || sw.tags?.[0] === oldItem.tags?.[0]) && sw.name !== oldItem.name);
+                                 return match ? new Item({...match, id: oldItem.id, quantity: oldItem.quantity}) : oldItem;
+                            });
+                            
+                            compInvTarget.equipped = mergeSkinned(compInvTarget.equipped);
+                            compInvTarget.carried = mergeSkinned(compInvTarget.carried);
+                        }
+                    }
+                }
+            }
+
+            setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
+            const scenario = await generateStartingScenario(finalPlayerCharacter, gameData, hookIndex, finalCompanions);
 
             // Check if player's coordinates exist in the mapZones (from SET_PRE_GAME_STATE)
             // If not, we just use 0-0.
@@ -406,9 +497,9 @@ export const useCharacterActions = (
             const startingFundsName = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
 
             const restartPayload: Partial<GameData> = {
-                playerCharacter: gameData.playerCharacter,
+                playerCharacter: finalPlayerCharacter,
                 playerInventory: gameData.playerInventory,
-                companions: gameData.companions || [],
+                companions: finalCompanions,
                 companionInventories: gameData.companionInventories || {},
                 story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: scenario.startingZone.name, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
                 messages: [

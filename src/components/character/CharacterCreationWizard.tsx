@@ -7,7 +7,7 @@ import { Icon } from '../Icon';
 import Modal from '../Modal';
 import { TRAIT_LIBRARY, LibraryTrait } from '../../utils/traitLibrary';
 import { CharacterTemplate } from '../../utils/templateRegistry';
-import { Ability, PlayerCharacter, Companion, SKILL_NAMES, AbilityScoreName } from '../../types';
+import { Ability, PlayerCharacter, Companion, SKILL_NAMES, AbilityScoreName, ABILITY_SCORES } from '../../types';
 import { weaveHero, generateRecruitSkins } from '../../services/aiCharacterService';
 import { getXPForLevel, getXPForLevel as getXpForLevel } from '../../utils/mechanics';
 import { getBuffTag } from '../../utils/itemModifiers';
@@ -22,6 +22,7 @@ import { WizardStepSpecialty } from './wizard/WizardStepSpecialty';
 import { WizardStepIdentity } from './wizard/WizardStepIdentity';
 import { WizardNavigation } from './wizard/WizardNavigation';
 import { WizardStepMethod } from './wizard/WizardStepMethod';
+import { WizardStepAttributes } from './wizard/WizardStepAttributes';
 
 interface CharacterCreationWizardProps {
     isOpen: boolean;
@@ -31,8 +32,8 @@ interface CharacterCreationWizardProps {
     existingId?: string;
 }
 
-const PLAYER_STEPS = ["Ancestry", "Archetype", "Origin", "Qualities", "Prowess", "Identity"];
-const COMPANION_STEPS = ["Ancestry", "Archetype", "Backstory", "Quirks", "Specialty", "Finalize"];
+const PLAYER_STEPS = ["Ancestry", "Archetype", "Origin", "Qualities", "Prowess", "Attributes", "Identity"];
+const COMPANION_STEPS = ["Ancestry", "Archetype", "Backstory", "Quirks", "Specialty", "Attributes", "Finalize"];
 const SHIP_STEPS = ["Path", "Hull Configuration", "Prowess", "Identify"];
 const GENDER_OPTIONS = ['Male', 'Female', 'Unspecified'];
 
@@ -61,7 +62,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     const [customBackground, setCustomBackground] = useState('');
     const [abilityScores, setAbilityScores] = useState<any>(null);
     const [savingThrows, setSavingThrows] = useState<AbilityScoreName[] | null>(null);
-
+    const [skills, setSkills] = useState<Record<string, { proficient: boolean }>>({});
 
     const isCompanion = type === 'companion';
     const activeSteps = isShip ? SHIP_STEPS : (isCompanion ? COMPANION_STEPS : PLAYER_STEPS);
@@ -119,8 +120,12 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             setIsWeaving(false);
             setIsShip(false);
             setCustomBackground('');
-            setAbilityScores(null);
+            setAbilityScores({
+                strength: { score: 8 }, dexterity: { score: 8 }, constitution: { score: 8 },
+                intelligence: { score: 8 }, wisdom: { score: 8 }, charisma: { score: 8 }
+            });
             setSavingThrows(null);
+            setSkills({});
         }
     }, [isOpen, type, playerLevel]);
 
@@ -164,6 +169,19 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         return Array.from(bonuses).sort();
     }, [backgroundTraits, generalTraits]);
 
+    const racialBonuses = useMemo(() => {
+        const bonuses: Partial<Record<AbilityScoreName, number>> = {};
+        const selectedRaceObj = availableRaces.find(r => r.name === race);
+        if (selectedRaceObj?.racialTrait?.buffs) {
+            selectedRaceObj.racialTrait.buffs.forEach(buff => {
+                if (buff.type === 'ability' && buff.abilityName) {
+                    bonuses[buff.abilityName as AbilityScoreName] = (bonuses[buff.abilityName as AbilityScoreName] || 0) + buff.bonus;
+                }
+            });
+        }
+        return bonuses;
+    }, [race, availableRaces]);
+
     const canGoNext = useMemo(() => {
         if (isShip) {
             if (step === 1) return true;
@@ -178,7 +196,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         if (step === 3) return backgroundTraits.length === 2;
         if (step === 4) return generalTraits.length === 2;
         if (step === 5) return combatAbility !== null;
-        if (step === 6) return name.trim().length > 0;
+        if (step === 6) return true; // Attributes
+        if (step === 7) return name.trim().length > 0;
         return true;
     }, [step, race, backgroundTraits, generalTraits, combatAbility, name, isShip]);
 
@@ -196,7 +215,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setCustomBackground(traitSummary);
         setAbilityScores(template.abilityScores);
         setSavingThrows(template.savingThrows || null);
-        setStep(isShip ? 4 : 6);
+        setStep(isShip ? 4 : 7);
 
     };
 
@@ -206,8 +225,12 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setGeneralTraits([]);
         setCombatAbility(null);
         setCustomBackground('');
-        setAbilityScores(null);
+        setAbilityScores({
+            strength: { score: 8 }, dexterity: { score: 8 }, constitution: { score: 8 },
+            intelligence: { score: 8 }, wisdom: { score: 8 }, charisma: { score: 8 }
+        });
         setSavingThrows(null);
+        setSkills({});
         setStep(isShip ? 2 : 3);
 
     };
@@ -275,7 +298,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const racialTrait = raceObj?.racialTrait;
 
             const traitSkillsList = [...recruit.bgSeeds, ...recruit.genSeeds].flatMap((t: any) => t.buffs || []).filter((b: any) => b.type === 'skill').map((b: any) => b.skillName).filter((s: any): s is string => !!s);
-            const wovenData = await weaveHero(gameData as any, { 
+            const unwovenDetails = { 
                 name: recruit.name, 
                 gender: recruit.gender, 
                 race: recruit.race, 
@@ -284,18 +307,40 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
                 guaranteedSkills: traitSkillsList,
                 racialTrait
-            }, true);
+            };
             
             const allAbilities: Ability[] = [
                 ...(racialTrait ? [{ ...racialTrait, id: `racial-rec-${Date.now()}` }] : []),
                 ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), 
                 ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), 
-                { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }
+                { ...recruit.comSeed, id: `combat-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged." }
             ];
 
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
-            const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
-            const baseCharData = { id: `comp-${Date.now()}`, name: recruit.name, gender: recruit.gender, race: recruit.race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: recruit.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level: playerLevel, experiencePoints: getXpForLevel(playerLevel), alignment: recruit.moralAlignment || wovenData.moralAlignment };
+            const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) }; return acc; }, {} as any);
+            
+            const defaultScores = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { score: 10 } }), {} as any);
+            const defaultSaves = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
+
+            const baseCharData = { 
+                id: `comp-${Date.now()}`, 
+                name: recruit.name, 
+                gender: recruit.gender, 
+                race: recruit.race, 
+                profession: "[Pending Profession]", 
+                appearance: "[Pending Appearance]", 
+                background: "[Pending Background]", 
+                personality: recruit.personality, 
+                keywords: [], 
+                abilityScores: defaultScores, 
+                savingThrows: defaultSaves, 
+                skills: fullSkills, 
+                abilities: allAbilities, 
+                level: playerLevel, 
+                experiencePoints: getXpForLevel(playerLevel), 
+                alignment: recruit.moralAlignment,
+                unwovenDetails 
+            };
             await integrateCharacter(new Companion(baseCharData), true, isPreGame);
 
             onClose();
@@ -316,30 +361,56 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const selectedRaceObj = availableRaces.find(r => r.name === race);
             const racialTrait = selectedRaceObj?.racialTrait;
 
-            const wovenData = await weaveHero(gameData, {
+            const unwovenDetails = {
                 name,
                 gender: isShip ? 'Unspecified' : gender,
                 race: isShip ? 'Vessel' : race,
                 backgroundTraits: backgroundTraits.map(t => t.name),
                 generalTraits: generalTraits.map(t => t.name),
                 combatAbility: { ...combatAbility, id: 'blueprint' } as Ability,
-                customBackground: customBackground, // Pass custom background to AI
-                abilityScores: abilityScores, // Pass template stats if available
+                customBackground: customBackground,
+                abilityScores: abilityScores,
                 savingThrows: savingThrows || undefined,
                 guaranteedSkills: [...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName).filter((s): s is string => !!s),
                 racialTrait
-            }, isCompanion);
+            };
 
             const allAbilities: Ability[] = [
                 ...(racialTrait ? [{ ...racialTrait, id: `racial-${Date.now()}` }] : []),
                 ...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
                 ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })),
-                { ...wovenData.skinnedAbility, id: `combat-${Date.now()}` }
+                { ...combatAbility, id: `combat-${Date.now()}`, name: `[Pending] ${combatAbility.name}`, description: "This ability is being forged." }
             ];
+            
+            // Merge custom skills with guaranteed traits
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
-            const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!(wovenData.skills?.[skill]?.proficient) }; return acc; }, {} as any);
+            // Use custom skills if defined
+            const hasManualSkills = Object.keys(skills).some(key => skills[key].proficient);
+            const finalSkills = hasManualSkills ? SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) || !!skills[skill]?.proficient }; return acc; }, {} as any) : SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) }; return acc; }, {} as any);
 
-            const baseCharData = { id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), name, gender: isShip ? 'Unspecified' : gender, race: isShip ? 'Vessel' : race, profession: wovenData.profession, appearance: wovenData.appearance, background: wovenData.background, personality: isShip ? '' : wovenData.personality, keywords: wovenData.keywords, abilityScores: wovenData.abilityScores, savingThrows: wovenData.savingThrows, skills: fullSkills, abilities: allAbilities, level, experiencePoints: getXpForLevel(level), isShip, isSentient: !isShip, alignment: wovenData.moralAlignment };
+            const defaultSaves = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
+
+            const baseCharData = { 
+                id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), 
+                name, 
+                gender: isShip ? 'Unspecified' : gender, 
+                race: isShip ? 'Vessel' : race, 
+                profession: "[Pending Profession]", 
+                appearance: "[Pending Appearance]", 
+                background: "[Pending Background]", 
+                personality: isShip ? '' : "[Pending Personality]", 
+                keywords: [], 
+                abilityScores: abilityScores, 
+                savingThrows: savingThrows || defaultSaves, 
+                skills: finalSkills, 
+                abilities: allAbilities, 
+                level, 
+                experiencePoints: getXpForLevel(level), 
+                isShip, 
+                isSentient: !isShip, 
+                alignment: { goodEvil: 0, lawChaos: 0 },
+                unwovenDetails
+            };
             const finalChar = type === 'player' ? new PlayerCharacter(baseCharData) : new Companion(baseCharData);
 
             await integrateCharacter(finalChar, isCompanion, isPreGame);
@@ -480,6 +551,17 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} />}
                                                 {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} />}
                                                 {step === 6 && (
+                                                    <WizardStepAttributes
+                                                        abilityScores={abilityScores || {}}
+                                                        onAbilityChange={(ability, score) => setAbilityScores((prev: any) => ({ ...prev, [ability]: { score } }))}
+                                                        skills={skills}
+                                                        onSkillChange={(skill, proficient) => setSkills(prev => ({ ...prev, [skill]: { proficient } }))}
+                                                        config={skillConfig}
+                                                        guaranteedSkills={acquiredSkills}
+                                                        racialBonuses={racialBonuses}
+                                                    />
+                                                )}
+                                                {step === 7 && (
                                                     <WizardStepIdentity
                                                         isCompanion={isCompanion}
                                                         name={name}
@@ -504,7 +586,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             else if (step > 1) setStep(s => s - 1);
                                             else { setCreationMethod(null); setIsShip(false); }
                                         } else {
-                                            if (step === 6 && selectedTemplateId) setStep(2);
+                                            if (step === 7 && selectedTemplateId) setStep(2);
                                             else if (step > 1) setStep(s => s - 1);
                                             else { setCreationMethod(null); setIsShip(false); }
                                         }
@@ -521,16 +603,16 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                             else setStep(s => s + 1);
                                         } else {
                                             // Prefill background context when moving to the final step
-                                            if (step === 5) {
+                                            if (step === 6) {
                                                 const traits = [...backgroundTraits, ...generalTraits];
                                                 const traitSummary = traits.map(t => t.name).join(', ');
                                                 setCustomBackground(traitSummary);
                                             }
-                                            if (step === 6) handleConfirmManual();
+                                            if (step === 7) handleConfirmManual();
                                             else setStep(s => s + 1);
                                         }
                                     }}
-                                    nextLabel={(isShip ? step === 4 : step === 6) ? (isShip ? "Commission Vessel" : "Add to Party") : "Next Step"}
+                                    nextLabel={(isShip ? step === 4 : step === 7) ? (isShip ? "Commission Vessel" : "Add to Party") : "Next Step"}
                                     isNextDisabled={!canGoNext}
                                     showBack={true}
                                 />
