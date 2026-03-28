@@ -3,7 +3,6 @@
 import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import { Icon } from '../Icon';
 import AutoResizingTextarea from '../AutoResizingTextarea';
-import SpeechToTextButton from '../SpeechToTextButton';
 import { useUI } from '../../context/UIContext';
 import { GameDataContext } from '../../context/GameDataContext';
 import { useEntityDictionary, DictionaryEntry } from '../../hooks/useEntityDictionary';
@@ -272,13 +271,6 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     <button onClick={props.onViewScene} disabled={props.isGeneratingImage || !props.hasPlayer} className="btn-icon">
                         {props.isGeneratingImage ? <Icon name="spinner" className="w-5 h-5 animate-spin text-brand-accent" /> : <Icon name="eye" className="w-5 h-5 text-brand-text-muted hover:text-brand-accent transition-colors" />}
                     </button>
-                    {!props.hasPlayer ? (
-                         <button disabled className="btn-icon opacity-40">
-                            <Icon name="microphone" className="w-5 h-5 text-brand-text-muted" />
-                         </button>
-                    ) : (
-                        <SpeechToTextButton onClick={props.onMicClick} className="btn-icon" />
-                    )}
                 </div>
                 <button
                     onClick={props.onSubmit}
