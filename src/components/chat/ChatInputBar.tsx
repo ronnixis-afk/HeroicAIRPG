@@ -228,7 +228,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                         : `No Heroic Points Remaining (0/${maxHeroicPoints})`}
                 >
                     <Icon
-                        name={isHeroicModeActive ? "starFill" : "star"}
+                        name={isHeroicModeActive ? "heroicAction" : "heroicActionOutline"}
                         className={`w-6 h-6 transition-colors duration-300 ${isHeroicModeActive ? 'text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-accent'}`}
                     />
 

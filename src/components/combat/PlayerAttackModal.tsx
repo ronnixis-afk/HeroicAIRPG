@@ -424,7 +424,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                         >
                             <div className="flex items-center gap-4">
                                 <div className={`p-3 rounded-2xl border transition-colors ${isHeroicModeActive ? 'bg-brand-accent text-black border-brand-accent shadow-lg shadow-brand-accent/20' : 'bg-brand-surface text-brand-text-muted border-brand-primary shadow-inner'}`}>
-                                    <Icon name={isHeroicModeActive ? "starFill" : "star"} className="w-5 h-5" />
+                                    <Icon name={isHeroicModeActive ? "heroicAction" : "heroicActionOutline"} className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col text-left">
                                     <span className={`text-body-base font-bold ${isHeroicModeActive ? 'text-brand-accent' : 'text-brand-text'}`}>

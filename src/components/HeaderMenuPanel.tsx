@@ -137,13 +137,11 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-brand-primary/10 flex items-center justify-between gap-4">
-            <div className="flex-1 flex flex-col gap-1 min-w-0">
-              <h2 className="text-brand-text line-clamp-1 overflow-hidden m-0 text-body-lg font-bold">{formattedWorldName}</h2>
-              <div className="flex">
-                <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-brand-primary/40 text-brand-accent border border-brand-accent/30 tracking-normal">
-                  {themeLabel}
-                </span>
-              </div>
+            <div className="flex items-center gap-3 min-w-0">
+              <Icon name="heroicAction" className="w-6 h-6 text-brand-accent shrink-0 drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
+              <h3 className="text-brand-text line-clamp-1 overflow-hidden m-0 text-xl font-bold font-merriweather">
+                {formattedWorldName}
+              </h3>
             </div>
             <button onClick={onClose} className="btn-icon text-brand-text-muted hover:text-brand-text transition-colors shrink-0">
               <Icon name="close" className="w-6 h-6" />

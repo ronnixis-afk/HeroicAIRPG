@@ -133,7 +133,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                                     className={`transition-all duration-700 transform ${i < currentHeroic ? 'scale-110' : 'opacity-20 scale-100'}`}
                                 >
                                     <Icon
-                                        name={i < currentHeroic ? "starFill" : "star"}
+                                        name={i < currentHeroic ? "heroicAction" : "heroicActionOutline"}
                                         className={`w-6 h-6 ${i < currentHeroic ? 'text-brand-accent drop-shadow-[0_0_10px_rgba(62,207,142,0.5)]' : 'text-brand-text-muted'}`}
                                     />
                                 </div>

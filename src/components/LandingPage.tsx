@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Button from './Button';
+import { Icon } from './Icon';
 
 const BACKGROUNDS = [
     '/login-bg.png',    // Fantasy
@@ -67,6 +68,7 @@ export default function LandingPage() {
 
                     {/* Hero Section (Centered) */}
                     <div className="flex-1 flex flex-col items-center justify-center px-4 py-20 text-center min-h-[70vh]">
+                        <Icon name="heroicAction" className="w-20 h-20 md:w-32 md:h-32 text-brand-accent mb-8 drop-shadow-[0_0_20px_rgba(62,207,142,0.5)] animate-fade-in" />
                         <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text mb-2 drop-shadow-xl">
                             Heroic AI <span className="text-brand-accent">RPG</span>
                         </h3>
