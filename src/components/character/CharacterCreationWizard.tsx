@@ -85,51 +85,6 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         ];
     }, [gameData?.world]);
 
-    useEffect(() => {
-        if (creationProgress.isActive && creationProgress.step) {
-            setWeavingMessage(creationProgress.step);
-        }
-    }, [creationProgress.step, creationProgress.isActive]);
-
-    useEffect(() => {
-        if (isOpen) {
-            if (type === 'player') {
-                setCreationMethod('manual');
-            } else if (initialMethod) {
-                setCreationMethod(initialMethod);
-                if (initialMethod === 'recruitment') handleGenerateRecruits();
-                if (initialMethod === 'shipyard') {
-                    setIsShip(true);
-                    setStep(1);
-                    setGender('Unspecified');
-                }
-            } else {
-                setCreationMethod(null);
-            }
-
-            setStep(1);
-
-            setRecruits([]);
-            setName('');
-            setRace('');
-            setBackgroundTraits([]);
-            setGeneralTraits([]);
-            setCombatAbility(null);
-            setSelectedTemplateId(null);
-            setLevel(playerLevel);
-            setIsWeaving(false);
-            setIsShip(false);
-            setCustomBackground('');
-            setAbilityScores({
-                strength: { score: 8 }, dexterity: { score: 8 }, constitution: { score: 8 },
-                intelligence: { score: 8 }, wisdom: { score: 8 }, charisma: { score: 8 }
-            });
-            setSavingThrows(null);
-            setSkills({});
-        }
-    }, [isOpen, type, playerLevel]);
-
-
     const libraryTraits = useMemo(() => TRAIT_LIBRARY.filter(t => !t.requiredConfig || t.requiredConfig === skillConfig), [skillConfig]);
 
     const backgrounds = useMemo(() => {
@@ -143,6 +98,71 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     }, [libraryTraits, isShip]);
 
     const combats = useMemo(() => libraryTraits.filter(t => t.category === 'combat'), [libraryTraits]);
+
+    useEffect(() => {
+        if (creationProgress.isActive && creationProgress.step) {
+            setWeavingMessage(creationProgress.step);
+        }
+    }, [creationProgress.step, creationProgress.isActive]);
+
+    useEffect(() => {
+        if (isOpen) {
+            let existingChar: any = null;
+            if (existingId === 'player') existingChar = gameData?.playerCharacter;
+            else if (existingId) existingChar = gameData?.companions.find(c => c.id === existingId);
+
+            if (existingChar && existingChar.unwovenDetails) {
+                const unwoven = existingChar.unwovenDetails;
+                setName(unwoven.name || '');
+                setGender(unwoven.gender || 'Unspecified');
+                setLevel(existingChar.level || 1);
+                setRace(unwoven.race || '');
+                setBackgroundTraits(libraryTraits.filter(t => unwoven.backgroundTraits.includes(t.name)));
+                setGeneralTraits(libraryTraits.filter(t => unwoven.generalTraits.includes(t.name)));
+                setCombatAbility(libraryTraits.find(t => t.name === unwoven.combatAbility?.name) || null);
+                setCustomBackground(unwoven.customBackground || '');
+                setAbilityScores(existingChar.abilityScores);
+                setSavingThrows(existingChar.savingThrows ? Object.entries(existingChar.savingThrows).filter(([_, v]: any) => v.proficient).map(([k]) => k as AbilityScoreName) : null);
+                setSkills(existingChar.skills || {});
+                setCreationMethod('manual');
+                setIsShip(existingChar.isShip || false);
+                setStep(existingChar.isShip ? 4 : 7);
+            } else {
+                if (type === 'player') {
+                    setCreationMethod('manual');
+                } else if (initialMethod) {
+                    setCreationMethod(initialMethod);
+                    if (initialMethod === 'recruitment') handleGenerateRecruits();
+                    if (initialMethod === 'shipyard') {
+                        setIsShip(true);
+                        setStep(1);
+                        setGender('Unspecified');
+                    }
+                } else {
+                    setCreationMethod(null);
+                }
+
+                setStep(1);
+                setRecruits([]);
+                setName('');
+                setRace('');
+                setBackgroundTraits([]);
+                setGeneralTraits([]);
+                setCombatAbility(null);
+                setSelectedTemplateId(null);
+                setLevel(playerLevel);
+                setIsWeaving(false);
+                setIsShip(false);
+                setCustomBackground('');
+                setAbilityScores({
+                    strength: { score: 8 }, dexterity: { score: 8 }, constitution: { score: 8 },
+                    intelligence: { score: 8 }, wisdom: { score: 8 }, charisma: { score: 8 }
+                });
+                setSavingThrows(null);
+                setSkills({});
+            }
+        }
+    }, [isOpen, type, playerLevel, existingId, gameData, libraryTraits]);
 
     const allSelectedTraitNames = useMemo(() => {
         return [...backgroundTraits, ...generalTraits].map(t => t.name);

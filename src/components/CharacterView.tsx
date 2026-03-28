@@ -10,11 +10,12 @@ import { CharacterCreationWizard } from './character/CharacterCreationWizard';
 import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
-    const { gameData, updateCompanion, startJourney, switchWorld } = useContext(GameDataContext);
+    const { gameData, updateCompanion, startJourney, switchWorld, deleteCompanion, dispatch } = useContext(GameDataContext);
     const { selectedCharacterId, setSelectedCharacterId, creationProgress } = useUI();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardType, setWizardType] = useState<'player' | 'companion'>('player');
+    const [editingId, setEditingId] = useState<string | undefined>(undefined);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -74,6 +75,20 @@ const CharacterView: React.FC = () => {
         setSelectedCharacterId(id);
     };
 
+    const handleEditHero = (type: 'player' | 'companion', id?: string) => {
+        setWizardType(type);
+        setEditingId(id || (type === 'player' ? 'player' : undefined));
+        setIsWizardOpen(true);
+    };
+
+    const handleDeleteHero = (type: 'player' | 'companion', id?: string) => {
+        if (type === 'player') {
+            dispatch({ type: 'UPDATE_PLAYER', payload: { ...playerCharacter, name: 'New Hero', isInitialized: false } as any });
+        } else if (id) {
+            deleteCompanion(id);
+        }
+    };
+
     const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
     return (
@@ -127,8 +142,21 @@ const CharacterView: React.FC = () => {
                                             <div className="text-sm font-bold text-brand-accent mb-1">Main Hero</div>
                                             <div className="text-xl font-bold text-brand-text truncate">{playerCharacter.name}</div>
                                         </div>
-                                        <div className="px-4">
-                                            <Icon name="chevron-right" className="w-5 h-5 text-brand-text-muted/30" />
+                                        <div className="flex items-center gap-1 group">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleEditHero('player'); }}
+                                                className="p-2.5 rounded-xl hover:bg-brand-primary/20 text-brand-text-muted transition-all"
+                                                title="Edit Hero"
+                                            >
+                                                <Icon name="edit" className="w-5 h-5 opacity-70 hover:opacity-100 hover:text-brand-accent" />
+                                            </button>
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteHero('player'); }}
+                                                className="p-2.5 rounded-xl hover:bg-brand-danger/20 text-brand-text-muted transition-all"
+                                                title="Remove Hero"
+                                            >
+                                                <Icon name="trash" className="w-5 h-5 opacity-70 hover:opacity-100 hover:text-brand-danger" />
+                                            </button>
                                         </div>
                                     </>
                                 ) : (
@@ -165,6 +193,22 @@ const CharacterView: React.FC = () => {
                                             <div className="flex-1 text-left">
                                                 <div className="text-sm font-bold text-brand-accent/70 mb-1">{companion.profession || 'Companion'}</div>
                                                 <div className="text-xl font-bold text-brand-text truncate">{companion.name}</div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); handleEditHero('companion', companion.id); }}
+                                                    className="p-2.5 rounded-xl hover:bg-brand-primary/20 text-brand-text-muted transition-all"
+                                                    title="Edit Hero"
+                                                >
+                                                    <Icon name="edit" className="w-5 h-5 opacity-70 hover:opacity-100 hover:text-brand-accent" />
+                                                </button>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteHero('companion', companion.id); }}
+                                                    className="p-2.5 rounded-xl hover:bg-brand-danger/20 text-brand-text-muted transition-all"
+                                                    title="Remove Hero"
+                                                >
+                                                    <Icon name="trash" className="w-5 h-5 opacity-70 hover:opacity-100 hover:text-brand-danger" />
+                                                </button>
                                             </div>
                                         </div>
                                     );
@@ -271,8 +315,12 @@ const CharacterView: React.FC = () => {
 
             <CharacterCreationWizard
                 isOpen={isWizardOpen}
-                onClose={() => setIsWizardOpen(false)}
+                onClose={() => {
+                    setIsWizardOpen(false);
+                    setEditingId(undefined);
+                }}
                 type={isPreGame ? wizardType : 'companion'}
+                existingId={editingId}
             />
         </div>
     );
