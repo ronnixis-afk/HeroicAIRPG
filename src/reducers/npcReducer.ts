@@ -93,18 +93,29 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
 
             let updatedNpcs = [...currentNpcs];
 
-            // 1. AUTOMATIC FOLLOWERS: Move any existing NPC who is flagged as following (and not dead)
+            // 1. AUTOMATIC FOLLOWERS: Resolve spatial anchoring for NPCs flagged as following
             if (location_update) {
+                // REGISTRY FOLLOW RULE: NPCs only follow for "locale" moves (transition_type: 'staying').
+                // If the party moves to a new POI or Zone, they stop following and remain at their last location.
+                const isPOIChange = location_update.transition_type !== 'staying';
+
                 updatedNpcs = updatedNpcs.map(npc => {
-                    if (npc.isFollowing && npc.status !== 'Dead') {
-                        return {
-                            ...npc,
-                            currentPOI: location_update.site_name || 'Current',
-                            site_id: location_update.site_id
-                        };
-                    }
-                    if (npc.status === 'Dead') {
-                        return { ...npc, isFollowing: false };
+                    if (npc.isFollowing) {
+                        if (npc.status === 'Dead') {
+                            return { ...npc, isFollowing: false };
+                        }
+                        
+                        if (isPOIChange) {
+                            // DISCONNECT: Party moved too far; NPC stays put.
+                            return { ...npc, isFollowing: false };
+                        } else {
+                            // NARRATIVE SYNC: Party moved within the same POI; NPC follows.
+                            return {
+                                ...npc,
+                                currentPOI: location_update.site_name || 'Current',
+                                site_id: location_update.site_id
+                            };
+                        }
                     }
                     return npc;
                 });

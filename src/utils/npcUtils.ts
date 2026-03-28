@@ -162,7 +162,7 @@ export const combatActorToNPC = (actor: CombatActor, currentPOI: string | undefi
         name: actor.name,
         description: actor.description && actor.description !== 'Analyzing entity...' ? actor.description : blueprintDesc,
         relationship: actor.isAlly ? Math.max(actor.alignment === 'ally' ? 20 : 0, 0) : 0,
-        alignment: actor.alignment || (actor.isAlly ? 'ally' : 'enemy'),
+        alignment: actor.alignment || (actor.isAlly ? 'ally' : 'neutral'),
         status: 'Alive',
         currentPOI: safePOI,
         size: actor.size,
@@ -218,7 +218,7 @@ export const npcToCombatActor = (npc: NPC, playerLevel: number, baseScore: numbe
     // Synchronize isAlly and alignment
     const isActuallyAlly = npc.relationship >= 10 || npc.alignment === 'ally';
     actor.isAlly = isActuallyAlly;
-    actor.alignment = npc.alignment || (isActuallyAlly ? 'ally' : 'enemy');
+    actor.alignment = npc.alignment || (isActuallyAlly ? 'ally' : 'neutral');
 
     actor.isShip = !!npc.isShip;
     actor.isMount = !!npc.isMount;

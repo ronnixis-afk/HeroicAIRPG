@@ -55,6 +55,7 @@ export const generateEncounterRoll = (
             rollType: 'Encounter Check',
             checkName: checkName,
             dieRoll: d100,
+            diceString: '1d100',
             bonus: hostilityModifier,
             total: total,
             outcome: outcome

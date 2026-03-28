@@ -113,10 +113,13 @@ const getGroupHeader = (roll: DiceRoll) => {
     const roller = roll.rollerName || 'Someone';
     const target = roll.targetName || 'Target';
 
-    if (roll.rollType === 'Skill Check' || roll.rollType === 'Ability Check') {
+    if (roll.rollType === 'Ability Check') {
         let header = `${roller} ${roll.checkName}`;
         if (roll.dc) header += ` vs DC ${roll.dc}`;
         return header;
+    }
+    if (roll.rollType === 'Encounter Check') {
+        return `Travel Danger Check`;
     }
     if (roll.rollType === 'Saving Throw') {
         let header = `${roller} ${roll.checkName} Save`;

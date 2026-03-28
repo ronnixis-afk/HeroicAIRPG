@@ -47,8 +47,8 @@ export const useTime = (
 
         if (isSafe) {
             const genericMessage = type === 'short'
-                ? "You take a moment to catch your breath and tend to your gear. The brief respite clears your mind and restores your physical energy for the path ahead."
-                : "You establish a secure camp and surrender to a deep, restorative sleep. When you finally stir, your wounds are healed and your full potential is completely restored.";
+                ? "The party takes a brief respite to recover and perform routine maintenance. This pause allows you to restore focus and energy for the task ahead."
+                : "The party secures their position and enters a period of extended rest and recuperation. You emerge fully restored and ready to continue.";
 
             // Log player intent and narrative response (Normal chat format)
             dispatch({

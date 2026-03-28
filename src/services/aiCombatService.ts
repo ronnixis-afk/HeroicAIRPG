@@ -116,7 +116,7 @@ export const generateCombatEncounterSuggestions = async (
     **MANDATORY SELECTIONS**:
     1. **Template**: Choose one of: Agile, Brute, Tank, Brawler, Sniper, Grenadier, Caster, Healer, Controller, Skirmisher.
     2. **Difficulty**: Select one: Weak, Normal, Elite, Boss.
-    3. **Alignment**: DEFAULT TO 'enemy' unless the narrative context clearly identifies them as allies.
+    3. **Alignment**: DEFAULT TO 'neutral' unless the narrative context clearly identifies them as enemies/antagonists who are actively attacking.
 
     Return JSON array of objects:
     {
@@ -124,7 +124,7 @@ export const generateCombatEncounterSuggestions = async (
         "template": "...",
         "size": "...",
         "difficulty": "...",
-        "alignment": "enemy",
+        "alignment": "neutral",
         "isShip": boolean,
         "affinity": "...",
         "archetype": "...",
@@ -178,7 +178,7 @@ export const enrichCombatantDetails = async (
     ${Object.keys(availableAffinities).join(', ')}
     
     **MANDATORY ENRICHMENT RULES**:
-    1. **ALIGNMENT**: DEFAULT TO 'enemy' unless the narrative context clearly identifies them as allies.
+    1. **ALIGNMENT**: DEFAULT TO 'neutral' unless the narrative context clearly identifies them as hostiles or antagonists.
     2. **SKINNING ABILITIES**: Rewrite the names and descriptions of 'attacks' and 'specialAbilities' to match the World Setting (Sci-Fi, Modern, Fantasy, Magitech).
     3. **DAMAGE TYPE ALIGNMENT**: Set the 'damageType' of attacks and abilities to match the theme (e.g. A "Fire Mage" should have 'Fire', a "Robot" might have 'Electric' or 'Force').
     4. **TARGETING**: Identify if the narrative implies the ability hits 'Single' or 'Multiple' targets.
@@ -190,7 +190,7 @@ export const enrichCombatantDetails = async (
         "name": "Unique Name", 
         "affinity": "AffinityName", 
         "description": "Short description", 
-        "alignment": "enemy",
+        "alignment": "neutral",
         "attacks": [{ "name": "Skinned Attack Name", "damageType": "...", "description": "Short description of the strike" }],
         "specialAbilities": [{ "name": "Skinned Ability Name", "description": "Evocative effect description.", "damageType": "...", "targetType": "Single|Multiple" }]
       }
@@ -391,7 +391,7 @@ export const reassessCombatEnemies = async (
         "name": "Unique Name",
         "template": "...",
         "difficulty": "...",
-        "alignment": "enemy",
+        "alignment": "neutral|enemy",
         "isShip": boolean,
         "description": "Brief description of their appearance/role"
       }

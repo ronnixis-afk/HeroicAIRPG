@@ -6,7 +6,7 @@ import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRe
 import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
-import { getTravelSpeed, parseCoords, parseHostility } from '../../utils/mapUtils';
+import { getTravelSpeed, parseCoords, parseHostility, getPOITheme } from '../../utils/mapUtils';
 import { useWorldSelectors } from './useWorldSelectors';
 import { useUI } from '../../context/UIContext';
 
@@ -145,6 +145,8 @@ export const useTravel = (
 
             const poisText = currentPois.map(p => `- ${p.title}: ${p.content}`).join('\n');
 
+            const lastSiteName = gameData.current_site_name || 'your previous location';
+
             // 2. Resolve Mechanics (Truth)
             const rawHostility = zone ? parseHostility(zone.hostility) : 0;
             const discoveryBonus = isDiscovery ? 75 : 0;
@@ -182,7 +184,58 @@ export const useTravel = (
                     generativeCombatInstruction = getSkillSuccessPrompt(skillToUse, matrix);
                 }
             } else {
-                generativeCombatInstruction = getClearPlotPrompt();
+                // If the journey is safe, we skip the AI pipeline and provide an immediate flavorful summary
+                const theme = getPOITheme(gameData.worldSummary || "");
+                const partyShip = gameData.companions.find(c => c.isShip && c.isInParty !== false);
+                const shipName = partyShip?.name || "your vessel";
+                const m = (travelMethod || "walking").toLowerCase();
+
+                let chosenMessage = "";
+                if (m.includes('ship') || m.includes('boat') || m.includes('sail') || m.includes('vessel') || m.includes('scout') || m.includes('fly') || m.includes('airship')) {
+                    const vesselMessages = {
+                        fantasy: `With ${shipName} cutting through the elements, the party charts a legendary course from ${lastSiteName} to ${locationName}. The vessel arrives without incident, ready for the challenges that lie ahead.`,
+                        modern: `With ${shipName} guiding the way, the party completes the transit from ${lastSiteName} to ${locationName}. The voyage was swift and secure, leading to a successful arrival.`,
+                        scifi: `The ${shipName} tears through the vacuum, its engines humming with raw power as it concludes the jump from ${lastSiteName} to ${locationName}. The vessel performs a precise arrival sequence at its destination.`,
+                        magitech: `The ${shipName} glides along the ley-line currents, navigating the shimmering boundary between ${lastSiteName} and ${locationName}. Its systems remain in perfect resonance as you achieve a successful arrival.`
+                    };
+                    chosenMessage = vesselMessages[theme as keyof typeof vesselMessages] || vesselMessages.fantasy;
+                } else if (m.includes('portal') || m.includes('teleport')) {
+                    const portalMessages = {
+                        fantasy: `The shimmering boundary between dimensions folds as you step from ${lastSiteName}. In a heartbeat, the party emerges within ${locationName}, the transition absolute and undisturbed.`,
+                        modern: `Synchronized transit confirmed. The party departs ${lastSiteName} and instantly recalibrates at ${locationName}. The arrival is silent, efficient, and secure.`,
+                        scifi: `The quantum bridge collapses behind you as the party stabilizes at ${locationName}. The transit from ${lastSiteName} was instantaneous, leaving you ready for immediate action.`,
+                        magitech: `The portal's harmonic resonance fades as you manifest within ${locationName}. The jump from ${lastSiteName} was smooth, and your party stands now at its destination.`
+                    };
+                    chosenMessage = portalMessages[theme as keyof typeof portalMessages] || portalMessages.fantasy;
+                } else {
+                    const trekkingMessages = {
+                        fantasy: `Braving the untamed wilds between ${lastSiteName} and ${locationName}, the party finally crests the final ridge to see their destination. The trek was arduous but uneventful, and you stand now ready for adventure in ${locationName}.`,
+                        modern: `The party concludes their journey from ${lastSiteName} to ${locationName}. The transit was quiet and secure, and you stand now at the threshold of ${locationName}, prepared for the next phase.`,
+                        scifi: `Through focus and steady progress, the party completes the traverse across the sector from ${lastSiteName} to ${locationName}. No threats crossed your path, and you have successfully arrived at your target coordinates.`,
+                        magitech: `With steady resolve, the party navigates the shifting energy fields between ${lastSiteName} and ${locationName}. The journey proved uneventful, allowing for a timely and secure arrival.`
+                    };
+                    chosenMessage = trekkingMessages[theme as keyof typeof trekkingMessages] || trekkingMessages.fantasy;
+                }
+
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-arr-safe-${Date.now()}`,
+                        sender: 'ai',
+                        content: chosenMessage,
+                        rolls: [roll],
+                        type: 'neutral'
+                    }
+                });
+
+                // Manual preloading of adjacent zones
+                const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
+                const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
+                preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
+                    .catch(e => console.error("Silent preloading failed:", e));
+
+                setIsAiGenerating(false);
+                return;
             }
 
             dispatch({
@@ -190,7 +243,7 @@ export const useTravel = (
                 payload: {
                     id: `sys-arr-enc-${Date.now()}`,
                     sender: 'system',
-                    content: `Danger Check: ${roll.total} (Threshold 75)${preRolledSummary ? '\n' + preRolledSummary : ''}`,
+                    content: preRolledSummary || `Danger Check resulted in an encounter.`,
                     rolls: preRolledRolls,
                     type: 'neutral'
                 }
@@ -217,17 +270,11 @@ export const useTravel = (
 
             await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
 
-            // Trigger silent preloading of adjacent zones sequentially WITHOUT blocking or setting isAiGenerating(true)
-            const dispatchZoneUpdate = (zone: MapZone) => {
-                dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
-            };
-
-            const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => {
-                dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
-            };
-
+            // Trigger silent preloading
+            const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
+            const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
             preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
-                .catch(e => console.error("Silent preloading failed at top-level:", e));
+                .catch(e => console.error("Silent preloading failed:", e));
 
         } catch (e) {
             console.error("Arrival failed", e);
