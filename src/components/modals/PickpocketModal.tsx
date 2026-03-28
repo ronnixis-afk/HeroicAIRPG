@@ -43,19 +43,14 @@ export const PickpocketModal: React.FC = () => {
             title="Sleight Of Hand"
         >
             <div className="space-y-8 py-2 animate-fade-in">
-                <div className="flex flex-col items-center text-center p-6 bg-purple-900/10 rounded-3xl border border-purple-500/30 shadow-inner group relative overflow-hidden">
-                    {/* Stealthy visual flare */}
-                    <div className="absolute -inset-1 bg-gradient-to-tr from-purple-500/5 to-brand-accent/5 blur-2xl opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
-                    
-                    <div className="w-16 h-16 rounded-full bg-brand-bg flex items-center justify-center mb-6 border border-purple-500/40 relative z-10">
-                        <Icon name="sparkles" className="w-8 h-8 text-brand-accent shadow-[0_0_15px_rgba(62,207,142,0.4)]" />
-                    </div>
-                    
-                    <div className="relative z-10">
-                        <h4 className="text-brand-text font-bold mb-2">Shadow Work</h4>
-                        <p className="text-body-sm text-brand-text-muted italic leading-relaxed">
-                            You are moving into the blind spot of <span className="text-brand-text font-bold">{pickpocketTarget.name}</span>.
-                        </p>
+                <div className="flex flex-col items-center justify-center p-4">
+                    <div className="w-40 h-40 flex items-center justify-center relative group">
+                        <div className="absolute inset-0 bg-brand-accent/5 rounded-full blur-2xl group-hover:bg-brand-accent/10 transition-colors" />
+                        <img 
+                            src="/icons/pickpocket.png" 
+                            alt="Pickpocket" 
+                            className="w-full h-full object-contain relative z-10 drop-shadow-2xl transition-transform duration-500 group-hover:scale-110" 
+                        />
                     </div>
                 </div>
 

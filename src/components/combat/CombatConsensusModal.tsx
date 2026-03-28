@@ -133,8 +133,13 @@ const CombatConsensusPanel: React.FC = () => {
             maxWidth="md"
         >
             <div className="flex flex-col items-center text-center space-y-8 py-4 animate-fade-in">
-                <div className="w-20 h-20 rounded-full bg-brand-danger/10 border border-brand-danger/30 flex items-center justify-center shadow-[0_0_35px_rgba(239,68,68,0.2)] animate-pulse">
-                    <Icon name="exclamation" className="w-10 h-10 text-brand-danger" />
+                <div className="w-40 h-40 flex items-center justify-center relative group">
+                    <div className="absolute inset-0 bg-brand-danger/10 rounded-full blur-2xl group-hover:bg-brand-danger/20 transition-colors" />
+                    <img 
+                        src="/icons/hostiles-detected.png" 
+                        alt="Hostiles Detected" 
+                        className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(239,68,68,0.3)] transition-transform duration-500 group-hover:scale-110 animate-pulse-slow" 
+                    />
                 </div>
                 
                 <div className="space-y-3">

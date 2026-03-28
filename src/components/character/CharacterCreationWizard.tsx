@@ -27,6 +27,7 @@ interface CharacterCreationWizardProps {
     isOpen: boolean;
     onClose: () => void;
     type: 'player' | 'companion';
+    initialMethod?: 'manual' | 'recruitment' | 'shipyard';
     existingId?: string;
 }
 
@@ -35,7 +36,7 @@ const COMPANION_STEPS = ["Ancestry", "Archetype", "Backstory", "Quirks", "Specia
 const SHIP_STEPS = ["Path", "Hull Configuration", "Prowess", "Identify"];
 const GENDER_OPTIONS = ['Male', 'Female', 'Unspecified'];
 
-export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = ({ isOpen, onClose, type, existingId }) => {
+export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = ({ isOpen, onClose, type, initialMethod, existingId }) => {
     const { gameData, integrateCharacter } = useContext(GameDataContext);
     const { setCreationProgress, creationProgress } = useUI();
 
@@ -91,10 +92,22 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
     useEffect(() => {
         if (isOpen) {
-            if (type === 'player') setCreationMethod('manual');
-            else setCreationMethod(null);
+            if (type === 'player') {
+                setCreationMethod('manual');
+            } else if (initialMethod) {
+                setCreationMethod(initialMethod);
+                if (initialMethod === 'recruitment') handleGenerateRecruits();
+                if (initialMethod === 'shipyard') {
+                    setIsShip(true);
+                    setStep(1);
+                    setGender('Unspecified');
+                }
+            } else {
+                setCreationMethod(null);
+            }
 
             setStep(1);
+
             setRecruits([]);
             setName('');
             setRace('');
