@@ -256,12 +256,12 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
         <button
             onClick={handleConfirm}
             disabled={totalAssigned === 0 || isProcessing}
-            className="btn-primary btn-md w-full gap-3 shadow-xl shadow-brand-accent/20 rounded-xl font-bold"
+            className="btn-primary btn-lg w-full gap-3 shadow-xl shadow-brand-accent/20 rounded-2xl font-medium"
         >
             {isProcessing ? (
                 <><Icon name="spinner" className="w-5 h-5 animate-spin" /><span>{gameData.combatConfiguration?.narrativeCombat ? 'Syncing Round...' : 'Processing...'}</span></>
             ) : (
-                <><Icon name={isQuickAction ? "sparkles" : "sword"} className="w-4 h-4" /><span>{isQuickAction ? 'Perform Action' : 'Execute Maneuver'}</span></>
+                <><Icon name={isQuickAction ? "sparkles" : "sword"} className="w-5 h-5" /><span>{isQuickAction ? 'Perform Action' : 'Execute Maneuver'}</span></>
             )}
         </button>
     );
@@ -294,10 +294,10 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
                 <div className="space-y-3">
                     <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Action Type</label>
-                    <div className="grid grid-cols-2 gap-2 bg-brand-primary/50 p-2 rounded-xl shadow-inner border border-brand-surface">
-                        <button onClick={() => { setMode('weapon'); setAssignments([]); setTargetCounts({}); }} className={`h-11 px-4 rounded-xl text-xs font-bold transition-all ${mode === 'weapon' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Attack Pattern</button>
-                        <button onClick={() => { setMode('ability'); setSelectedSourceId(null); setTargetCounts({}); }} className={`h-11 px-4 rounded-xl text-xs font-bold transition-all ${mode === 'ability' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Special Ability</button>
-                        <button onClick={() => { setMode('item'); setSelectedSourceId(null); setTargetCounts({}); }} className={`h-11 px-4 rounded-xl text-xs font-bold transition-all ${mode === 'item' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Tactical Item</button>
+                    <div className="flex gap-2 bg-brand-primary/50 p-1 rounded-xl shadow-inner border border-brand-surface">
+                        <button onClick={() => { setMode('weapon'); setAssignments([]); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'weapon' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Attack</button>
+                        <button onClick={() => { setMode('ability'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'ability' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Ability</button>
+                        <button onClick={() => { setMode('item'); setSelectedSourceId(null); setTargetCounts({}); }} className={`flex-1 h-10 px-4 rounded-lg text-xs font-bold transition-all ${mode === 'item' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}>Item</button>
                     </div>
                 </div>
 
@@ -369,7 +369,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                             key={source.id}
                                             onClick={() => { setSelectedSourceId(source.id); setTargetCounts({}); }}
                                             disabled={!!disabledReason}
-                                            className={`w-full text-left bg-brand-primary/10 rounded-xl p-5 border-2 transition-all flex flex-col gap-2 relative overflow-hidden group shadow-sm ${isSelected ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20' : 'border-brand-surface hover:border-brand-primary/50'} ${disabledReason ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                                            className={`w-full text-left bg-brand-primary/10 rounded-3xl p-5 border-2 transition-all flex flex-col gap-2 relative overflow-hidden group shadow-sm ${isSelected ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20' : 'border-brand-surface hover:border-brand-primary/50'} ${disabledReason ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div className="flex items-center gap-4 overflow-hidden flex-1">
@@ -417,13 +417,13 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                         <button
                             onClick={() => { if (heroicPoints > 0) setIsHeroicModeActive(!isHeroicModeActive); }}
                             disabled={heroicPoints <= 0}
-                            className={`w-full flex items-center justify-between p-5 rounded-xl border-2 transition-all group ${isHeroicModeActive
+                            className={`w-full flex items-center justify-between p-5 rounded-3xl border-2 transition-all group ${isHeroicModeActive
                                 ? 'border-brand-accent bg-brand-accent/5 ring-1 ring-brand-accent/20'
                                 : 'border-brand-surface bg-brand-primary/10 hover:border-brand-primary/50'
                                 } ${heroicPoints <= 0 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer shadow-sm'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`p-3 rounded-xl border transition-colors ${isHeroicModeActive ? 'bg-brand-accent text-black border-brand-accent shadow-lg shadow-brand-accent/20' : 'bg-brand-surface text-brand-text-muted border-brand-primary shadow-inner'}`}>
+                                <div className={`p-3 rounded-2xl border transition-colors ${isHeroicModeActive ? 'bg-brand-accent text-black border-brand-accent shadow-lg shadow-brand-accent/20' : 'bg-brand-surface text-brand-text-muted border-brand-primary shadow-inner'}`}>
                                     <Icon name={isHeroicModeActive ? "heroicAction" : "heroicActionOutline"} className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col text-left">
@@ -435,7 +435,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                     </span>
                                 </div>
                             </div>
-                            {isHeroicModeActive && <Icon name="check" className="w-5 h-5 text-brand-accent animate-bounce-in" />}
+                            {isHeroicModeActive && <Icon name="check" className="w-6 h-6 text-brand-accent animate-bounce-in" />}
                         </button>
                     </div>
                 )}
@@ -448,7 +448,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                 {isMultiTargetAbility ? 'Entire Team' : `Slots: ${totalAssigned}/${maxTotalAttacks}`}
                             </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 px-2">
+                        <div className="grid grid-cols-3 gap-6 px-2">
                             {availableTargets.length === 0 ? (
                                 <div className="col-span-full py-10 text-center border-2 border-dashed border-brand-primary/30 rounded-3xl bg-brand-primary/5">
                                     <p className="text-body-sm text-brand-text-muted italic">{sourceType === 'Heal' ? 'No allies found in vicinity.' : 'No valid threats detected.'}</p>

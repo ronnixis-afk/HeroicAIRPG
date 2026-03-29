@@ -382,7 +382,7 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             <input type="text" value={editedNPC.name} onChange={(e) => handleChange('name', e.target.value)} className={inputClass} />
                         </StyledInputGroup>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <StyledInputGroup label="Ancestry">
                                 <div className="relative">
                                     <select

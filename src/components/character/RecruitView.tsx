@@ -79,7 +79,7 @@ const RecruitView: React.FC = () => {
                             <button
                                 onClick={() => handleAddCompanion('recruitment')}
                                 disabled={!isRecruitmentAvailable}
-                                className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
                                     <Icon name="character" className="w-8 h-8 text-black" />
@@ -92,7 +92,7 @@ const RecruitView: React.FC = () => {
 
                             <button
                                 disabled={true}
-                                className="group relative flex flex-row items-center p-6 bg-brand-surface/30 border-2 border-brand-primary/10 rounded-xl transition-all cursor-not-allowed opacity-60"
+                                className="group relative flex flex-row items-center p-6 bg-brand-surface/30 border-2 border-brand-primary/10 rounded-3xl transition-all cursor-not-allowed opacity-60"
                             >
                                 <div className="w-14 h-14 rounded-full bg-brand-surface flex items-center justify-center mr-6 shadow-lg group-hover:scale-105 transition-transform flex-shrink-0">
                                     <Icon name="store" className="w-8 h-8 text-brand-text-muted" />
@@ -109,7 +109,7 @@ const RecruitView: React.FC = () => {
                             <button
                                 onClick={() => handleAddCompanion('shipyard')}
                                 disabled={!isRecruitmentAvailable}
-                                className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
                                     <Icon name="world" className="w-8 h-8 text-black" />

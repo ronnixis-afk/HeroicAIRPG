@@ -2,7 +2,7 @@
 // hooks/world/useTravel.ts
 
 import React, { useCallback } from 'react';
-import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, LoreEntry, InventoryUpdatePayload } from '../../types';
+import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, LoreEntry, InventoryUpdatePayload, AIUpdatePayload } from '../../types';
 import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
@@ -19,6 +19,13 @@ export const useTravel = (
 ) => {
     const { getCombatSlots } = useWorldSelectors(gameData);
     const { setPendingTravelConfirmation } = useUI();
+
+    const BOARDING_MESSAGES = {
+        fantasy: (shipName: string, dest: string) => `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. With a final check of the rigging, you cast off, the vessel cutting a path through the swells toward ${dest}.`,
+        modern: (shipName: string, dest: string) => `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor and set a course, the wake trailing behind us as you make for ${dest}.`,
+        scifi: (shipName: string, dest: string) => `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface. With a smooth acceleration, you break orbit and align for the transit to ${dest}.`,
+        magitech: (shipName: string, dest: string) => `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents. You glide into the ley-line stream, charting a luminous path toward ${dest}.`
+    };
 
     const processArrival = useCallback(async (
         coordinates: string,
@@ -186,8 +193,8 @@ export const useTravel = (
             } else {
                 // If the journey is safe, we skip the AI pipeline and provide an immediate flavorful summary
                 const theme = getPOITheme(gameData.worldSummary || "");
-                const partyShip = gameData.companions.find(c => c.isShip && c.isInParty !== false);
-                const shipName = partyShip?.name || "your vessel";
+                const anyShip = gameData.companions.find(c => c.isShip);
+                const shipName = anyShip?.name || "your vessel";
                 const m = (travelMethod || "walking").toLowerCase();
 
                 let chosenMessage = "";
@@ -259,14 +266,19 @@ export const useTravel = (
                 targetCoordinates: coordinates
             };
 
-            const systemContext = `[SYSTEM] Player arrived at: ${zone?.name || locationName} ${travelMethod ? `via ${travelMethod}` : ''}.
+            const usedShip = (travelMethod && /ship|boat|sail|vessel|scout|fly|airship/i.test(travelMethod)) 
+                ? gameData.companions.find(c => c.isShip) 
+                : null;
+
+            const systemContext = `[SYSTEM] Player has arrived at: ${zone?.name || locationName} (Coordinates: ${coordinates}) ${travelMethod ? `via ${travelMethod}` : ''}.
             ${isDiscovery ? 'STATUS: Discovery / First-time arrival.' : 'STATUS: Return visit.'}
             Visual Base: "${generatedDescription || zone?.description || 'A mysterious location.'}"
             [AVAILABLE POINTS OF INTEREST]:
             ${poisText || 'Generic wilderness.'}
             ${newGmNotes ? `[ENCOUNTER PLOT]: ${newGmNotes}` : ''}
             ${localeEntry ? `Focal Point Lore: ${localeEntry.content}` : ''}
-            NARRATIVE DIRECTIVE: Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" as your immediate landing locale while framing other landmarks as distant features or nearby points of interest.`;
+            ${usedShip ? `[PRIMARY ENVIRONMENT]: The party is currently aboard the ${usedShip.name}.` : ''}
+            NARRATIVE DIRECTIVE: The transition is complete. ${usedShip ? `Narrate the arrival while emphasizing the party is still aboard the ${usedShip.name} which is at rest within ${zone?.name || locationName}.` : `Narrate the arrival at ${zone?.name || locationName} (${coordinates}).`} Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" (or ${usedShip ? usedShip.name : 'your landing site'}) as your immediate locale while framing other landmarks as distant features or nearby points of interest.`;
 
             await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
 
@@ -305,8 +317,41 @@ export const useTravel = (
         }
 
         if (targetCoordinates) {
+            // Auto-join ship companion if traveling via vessel
+            const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship/i.test(method);
+            const shipCompanion = gameData.companions.find(c => c.isShip);
+            let finalTargetLocale = destination;
+
+            if (isShipTravel && shipCompanion) {
+                if (!shipCompanion.isInParty) {
+                    dispatch({ 
+                        type: 'AI_UPDATE', 
+                        payload: { 
+                            companions: [{ id: shipCompanion.id, isInParty: true }] 
+                        } 
+                    });
+                }
+                
+                // Narrative: Boarding/Transit message
+                const theme = getPOITheme(gameData.worldSummary || "");
+                const boardingText = BOARDING_MESSAGES[theme as keyof typeof BOARDING_MESSAGES](shipCompanion.name, destination);
+                
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-boarding-${Date.now()}`,
+                        sender: 'ai', // First person narrative
+                        content: boardingText,
+                        type: 'neutral'
+                    }
+                });
+
+                // Override target locale to the ship's name to force narrative snapping
+                finalTargetLocale = shipCompanion.name;
+            }
+
             dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: targetCoordinates });
-            await processArrival(targetCoordinates, destination, gameData.messages, method, destination);
+            await processArrival(targetCoordinates, destination, gameData.messages, method, finalTargetLocale);
         }
     }, [gameData, dispatch, processArrival]);
 

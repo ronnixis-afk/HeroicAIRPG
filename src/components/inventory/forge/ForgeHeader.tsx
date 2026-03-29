@@ -36,7 +36,7 @@ export const ForgeHeader: React.FC<ForgeHeaderProps> = ({
     randomizedSummary
 }) => {
     return (
-        <div className="bg-brand-surface p-6 rounded-xl border border-brand-primary/50 shadow-xl">
+        <div className="bg-brand-surface p-6 rounded-2xl border border-brand-primary/50 shadow-xl">
             <div className="grid grid-cols-2 gap-x-4 gap-y-6">
                 <SelectField label="Scale" value={forgeScale} onChange={setForgeScale} options={SCALE_OPTIONS} />
                 <SelectField label="Item Category" value={baseGroup} onChange={onCategorySelect} options={filteredGroups} />

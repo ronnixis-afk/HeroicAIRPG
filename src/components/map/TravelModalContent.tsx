@@ -184,7 +184,7 @@ const TravelModalContent: React.FC<TravelModalContentProps> = ({ gameData, onSub
                         <button
                             onClick={handleTravel}
                             disabled={!travelPossible}
-                            className="btn-primary btn-md w-full rounded-xl shadow-xl shadow-brand-accent/10 font-bold"
+                            className="btn-primary btn-lg w-full rounded-2xl shadow-xl shadow-brand-accent/10"
                         >
                             <Icon name="play" className="w-4 h-4 mr-2" />
                             Initiate Travel

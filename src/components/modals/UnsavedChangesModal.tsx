@@ -66,12 +66,12 @@ export const UnsavedChangesModal: React.FC = () => {
                     <button 
                         onClick={handleSave} 
                         disabled={isSaving} 
-                        className="btn-primary btn-md w-full rounded-xl shadow-xl shadow-brand-accent/20 gap-3 font-bold"
+                        className="btn-primary btn-lg w-full rounded-2xl shadow-xl shadow-brand-accent/20 gap-3"
                     >
                         {isSaving ? (
                             <><Icon name="spinner" className="w-5 h-5 animate-spin" /><span>Saving Profile...</span></>
                         ) : (
-                            <><Icon name="save" className="w-4 h-4" /><span>Save and Proceed</span></>
+                            <><Icon name="save" className="w-5 h-5" /><span>Save and Proceed</span></>
                         )}
                     </button>
                     

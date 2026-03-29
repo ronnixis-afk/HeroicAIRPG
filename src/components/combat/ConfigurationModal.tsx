@@ -97,14 +97,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Configuration">
-            <div className="grid grid-cols-2 gap-1.5 border-b border-brand-primary/20 mb-6 bg-brand-primary/10 rounded-xl p-1.5">
+            <div className="flex border-b border-brand-primary/20 mb-6 bg-brand-primary/10 rounded-xl p-1">
                 <ModalTabButton label="Templates" isActive={templateTab === 'templates'} onClick={() => setTemplateTab('templates')} />
                 <ModalTabButton label="Archetypes" isActive={templateTab === 'archetypes'} onClick={() => setTemplateTab('archetypes')} />
                 <ModalTabButton label="Affinities" isActive={templateTab === 'affinities'} onClick={() => setTemplateTab('affinities')} />
                 <ModalTabButton label="Sizes" isActive={templateTab === 'sizes'} onClick={() => setTemplateTab('sizes')} />
-                <div className="col-span-2">
-                    <ModalTabButton label="Base Score" isActive={templateTab === 'base'} onClick={() => setTemplateTab('base')} />
-                </div>
+                <ModalTabButton label="Base" isActive={templateTab === 'base'} onClick={() => setTemplateTab('base')} />
             </div>
 
             <div className="h-[60vh] overflow-y-auto custom-scroll px-1">
@@ -112,12 +110,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                 {/* Templates Editor */}
                 {templateTab === 'templates' && (
                     <div className="flex flex-col h-full">
-                        <div className="grid grid-cols-2 gap-2 mb-6 flex-shrink-0">
+                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 flex-shrink-0 no-scrollbar">
                             {Object.keys(templates).filter(k => k !== 'Custom').map(key => (
                                 <button
                                     key={key}
                                     onClick={() => setSelectedTemplate(key)}
-                                    className={`h-11 px-4 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${selectedTemplate === key ? 'bg-brand-accent text-black border-brand-accent shadow-md' : 'bg-brand-primary text-brand-text-muted border-brand-surface hover:border-brand-primary/50'}`}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${selectedTemplate === key ? 'bg-brand-accent text-black border-brand-accent shadow-md' : 'bg-brand-primary text-brand-text-muted border-brand-surface hover:border-brand-primary/50'}`}
                                 >
                                     {key}
                                 </button>
@@ -148,7 +146,7 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
 
                                 <div className="bg-brand-primary/20 p-5 rounded-2xl border border-brand-surface shadow-inner">
                                     <h4 className="text-body-sm font-bold text-brand-text-muted mb-4 ml-1">Stat Modifiers</h4>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-3 gap-4">
                                         {['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'].map((stat, idx) => (
                                             <div key={stat} className="space-y-1.5">
                                                 <label className="block text-[10px] font-bold text-brand-text-muted mb-1 text-center capitalize">{stat}</label>
@@ -223,12 +221,12 @@ export const ConfigurationModal: React.FC<ConfigurationModalProps> = ({
                 {/* Affinities Editor */}
                 {templateTab === 'affinities' && (
                     <div className="space-y-6 animate-fade-in pb-8">
-                        <div className="grid grid-cols-2 gap-2 mb-6">
+                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar">
                             {Object.keys(affinities).map(key => (
                                 <button
                                     key={key}
                                     onClick={() => setSelectedAffinityKey(key)}
-                                    className={`h-11 px-4 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${selectedAffinityKey === key ? 'bg-brand-accent text-black border-brand-accent shadow-md' : 'bg-brand-primary text-brand-text-muted border-brand-surface hover:border-brand-primary/50'}`}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${selectedAffinityKey === key ? 'bg-brand-accent text-black border-brand-accent shadow-md' : 'bg-brand-primary text-brand-text-muted border-brand-surface hover:border-brand-primary/50'}`}
                                 >
                                     {key}
                                 </button>

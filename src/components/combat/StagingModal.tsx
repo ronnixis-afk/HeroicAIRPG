@@ -23,18 +23,18 @@ interface StagingModalProps {
 const AlignmentButton: React.FC<{ label: string, active: boolean, onClick: () => void, colorClass: string }> = ({ label, active, onClick, colorClass }) => (
     <button 
         onClick={onClick}
-        className={`w-full flex items-center justify-center h-11 px-4 rounded-xl border transition-all shadow-md group ${
+        className={`flex-1 flex flex-col items-center justify-center h-16 rounded-2xl border transition-all shadow-md group ${
             active 
                 ? `bg-brand-primary/40 border-brand-accent ${colorClass}` 
                 : 'bg-brand-primary/40 border-brand-surface text-brand-text-muted hover:border-brand-primary'
         }`}
     >
-        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center mr-2 transition-all flex-shrink-0 ${
+        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center mb-1 transition-all ${
             active ? 'bg-brand-accent border-brand-accent' : 'border-brand-text-muted/30'
         }`}>
-            {active && <Icon name="check" className="w-2.5 h-2.5 text-black" />}
+            {active && <Icon name="check" className="w-3 h-3 text-black" />}
         </div>
-        <span className={`text-xs font-bold truncate ${active ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
+        <span className={`text-body-sm font-bold ${active ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
             {label}
         </span>
     </button>
@@ -196,7 +196,7 @@ export const StagingModal: React.FC<StagingModalProps> = ({
 
                 <div className="space-y-3">
                     <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Combat Alignment</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex gap-2">
                         <AlignmentButton label="Enemy" active={alignment === 'enemy'} onClick={() => setAlignment('enemy')} colorClass="text-brand-danger" />
                         <AlignmentButton label="Neutral" active={alignment === 'neutral'} onClick={() => setAlignment('neutral')} colorClass="text-brand-text-muted" />
                         <AlignmentButton label="Ally" active={alignment === 'ally'} onClick={() => setAlignment('ally')} colorClass="text-brand-accent" />
@@ -215,15 +215,15 @@ export const StagingModal: React.FC<StagingModalProps> = ({
                             <button
                                 key={key}
                                 onClick={() => handleApplyTemplate(key)}
-                                className="bg-brand-primary hover:bg-brand-surface h-11 px-4 rounded-xl border border-brand-surface text-left transition-all hover:border-brand-accent group flex items-center justify-between shadow-inner"
+                                className="bg-brand-primary hover:bg-brand-surface p-4 rounded-2xl border border-brand-surface text-left transition-all hover:border-brand-accent group flex flex-col h-full shadow-inner"
                             >
-                                <span className="font-bold text-brand-text text-xs group-hover:text-brand-accent transition-colors truncate">
+                                <div className="font-bold text-brand-text text-body-base group-hover:text-brand-accent mb-1 transition-colors">
                                     {key === 'Custom' ? 'Blank / Custom' : key}
-                                </span>
+                                </div>
                                 {key !== 'Custom' && (
-                                    <span className="text-[10px] font-bold text-brand-text-muted opacity-60 ml-2 flex-shrink-0">
-                                        {templates[key].attackType.charAt(0)}
-                                    </span>
+                                    <div className="text-[10px] font-bold text-brand-text-muted mt-auto opacity-60">
+                                        {templates[key].attackType}
+                                    </div>
                                 )}
                             </button>
                         ))}

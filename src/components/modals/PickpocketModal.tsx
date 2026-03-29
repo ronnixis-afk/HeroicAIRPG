@@ -61,7 +61,7 @@ export const PickpocketModal: React.FC = () => {
                         value={itemIntent}
                         onChange={(e) => setItemIntent(e.target.value)}
                         placeholder="What are you trying to take?"
-                        className="w-full bg-brand-primary h-11 px-5 rounded-xl border-2 border-brand-surface focus:border-brand-accent focus:ring-1 focus:ring-brand-accent focus:outline-none text-body-base text-brand-text transition-all shadow-inner font-bold"
+                        className="w-full bg-brand-primary h-14 px-5 rounded-2xl border-2 border-brand-surface focus:border-brand-accent focus:ring-1 focus:ring-brand-accent focus:outline-none text-body-base text-brand-text transition-all shadow-inner"
                         autoFocus
                     />
                     <p className="text-[10px] text-brand-text-muted italic px-1 mt-1 leading-relaxed">
@@ -73,17 +73,17 @@ export const PickpocketModal: React.FC = () => {
                     <button 
                         onClick={handleConfirm}
                         disabled={!itemIntent.trim()}
-                        className="btn-primary btn-md w-full rounded-xl shadow-xl shadow-brand-accent/20 gap-3 border border-white/10 group overflow-hidden relative font-bold"
+                        className="btn-primary btn-lg w-full rounded-2xl shadow-xl shadow-brand-accent/20 gap-3 border border-white/10 group overflow-hidden relative"
                     >
                         {/* High-stakes button styling */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                        <Icon name="photo" className="w-4 h-4 text-black" />
-                        <span className="text-xs">Take Item</span>
+                        <Icon name="photo" className="w-5 h-5 text-black" />
+                        <span className="font-bold">Take Item</span>
                     </button>
                     
                     <button 
                         onClick={handleClose}
-                        className="btn-tertiary btn-md w-full rounded-xl opacity-60 hover:opacity-100 transition-opacity font-bold text-xs"
+                        className="btn-tertiary btn-md w-full rounded-xl opacity-60 hover:opacity-100 transition-opacity"
                     >
                         Abstain
                     </button>

@@ -170,7 +170,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
               {/* Action Grid - 3 Columns */}
               <div className="flex-1 flex flex-col justify-center gap-4 py-4 min-min-h-0">
                 <label className="text-body-tiny font-bold text-brand-text-muted opacity-60 block mb-1">Menu</label>
-                <div className="grid grid-cols-2 gap-y-4 sm:gap-y-6 md:gap-y-8 gap-x-2 pb-2">
+                <div className="grid grid-cols-3 gap-y-4 sm:gap-y-6 md:gap-y-8 gap-x-2 pb-2">
                   <MenuItem label="Heroes" imageUrl="/icons/heroes.png" onClick={() => handleAction('character')} disabled={!hasPlayer} />
                   <MenuItem label="Backpack" imageUrl="/icons/backpack.png" onClick={() => handleAction('inventory')} badgeCount={badges.inventory} disabled={!hasPlayer} />
                   <MenuItem label="Chronicle" imageUrl="/icons/chronicle.png" onClick={() => handleAction('story')} badgeCount={badges.story} disabled={!hasPlayer} />
@@ -222,17 +222,17 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
           <div className="p-6 bg-brand-primary/10 border-t border-brand-primary/10 grid grid-cols-2 gap-3">
             <button
               onClick={() => handleAction('settings')}
-              className="w-full flex flex-row items-center justify-center gap-3 h-11 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
+              className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
-              <img src="/icons/settings.png" alt="Settings" className="w-4 h-4 object-contain shrink-0 group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-xs font-bold text-brand-text">Settings</span>
+              <img src="/icons/settings.png" alt="Settings" className="w-5 h-5 object-contain shrink-0 scale-150 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-body-sm font-bold text-brand-text">Settings</span>
             </button>
             <button
               onClick={() => { onSwitchWorldClick(); onClose(); }}
-              className="w-full flex flex-row items-center justify-center gap-3 h-11 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
+              className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
             >
-              <img src="/icons/change-realm.png" alt="Exit Realm" className="w-4 h-4 object-contain shrink-0 group-hover:rotate-180 transition-transform duration-500" />
-              <span className="text-xs font-bold text-brand-text">Exit Realm</span>
+              <img src="/icons/change-realm.png" alt="Exit Realm" className="w-5 h-5 object-contain shrink-0 scale-150 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-body-sm font-bold text-brand-text">Exit Realm</span>
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { GameData, PlayerCharacter, Companion, Inventory, GameAction, ChatMessage } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNextLevelXP, getXPForLevel } from '../utils/mechanics';
+import { getPOITheme } from '../utils/mapUtils';
 
 export const characterReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
@@ -23,6 +24,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
         
         case 'UPDATE_COMPANION': {
             let newLocale = state.currentLocale;
+            let disembarkMsg: ChatMessage | null = null;
             const updatedCompanions = (state.companions ?? []).map(c => {
                 if (c.id === action.payload.id) {
                     const companion = action.payload instanceof Companion
@@ -38,6 +40,31 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     if (companion.isShip && companion.isInParty !== false && c.isInParty === false) {
                         newLocale = `Inside ${companion.name}, ${state.current_site_name} Vicinity`;
                     }
+
+                    // DISMBERK LOGIC: Detecting when a ship companion is REMOVED from the party
+                    if (companion.isShip && (action.payload as any).isInParty === false && c.isInParty !== false) {
+                        const theme = getPOITheme(state.worldSummary || "");
+                        const shipName = companion.name;
+
+                        const messages = {
+                            fantasy: `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
+                            modern: `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
+                            scifi: `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
+                            magitech: `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`
+                        };
+
+                        disembarkMsg = {
+                            id: `sys-disembark-${Date.now()}`,
+                            sender: 'system',
+                            content: (messages as any)[theme] || messages.fantasy,
+                            type: 'neutral'
+                        };
+
+                        // If they were inside the ship, snap the locale back to just the site vicinity
+                        if (newLocale && newLocale.includes(`Inside ${shipName}`)) {
+                            newLocale = state.current_site_name || "Open Area";
+                        }
+                    }
                     
                     return companion;
                 }
@@ -47,7 +74,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             return {
                 ...state,
                 companions: updatedCompanions,
-                currentLocale: newLocale
+                currentLocale: newLocale,
+                messages: disembarkMsg ? [...state.messages, disembarkMsg] : state.messages
             };
         }
         

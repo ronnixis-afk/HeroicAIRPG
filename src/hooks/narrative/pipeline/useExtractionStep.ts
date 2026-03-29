@@ -108,17 +108,26 @@ export const useExtractionStep = (
                 const destHint = narratorLoc.destination_zone_hint || narratorLoc.site_name;
                 const destHintLower = destHint.toLowerCase().trim();
 
-                // 1. Try to find the zone
-                let targetZone = (gameData.mapZones || []).find(z => z.name.toLowerCase().includes(destHintLower) || destHintLower.includes(z.name.toLowerCase()));
+                // 1. Try to find the zone explicitly at the forced coordinates first
+                let targetZone = forcedCoordinates ? (gameData.mapZones || []).find(z => z.coordinates === forcedCoordinates) : undefined;
+                
+                // If not forced, fallback to matching by narrative hint
+                if (!targetZone) {
+                    targetZone = (gameData.mapZones || []).find(z => z.name.toLowerCase().includes(destHintLower) || destHintLower.includes(z.name.toLowerCase()));
+                }
 
                 let newCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
 
-                // If we have forced coordinates, and we found a zone, ensure the zone coordinates match the forced ones
+                // CROSS-REFERENCE: If narrative hint found a zone, but it's not where we are forcing the move, 
+                // we discard the hint's coordinates in favor of the system truth.
                 if (forcedCoordinates && targetZone && targetZone.coordinates !== forcedCoordinates) {
-                    // Coordinates mismatch: Trust the forced ones (the user-confirmed travel target)
-                    // If the zone exists elsewhere, we ignore it and treat this as a potentially new site or exploration
                     targetZone = (gameData.mapZones || []).find(z => z.coordinates === forcedCoordinates);
                 }
+
+                const anyShip = (gameData.companions || []).find(c => c.isShip);
+                const isShipTravel = !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty);
+                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (narratorLoc.site_name || 'Open Area');
+                const forcedSiteId = isShipTravel && anyShip ? `ship-${anyShip.id}` : (narratorLoc.site_id || `open-area-${newCoords}`);
 
                 if (targetZone) {
                     newCoords = targetZone.coordinates;
@@ -126,8 +135,8 @@ export const useExtractionStep = (
                         ...narratorLoc,
                         coordinates: newCoords,
                         zone: targetZone.name,
-                        site_name: narratorLoc.site_name || 'Open Area',
-                        site_id: narratorLoc.site_id || `open-area-${newCoords}`,
+                        site_name: forcedSiteName,
+                        site_id: forcedSiteId,
                         is_new_site: true,
                         transition_type: 'zone_change'
                     };
@@ -163,8 +172,8 @@ export const useExtractionStep = (
                             ...narratorLoc,
                             coordinates: newCoords,
                             zone: details.name || destHint,
-                            site_name: narratorLoc.site_name || 'Open Area',
-                            site_id: `open-area-${newCoords}`,
+                            site_name: forcedSiteName,
+                            site_id: forcedSiteId,
                             is_new_site: true,
                             transition_type: 'zone_change'
                         };
@@ -173,8 +182,8 @@ export const useExtractionStep = (
                             ...narratorLoc,
                             coordinates: newCoords,
                             zone: destHint,
-                            site_name: narratorLoc.site_name || 'Open Area',
-                            site_id: `open-area-${newCoords}`,
+                            site_name: forcedSiteName,
+                            site_id: forcedSiteId,
                             is_new_site: true,
                             transition_type: 'zone_change'
                         };
@@ -185,18 +194,22 @@ export const useExtractionStep = (
                 // Snap back to current location — no physical movement occurred.
                 const snapCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
                 
-                // If we just traveled (forcedCoordinates present) but the narrator says we are 'staying',
-                // we should still be at the NEW coordinates and use the NEW zone's info.
+                // If we are forcing a move (e.g. traveling), but the narrator thinks we stayed, 
+                // we force the location update to the target coordinates regardless.
                 const currentZone = (gameData.mapZones || []).find(z => z.coordinates === snapCoords);
                 
+                const anyShip = (gameData.companions || []).find(c => c.isShip);
+                const isShipTravel = forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty;
+                const forcedSiteName = isShipTravel ? anyShip.name : 'Open Area';
+
                 finalUpdates.location_update = {
                     ...narratorLoc,
                     coordinates: snapCoords,
                     zone: currentZone?.name || gameData.current_site_name || 'The Wilds',
-                    site_name: (snapCoords !== gameData.playerCoordinates) ? 'Open Area' : (gameData.current_site_name || 'Open Area'),
-                    site_id: (snapCoords !== gameData.playerCoordinates) ? `open-area-${snapCoords}` : (gameData.current_site_id || `open-area-${snapCoords}`),
-                    is_new_site: false,
-                    transition_type: 'staying'
+                    site_name: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? forcedSiteName : (gameData.current_site_name || 'Open Area'),
+                    site_id: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? (isShipTravel ? `ship-${anyShip.id}` : `open-area-${snapCoords}`) : (gameData.current_site_id || `open-area-${snapCoords}`),
+                    is_new_site: !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates),
+                    transition_type: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? 'zone_change' : 'staying'
                 };
                 resolvedLocale = finalUpdates.location_update.site_name;
             } else if (narratorLoc.transition_type === 'returning') {
@@ -500,7 +513,12 @@ export const useExtractionStep = (
 
         // 5. Resolve Auditor Result Metadata
         if (resolvedLocale) finalUpdates.currentLocale = resolvedLocale;
-        if (finalUpdates.location_update?.coordinates) {
+        if (forcedCoordinates) {
+            finalUpdates.playerCoordinates = forcedCoordinates;
+            if (finalUpdates.location_update) {
+                finalUpdates.location_update.coordinates = forcedCoordinates;
+            }
+        } else if (finalUpdates.location_update?.coordinates) {
             finalUpdates.playerCoordinates = finalUpdates.location_update.coordinates;
         }
         if (auditResult.timePassedMinutes > 0) {

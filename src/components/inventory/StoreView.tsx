@@ -16,7 +16,7 @@ const SHOP_CATEGORIES = FORGE_GROUPS.filter(g => g.id !== 'Quest' && g.id !== 'M
 const CategoryTab: React.FC<{ label: string, isActive: boolean, onClick: () => void }> = ({ label, isActive, onClick }) => (
     <button
         onClick={onClick}
-        className={`w-full h-11 flex items-center justify-center text-xs font-bold rounded-xl transition-all border ${isActive ? 'bg-brand-accent text-black border-brand-accent shadow-md' : 'bg-brand-primary text-brand-text-muted border-brand-surface hover:border-brand-primary/50'}`}
+        className={`w-full ${isActive ? 'btn-primary' : 'btn-secondary'} btn-sm`}
     >
         {label}
     </button>
@@ -237,7 +237,7 @@ const StoreView: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 w-full">
+                        <div className="grid grid-cols-4 gap-2 w-full">
                             {SHOP_CATEGORIES.map(cat => (
                                 <CategoryTab
                                     key={cat.id}
@@ -288,10 +288,10 @@ const StoreView: React.FC = () => {
                             <p className="text-[10px] font-bold text-brand-text-muted opacity-60">
                                 Can't Find What You Are Looking For?
                             </p>
-                             <button
+                            <button
                                 onClick={() => handleRefreshCategory()}
                                 disabled={isLoading}
-                                className="btn-secondary btn-md w-full max-w-xs rounded-xl font-bold"
+                                className="btn-secondary btn-md w-60"
                             >
                                 {isLoading ? (
                                     <><Icon name="spinner" className="w-4 h-4 animate-spin mr-2" /> Stocking...</>
