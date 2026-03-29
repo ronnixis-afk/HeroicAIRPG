@@ -144,7 +144,7 @@ const ItemForgeView: React.FC = () => {
                     <button
                         onClick={actions.handleForge}
                         disabled={!state.baseGroup || (state.showModifiers && state.selectedModifiers.length === 0 && state.effectType === 'None' && !state.itemName.trim() && !state.lorePrompt.trim())}
-                        className="btn-primary btn-md w-full max-w-sm rounded-full shadow-brand-accent/20"
+                        className="btn-primary btn-md w-full max-w-sm rounded-xl shadow-brand-accent/20 font-bold"
                     >
                         Forge Item
                     </button>

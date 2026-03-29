@@ -86,7 +86,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                             </div>
                         </div>
                     ))}
-                    <button onClick={onAddAttack} className="btn-secondary btn-sm w-full gap-2 rounded-xl h-12">
+                    <button onClick={onAddAttack} className="btn-secondary btn-md w-full gap-2 rounded-xl">
                         <Icon name="plus" className="w-4 h-4" /> <span>Add Attack Pattern</span>
                     </button>
                 </div>
@@ -176,7 +176,7 @@ export const ActorActions: React.FC<ActorActionsProps> = ({
                             </div>
                         </div>
                     ))}
-                    <button onClick={onAddAbility} className="btn-secondary btn-sm w-full gap-2 rounded-xl h-12">
+                    <button onClick={onAddAbility} className="btn-secondary btn-md w-full gap-2 rounded-xl">
                         <Icon name="plus" className="w-4 h-4" /> <span>Add Specialized Ability</span>
                     </button>
                 </div>

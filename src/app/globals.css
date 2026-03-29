@@ -155,7 +155,7 @@
 
   /* 9px */
   .btn-lg {
-    @apply h-14 px-12 text-sm rounded-2xl;
+    @apply h-11 px-12 text-xs rounded-xl;
   }
 
   /* 12px */

@@ -155,29 +155,19 @@ const CombatConsensusPanel: React.FC = () => {
                     <button 
                         onClick={() => handleDeescalate('Stealth')} 
                         disabled={isProcessing}
-                        className="flex flex-col items-center py-6 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-3 shadow-inner"
+                        className="btn-secondary btn-md rounded-xl gap-2 shadow-inner"
                     >
-                        <div className="group-hover:scale-110 transition-transform">
-                            <img src="/icons/sneak.png" alt="Stealth" className="w-18 h-18 object-contain" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-brand-accent text-center">Stealth</span>
-                            <span className="text-body-sm text-brand-text font-bold">Distract & Hide</span>
-                        </div>
+                        <img src="/icons/sneak.png" alt="Stealth" className="w-5 h-5 object-contain" />
+                        <span>Stealth</span>
                     </button>
                     
                     <button 
                         onClick={() => handleDeescalate('Persuasion')} 
                         disabled={isProcessing}
-                        className="flex flex-col items-center py-6 px-4 bg-brand-primary/20 border border-brand-surface rounded-3xl hover:bg-brand-primary/40 hover:border-brand-accent/30 transition-all group gap-3 shadow-inner"
+                        className="btn-secondary btn-md rounded-xl gap-2 shadow-inner"
                     >
-                        <div className="group-hover:scale-110 transition-transform">
-                            <img src="/icons/persuade.png" alt="Persuade" className="w-18 h-18 object-contain" />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-bold text-brand-accent text-center">Social</span>
-                            <span className="text-body-sm text-brand-text font-bold">Charm Your Way</span>
-                        </div>
+                        <img src="/icons/persuade.png" alt="Persuade" className="w-5 h-5 object-contain" />
+                        <span>Social</span>
                     </button>
                 </div>
             </div>

@@ -583,13 +583,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
                     <div className="px-3 space-y-1">
                         {/* 2. Subscription & Billing */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                                 <Icon name="shield" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Subscription & Billing</span>
-                                <span className="text-[10px] text-brand-text-muted inter">Manage Plans & Payment</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Subscription & Billing</span>
                             </div>
                         </button>
 
@@ -610,57 +609,52 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <div className="h-px bg-brand-primary/10 mx-3 my-2" />
 
                         {/* 4. Characters & Worlds */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-brand-accent/10 flex items-center justify-center text-brand-accent group-hover:scale-110 transition-transform">
                                 <Icon name="boxDrawer" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Characters & Worlds</span>
-                                <span className="text-[10px] text-brand-text-muted inter">Manage Saved RPG Assets</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Characters & Worlds</span>
                             </div>
                         </button>
 
                         {/* 5. Achievements & Stats */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-400 group-hover:scale-110 transition-transform">
                                 <Icon name="starFill" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Achievements & Stats</span>
-                                <span className="text-[10px] text-brand-text-muted inter">Progress Tracking & Records</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Achievements & Stats</span>
                             </div>
                         </button>
 
                         {/* 6. App & AI Settings */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 group-hover:scale-110 transition-transform">
                                 <Icon name="settings" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Settings</span>
-                                <span className="text-[10px] text-brand-text-muted inter">Preferences & AI Generation</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Settings</span>
                             </div>
                         </button>
 
                         {/* 7. Community & Friends */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
                                 <Icon name="users" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Community & Friends</span>
-                                <span className="text-[10px] text-brand-text-muted inter">Connect with Other Players</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Community & Friends</span>
                             </div>
                         </button>
 
                         {/* 8. Help & Support */}
-                        <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
+                        <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-primary/10 transition-colors group text-left">
                             <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
                                 <Icon name="info" className="w-4 h-4" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-brand-text inter">Help & Support</span>
-                                <span className="text-[10px] text-brand-text-muted inter">FAQs, Discord & Feedback</span>
+                                <span className="text-sm font-bold text-brand-text inter leading-none">Help & Support</span>
                             </div>
                         </button>
 
@@ -726,7 +720,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
                 {/* 9. Log Out */}
                 <div className="mt-auto p-4 border-t border-brand-primary/10 bg-brand-surface/20">
-                    <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-brand-danger/10 text-brand-text-muted hover:text-brand-danger transition-all group">
+                    <button className="w-full flex items-center gap-3 h-11 px-3 rounded-xl hover:bg-brand-danger/10 text-brand-text-muted hover:text-brand-danger transition-all group">
                         <Icon name="arrowLeft" className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="text-xs font-bold inter">Log Out</span>
                     </button>
@@ -1018,9 +1012,9 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <button
                             onClick={handleGeneratePreview}
                             disabled={!worldName.trim() || isGenerating}
-                            className="btn-primary btn-lg w-full mt-4 shadow-xl shadow-brand-accent/20"
+                            className="btn-primary btn-md w-full mt-4 shadow-xl shadow-brand-accent/20 rounded-xl font-bold"
                         >
-                            {isGenerating ? <span className="flex items-center justify-center gap-2"><Icon name="spinner" className="w-5 h-5 animate-spin" /> Generating...</span> : 'Scout The Realm'}
+                            {isGenerating ? <span className="flex items-center justify-center gap-2"><Icon name="spinner" className="w-4 h-4 animate-spin" /> Generating...</span> : 'Scout The Realm'}
                         </button>
                     </div>
                 )}

@@ -36,7 +36,7 @@ const LootPanel: React.FC = () => {
     const footer = (
         <button
             onClick={() => takeAllLoot(lootState.items, lootState.defeatedEnemies.map(e => e.name), lootState.defeatedEnemies.map(e => e.id))}
-            className="btn-primary btn-lg w-full gap-2 shadow-xl shadow-brand-accent/20 rounded-2xl"
+            className="btn-primary btn-md w-full gap-2 shadow-xl shadow-brand-accent/20 rounded-xl font-bold"
         >
             <Icon name="sparkles" className="w-5 h-5" />
             Take All Items

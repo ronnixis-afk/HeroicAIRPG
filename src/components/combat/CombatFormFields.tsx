@@ -13,19 +13,19 @@ export const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement> & 
 
 export const CheckboxField: React.FC<{ label: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }> = ({ label, checked, onChange }) => (
     <div 
-        className={`flex items-center justify-center h-14 px-4 rounded-2xl border transition-all w-full group shadow-md cursor-pointer select-none ${
+        className={`flex items-center justify-center h-11 px-4 rounded-xl border transition-all w-full group shadow-md cursor-pointer select-none ${
             checked 
                 ? 'bg-brand-primary/40 border-brand-accent text-brand-accent' 
                 : 'bg-brand-primary/40 border-brand-surface text-brand-text-muted hover:border-brand-primary'
         }`}
         onClick={() => onChange({ target: { checked: !checked } } as any)}
     >
-        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${
             checked ? 'bg-brand-accent border-brand-accent' : 'border-brand-text-muted/30 bg-transparent'
         }`}>
-            {checked && <Icon name="check" className="w-3.5 h-3.5 text-black" />}
+            {checked && <Icon name="check" className="w-2.5 h-2.5 text-black" />}
         </div>
-        <span className={`ml-3 text-body-base font-bold transition-colors ${checked ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
+        <span className={`ml-3 text-xs font-bold transition-colors ${checked ? 'text-brand-text' : 'text-brand-text-muted group-hover:text-brand-text'}`}>
             {label}
         </span>
     </div>
@@ -34,8 +34,8 @@ export const CheckboxField: React.FC<{ label: string, checked: boolean, onChange
 export const ModalTabButton: React.FC<{label: string, isActive: boolean, onClick: () => void}> = ({ label, isActive, onClick }) => (
     <button
       onClick={onClick}
-      className={`flex-1 py-3 text-xs font-bold transition-colors duration-200 focus:outline-none relative ${
-          isActive ? 'text-brand-accent' : 'text-brand-text-muted hover:text-brand-text'
+      className={`w-full h-11 flex items-center justify-center text-xs font-bold transition-colors duration-200 focus:outline-none relative ${
+          isActive ? 'text-brand-accent bg-brand-accent/5' : 'text-brand-text-muted hover:text-brand-text'
       }`}
     >
       {label}

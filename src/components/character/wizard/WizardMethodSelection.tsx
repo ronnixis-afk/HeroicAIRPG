@@ -19,7 +19,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                 <div className="grid grid-cols-1 gap-4 w-full max-w-md">
                     <button
                         onClick={() => onSelect('recruitment')}
-                        className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
+                        className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
                         <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
                             <Icon name="users" className="w-8 h-8 text-black" />
@@ -32,7 +32,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
 
                     <button
                         onClick={() => onSelect('manual')}
-                        className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
+                        className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
                         <div className="w-14 h-14 rounded-full bg-brand-primary flex items-center justify-center mr-6 shadow-lg group-hover:scale-110 transition-transform flex-shrink-0">
                             <Icon name="hammer" className="w-8 h-8 text-brand-text" />
@@ -64,7 +64,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
             <div className="grid grid-cols-1 gap-4 w-full max-w-md">
                 <button
                     onClick={() => setView('ally')}
-                    className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
+                    className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                 >
                     <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
                         <Icon name="character" className="w-8 h-8 text-black" />
@@ -77,7 +77,7 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
 
                 <button
                     onClick={() => onSelect('shipyard')}
-                    className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
+                    className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                 >
                     <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
                         <Icon name="world" className="w-8 h-8 text-black" />

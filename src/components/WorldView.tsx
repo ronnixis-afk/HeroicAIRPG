@@ -349,12 +349,12 @@ const WorldView: React.FC = () => {
                         <button
                             onClick={handleGenerateLore}
                             disabled={!generationPrompt.trim() || isGenerating}
-                            className="btn-primary btn-lg w-full max-w-xs gap-3 shadow-brand-accent/20"
+                            className="btn-primary btn-md w-full max-w-xs gap-3 shadow-brand-accent/20 rounded-xl font-bold"
                         >
                             {isGenerating ? (
-                                <><Icon name="spinner" className="w-5 h-5 animate-spin" /> Writing lore...</>
+                                <><Icon name="spinner" className="w-4 h-4 animate-spin" /> Writing lore...</>
                             ) : (
-                                <><Icon name="sparkles" className="w-5 h-5" /> Transcribe Lore</>
+                                <><Icon name="sparkles" className="w-4 h-4" /> Transcribe Lore</>
                             )}
                         </button>
                         {error && <p className="text-brand-danger text-[10px] font-bold mt-4 animate-pulse">{error}</p>}
