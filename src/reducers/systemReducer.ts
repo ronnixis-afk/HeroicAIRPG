@@ -421,20 +421,22 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             // --- SPATIAL SNAPPING LOGIC ---
             if (updates.location_update) {
                 const loc = updates.location_update;
-
-                // Enforce Ship Location
-                const partyShip = newState.companions.find(c => c.isShip && c.isInParty !== false);
-                if (partyShip) {
-                    loc.site_id = `ship-${partyShip.id}`;
-                    loc.site_name = partyShip.name;
-                }
-
                 const siteIdChanged = loc.site_id !== state.current_site_id;
 
-                // Update identity anchors
+                // Update identity anchors (Physical POI)
                 newState.current_site_id = loc.site_id;
                 newState.current_site_name = loc.site_name;
-                newState.currentLocale = loc.site_name; // Legacy compatibility
+
+                // NARRATIVE LOCALE SNAP: If a ship is in the party, narration prioritizes the vessel.
+                const partyShip = newState.companions.find(c => c.isShip && c.isInParty !== false);
+                const effectiveShipName = loc.ship_name || partyShip?.name;
+                const isAboard = loc.is_aboard_ship ?? (partyShip !== undefined);
+
+                if (isAboard && effectiveShipName) {
+                    newState.currentLocale = `Inside ${effectiveShipName}, ${loc.site_name} Vicinity`;
+                } else {
+                    newState.currentLocale = loc.site_name;
+                }
 
                 // Update coordinates if pattern matches
                 if (loc.coordinates && /^-?\d+-(-?\d+)$/.test(loc.coordinates)) {

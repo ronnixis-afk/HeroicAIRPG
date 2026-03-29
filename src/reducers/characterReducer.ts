@@ -22,8 +22,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
         }
         
         case 'UPDATE_COMPANION': {
-            let newSiteId = state.current_site_id;
-            let newSiteName = state.current_site_name;
+            let newLocale = state.currentLocale;
             const updatedCompanions = (state.companions ?? []).map(c => {
                 if (c.id === action.payload.id) {
                     const companion = action.payload instanceof Companion
@@ -37,8 +36,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     companion.maxHeroicPoints = companion.getMaxHeroicPoints(state.companionInventories[companion.id]);
                     
                     if (companion.isShip && companion.isInParty !== false && c.isInParty === false) {
-                        newSiteId = `ship-${companion.id}`;
-                        newSiteName = companion.name;
+                        newLocale = `Inside ${companion.name}, ${state.current_site_name} Vicinity`;
                     }
                     
                     return companion;
@@ -49,8 +47,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             return {
                 ...state,
                 companions: updatedCompanions,
-                current_site_id: newSiteId,
-                current_site_name: newSiteName
+                currentLocale: newLocale
             };
         }
         

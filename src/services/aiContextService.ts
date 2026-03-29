@@ -466,6 +466,7 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
    - Use 'staying' if no movement occurred.
    - Use 'returning' if visiting a previously established POI from the [LOCAL POINTS OF INTEREST] list, and use its exact title.
    - Use 'exploring_new' ONLY if moving to an entirely unestablished or new location.
+   - SHIP CONTEXT: If the party is aboard a ship (vessel), set 'is_aboard_ship' to true and 'ship_name' to the vessel's name. The 'site_name' should still reflect the physical POI vicinity (e.g. "The Silver Coast").
 2. PLAIN TEXT ONLY: No Markdown (**, #, etc.) in 'narration' or 'dialogues'.
 3. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
 4. ADVENTURE BRIEF: You MUST update 'adventure_brief' in your JSON with a STRICT MAX 10 WORD summary of the player's immediate goal or next step.

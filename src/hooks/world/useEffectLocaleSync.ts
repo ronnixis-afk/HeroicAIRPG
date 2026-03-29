@@ -30,8 +30,9 @@ export const useEffectLocaleSync = (
         // 1. Identify NPCs at the current locale using semantic container matching
         const nearbyNPCs = (gameData.npcs || []).filter(npc => {
             const npcPOI = npc.currentPOI || "";
-            // USE isLocaleMatch for hierarchical awareness (e.g. Bar -> Bar Table)
-            const isAtLocale = isLocaleMatch(npcPOI, currentLocale);
+            // NPCs are nearby if they match the narrative locale, OR if they are following the party.
+            // This ensures characters like followers appear even when the party is 'enclosed' on a ship.
+            const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npc.isFollowing === true;
             const inParty = npc.companionId || partyNames.has(npc.name?.toLowerCase().trim() || '');
             const isAlive = npc.status !== 'Dead';
             return isAtLocale && !inParty && !npc.isShip && isAlive;
