@@ -332,20 +332,6 @@ export const useTravel = (
                     });
                 }
                 
-                // Narrative: Boarding/Transit message
-                const theme = getPOITheme(gameData.worldSummary || "");
-                const boardingText = BOARDING_MESSAGES[theme as keyof typeof BOARDING_MESSAGES](shipCompanion.name, destination);
-                
-                dispatch({
-                    type: 'ADD_MESSAGE',
-                    payload: {
-                        id: `boarding-${Date.now()}`,
-                        sender: 'ai', // Normal chat message sender
-                        content: boardingText,
-                        type: 'neutral'
-                    }
-                });
-
                 // Override target locale to the ship's name to force narrative snapping
                 finalTargetLocale = shipCompanion.name;
             }

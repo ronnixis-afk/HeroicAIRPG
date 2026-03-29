@@ -41,28 +41,51 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                         newLocale = `Inside ${companion.name}, ${state.current_site_name} Vicinity`;
                     }
 
-                    // DISMBERK LOGIC: Detecting when a ship companion is REMOVED from the party
-                    if (companion.isShip && (action.payload as any).isInParty === false && c.isInParty !== false) {
+                    // BOARDING & DISEMBARK LOGIC: Detecting when a ship companion is added/removed from the party
+                    if (companion.isShip) {
                         const theme = getPOITheme(state.worldSummary || "");
                         const shipName = companion.name;
 
-                        const messages = {
-                            fantasy: `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
-                            modern: `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
-                            scifi: `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
-                            magitech: `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`
-                        };
+                        // Case A: Disembarking (Removal)
+                        if ((action.payload as any).isInParty === false && c.isInParty !== false) {
+                            const messages = {
+                                fantasy: `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
+                                modern: `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
+                                scifi: `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
+                                magitech: `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`
+                            };
 
-                        disembarkMsg = {
-                            id: `disembark-${Date.now()}`,
-                            sender: 'ai',
-                            content: (messages as any)[theme] || messages.fantasy,
-                            type: 'neutral'
-                        };
+                            disembarkMsg = {
+                                id: `disembark-${Date.now()}`,
+                                sender: 'ai',
+                                content: (messages as any)[theme] || messages.fantasy,
+                                type: 'neutral'
+                            };
 
-                        // If they were inside the ship, snap the locale back to just the site vicinity
-                        if (newLocale && newLocale.includes(`Inside ${shipName}`)) {
-                            newLocale = state.current_site_name || "Open Area";
+                            // If they were inside the ship, snap the locale back to just the site vicinity
+                            if (newLocale && newLocale.includes(`Inside ${shipName}`)) {
+                                newLocale = state.current_site_name || "Open Area";
+                            }
+                        }
+                        
+                        // Case B: Boarding (Addition)
+                        if ((action.payload as any).isInParty === true && c.isInParty === false) {
+                            const messages = {
+                                fantasy: `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. The vessel cuts a path through the swells, ready for whatever lies ahead.`,
+                                modern: `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor, the wake trailing behind you.`,
+                                scifi: `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface.`,
+                                magitech: `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents.`
+                            };
+
+                            disembarkMsg = {
+                                id: `boarding-${Date.now()}`,
+                                sender: 'ai',
+                                content: (messages as any)[theme] || messages.fantasy,
+                                type: 'neutral'
+                            };
+                            
+                            // Snapping narrative locale to the ship's name
+                            newLocale = `Inside ${shipName}, ${state.current_site_name} Vicinity`;
                         }
                     }
                     
@@ -96,6 +119,28 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
 
             const exists = (state.companions ?? []).some(c => c.id === companionInstance.id);
             
+            let newLocale = state.currentLocale;
+            let boardingMsg: ChatMessage | null = null;
+            
+            if (companionInstance.isShip && companionInstance.isInParty !== false) {
+                const theme = getPOITheme(state.worldSummary || "");
+                const shipName = companionInstance.name;
+                const messages = {
+                    fantasy: `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. The vessel cuts a path through the swells, ready for whatever lies ahead.`,
+                    modern: `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor, the wake trailing behind you.`,
+                    scifi: `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface.`,
+                    magitech: `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents.`
+                };
+
+                boardingMsg = {
+                    id: `boarding-${Date.now()}`,
+                    sender: 'ai',
+                    content: (messages as any)[theme] || messages.fantasy,
+                    type: 'neutral'
+                };
+                newLocale = `Inside ${shipName}, ${state.current_site_name} Vicinity`;
+            }
+
             if (exists) {
                 return {
                     ...state,
@@ -103,7 +148,9 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     companionInventories: {
                         ...state.companionInventories,
                         [companionInstance.id]: newInventory
-                    }
+                    },
+                    currentLocale: newLocale,
+                    messages: boardingMsg ? [...state.messages, boardingMsg] : state.messages
                 };
             }
 
@@ -113,7 +160,9 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                 companionInventories: {
                     ...state.companionInventories,
                     [companionInstance.id]: newInventory
-                }
+                },
+                currentLocale: newLocale,
+                messages: boardingMsg ? [...state.messages, boardingMsg] : state.messages
             };
             
             // Automatic consolidation: ensure any currency received during companion creation is moved to player

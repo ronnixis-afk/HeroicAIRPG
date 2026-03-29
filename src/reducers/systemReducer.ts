@@ -3,6 +3,7 @@
 import { GameData, GameAction, Item, LoreEntry, MapZone, Inventory, NPC } from '../types';
 import { PlayerCharacter, Companion } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
+import { getPOITheme } from '../utils/mapUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
 import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
@@ -485,8 +486,58 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     if (!cUpdate || !cUpdate.id) return;
                     const cIdx = newState.companions.findIndex(c => c.id === cUpdate.id);
                     if (cIdx > -1) {
-                        const mergedData = { ...newState.companions[cIdx], ...cUpdate };
+                        const oldComp = newState.companions[cIdx];
+                        const mergedData = { ...oldComp, ...cUpdate };
                         const updatedComp = new Companion(mergedData);
+
+                        // SHIP TRANSITION DETECTION: Automated Boarding/Disembarking Narratives
+                        if (updatedComp.isShip && cUpdate.isInParty !== undefined && cUpdate.isInParty !== oldComp.isInParty) {
+                            const theme = getPOITheme(newState.worldSummary || "");
+                            const shipName = updatedComp.name;
+
+                            // Case A: Disembarking (Removal from party)
+                            if (cUpdate.isInParty === false && oldComp.isInParty !== false) {
+                                const messages = {
+                                    fantasy: `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
+                                    modern: `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
+                                    scifi: `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
+                                    magitech: `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`
+                                };
+
+                                newState.messages = [...newState.messages, {
+                                    id: `disembark-${Date.now()}-${Math.random()}`,
+                                    sender: 'ai',
+                                    content: (messages as any)[theme] || messages.fantasy,
+                                    type: 'neutral'
+                                }];
+
+                                // Locale Snap: Move back to site vicinity
+                                if (newState.currentLocale && newState.currentLocale.includes(`Inside ${shipName}`)) {
+                                    newState.currentLocale = newState.current_site_name || "Open Area";
+                                }
+                            }
+
+                            // Case B: Boarding (Addition to party)
+                            if (cUpdate.isInParty === true && oldComp.isInParty === false) {
+                                const messages = {
+                                    fantasy: `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. The vessel cuts a path through the swells, ready for whatever lies ahead.`,
+                                    modern: `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor, the wake trailing behind you.`,
+                                    scifi: `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface.`,
+                                    magitech: `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents.`
+                                };
+
+                                newState.messages = [...newState.messages, {
+                                    id: `boarding-${Date.now()}-${Math.random()}`,
+                                    sender: 'ai',
+                                    content: (messages as any)[theme] || messages.fantasy,
+                                    type: 'neutral'
+                                }];
+
+                                // Locale Snap: Move inside the ship
+                                newState.currentLocale = `Inside ${shipName}, ${newState.current_site_name} Vicinity`;
+                            }
+                        }
+
                         updatedComp.maxHeroicPoints = updatedComp.getMaxHeroicPoints(state.companionInventories[cUpdate.id]);
                         const newComps = [...newState.companions];
                         newComps[cIdx] = updatedComp;
