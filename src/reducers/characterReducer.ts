@@ -54,8 +54,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                         };
 
                         disembarkMsg = {
-                            id: `sys-disembark-${Date.now()}`,
-                            sender: 'system',
+                            id: `disembark-${Date.now()}`,
+                            sender: 'ai',
                             content: (messages as any)[theme] || messages.fantasy,
                             type: 'neutral'
                         };

@@ -318,7 +318,7 @@ export const useTravel = (
 
         if (targetCoordinates) {
             // Auto-join ship companion if traveling via vessel
-            const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship/i.test(method);
+            const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship|pilot|command|transit/i.test(method);
             const shipCompanion = gameData.companions.find(c => c.isShip);
             let finalTargetLocale = destination;
 
@@ -339,8 +339,8 @@ export const useTravel = (
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
-                        id: `sys-boarding-${Date.now()}`,
-                        sender: 'ai', // First person narrative
+                        id: `boarding-${Date.now()}`,
+                        sender: 'ai', // Normal chat message sender
                         content: boardingText,
                         type: 'neutral'
                     }
