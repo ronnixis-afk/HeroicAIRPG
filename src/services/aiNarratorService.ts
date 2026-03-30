@@ -4,6 +4,7 @@ import { GameData, ChatMessage, ActorSuggestion, UsageStats, DiceRoll, LoreEntry
 import { Type, Modality } from "@google/genai";
 import { buildSystemInstruction, ContextKey } from './aiContextService';
 import { generateEmbedding } from './geminiService';
+import { getTimePeriod } from '../utils/timeUtils';
 
 // Mapping UI voices to Gemini Neural Voices
 const VOICE_MAP: Record<string, string> = {
@@ -292,11 +293,17 @@ The player has expended a HEROIC POINT this round.
 2. SUCCESS: They are performing at their absolute peak potential.
 ` : "";
 
+    const period = getTimePeriod(gameData.currentTime);
+
     const systemInstruction = `
     You are a legendary TTRPG Storyteller and Action Director. 
     You are resolving a full round of combat in a single, breath-taking epic narration.
     [Style]: High-octane cinematic action. 
     [Tone]: ${tone}. ${isMature ? 'Brutal and visceral realism is encouraged.' : 'Focus on heroic feats.'}
+    [WORLD TIME]: ${gameData.currentTime} | [PERIOD]: ${period}
+    [THREAT DYNAMICS]:
+    - DAYLIGHT (Dawn-Dusk): Organized forces (Guard, Soldier), social confrontations.
+    - DARKNESS (Night/Midnight): Elevated lethality. Nocturnal monsters, undead, assassins. Visibility is LOW; favor surprise attacks and high-stakes descriptions.
     [GM Directives]: ${gmDirectives}
     ${heroicDirective}
     **Formatting Rules**: 

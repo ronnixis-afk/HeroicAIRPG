@@ -283,13 +283,18 @@ Every 'narration' field MUST be exactly two paragraphs (paragraph1, paragraph2) 
     const isIsolatedEnv = zoneDesc.includes('space') || zoneDesc.includes('underground') || zoneDesc.includes('vault') || zoneDesc.includes('cave');
 
     const temporalContext = `
-### TEMPORAL CONTEXT
+### TEMPORAL CONTEXT & LOGICAL AVAILABILITY
 [WORLD TIME]: ${gameData.currentTime} | [PERIOD]: ${period}
-[SCHEDULES & ROUTINES]: 
-- Shops/Businesses: Typically open Morning through Dusk. Closed during Night/Midnight unless specified as "24hr".
-- Citizens: Most NPCs sleep during Night/Midnight. Streets are emptier, while guards and nocturnal entities become active.
-- Atmosphere: Descriptions must reflect the ${period} (lighting, sounds, temperature).
-${isIsolatedEnv ? `[ENVIRONMENTAL OVERRIDE]: You are in an ISOLATED environment (Space/Underground). External lighting from the sun does not change based on time, but NPC shifts, facility schedules, and technological lighting cycles still strictly follow the [WORLD TIME].` : ''}
+[SERVICE & NPC AVAILABILITY RULES]: 
+- MORNING (08:00-12:00) / MIDDAY (12:00-14:00) / AFTERNOON (14:00-17:00): Full service availability. Most shops, taverns, and administrative offices are OPEN and staffed. Streets are active.
+- DUSK (17:00-20:00): Transition period. Markets start closing, but taverns and nightlife begin to peak. Citizens are returning home or heading to socialize.
+- NIGHT (20:00-05:00) / MIDNIGHT (00:00): Service blackout. Most shops are CLOSED and locked. TAIVERNS remain open but quiet or rowdy. NPCs are largely asleep in their residences; only guards, criminals, or nocturnal entities are encountered.
+- DAWN (05:00-08:00): Transition period. Early workers (bakers, farmers) begin their day. Most shops are still closed.
+- ATMOSPHERE: Narration MUST strictly reflect the ${period} (lighting, sounds, temperature, and crowd density).
+[THREAT DYNAMICS & ENCOUNTER LETHALITY]:
+- DAYLIGHT (Dawn through Dusk): Threats are typically organized (Guards, Soldiers, Bandits) or standard diurnal wildlife. Visibility is high; encounters are often social or tactical before becoming violent.
+- DARKNESS (Night / Midnight): Threat levels are ELEVATED. Nocturnal predators, aggressive monsters, and undead are most active. Criminal elements (thieves, assassins) utilize the shadows. Visibility is low; surprise attacks, ambushes, and high-lethality encounters are common.
+${isIsolatedEnv ? `[ENVIRONMENTAL OVERRIDE]: You are in an ISOLATED environment (Space/Underground). While external sun does not set, NPC shifts, facility lockdowns, and automated lighting cycles still STRICTLY follow the [WORLD TIME] schedule above.` : ''}
 `;
 
     // --- TIER 1: CORE REALITY (Always partially mandatory, but pruned) ---

@@ -49,13 +49,14 @@ const extractRelevantLore = (messages: ChatMessage[], gameData: GameData): strin
  */
 export const generateCharacterImage = async (description: string, items: any[], style: string, isMature: boolean): Promise<string | null> => {
     const itemDesc = items.map(i => i.name).join(', ');
-    const prompt = `Character portrait. 
+    const prompt = `Character Portrait. 
+    Instruction: Must Not Include Any Text, Writing, Letters, Or Numbers In The Image.
     Description: ${description}
     Visible Equipment: ${itemDesc}
     Art Style: ${style}. 
     Aspect Ratio: 1:1.
-    High quality, detailed, no text, no borders.
-    ${isMature ? '' : 'Safe for work, no explicit content.'}`;
+    High Quality, Detailed, No Text, No Borders.
+    ${isMature ? '' : 'Safe For Work, No Explicit Content.'}`;
 
     try {
         const ai = getAi();
@@ -112,9 +113,10 @@ export const generateSceneVisuals = async (
     const supplementaryLore = extractRelevantLore(messages, gameData);
 
     // 1. Construct the Text Prompt
-    let prompt = `Tabletop RPG illustration. Style: ${style}. Setting: ${location}. 
-    Context: ${narrativeContext.substring(0, 200)}...
-    ${supplementaryLore ? `Lore: ${supplementaryLore.substring(0, 200)}...` : ''}`;
+    let prompt = `Tabletop RPG Illustration. Instruction: Must Not Include Any Text, Writing, Letters, Or Numbers In The Image. 
+    Style: ${style}. Setting: ${location}. 
+    Context: ${narrativeContext.substring(0, 180)}...
+    ${supplementaryLore ? `Lore: ${supplementaryLore.substring(0, 180)}...` : ''}`;
 
     const parts: any[] = [];
     let imageIndex = 1;
@@ -144,7 +146,7 @@ export const generateSceneVisuals = async (
         prompt += `\nEnemies: ${uniqueEnemies.join(', ').substring(0, 100)}.`;
     }
 
-    prompt += `\nVertical 9:16. Cinematic lighting. No text.`;
+    prompt += `\nVertical 9:16. Cinematic Lighting. Absolutely No Text.`;
 
     // Safety truncation if it still exceeds general limits (Imagen typically accepts up to ~480 chars easily)
     if (prompt.length > 480) {

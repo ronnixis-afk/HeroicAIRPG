@@ -3,10 +3,72 @@
 import { GameData, GameAction, Item, LoreEntry, MapZone, Inventory, NPC } from '../types';
 import { PlayerCharacter, Companion } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
-import { getPOITheme } from '../utils/mapUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
+import { getPOITheme } from '../utils/mapUtils';
 import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
+
+const BOARDING_SHIP_MESSAGES = {
+    fantasy: [
+        (shipName: string) => `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. The vessel cuts a path through the swells, ready for whatever lies ahead.`,
+        (shipName: string) => `You step onto the creaking deck of the ${shipName}, the smell of salt and old oak filling your lungs. The sails unfurl like the wings of a great bird, catching the wind as you set out toward the horizon.`,
+        (shipName: string) => `The gangplank thuds against the dock as you and your party climb aboard the ${shipName}. Heavy ropes are cast off, and the hull groans with life, carrying you into the unknown reaches of the sea.`,
+        (shipName: string) => `The ${shipName} awaits, its figurehead pointing boldly toward your destination. You take your place on deck, watching the shore recede as the waves begin their rhythmic greeting against the wood.`,
+        (shipName: string) => `A steady breeze whistles through the rigging of the ${shipName} as you come aboard. With a sharp command from the captain, the anchor is raised, and the vast span of the ocean opens before you.`
+    ],
+    modern: [
+        (shipName: string) => `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor, the wake trailing behind you.`,
+        (shipName: string) => `The metal deck of the ${shipName} vibrates under your boots as the generator hums. You check the navigation lights and give the signal; with a powerful surge, the vessel pushes away from the pier.`,
+        (shipName: string) => `You step onto the ${shipName}, the scent of diesel and sea air meeting you. With the flick of a few switches, the dashboard glows to life, and the propellers begin to churn the water into a white foam.`,
+        (shipName: string) => `Gear stowed and lines released. You take your position on the ${shipName}, feel the throb of the engine through the deck, and steer the craft into the open channel, leaving the safety of the dock behind.`,
+        (shipName: string) => `The ${shipName} bobs rhythmically as you and your party board. You settle into the seats, the roar of the outboard motor drowning out the gulls as you accelerate towards the open water.`
+    ],
+    scifi: [
+        (shipName: string) => `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface.`,
+        (shipName: string) => `The ramp retracts with a mechanical hiss as you board the ${shipName}. Synthetic gravity kicks in, grounding your steps as the pilot initiates the launch sequence, the stars awaiting your arrival.`,
+        (shipName: string) => `You step into the sleek interior of the ${shipName}, the humming reactor sounding like a heartbeat through the walls. Atmospheric scrubbers whir as the vessel untethers, drifting momentarily before the main drive ignites.`,
+        (shipName: string) => `Primary systems online. You and your party take your stations aboard the ${shipName}. The external viewports shutter as the ship prepares for the high-G burn that will carry you through the void.`,
+        (shipName: string) => `A flash of blue light signals the connection between your suit and the ${shipName}'s interface. You walk through the boarding tube, the silence of space replaced by the comforting vibration of an active starship.`
+    ],
+    magitech: [
+        (shipName: string) => `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents.`,
+        (shipName: string) => `The deck of the ${shipName} glows with intricate runes as you step aboard. A sudden warmth spreads from the core as the arcane engines engage, lifting the ship effortlessly into the shimmering ley-lines.`,
+        (shipName: string) => `Arclight flickers along the hull of the ${shipName} as you and your party come aboard. The air tastes of ozone and ancient spells; with a soft chime, the ship begins to glide through the currents of the world's soul.`,
+        (shipName: string) => `You board the ${shipName}, the wood and metal pulsating with vibrant energy. The aether-sails catch the invisible tides of magic, and with a silent surge, you are carried away on a breath of pure enchantment.`,
+        (shipName: string) => `The ${shipName} hums a melodic tune as you ascend. You feel the connection to the world thrumming through the deck, the mana-flow directing your path as the vessel prepares to transcend the physical distance.`
+    ]
+};
+
+const LEAVING_SHIP_MESSAGES = {
+    fantasy: [
+        (shipName: string) => `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
+        (shipName: string) => `The wood of the dock feels strangely firm as you disembark from the ${shipName}. You look back one last time at the masts silhouetted against the sky, the tang of sea salt still clinging to your cloak.`,
+        (shipName: string) => `You and your party walk down the gangway, leaving the ${shipName} at rest in the harbor. The sway of the deck lingers in your stride as you turn your back to the water and face the challenges of the land.`,
+        (shipName: string) => `Farewell to the waves. You step from the ${shipName} onto the shore, the rhythmic creaking of the hull replaced by the sounds of the bustling port. Your sea-legs will take time to fade, but the road calls.`,
+        (shipName: string) => `Dust rises from your boots as you step off the ${shipName}. The journey was long, but as you reach solid earth, you feel the weight of your land-bound quest return. The ship remains behind, its duty done for now.`
+    ],
+    modern: [
+        (shipName: string) => `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
+        (shipName: string) => `You step from the ${shipName} onto the pier, the vibration of the engine still tingling in your feet. The modern world greets you with its familiar sounds as you leave the vessel behind at its mooring.`,
+        (shipName: string) => `The cleats are secured and the engine stilled. You climb off the ${shipName}, feeling the stable earth beneath you. The boat sways gently in your wake, a metal shell resting after its trial on the water.`,
+        (shipName: string) => `Transit complete. You and your party gather your bags and step off the ${shipName}. The smell of exhaust fades into the air of the port, and the horizon you chased is now just a memory behind you.`,
+        (shipName: string) => `You disembark the ${shipName}, the metal hull cooling in the breeze. As you walk away from the docks, the steady ground feels strange, a reminder of the miles you covered across the shifting blue.`
+    ],
+    scifi: [
+        (shipName: string) => `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
+        (shipName: string) => `The pressure equalizes with a sharp pop, and the ramp of the ${shipName} descends. You step into the alien atmosphere, the synthetic sterile air of the cabin replaced by the raw, untamed scents of a new planet.`,
+        (shipName: string) => `You disembark from the ${shipName}, your boots striking the landing pad. The ship’s engines cool with a series of metallic ticks, its lights dimming as it enters low-power mode, its journey through the stars paused.`,
+        (shipName: string) => `Footsteps echoing in the hollow boarding bay, you leave the ${shipName}. The vastness of the cosmos is now shielded behind the ship's hull, and the immediate reality of the ground beneath you takes hold.`,
+        (shipName: string) => `The airlock door slides shut behind you as you step off the ${shipName}. For a moment, you feel the lingering gravity of the ship, but as you walk forward, the weight of the world takes over, anchoring you to your new goal.`
+    ],
+    magitech: [
+        (shipName: string) => `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`,
+        (shipName: string) => `You step off the ${shipName}, the tingling of arcane energy fading from your skin. The runes on the hull dim as you touch the natural earth, the grounded world reclaiming you from the ephemeral paths of the sky.`,
+        (shipName: string) => `The shimmering ramp retracts as you disembark the ${shipName}. You look back at the vessel, its crystalline parts catching the light like a gemstone. The silence of the world feels heavy after the singing of the mana-engines.`,
+        (shipName: string) => `Ley-line connection severed. You and your party walk away from the ${shipName}, the air of the land feeling thick and heavy compared to the lightness of magic. The vessel waits, a beacon of arcane potential resting in the port.`,
+        (shipName: string) => `You leave the ${shipName}, the soft hum of its core still echoing in your mind. As you walk forward, the magical resonance fades, replaced by the mundane sounds of your destination. The adventure on the magic-tide ends, and a new one begins on foot.`
+    ]
+};
 
 /**
  * Decrements the duration of active buffs on an actor based on time passed.
@@ -497,17 +559,13 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
 
                             // Case A: Disembarking (Removal from party)
                             if (cUpdate.isInParty === false && oldComp.isInParty !== false) {
-                                const messages = {
-                                    fantasy: `You step off the ${shipName}, your boots meeting solid ground once more as the echo of the shifting tides fades. Behind you, the vessel stands tall, a silent sentinel of your journey across the deep.`,
-                                    modern: `The engine cuts to a silence that feels heavy after hours of transit. You disembark from the ${shipName}, the scents of the land replacing the salt-spray. The journey is complete; the path ahead is yours to walk.`,
-                                    scifi: `Hissing hydraulics signal the opening of the airlock. You step out onto the surface as the ${shipName} cycles into standby mode. The hum of its reactor stays with you, a fading vibration as you find your footing in this new world.`,
-                                    magitech: `The aetheric cushion dissipates with a soft chime. You descend the crystalline ramp of the ${shipName}, the resonance of the ley-lines grounding you. Your vessel remains behind, its mana-cells glowing faintly as you embark on your land-bound quest.`
-                                };
+                                const variationIdx = Math.floor(Math.random() * 5);
+                                const content = (LEAVING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || LEAVING_SHIP_MESSAGES.fantasy[0](shipName);
 
                                 newState.messages = [...newState.messages, {
                                     id: `disembark-${Date.now()}-${Math.random()}`,
                                     sender: 'ai',
-                                    content: (messages as any)[theme] || messages.fantasy,
+                                    content: content,
                                     type: 'neutral'
                                 }];
 
@@ -519,17 +577,13 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
 
                             // Case B: Boarding (Addition to party)
                             if (cUpdate.isInParty === true && oldComp.isInParty === false) {
-                                const messages = {
-                                    fantasy: `You and your party gather your belongings and board the ${shipName}, your footsteps echoing on the wooden planks as the crew prepares the sails. The vessel cuts a path through the swells, ready for whatever lies ahead.`,
-                                    modern: `You and your party haul the gear onto the ${shipName} and secure the hatches. You take the helm, the engine rumbling to life with a steady thrum into the hull. You clear the harbor, the wake trailing behind you.`,
-                                    scifi: `Airlock cycled. You and your party step into the pressurized cabin of the ${shipName} as the pre-flight sequence begins. The ion thrusters whine with increasing intensity before lifting you from the surface.`,
-                                    magitech: `You and your party ascend the shimmering gangplank of the ${shipName}, feeling the hum of the mana-crystals beneath your feet. The navigator strikes the resonance chord, and the vessel lifts on a cushion of aetheric currents.`
-                                };
+                                const variationIdx = Math.floor(Math.random() * 5);
+                                const content = (BOARDING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || BOARDING_SHIP_MESSAGES.fantasy[0](shipName);
 
                                 newState.messages = [...newState.messages, {
                                     id: `boarding-${Date.now()}-${Math.random()}`,
                                     sender: 'ai',
-                                    content: (messages as any)[theme] || messages.fantasy,
+                                    content: content,
                                     type: 'neutral'
                                 }];
 
