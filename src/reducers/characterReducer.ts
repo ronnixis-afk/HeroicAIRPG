@@ -99,9 +99,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     // Sync derived capacity
                     companion.maxHeroicPoints = companion.getMaxHeroicPoints(state.companionInventories[companion.id]);
                     
-                    if (companion.isShip && companion.isInParty !== false && c.isInParty === false) {
-                        newLocale = `Inside ${companion.name}, ${state.current_site_name} Vicinity`;
-                    }
+                    // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
 
                     // BOARDING & DISEMBARK LOGIC: Detecting when a ship companion is added/removed from the party
                     if (companion.isShip) {
@@ -128,18 +126,20 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                         
                         // Case B: Boarding (Addition)
                         if ((action.payload as any).isInParty === true && c.isInParty === false) {
-                            const variationIdx = Math.floor(Math.random() * 5);
-                            const content = (BOARDING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || BOARDING_SHIP_MESSAGES.fantasy[0](shipName);
+                            // ENCLOSURE RULE: Only play narrative if ship is healthy
+                            if (c.currentHitPoints > 0) {
+                                const variationIdx = Math.floor(Math.random() * 5);
+                                const content = (BOARDING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || BOARDING_SHIP_MESSAGES.fantasy[0](shipName);
 
-                            disembarkMsg = {
-                                id: `boarding-${Date.now()}`,
-                                sender: 'ai',
-                                content: content,
-                                type: 'neutral'
-                            };
-                            
-                            // Snapping narrative locale to the ship's name
-                            newLocale = `Inside ${shipName}, ${state.current_site_name} Vicinity`;
+                                disembarkMsg = {
+                                    id: `boarding-${Date.now()}`,
+                                    sender: 'ai',
+                                    content: content,
+                                    type: 'neutral'
+                                };
+                                
+                                // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
+                            }
                         }
                     }
                     
@@ -176,7 +176,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             let newLocale = state.currentLocale;
             let boardingMsg: ChatMessage | null = null;
             
-            if (companionInstance.isShip && companionInstance.isInParty !== false) {
+            // ENCLOSURE RULE: Only play boarding narrative if ship is functional
+            if (companionInstance.isShip && companionInstance.isInParty !== false && companionInstance.currentHitPoints > 0) {
                 const theme = getPOITheme(state.worldSummary || "");
                 const shipName = companionInstance.name;
                 const variationIdx = Math.floor(Math.random() * 5);
@@ -188,7 +189,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     content: content,
                     type: 'neutral'
                 };
-                newLocale = `Inside ${shipName}, ${state.current_site_name} Vicinity`;
+                
+                // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
             }
 
             if (exists) {

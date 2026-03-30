@@ -490,16 +490,9 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 newState.current_site_id = loc.site_id;
                 newState.current_site_name = loc.site_name;
 
-                // NARRATIVE LOCALE SNAP: If a ship is in the party, narration prioritizes the vessel.
-                const partyShip = newState.companions.find(c => c.isShip && c.isInParty !== false);
-                const effectiveShipName = loc.ship_name || partyShip?.name;
-                const isAboard = loc.is_aboard_ship ?? (partyShip !== undefined);
-
-                if (isAboard && effectiveShipName) {
-                    newState.currentLocale = `Inside ${effectiveShipName}, ${loc.site_name} Vicinity`;
-                } else {
-                    newState.currentLocale = loc.site_name;
-                }
+                // NARRATIVE LOCALE: AI update sets the base site name. 
+                // The Ship Enclosure Sentinel in game_reducer.ts will forcibly snap it back to 'Inside [Ship]' if a healthy vessel is in the party.
+                newState.currentLocale = loc.site_name;
 
                 // Update coordinates if pattern matches
                 if (loc.coordinates && /^-?\d+-(-?\d+)$/.test(loc.coordinates)) {
@@ -568,15 +561,11 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                                     content: content,
                                     type: 'neutral'
                                 }];
-
-                                // Locale Snap: Move back to site vicinity
-                                if (newState.currentLocale && newState.currentLocale.includes(`Inside ${shipName}`)) {
-                                    newState.currentLocale = newState.current_site_name || "Open Area";
-                                }
                             }
 
                             // Case B: Boarding (Addition to party)
-                            if (cUpdate.isInParty === true && oldComp.isInParty === false) {
+                            // ENCLOSURE RULE: Only narrative if ship is functional (HP > 0)
+                            if (cUpdate.isInParty === true && oldComp.isInParty === false && updatedComp.currentHitPoints > 0) {
                                 const variationIdx = Math.floor(Math.random() * 5);
                                 const content = (BOARDING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || BOARDING_SHIP_MESSAGES.fantasy[0](shipName);
 
@@ -586,9 +575,8 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                                     content: content,
                                     type: 'neutral'
                                 }];
-
-                                // Locale Snap: Move inside the ship
-                                newState.currentLocale = `Inside ${shipName}, ${newState.current_site_name} Vicinity`;
+                                
+                                // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
                             }
                         }
 

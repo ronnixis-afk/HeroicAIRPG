@@ -9,7 +9,7 @@ import { narrativeReducer } from './narrativeReducer';
 import { systemReducer } from './systemReducer';
 import { npcReducer } from './npcReducer';
 
-export const gameReducer = (state: GameData | null, action: GameAction): GameData | null => {
+const baseReducer = (state: GameData | null, action: GameAction): GameData | null => {
     // If state is null, only allow initializing actions
     if (!state) {
         if (action.type === 'SET_GAME_DATA') return action.payload;
@@ -115,8 +115,6 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'MARK_ALL_PLOT_POINTS_SEEN':
             return narrativeReducer(state, action);
 
-
-
         // NPC Actions
         case 'ADD_NPC':
         case 'UPDATE_NPC':
@@ -151,8 +149,40 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
         case 'SET_USE_AI_TTS':
         case 'SET_PARTY_HIDDEN':
             return systemReducer(state, action);
-
+        
         default:
             return state;
     }
+};
+
+/**
+ * SHIP ENCLOSURE SENTINEL:
+ * Forcibly maintains the narrative locale within a ship if an active and healthy 
+ * vessel (HP > 0) is in the party. This prevents AI hallucinations or automated 
+ * transitions from accidentally "stepping out" the player during transit.
+ */
+export const gameReducer = (state: GameData | null, action: GameAction): GameData | null => {
+    const nextState = baseReducer(state, action);
+    if (!nextState) return null;
+
+    // Enforce Ship Enclosure if a functional ship is in the party
+    const activeShip = nextState.companions?.find(c => c.isShip && c.isInParty !== false);
+    
+    // Only enforce if ship is alive (HP > 0)
+    // IMPORTANT: If currentHitPoints is 0 or less, the sentinel allows the locale to change (e.g. for crash landings)
+    if (activeShip && activeShip.currentHitPoints > 0) {
+        const shipEnclosurePrefix = `Inside ${activeShip.name}`;
+        const siteSuffix = nextState.current_site_name || "Open Area";
+        const enforcedLocale = `${shipEnclosurePrefix}, ${siteSuffix} Vicinity`;
+
+        // If currentLocale doesn't match the enclosure, forcibly snap it back
+        if (nextState.currentLocale !== enforcedLocale) {
+            return {
+                ...nextState,
+                currentLocale: enforcedLocale
+            };
+        }
+    }
+
+    return nextState;
 };
