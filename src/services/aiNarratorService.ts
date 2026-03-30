@@ -125,6 +125,7 @@ export const generateNarrativeResponse = async (
                         description: "Paragraph 1: Sensory & Atmospheric summary. Focus on the immediate environment and resulting mood. NO dialogue here." 
                     },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." },
+                    paragraph3: { type: Type.STRING, description: "Paragraph 3: Optional narrative flare or character moment. Use ONLY if the scene is complex or transformative." },
                     dialogues: {
                         type: Type.ARRAY,
                         description: "Structured dialogue lines. Max 1 dialogue per actor. DO NOT include player ('You') dialogue.",
@@ -308,7 +309,7 @@ The player has expended a HEROIC POINT this round.
     ${heroicDirective}
     **Formatting Rules**: 
     1. Plain text only in paragraphs. NO bolding or italics in narration bodies.
-    2. Write exactly two paragraphs (paragraph1 and paragraph2).
+    2. Write exactly two to three paragraphs (paragraph1, paragraph2, and optional paragraph3).
     3. NO dialogues in 'paragraph1'. Use the structured 'dialogues' array instead.
     4. **SYSTEM DIALOGUE PROTOCOL**: 
        - Max 1 dialogue entry per actor. 
@@ -331,6 +332,7 @@ The player has expended a HEROIC POINT this round.
       "narration": {
           "paragraph1": "Atmospheric sensory summary. NO dialogue.",
           "paragraph2": "Environmental Hook & Agency (2-3 POIs + status/threat hint).",
+          "paragraph3": "Optional narrative flare/character moment.",
           "dialogues": [
             { "actorName": "string", "content": "string", "isAlignmentReaction": boolean }
           ]

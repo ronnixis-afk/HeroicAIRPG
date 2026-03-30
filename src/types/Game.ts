@@ -63,6 +63,7 @@ export interface GameData {
   skillConfiguration: SkillConfiguration;
   isPartyHidden?: boolean;
   partyStealthScore?: number;
+  isAboard?: boolean; // NEW: Tracks if the party is currently inside their vessel
 }
 
 export interface World {
@@ -102,6 +103,7 @@ export interface AIUpdatePayload {
   mapZones?: Partial<MapZone>[];
   location_update?: LocationUpdate; // NEW: Structured spatial snapping data
   npc_resolution?: NPCResolution[]; // NEW: Structured social resolution data
+  isAboard?: boolean; // NEW: AI-signaled transition for boarding/disembarking
 }
 
 export interface AIResponse {

@@ -94,7 +94,8 @@ export const useEntityDictionary = () => {
 
         // 4. Locations (Map Zones)
         (gameData.mapZones || []).forEach(z => {
-            if (z.visited) addIfValid(z.name, 'location', z);
+            // Include all discovered or pre-generated zones as long as they aren't currently loading placeholders
+            if (!z.isLoading) addIfValid(z.name, 'location', z);
         });
 
         // 6. Lore Entries

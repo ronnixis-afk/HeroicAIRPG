@@ -165,12 +165,11 @@ export const gameReducer = (state: GameData | null, action: GameAction): GameDat
     const nextState = baseReducer(state, action);
     if (!nextState) return null;
 
-    // Enforce Ship Enclosure if a functional ship is in the party
+    // Enforce Ship Enclosure if a functional ship is in the party AND the party is aboard
     const activeShip = nextState.companions?.find(c => c.isShip && c.isInParty !== false);
     
-    // Only enforce if ship is alive (HP > 0)
-    // IMPORTANT: If currentHitPoints is 0 or less, the sentinel allows the locale to change (e.g. for crash landings)
-    if (activeShip && activeShip.currentHitPoints > 0) {
+    // Only enforce if ship is alive (HP > 0) AND the party is explicitly aboard
+    if (activeShip && activeShip.currentHitPoints > 0 && nextState.isAboard) {
         const shipEnclosurePrefix = `Inside ${activeShip.name}`;
         const siteSuffix = nextState.current_site_name || "Open Area";
         const enforcedLocale = `${shipEnclosurePrefix}, ${siteSuffix} Vicinity`;

@@ -24,6 +24,8 @@ export const auditSystemState = async (
     missedRollRequests: DiceRollRequest[];
     turnSummary: string;
     timePassedMinutes: number;
+    inventoryUpdates?: any[];
+    isAboard?: boolean;
 }> => {
     
     const knownNpcs = (gameData.npcs || []).map(n => ({ 
@@ -102,7 +104,17 @@ export const auditSystemState = async (
       "timePassedMinutes": number,
       "newNPCs": [ { "name": "Full Name (First and Last/Family Name) CONSISTENT with their gender (minimum 2 words)", "description", "race", "gender", "is_essential" } ],
       "npcUpdates": [ { "id", "currentPOI", "status" } ],
+      "inventoryUpdates": [ 
+        { 
+          "ownerId": "player | CompanionID", 
+          "list": "carried | equipped | storage | assets", 
+          "action": "add | remove", 
+          "items": [ { "name": "string", "quantity": number, "description": "string", "tags": ["string"], "rarity": "Common | Uncommon | Rare | etc" } ] 
+        } 
+      ],
       "activeEngagement": boolean,
+      "timePassedMinutes": number,
+      "isAboard": boolean,
       "turnSummary": "string (Max 10 words)",
       "missedRolls": []
     }
@@ -137,7 +149,9 @@ export const auditSystemState = async (
             npcUpdates: result.npcUpdates || [],
             activeEngagement: !!result.activeEngagement,
             missedRollRequests: result.missedRolls || [],
-            turnSummary: result.turnSummary || ""
+            turnSummary: result.turnSummary || "",
+            inventoryUpdates: result.inventoryUpdates || [],
+            isAboard: result.isAboard
         };
     } catch (e) {
         console.error("Auditor failed:", e);

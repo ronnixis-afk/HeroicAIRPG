@@ -64,7 +64,9 @@ export const useExtractionStep = (
                 npcUpdates: [],
                 activeEngagement: false,
                 missedRollRequests: [],
-                turnSummary: ""
+                turnSummary: "",
+                inventoryUpdates: [],
+                isAboard: undefined
             });
 
         const housekeepingPromise = (scope.flags.itemChange || scope.flags.alignmentChange || scope.flags.socialChange)
@@ -83,7 +85,8 @@ export const useExtractionStep = (
             ...(aiResponse.updates || {}),
             location_update: aiResponse.location_update,
             npc_resolution: aiResponse.npc_resolution,
-            adventureBrief: aiResponse.adventure_brief
+            adventureBrief: aiResponse.adventure_brief,
+            isAboard: auditResult.isAboard !== undefined ? auditResult.isAboard : gameData.isAboard
         };
 
         // --- SPATIAL SNAPPING & VALIDATION GATE ---
@@ -298,11 +301,16 @@ export const useExtractionStep = (
         }
 
         // 2. Resolve Inventory Transitions
-        if (housekeepingResult.inventoryUpdates?.length > 0) {
+        const allInventoryUpdates = [
+            ...(housekeepingResult.inventoryUpdates || []),
+            ...(auditResult.inventoryUpdates || [])
+        ];
+
+        if (allInventoryUpdates.length > 0) {
             const skillConfig = gameData.skillConfiguration || 'Fantasy';
             
             // Waterfall: Forge -> Enrich (Thematic Pass)
-            const skinnedUpdates = await Promise.all(housekeepingResult.inventoryUpdates.map(async batch => {
+            const skinnedUpdates = await Promise.all(allInventoryUpdates.map(async batch => {
                 if (batch.action === 'remove') return batch;
                 
                 const forgedItems = forgeSkins(batch.items, skillConfig);

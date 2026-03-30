@@ -86,7 +86,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
         
         case 'UPDATE_COMPANION': {
             let newLocale = state.currentLocale;
-            let disembarkMsg: ChatMessage | null = null;
+            let vesselMsg: ChatMessage | null = null;
+            let newAboard: boolean | undefined;
             const updatedCompanions = (state.companions ?? []).map(c => {
                 if (c.id === action.payload.id) {
                     const companion = action.payload instanceof Companion
@@ -111,7 +112,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                             const variationIdx = Math.floor(Math.random() * 5);
                             const content = (LEAVING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || LEAVING_SHIP_MESSAGES.fantasy[0](shipName);
 
-                            disembarkMsg = {
+                            vesselMsg = {
                                 id: `disembark-${Date.now()}`,
                                 sender: 'ai',
                                 content: content,
@@ -131,7 +132,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                                 const variationIdx = Math.floor(Math.random() * 5);
                                 const content = (BOARDING_SHIP_MESSAGES as any)[theme]?.[variationIdx]?.(shipName) || BOARDING_SHIP_MESSAGES.fantasy[0](shipName);
 
-                                disembarkMsg = {
+                                vesselMsg = {
                                     id: `boarding-${Date.now()}`,
                                     sender: 'ai',
                                     content: content,
@@ -141,6 +142,9 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                                 // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
                             }
                         }
+                        
+                        // SYNC: Narratively aboard if ship is in party
+                        newAboard = (action.payload as any).isInParty !== false;
                     }
                     
                     return companion;
@@ -152,7 +156,8 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                 ...state,
                 companions: updatedCompanions,
                 currentLocale: newLocale,
-                messages: disembarkMsg ? [...state.messages, disembarkMsg] : state.messages
+                isAboard: newAboard !== undefined ? newAboard : state.isAboard,
+                messages: vesselMsg ? [...state.messages, vesselMsg] : state.messages
             };
         }
         
@@ -194,7 +199,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             }
 
             if (exists) {
-                return {
+                const newState = {
                     ...state,
                     companions: (state.companions ?? []).map(c => c.id === companionInstance.id ? companionInstance : c),
                     companionInventories: {
@@ -202,8 +207,10 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                         [companionInstance.id]: newInventory
                     },
                     currentLocale: newLocale,
+                    isAboard: companionInstance.isShip ? (companionInstance.isInParty !== false) : state.isAboard,
                     messages: boardingMsg ? [...state.messages, boardingMsg] : state.messages
                 };
+                return consolidateCurrencyToPlayer(newState);
             }
 
             const newState = {
@@ -214,6 +221,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     [companionInstance.id]: newInventory
                 },
                 currentLocale: newLocale,
+                isAboard: companionInstance.isShip ? (companionInstance.isInParty !== false) : state.isAboard,
                 messages: boardingMsg ? [...state.messages, boardingMsg] : state.messages
             };
             

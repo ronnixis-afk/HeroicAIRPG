@@ -480,6 +480,19 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             let newState = { ...state };
 
             if (!updates) return newState;
+            
+            // --- VESSEL ENCLOSURE STATE ---
+            if (updates.isAboard !== undefined) {
+                newState.isAboard = updates.isAboard;
+                
+                // SYNC: Narrative -> System (Aboard implies in party)
+                newState.companions = newState.companions.map(c => {
+                    if (c.isShip) {
+                        return new Companion({ ...c, isInParty: updates.isAboard });
+                    }
+                    return c;
+                });
+            }
 
             // --- SPATIAL SNAPPING LOGIC ---
             if (updates.location_update) {
@@ -577,6 +590,11 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                                 }];
                                 
                                 // Note: Locale SNAP is handled globally by Ship Enclosure Sentinel in game_reducer.ts
+                            }
+                            
+                            // SYNC: System -> Narrative (Party membership implies being aboard)
+                            if (updates.isAboard === undefined) {
+                                newState.isAboard = updatedComp.isInParty;
                             }
                         }
 
