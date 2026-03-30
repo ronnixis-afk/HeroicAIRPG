@@ -3,7 +3,7 @@
 
 import React, { useCallback } from 'react';
 import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRequest, StoryLog, LoreEntry, InventoryUpdatePayload, AIUpdatePayload } from '../../types';
-import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones } from '../../services/geminiService';
+import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones, resolveLocaleCreation } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
 import { getTravelSpeed, parseCoords, parseHostility, getPOITheme } from '../../utils/mapUtils';
@@ -197,31 +197,31 @@ export const useTravel = (
                 const shipName = anyShip?.name || "your vessel";
                 const m = (travelMethod || "walking").toLowerCase();
 
-                let chosenMessage = "";
+                let chosenMessage = `You arrive at ${locationName}, the trip from ${lastSiteName} was fairly safe and uneventful. `;
                 if (m.includes('ship') || m.includes('boat') || m.includes('sail') || m.includes('vessel') || m.includes('scout') || m.includes('fly') || m.includes('airship')) {
                     const vesselMessages = {
-                        fantasy: `With ${shipName} cutting through the elements, the party charts a legendary course from ${lastSiteName} to ${locationName}. The vessel arrives without incident, ready for the challenges that lie ahead.`,
-                        modern: `With ${shipName} guiding the way, the party completes the transit from ${lastSiteName} to ${locationName}. The voyage was swift and secure, leading to a successful arrival.`,
-                        scifi: `The ${shipName} tears through the vacuum, its engines humming with raw power as it concludes the jump from ${lastSiteName} to ${locationName}. The vessel performs a precise arrival sequence at its destination.`,
-                        magitech: `The ${shipName} glides along the ley-line currents, navigating the shimmering boundary between ${lastSiteName} and ${locationName}. Its systems remain in perfect resonance as you achieve a successful arrival.`
+                        fantasy: `The ${shipName} cut smoothly through the waves, its sails catching a steady breeze that carried you to your destination without incident.`,
+                        modern: `With the ${shipName} guiding the way, the engine hummed a steady rhythm throughout the secure and efficient transit.`,
+                        scifi: `The ${shipName} performed a flawless burn across the void, its systems remaining quiet and stable until the final approach sequence.`,
+                        magitech: `Gliding along the shimmering ley-lines, the ${shipName} maintained perfect resonance as you traversed the aetheric currents safely.`
                     };
-                    chosenMessage = vesselMessages[theme as keyof typeof vesselMessages] || vesselMessages.fantasy;
+                    chosenMessage += vesselMessages[theme as keyof typeof vesselMessages] || vesselMessages.fantasy;
                 } else if (m.includes('portal') || m.includes('teleport')) {
                     const portalMessages = {
-                        fantasy: `The shimmering boundary between dimensions folds as you step from ${lastSiteName}. In a heartbeat, the party emerges within ${locationName}, the transition absolute and undisturbed.`,
-                        modern: `Synchronized transit confirmed. The party departs ${lastSiteName} and instantly recalibrates at ${locationName}. The arrival is silent, efficient, and secure.`,
-                        scifi: `The quantum bridge collapses behind you as the party stabilizes at ${locationName}. The transit from ${lastSiteName} was instantaneous, leaving you ready for immediate action.`,
-                        magitech: `The portal's harmonic resonance fades as you manifest within ${locationName}. The jump from ${lastSiteName} was smooth, and your party stands now at its destination.`
+                        fantasy: `The arcane gateway held firm, the shimmering transition between locations occurring in a heartbeat of absolute silence.`,
+                        modern: `The digital synchronization was complete in an instant, your atoms reassembling flawlessly at the target terminal.`,
+                        scifi: `The quantum bridge remained stable throughout the jump, the localized distortion fading as quickly as it appeared.`,
+                        magitech: `The harmonic frequency of the portal remained in perfect tune, allowing for a seamless shift through the folds of the world.`
                     };
-                    chosenMessage = portalMessages[theme as keyof typeof portalMessages] || portalMessages.fantasy;
+                    chosenMessage += portalMessages[theme as keyof typeof portalMessages] || portalMessages.fantasy;
                 } else {
                     const trekkingMessages = {
-                        fantasy: `Braving the untamed wilds between ${lastSiteName} and ${locationName}, the party finally crests the final ridge to see their destination. The trek was arduous but uneventful, and you stand now ready for adventure in ${locationName}.`,
-                        modern: `The party concludes their journey from ${lastSiteName} to ${locationName}. The transit was quiet and secure, and you stand now at the threshold of ${locationName}, prepared for the next phase.`,
-                        scifi: `Through focus and steady progress, the party completes the traverse across the sector from ${lastSiteName} to ${locationName}. No threats crossed your path, and you have successfully arrived at your target coordinates.`,
-                        magitech: `With steady resolve, the party navigates the shifting energy fields between ${lastSiteName} and ${locationName}. The journey proved uneventful, allowing for a timely and secure arrival.`
+                        fantasy: `Braving the wilderness on foot, the party maintained a steady pace as the terrain proved manageable and the local wildlife kept its distance.`,
+                        modern: `The trek was straightforward and quiet, with no unexpected obstacles or delays interrupting your steady progress across the region.`,
+                        scifi: `Through focus and steady movement, the party successfully traversed the sector, the local environment proving peaceful and undisturbed.`,
+                        magitech: `Navigating the shifting energies of the wilds, the party's journey was guided by a steady resolve that kept any potential threats at bay.`
                     };
-                    chosenMessage = trekkingMessages[theme as keyof typeof trekkingMessages] || trekkingMessages.fantasy;
+                    chosenMessage += trekkingMessages[theme as keyof typeof trekkingMessages] || trekkingMessages.fantasy;
                 }
 
                 dispatch({
@@ -230,7 +230,12 @@ export const useTravel = (
                         id: `sys-arr-safe-${Date.now()}`,
                         sender: 'ai',
                         content: chosenMessage,
-                        rolls: [roll],
+                        rolls: [{
+                            ...roll,
+                            checkName: `Encounter Check: ${locationName}`,
+                            dc: 75,
+                            outcome: 'No Encounter'
+                        }],
                         type: 'neutral'
                     }
                 });
@@ -318,19 +323,22 @@ export const useTravel = (
 
         if (targetCoordinates) {
             // Auto-join ship companion if traveling via vessel
-            const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship|pilot|command|transit/i.test(method);
             const shipCompanion = gameData.companions.find(c => c.isShip);
+            const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship|pilot|command|transit/i.test(method) || 
+                               (shipCompanion && method.toLowerCase().trim() === shipCompanion.name.toLowerCase().trim());
+            
             let finalTargetLocale = destination;
 
             if (isShipTravel && shipCompanion) {
-                if (!shipCompanion.isInParty) {
-                    dispatch({ 
-                        type: 'AI_UPDATE', 
-                        payload: { 
-                            companions: [{ id: shipCompanion.id, isInParty: true }] 
-                        } 
-                    });
-                }
+                // Ensure ship is in party and party is marked as aboard
+                // This triggers the automatic boarding narrative in systemReducer
+                dispatch({ 
+                    type: 'AI_UPDATE', 
+                    payload: { 
+                        isAboard: true,
+                        companions: [{ id: shipCompanion.id, isInParty: true }] 
+                    } 
+                });
                 
                 // Override target locale to the ship's name to force narrative snapping
                 finalTargetLocale = shipCompanion.name;
@@ -429,16 +437,58 @@ export const useTravel = (
                         await initiateTravel(dest, method, targetCoords);
                     }
                 } else if (!directionMap[normalizedDest]) {
-                    // Named destination was provided but nothing matched
-                    dispatch({
-                        type: 'ADD_MESSAGE',
-                        payload: {
-                            id: `sys-travel-fail-${Date.now()}`,
-                            sender: 'system',
-                            content: `I couldn't locate "${dest}" on your map. Try traveling in a cardinal direction (e.g., "Go North") or referencing a discovered landmark by its exact name.`,
-                            type: 'neutral'
+                    // Named destination provided but no Map POI matched.
+                    // TRIGGER LOCALE AGENT: Check if this is a sub-location within the current POI.
+                    setIsAiGenerating(true);
+                    try {
+                        const resolution = await resolveLocaleCreation(dest, gameData);
+                        
+                        if (resolution.validation_passed) {
+                            // If it's a sub-location, or a valid new site in the same area
+                            dispatch({
+                                type: 'AI_UPDATE',
+                                payload: {
+                                    current_site_name: resolution.name,
+                                    currentSubLocation: resolution.sub_location,
+                                    // If it's NOT a literal transition, we stay at the same coordinates
+                                    playerCoordinates: resolution.isLiteralTransition ? undefined : gameData.playerCoordinates
+                                }
+                            });
+
+                            dispatch({
+                                type: 'ADD_MESSAGE',
+                                payload: {
+                                    id: `sys-subloc-${Date.now()}`,
+                                    sender: 'ai',
+                                    content: resolution.content,
+                                    type: 'neutral'
+                                }
+                            });
+                        } else {
+                            // Immersive failure from AI reasoning
+                            dispatch({
+                                type: 'ADD_MESSAGE',
+                                payload: {
+                                    id: `sys-travel-fail-imm-${Date.now()}`,
+                                    sender: 'ai',
+                                    content: resolution.immersive_failure_message || `You search for ${dest}, but it is not here.`,
+                                    type: 'neutral'
+                                }
+                            });
                         }
-                    });
+                    } catch (e) {
+                         dispatch({
+                            type: 'ADD_MESSAGE',
+                            payload: {
+                                id: `sys-travel-error-${Date.now()}`,
+                                sender: 'system',
+                                content: `The spatial anchor failed to resolve that location.`,
+                                type: 'neutral'
+                            }
+                        });
+                    } finally {
+                        setIsAiGenerating(false);
+                    }
                 }
             } else {
                 setIsAiGenerating(false);

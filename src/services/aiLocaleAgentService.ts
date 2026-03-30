@@ -23,6 +23,7 @@ export const resolveLocaleCreation = async (
     isLiteralTransition: boolean;
     reasoning: string;
     validation_passed: boolean;
+    immersive_failure_message?: string;
 }> => {
     const currentCoords = gameData.playerCoordinates || '0-0';
     const currentZone = gameData.mapZones?.find(z => z.coordinates === currentCoords);
@@ -43,8 +44,17 @@ export const resolveLocaleCreation = async (
     [VALIDATION RULES]
     1. MOVE FEASIBILITY: Is the [REQUESTED DESTINATION] physically reachable?
        - Moving between rooms in the same building is VALID.
-       - Moving to a spot within the current room is VALID.
+       - Moving to a spot within the current room (e.g. "at the bar", "corner table") is VALID.
        - Moving between zones without a travel action is INVALID.
+    
+    2. PHYSICAL BARRIERS: Respect solid surfaces (walls, locked doors, iron bars).
+       - If the user's path is blocked by a solid surface, the move is INVALID unless they have a narrative justification (e.g. they mention a key, use magic, or have high enough strength to break it).
+
+    - If it is a SUB-LOCATION, set 'isLiteralTransition' to false (since they aren't changing their map POI).
+
+    [IMMERSIVE FAILURE]
+    - If 'validation_passed' is false, you MUST provide an 'immersive_failure_message'.
+    - STYLE: Immersive RPG/Game-like prose. Explain WHY it doesn't exist based on the logic (e.g. "There is no couch in this barren room...").
 
     [PHYSICALITY FILTER]
     1. SITE NAME: The building/area (e.g., "The Iron Forge"). Proper Noun. MAX 3 WORDS.
@@ -59,6 +69,7 @@ export const resolveLocaleCreation = async (
       "isNew": boolean,
       "isLiteralTransition": boolean,
       "validation_passed": boolean,
+      "immersive_failure_message": "string (Immersive RPG prose explaining the absence)",
       "reasoning": "string"
     }
     `;
@@ -74,6 +85,7 @@ export const resolveLocaleCreation = async (
             isNew: true,
             isLiteralTransition: true,
             validation_passed: true,
+            immersive_failure_message: "",
             reasoning: "Standard validation."
         };
 
@@ -96,6 +108,7 @@ export const resolveLocaleCreation = async (
                 isNew: !!result.isNew,
                 isLiteralTransition: !!result.isLiteralTransition,
                 validation_passed: result.validation_passed !== undefined ? result.validation_passed : true,
+                immersive_failure_message: result.immersive_failure_message || "",
                 reasoning: result.reasoning || "Standard validation."
             };
 

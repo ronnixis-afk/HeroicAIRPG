@@ -43,12 +43,13 @@ import { TravelConfirmationModal } from './components/map/TravelConfirmationModa
 interface HeaderProps {
   currentTime: string;
   currentLocale?: string;
+  currentSubLocation?: string;
   onTimeClick: () => void;
   onMenuClick: () => void;
   badgeCount?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, onTimeClick, onMenuClick, badgeCount }) => {
+const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, currentSubLocation, onTimeClick, onMenuClick, badgeCount }) => {
   const formattedHeaderString = useMemo(() => {
     if (!currentTime) return '';
 
@@ -69,8 +70,9 @@ const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, onTimeClick
     }
 
     const localeStr = currentLocale ? toTitleCase(currentLocale) : 'The Wilds';
-    return `${timeStr}, ${localeStr}`;
-  }, [currentTime, currentLocale]);
+    const subLocStr = currentSubLocation ? ` - ${toTitleCase(currentSubLocation)}` : '';
+    return `${timeStr}, ${localeStr}${subLocStr}`;
+  }, [currentTime, currentLocale, currentSubLocation]);
 
   return (
     <header className="h-[54px] bg-brand-bg flex-shrink-0 flex items-center justify-between px-4 border-b border-brand-primary/10">
@@ -368,6 +370,7 @@ const GameInterface: React.FC = () => {
       <Header
         currentTime={gameData?.currentTime || ''}
         currentLocale={gameData?.currentLocale}
+        currentSubLocation={gameData?.currentSubLocation}
         onTimeClick={() => setIsTimeModalOpen(true)}
         onMenuClick={() => setIsHeaderMenuOpen(true)}
         badgeCount={totalMenuBadgeCount}

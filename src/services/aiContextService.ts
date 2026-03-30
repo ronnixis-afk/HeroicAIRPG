@@ -300,7 +300,7 @@ ${isIsolatedEnv ? `[ENVIRONMENTAL OVERRIDE]: You are in an ISOLATED environment 
     // --- TIER 1: CORE REALITY (Always partially mandatory, but pruned) ---
     const tier1Mandatory = `
 ### TIER 1: CORE REALITY
-[CURRENT POSITION]: Zone: ${z?.name || 'Unknown'} (${gameData.playerCoordinates}) | Locale: ${gameData.currentLocale || 'Open Area'}
+[CURRENT POSITION]: Zone: ${z?.name || 'Unknown'} (${gameData.playerCoordinates}) | Locale: ${gameData.currentLocale || 'Open Area'} ${gameData.currentSubLocation ? `| Specific Spot: ${gameData.currentSubLocation}` : ''}
 ${requiredKeys.includes('location_details') ? `[ZONE DESCRIPTION]: ${z?.description || 'Uncharted territory.'}` : ''}
 [ADVENTURE BRIEF]: ${gameData.adventureBrief || 'Proceed with exploration.'}
 ${requiredKeys.includes('active_quests') ? `[PRIMARY TRACKED QUEST]: ${tracked ? `"${tracked.title}" - ${tracked.nextStep || tracked.content}` : "None."}` : ''}

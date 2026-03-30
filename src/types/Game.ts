@@ -64,6 +64,7 @@ export interface GameData {
   isPartyHidden?: boolean;
   partyStealthScore?: number;
   isAboard?: boolean; // NEW: Tracks if the party is currently inside their vessel
+  currentSubLocation?: string; // NEW: Tracks the specific spot within a POI (e.g. "at the bar")
 }
 
 export interface World {
@@ -104,6 +105,7 @@ export interface AIUpdatePayload {
   location_update?: LocationUpdate; // NEW: Structured spatial snapping data
   npc_resolution?: NPCResolution[]; // NEW: Structured social resolution data
   isAboard?: boolean; // NEW: AI-signaled transition for boarding/disembarking
+  currentSubLocation?: string; // NEW: Narrative spot within a POI
 }
 
 export interface AIResponse {

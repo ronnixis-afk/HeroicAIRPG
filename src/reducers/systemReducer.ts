@@ -357,6 +357,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: "",
                 current_site_id: "",
                 current_site_name: "",
+                currentSubLocation: "",
                 currentTime: state.currentTime || "Day 1, 08:00",
                 skillConfiguration: state.skillConfiguration || 'Fantasy',
                 isPartyHidden: false,
@@ -384,6 +385,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: "",
                 current_site_id: "",
                 current_site_name: "",
+                currentSubLocation: "",
                 globalStoreInventory: {},
                 isPartyHidden: false,
                 partyStealthScore: 10
@@ -441,6 +443,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentLocale: restartPayload.currentLocale || "",
                 current_site_id: restartPayload.current_site_id || "",
                 current_site_name: restartPayload.current_site_name || "",
+                currentSubLocation: restartPayload.currentSubLocation || "",
                 currentTime: restartPayload.currentTime || state.currentTime,
                 npcs: restartPayload.npcs || [],
                 plotPoints: [],
@@ -541,6 +544,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             if (updates.gmNotes !== undefined) newState.gmNotes = updates.gmNotes;
             if (updates.playerCoordinates) newState.playerCoordinates = updates.playerCoordinates;
             if (updates.currentLocale !== undefined) newState.currentLocale = updates.currentLocale;
+            if (updates.currentSubLocation !== undefined) newState.currentSubLocation = updates.currentSubLocation;
 
             if (updates.playerCharacter) {
                 const mergedData = { ...newState.playerCharacter, ...updates.playerCharacter };
@@ -554,7 +558,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     if (!cUpdate || !cUpdate.id) return;
                     const cIdx = newState.companions.findIndex(c => c.id === cUpdate.id);
                     if (cIdx > -1) {
-                        const oldComp = newState.companions[cIdx];
+                        const oldComp = state.companions?.find(c => c.id === cUpdate.id) || newState.companions[cIdx];
                         const mergedData = { ...oldComp, ...cUpdate };
                         const updatedComp = new Companion(mergedData);
 
