@@ -8,6 +8,7 @@ import {
     generateGlobalWorldSummary
 } from '../services/aiWorldService';
 import type { World, LoreEntry, GameData, WorldPreview, MapSettings, MapZone, SkillConfiguration } from '../types';
+import { SKILL_DEFINITIONS } from '../types/Core';
 import { Icon } from './Icon';
 import Modal from './Modal';
 import CharacterCreationLoader from './CharacterCreationLoader';
@@ -85,6 +86,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
     const [numRaces, setNumRaces] = useState(3);
     const [numFactions, setNumFactions] = useState(3);
+    const [raceNames, setRaceNames] = useState<string[]>(Array(10).fill(''));
+    const [factionNames, setFactionNames] = useState<string[]>(Array(10).fill(''));
     const [mapDistance, setMapDistance] = useState(24);
     const [mapUnit, setMapUnit] = useState('Miles');
     const [worldName, setWorldName] = useState('');
@@ -367,7 +370,9 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                 numRaces,
                 numFactions,
                 worldName,
-                additionalContext
+                additionalContext,
+                raceNames.slice(0, numRaces),
+                factionNames.slice(0, numFactions)
             );
 
             if (generationTimeoutRef.current) clearTimeout(generationTimeoutRef.current);
@@ -927,7 +932,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
             </main>
 
-            <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} title={previewData ? "World Preview" : "Forging a New World"}>
+            <Modal isOpen={isCreateModalOpen} onClose={() => !isGenerating && setIsCreateModalOpen(false)} hideHeader={true} title="">
                 {isGenerating ? (
                     <CharacterCreationLoader 
                         title="Forging World..." 
@@ -1002,7 +1007,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-6 animate-page py-2 flex flex-col h-full">
+                    <div className="space-y-6 animate-page py-2">
                         {/* Wizard Progress Bar */}
                         <div className="flex justify-between items-center mb-8 px-2 gap-2 flex-shrink-0">
                             {[1, 2, 3, 4, 5].map((s) => (
@@ -1018,16 +1023,56 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             ))}
                         </div>
 
-                        <div className="flex-1 overflow-y-auto custom-scroll pr-1">
-                            {wizardStep === 1 && (
+                        {/* Choices Chosen Summary */}
+                        {(setting || selectedThemes.length > 0 || (wizardStep >= 3 && (numRaces > 0 || numFactions > 0))) && (
+                            <div className="mb-6 px-4 animate-fade-in grid grid-cols-2 gap-6 border-b border-brand-primary/20 pb-6 max-w-4xl mx-auto w-full">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold text-brand-text-muted opacity-60 inter ml-0.5">Foundations</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {setting && (
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent tracking-normal shadow-sm">
+                                                    {setting}
+                                                </span>
+                                            )}
+                                            {selectedThemes.map(theme => (
+                                                <span key={theme} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                    {theme}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    {wizardStep >= 3 && (numRaces > 0 || numFactions > 0) && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 inter ml-0.5">Composition</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                    {numRaces} Species
+                                                </span>
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                    {numFactions} Powers
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                             {wizardStep === 1 && (
                                 <div className="space-y-6 animate-page">
-                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Prime Genesis</h4>
-                                    <p className="text-body-sm text-brand-text-muted mb-4">Select the core genre and technological foundation of your new realm.</p>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="text-center space-y-2 mb-8">
+                                        <h4 className="text-2xl font-bold text-brand-text inter">Core Theme</h4>
+                                        <p className="text-sm text-brand-text-muted italic inter">Choose the main genre and setting for your new world.</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 max-w-4xl mx-auto">
                                         {SETTINGS.map(s => (
                                             <button
                                                 key={s}
-                                                onClick={() => { setSetting(s); setWizardStep(2); }}
+                                                onClick={() => { setSetting(s); }}
                                                 type="button"
                                                 className={`group relative aspect-video rounded-3xl overflow-hidden border-2 transition-all duration-500 ${
                                                     setting === s 
@@ -1056,93 +1101,165 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                             </button>
                                         ))}
                                     </div>
+                                    
+                                    {setting && (
+                                        <div className="mt-8 space-y-6 animate-fade-in max-w-4xl mx-auto px-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-px flex-1 bg-brand-primary/10"></div>
+                                                <h4 className="text-xl font-bold text-brand-text inter shrink-0 tracking-tight">Archetype & Skills</h4>
+                                                <div className="h-px flex-1 bg-brand-primary/10"></div>
+                                            </div>
+                                            
+                                            <div className="flex flex-wrap gap-2 justify-center max-w-2xl mx-auto">
+                                                {Object.entries(SKILL_DEFINITIONS)
+                                                    .filter(([_, def]) => def.usedIn === 'All' || (Array.isArray(def.usedIn) && (def.usedIn as any).includes(setting)))
+                                                    .map(([name]) => (
+                                                        <span key={name} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent tracking-normal shadow-sm animate-fade-in">
+                                                            {name}
+                                                        </span>
+                                                    ))}
+                                            </div>
+                                            <p className="text-center text-[11px] text-brand-text-muted italic">
+                                                These skills will form the fundamental ruleset for the {setting} setting.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {wizardStep === 2 && (
                                 <div className="space-y-6 animate-page">
-                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Thematic Threads</h4>
+                                    <div className="text-center space-y-2 mb-8">
+                                        <h4 className="text-2xl font-bold text-brand-text inter">World Traits</h4>
+                                        <p className="text-sm text-brand-text-muted italic inter">Pick special features and unique traits for your realm.</p>
+                                    </div>
                                     
-                                    {/* Active Threads (Selected) */}
-                                    {selectedThemes.length > 0 && (
-                                        <div className="space-y-3 animate-fade-in">
-                                            <label className="text-[10px] font-bold text-brand-accent ml-1">Active Threads ({selectedThemes.length}/3)</label>
-                                            <div className="flex flex-wrap gap-2 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/20">
-                                                {selectedThemes.map(theme => (
+                                    <div className="max-w-4xl mx-auto space-y-8 w-full">
+                                        {/* Active Threads (Selected) */}
+                                        {selectedThemes.length > 0 && (
+                                            <div className="space-y-3 animate-fade-in">
+                                                <label className="text-[10px] font-bold text-brand-accent ml-1">Active Threads ({selectedThemes.length}/3)</label>
+                                                <div className="flex flex-wrap gap-2 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/20">
+                                                    {selectedThemes.map(theme => (
+                                                        <button
+                                                            key={theme}
+                                                            onClick={() => handleThemeToggle(theme)}
+                                                            type="button"
+                                                            className="btn-primary btn-sm rounded-full flex items-center gap-2 group pr-3 transition-all animate-bounce-subtle"
+                                                        >
+                                                            {theme}
+                                                            <Icon name="close" className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Available Threads */}
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-bold text-brand-text-muted ml-1">Available Threads</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {(GENRE_THEMES[setting] || []).filter(t => !selectedThemes.includes(t)).map(theme => (
                                                     <button
                                                         key={theme}
                                                         onClick={() => handleThemeToggle(theme)}
                                                         type="button"
-                                                        className="btn-primary btn-sm rounded-full flex items-center gap-2 group pr-3 transition-all animate-bounce-subtle"
+                                                        disabled={selectedThemes.length >= 3}
+                                                        className={`btn-sm rounded-lg transition-all ${
+                                                            selectedThemes.length >= 3 
+                                                                ? 'btn-secondary opacity-30 cursor-not-allowed' 
+                                                                : 'btn-secondary opacity-60 hover:opacity-100 hover:border-brand-accent/50'
+                                                        }`}
                                                     >
                                                         {theme}
-                                                        <Icon name="close" className="w-3 h-3 opacity-50 group-hover:opacity-100" />
                                                     </button>
                                                 ))}
                                             </div>
                                         </div>
-                                    )}
 
-                                    {/* Available Threads */}
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-bold text-brand-text-muted ml-1">Available Threads</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {(GENRE_THEMES[setting] || []).filter(t => !selectedThemes.includes(t)).map(theme => (
-                                                <button
-                                                    key={theme}
-                                                    onClick={() => handleThemeToggle(theme)}
-                                                    type="button"
-                                                    disabled={selectedThemes.length >= 3}
-                                                    className={`btn-sm rounded-lg transition-all ${
-                                                        selectedThemes.length >= 3 
-                                                            ? 'btn-secondary opacity-30 cursor-not-allowed' 
-                                                            : 'btn-secondary opacity-60 hover:opacity-100 hover:border-brand-accent/50'
-                                                    }`}
-                                                >
-                                                    {theme}
-                                                </button>
-                                            ))}
+                                        <div className="bg-brand-primary/10 p-4 rounded-xl border border-brand-primary/20 mt-4">
+                                            <p className="text-[10px] text-brand-text-muted italic inter">Note: Select up to 3 threads. Conflicting themes like High-Magic and No-Magic will automatically adjust.</p>
                                         </div>
-                                    </div>
-
-                                    <div className="bg-brand-primary/10 p-4 rounded-xl border border-brand-primary/20 mt-4">
-                                        <p className="text-[10px] text-brand-text-muted italic">Note: Select up to 3 threads. Conflicting themes like High-Magic and No-Magic will automatically adjust.</p>
                                     </div>
                                 </div>
                             )}
 
                             {wizardStep === 3 && (
                                 <div className="space-y-8 animate-page">
-                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Mortal Presence</h4>
-                                    <p className="text-body-sm text-brand-text-muted mb-6">Determine the complexity of the sentient societies within the realm.</p>
+                                    <div className="text-center space-y-2 mb-8">
+                                        <h4 className="text-2xl font-bold text-brand-text inter">Races & Factions</h4>
+                                        <p className="text-sm text-brand-text-muted italic inter">Set the number of species and powerful groups in your world.</p>
+                                    </div>
                                     
-                                    <div className="space-y-8">
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-sm font-bold text-brand-text">Major Ancestries</label>
-                                                <span className="text-xs font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full">{numRaces} Species</span>
+                                    <div className="space-y-10 max-w-2xl mx-auto w-full px-4">
+                                        <div className="space-y-6">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center ml-1">
+                                                    <label className="text-sm font-bold text-brand-text">Major Ancestries</label>
+                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 tracking-normal shadow-sm">{numRaces} Species</span>
+                                                </div>
+                                                <input
+                                                    type="range"
+                                                    min="1" max="10"
+                                                    value={numRaces}
+                                                    onChange={(e) => setNumRaces(parseInt(e.target.value))}
+                                                    className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
+                                                />
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="1" max="10"
-                                                value={numRaces}
-                                                onChange={(e) => setNumRaces(parseInt(e.target.value))}
-                                                className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
-                                            />
+                                            
+                                            <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                                                {Array.from({ length: numRaces }).map((_, i) => (
+                                                    <input
+                                                        key={`race-${i}`}
+                                                        value={raceNames[i]}
+                                                        onChange={(e) => {
+                                                            const newNames = [...raceNames];
+                                                            newNames[i] = e.target.value;
+                                                            setRaceNames(newNames);
+                                                        }}
+                                                        placeholder={`Species ${i + 1} Name...`}
+                                                        className="bg-brand-primary/40 border border-brand-surface rounded-xl px-4 py-2 text-xs focus:border-brand-accent focus:outline-none transition-all placeholder:text-brand-text-muted/40"
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
 
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center ml-1">
-                                                <label className="text-sm font-bold text-brand-text">Major Factions</label>
-                                                <span className="text-xs font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full">{numFactions} Powers</span>
+                                        <div className="space-y-6">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center ml-1">
+                                                    <label className="text-sm font-bold text-brand-text">Major Factions</label>
+                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 tracking-normal shadow-sm">{numFactions} Powers</span>
+                                                </div>
+                                                <input
+                                                    type="range"
+                                                    min="1" max="10"
+                                                    value={numFactions}
+                                                    onChange={(e) => setNumFactions(parseInt(e.target.value))}
+                                                    className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
+                                                />
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="1" max="10"
-                                                value={numFactions}
-                                                onChange={(e) => setNumFactions(parseInt(e.target.value))}
-                                                className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
-                                            />
+
+                                            <div className="grid grid-cols-2 gap-3 animate-fade-in">
+                                                {Array.from({ length: numFactions }).map((_, i) => (
+                                                    <input
+                                                        key={`faction-${i}`}
+                                                        value={factionNames[i]}
+                                                        onChange={(e) => {
+                                                            const newNames = [...factionNames];
+                                                            newNames[i] = e.target.value;
+                                                            setFactionNames(newNames);
+                                                        }}
+                                                        placeholder={`Faction ${i + 1} Name...`}
+                                                        className="bg-brand-primary/40 border border-brand-surface rounded-xl px-4 py-2 text-xs focus:border-brand-accent focus:outline-none transition-all placeholder:text-brand-text-muted/40"
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-brand-accent/5 border border-brand-accent/10 p-4 rounded-2xl">
+                                            <p className="text-[11px] text-brand-text-muted italic inter leading-relaxed">
+                                                <span className="text-brand-accent font-bold not-italic">Architect's Note:</span> Any names left blank will be filled with thematic lore matches by the AI architect to complete the world's vision.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -1150,67 +1267,76 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
                             {wizardStep === 4 && (
                                 <div className="space-y-6 animate-page">
-                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Space And Time</h4>
-                                    
-                                    <div className="grid grid-cols-2 gap-4 bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 mb-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Starting Date</label>
-                                            <input
-                                                type="date"
-                                                value={startingDate}
-                                                onChange={(e) => setStartingDate(e.target.value)}
-                                                className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Time</label>
-                                            <input
-                                                type="time"
-                                                value={startingTime}
-                                                onChange={(e) => setStartingTime(e.target.value)}
-                                                className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
-                                            />
-                                        </div>
+                                    <div className="text-center space-y-2 mb-8">
+                                        <h4 className="text-2xl font-bold text-brand-text inter">World Details</h4>
+                                        <p className="text-sm text-brand-text-muted italic inter">Set the starting time and add any extra details for the world.</p>
                                     </div>
+                                    
+                                    <div className="max-w-3xl mx-auto w-full space-y-6 px-4">
+                                        <div className="grid grid-cols-2 gap-4 bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 mb-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Starting Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={startingDate}
+                                                    onChange={(e) => setStartingDate(e.target.value)}
+                                                    className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Time</label>
+                                                <input
+                                                    type="time"
+                                                    value={startingTime}
+                                                    onChange={(e) => setStartingTime(e.target.value)}
+                                                    className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
+                                                />
+                                            </div>
+                                        </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-brand-text-muted ml-1">Architectural Context</label>
-                                        <textarea
-                                            value={additionalContext}
-                                            onChange={(e) => setAdditionalContext(e.target.value)}
-                                            placeholder="Provide specific details for the architect... e.g. Single giant city, Floating islands, or Low magic technology..."
-                                            className="w-full bg-brand-primary p-4 rounded-2xl border border-brand-surface focus:border-brand-accent focus:outline-none h-32 text-sm leading-relaxed text-brand-text"
-                                        />
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-brand-text-muted ml-1">Architectural Context</label>
+                                            <textarea
+                                                value={additionalContext}
+                                                onChange={(e) => setAdditionalContext(e.target.value)}
+                                                placeholder="Provide specific details for the architect... e.g. Single giant city, Floating islands, or Low magic technology..."
+                                                className="w-full bg-brand-primary p-4 rounded-2xl border border-brand-surface focus:border-brand-accent focus:outline-none h-32 text-sm leading-relaxed text-brand-text"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
                             {wizardStep === 5 && (
                                 <div className="space-y-6 animate-page">
-                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Naming The Void</h4>
-                                    <p className="text-body-sm text-brand-text-muted mb-6">Every legend begins with a name. How shall history remember this realm?</p>
-                                    
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-bold text-brand-text-muted ml-1">Realm Name</label>
-                                        <input
-                                            ref={worldNameInputRef}
-                                            value={worldName}
-                                            onChange={(e) => setWorldName(e.target.value)}
-                                            placeholder="e.g. Eldoria, Neo-Tokyo, Sector 7..."
-                                            className="w-full bg-brand-primary h-14 px-6 rounded-2xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-lg font-bold text-brand-text"
-                                        />
+                                    <div className="text-center space-y-2 mb-8">
+                                        <h4 className="text-2xl font-bold text-brand-text inter">World Name</h4>
+                                        <p className="text-sm text-brand-text-muted italic inter">Give your world a name to begin your adventure.</p>
                                     </div>
+                                    
+                                    <div className="max-w-2xl mx-auto w-full space-y-8 py-4 px-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-bold text-brand-text-muted ml-1">Realm Name</label>
+                                            <input
+                                                ref={worldNameInputRef}
+                                                value={worldName}
+                                                onChange={(e) => setWorldName(e.target.value)}
+                                                placeholder="e.g. Eldoria, Neo-Tokyo, Sector 7..."
+                                                className="w-full bg-brand-primary h-14 px-6 rounded-2xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-lg font-bold text-brand-text"
+                                            />
+                                        </div>
 
-                                    {error && <p className="text-brand-danger text-body-sm text-center font-bold animate-pulse">{error}</p>}
+                                        {error && <p className="text-brand-danger text-body-sm text-center font-bold animate-pulse">{error}</p>}
+                                    </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Wizard Navigation Footer */}
-                        <div className="pt-8 flex items-center justify-between border-t border-brand-primary/10 mt-auto flex-shrink-0">
+                         {/* Wizard Navigation Footer */}
+                        <div className="pt-8 flex items-center justify-center gap-4 border-t border-brand-primary/10 mt-8">
                             <button 
                                 onClick={() => setWizardStep(s => Math.max(1, s - 1))}
-                                className={`btn-secondary btn-md rounded-full px-8 transition-all ${wizardStep === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+                                className={`btn-secondary btn-md rounded-full px-8 transition-all ${wizardStep === 1 ? 'invisible' : ''}`}
                             >
                                 Back
                             </button>
@@ -1218,7 +1344,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                             {wizardStep < 5 ? (
                                 <button
                                     onClick={() => setWizardStep(s => s + 1)}
-                                    className="btn-primary btn-md rounded-full px-12 shadow-xl shadow-brand-accent/20 flex items-center gap-2"
+                                    disabled={wizardStep === 1 && !setting}
+                                    className={`btn-primary btn-md flex-1 rounded-full shadow-xl shadow-brand-accent/20 flex items-center justify-center gap-3 transition-all ${wizardStep === 1 && !setting ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
                                 >
                                     Next Step
                                     <Icon name="chevronDown" className="w-4 h-4 -rotate-90" />
@@ -1227,12 +1354,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 <button
                                     onClick={handleGeneratePreview}
                                     disabled={!worldName.trim() || isGenerating}
-                                    className="btn-primary btn-lg rounded-full px-12 shadow-xl shadow-brand-accent/20 flex items-center gap-2"
+                                    className="btn-primary btn-md flex-1 rounded-full shadow-xl shadow-brand-accent/20 flex items-center justify-center gap-3 transition-all"
                                 >
                                     {isGenerating ? (
-                                        <><Icon name="spinner" className="w-5 h-5 animate-spin" /> Scattering Seeds...</>
+                                        <><Icon name="spinner" className="w-4 h-4 animate-spin" /> Casting Seeds...</>
                                     ) : (
-                                        <><Icon name="play" className="w-5 h-5" /> Breathe Life into Realm</>
+                                        <><Icon name="play" className="w-4 h-4" /> Breathe Life into Realm</>
                                     )}
                                 </button>
                             )}
