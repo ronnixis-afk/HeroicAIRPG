@@ -51,17 +51,41 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
 
     const displayName = name.length > 9 ? name.slice(0, 8) + '..' : name;
 
+    const ratios: number[] = [];
+    const colors: string[] = [];
+    if (maxHp > 0) {
+        ratios.push(hpPercent);
+        colors.push(color);
+    }
+    if (maxTempHp > 0) {
+        ratios.push(tempPercent);
+        colors.push(tempColor);
+    }
+    if (maxStamina > 0) {
+        ratios.push(staminaPercent);
+        colors.push(staminaColor);
+    }
+
+    const size = isShrunk ? 40 : 80;
+    const strokeWidth = Math.max(2, size * 0.06);
+    const padding = 2;
+    const totalSize = size + (strokeWidth + padding) * 2;
+    const center = totalSize / 2;
+    const radius = (size / 2) + padding + (strokeWidth / 2);
+    const circumference = 2 * Math.PI * radius;
+
     return (
-        <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 ${isShrunk ? 'w-10 gap-1' : 'w-20 gap-2'}`}>
-            <div className="relative w-full">
+        <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 ${isShrunk ? 'w-10 gap-0.5' : 'w-24 gap-2'}`}>
+            <div className="relative flex items-center justify-center" style={{ width: totalSize, height: totalSize }}>
                 <button
                     onClick={onClick}
                     title={`${name} (${currentHp}/${maxHp} Hp)`}
-                    className={`relative flex flex-col items-center justify-center transition-all duration-300 ${
+                    className={`relative flex items-center justify-center transition-all duration-300 ${
                         isActive ? 'scale-100 z-10' : 'opacity-80 hover:opacity-100 hover:scale-105'
-                    } ${isShrunk ? 'w-10 h-10' : 'w-20 h-20'}`}
+                    }`}
+                    style={{ width: size, height: size }}
                 >
-                    <div className={`relative transition-all duration-300 w-full h-full rounded-xl overflow-hidden border-2 bg-brand-surface ${isActive ? 'border-brand-text' : 'border-brand-primary'} ${isDead ? 'grayscale brightness-50' : ''}`}>
+                    <div className={`relative transition-all duration-300 w-full h-full rounded-full overflow-hidden border-2 bg-brand-surface ${isActive ? 'border-brand-text' : 'border-brand-primary'} ${isDead ? 'grayscale brightness-50' : ''}`}>
                          {imageUrl ? (
                             <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                         ) : (
@@ -76,50 +100,58 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
                     </div>
                 </button>
 
-                {/* Health and Shield Bars */}
-                <div className={`mt-1.5 w-full px-1 ${isShrunk ? 'space-y-0.5' : 'space-y-1'}`}>
-                    {/* HP Bar */}
-                    <div className={`${isShrunk ? 'h-1' : 'h-1.5'} w-full bg-black/40 rounded-full overflow-hidden border border-white/5`}>
-                        <div 
-                            className="h-full transition-all duration-500 ease-out"
-                            style={{ 
-                                width: `${hpPercent * 100}%`,
-                                backgroundColor: color
-                            }}
+                {/* Status Arcs SVG */}
+                {ratios.length > 0 && (
+                    <svg 
+                        viewBox="0 0 100 100" 
+                        className="absolute pointer-events-none -rotate-90 z-20 inset-0 w-full h-full"
+                    >
+                        <circle
+                            cx="50"
+                            cy="50"
+                            r="47"
+                            fill="none"
+                            stroke="rgba(0, 0, 0, 0.4)"
+                            strokeWidth="6"
                         />
-                    </div>
-                    
-                    {/* Shield Bar (Temp HP) */}
-                    {maxTempHp > 0 && (
-                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${tempPercent * 100}%`,
-                                    backgroundColor: tempColor
-                                }}
-                            />
-                        </div>
-                    )}
-                    
-                    {/* Stamina Bar */}
-                    {maxStamina > 0 && (
-                        <div className="h-1 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                            <div 
-                                className="h-full transition-all duration-700 ease-out opacity-90"
-                                style={{ 
-                                    width: `${staminaPercent * 100}%`,
-                                    backgroundColor: staminaColor
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
+                        {ratios.map((ratio, i) => {
+                            if (ratio <= 0) return null;
+                            const svgCircumference = 2 * Math.PI * 47;
+                            const activeCount = ratios.length;
+                            const segmentLength = svgCircumference / activeCount;
+                            const gap = activeCount > 1 ? svgCircumference * 0.02 : 0;
+                            const availableLength = segmentLength - gap;
+                            const dashLength = availableLength * ratio;
+                            const gapLength = svgCircumference - dashLength;
+                            const rotation = (360 / activeCount) * i;
+                            
+                            return (
+                                <circle
+                                    key={i}
+                                    cx="50"
+                                    cy="50"
+                                    r="47"
+                                    fill="none"
+                                    stroke={colors[i]}
+                                    strokeWidth="6"
+                                    strokeDasharray={`${dashLength} ${gapLength}`}
+                                    style={{ 
+                                        transform: `rotate(${rotation}deg)`,
+                                        transformOrigin: '50% 50%',
+                                        transition: 'all 0.5s ease-out'
+                                    }}
+                                    strokeLinecap="round"
+                                />
+                            );
+                        })}
+                    </svg>
+                )}
 
+                {/* Party Toggle Indicator */}
                 {!isPlayer && onToggleParty && !isShrunk && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onToggleParty(); }}
-                        className={`absolute -top-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center border-2 shadow-md transition-all duration-200 z-20 ${
+                        className={`absolute -top-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center border-2 shadow-md transition-all duration-200 z-30 ${
                             isInParty 
                                 ? 'bg-brand-accent border-brand-accent text-black scale-100' 
                                 : 'bg-brand-surface border-brand-primary text-brand-text-muted hover:text-brand-text scale-90 hover:scale-100'

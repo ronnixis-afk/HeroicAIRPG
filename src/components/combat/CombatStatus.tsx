@@ -110,10 +110,8 @@ const CombatStatusDisplay: React.FC = () => {
     }, [combatState, currentTurnDisplayId, isExpanded]);
 
     const getActorNameColor = (actor: any) => {
-        if (actor.alignment === 'ally') return 'text-brand-accent';
-        if (actor.alignment === 'neutral') return 'text-yellow-400';
+        if (actor.alignment === 'ally' || actor.isAlly === true) return 'text-brand-accent';
         if (actor.rank === 'boss') return 'text-brand-danger font-bold';
-        if (actor.rank === 'elite') return 'text-blue-400';
         return 'text-brand-danger';
     };
 
