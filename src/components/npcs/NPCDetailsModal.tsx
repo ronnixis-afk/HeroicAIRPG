@@ -108,6 +108,12 @@ const NPCViewContent: React.FC<{
                                 {toTitleCase(npc.status)}
                             </span>
                         )}
+                        {npc.presenceMode === 'Remote' && (
+                            <span className="text-[10px] font-bold text-blue-400 bg-blue-900/20 px-3 py-1 rounded-lg border border-blue-500/20 tracking-normal flex items-center gap-1">
+                                <Icon name="radio" className="w-3 h-3" />
+                                Remote
+                            </span>
+                        )}
                         {npc.is_essential && (
                             <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-lg border border-yellow-500/20 tracking-normal flex items-center gap-1">
                                 <Icon name="starFill" className="w-3 h-3" />
@@ -473,7 +479,20 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                     </div>
 
                     <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                        <h5 className="text-xs font-bold text-brand-text-muted mb-4 opacity-60">Spatial Registry</h5>
+                        <div className="flex justify-between items-center mb-4">
+                            <h5 className="text-xs font-bold text-brand-text-muted opacity-60">Spatial Registry</h5>
+                            <div className="flex items-center gap-2 bg-brand-primary/20 px-3 py-1.5 rounded-xl border border-brand-surface">
+                                <span className="text-[10px] font-bold text-brand-text-muted">Presence:</span>
+                                <select 
+                                    value={editedNPC.presenceMode || 'Physical'} 
+                                    onChange={(e) => handleChange('presenceMode', e.target.value)}
+                                    className="bg-transparent text-[10px] font-bold text-brand-accent focus:outline-none cursor-pointer"
+                                >
+                                    <option value="Physical" className="text-black">Physical</option>
+                                    <option value="Remote" className="text-black">Remote</option>
+                                </select>
+                            </div>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <StyledInputGroup label="Last Visited Zone">
                                 <div className="relative">

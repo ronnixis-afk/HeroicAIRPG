@@ -4,6 +4,8 @@
 import { AbilityScoreName, AbilityEffect, StatusEffect, RollMode, CombatActorSize, ArchetypeName, SkillName, ActiveBuff } from './Core';
 import { Ability } from './Characters';
 
+export type PresenceMode = 'Physical' | 'Remote';
+
 // Fix: Added LocationUpdate interface to support structured AI spatial transition responses
 export interface LocationUpdate {
   coordinates: string;
@@ -41,6 +43,7 @@ export interface NPCResolution {
   action: string; // e.g., "existing", "new", "leaves"
   summary: string;
   isFollowing?: boolean;
+  presenceMode?: PresenceMode;
 }
 
 export interface ObjectiveUpdate {
@@ -165,6 +168,8 @@ export interface NPC {
   statusEffects?: StatusEffect[];
   activeBuffs?: ActiveBuff[];
   isFollowing?: boolean;
+  presenceMode?: PresenceMode;
+  willTravel?: boolean;
 }
 
 export interface DiceRoll {

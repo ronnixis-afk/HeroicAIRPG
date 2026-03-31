@@ -75,7 +75,8 @@ export const extractNPCsFromNarrative = async (
         "template": "Agile|Brute|Tank|Brawler|Sniper|Grenadier|Caster|Healer|Controller|Skirmisher",
         "difficulty": "Weak|Normal|Elite|Boss",
         "affinity": "Thermal|Cryo|Voltaic|Reinforced|Phased|Caustic|Luminous|Entropic|Neural|Kinetic|None",
-        "archetype": "Bipedal|Bestial|Aerial|Marine|Amphibian|Crawler|Hoverer|Sentry"
+        "archetype": "Bipedal|Bestial|Aerial|Marine|Amphibian|Crawler|Hoverer|Sentry",
+        "presenceMode": "Physical | Remote (Set 'Remote' for intercom, radio, telepathy, vision, or projections)"
       }
     ]
 
@@ -162,7 +163,8 @@ export const refineNPCDetails = async (
       "template": "Agile|Brute|Tank|Brawler|Sniper|Grenadier|Caster|Healer|Controller|Skirmisher",
       "difficulty": "Weak|Normal|Elite|Boss",
       "affinity": "Thermal|Cryo|Voltaic|Reinforced|Phased|Caustic|Luminous|Entropic|Neural|Kinetic|None",
-      "archetype": "Bipedal|Bestial|Aerial|Marine|Amphibian|Crawler|Hoverer|Sentry"
+      "archetype": "Bipedal|Bestial|Aerial|Marine|Amphibian|Crawler|Hoverer|Sentry",
+      "presenceMode": "Physical | Remote"
     }
     `;
 

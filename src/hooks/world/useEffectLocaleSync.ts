@@ -35,7 +35,8 @@ export const useEffectLocaleSync = (
             const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npc.isFollowing === true;
             const inParty = npc.companionId || partyNames.has(npc.name?.toLowerCase().trim() || '');
             const isAlive = npc.status !== 'Dead';
-            return isAtLocale && !inParty && !npc.isShip && isAlive;
+            const isPhysical = npc.presenceMode !== 'Remote';
+            return isAtLocale && !inParty && !npc.isShip && isAlive && isPhysical;
         });
 
         // 2. Comparison Logic (Performance optimized string check)
@@ -44,7 +45,8 @@ export const useEffectLocaleSync = (
             t: n.template, 
             d: n.difficulty,
             s: n.status,
-            p: n.currentPOI
+            p: n.currentPOI,
+            pm: n.presenceMode
         })));
         
         if (syncTargetString !== lastSyncStateRef.current) {

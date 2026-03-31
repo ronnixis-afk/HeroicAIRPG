@@ -37,6 +37,21 @@ export const TravelConfirmationModal: React.FC = () => {
 
         return methods;
     }, [gameData]);
+    
+    // Track authorised NPCs locally in the modal
+    const initialFollowing = useMemo(() => {
+        if (!gameData) return [];
+        return gameData.npcs.filter(n => n.isFollowing);
+    }, [gameData]);
+
+    const [authorizedNpcIds, setAuthorizedNpcIds] = useState<string[]>([]);
+    
+    // Sync initial state
+    useEffect(() => {
+        if (pendingTravelConfirmation) {
+            setAuthorizedNpcIds(initialFollowing.map(n => n.id));
+        }
+    }, [pendingTravelConfirmation, initialFollowing]);
 
     useEffect(() => {
         if (pendingTravelConfirmation && !selectedMethod) {
@@ -47,8 +62,26 @@ export const TravelConfirmationModal: React.FC = () => {
     if (!pendingTravelConfirmation) return null;
 
     const handleConfirm = async () => {
-        const { destination, targetCoords } = pendingTravelConfirmation;
+        const { destination, targetCoords } = pendingTravelConfirmation!;
         const finalMethod = selectedMethod || 'Walk';
+        
+        // 1. Authorize selected NPCs for travel in the state
+        if (dispatch) {
+            dispatch({
+                type: 'SET_NPCS_WILL_TRAVEL',
+                payload: { ids: authorizedNpcIds, willTravel: true }
+            });
+            
+            // De-authorize others that were following but not selected
+            const toDeauthorize = initialFollowing.filter(n => !authorizedNpcIds.includes(n.id)).map(n => n.id);
+            if (toDeauthorize.length > 0) {
+                dispatch({
+                    type: 'SET_NPCS_WILL_TRAVEL',
+                    payload: { ids: toDeauthorize, willTravel: false }
+                });
+            }
+        }
+
         setPendingTravelConfirmation(null);
         await initiateTravel(destination, finalMethod, targetCoords);
     };
@@ -100,6 +133,46 @@ export const TravelConfirmationModal: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {initialFollowing.length > 0 && (
+                    <div className="w-full space-y-3 mb-8 text-left animate-fade-in">
+                        <label className="text-[10px] font-bold text-brand-text-muted ml-1 tracking-normal uppercase">Authorized Followers</label>
+                        <div className="space-y-2 bg-brand-primary/10 p-4 rounded-2xl border border-brand-surface shadow-inner max-h-[30vh] overflow-y-auto custom-scrollbar">
+                            {initialFollowing.map(npc => (
+                                <div 
+                                    key={npc.id} 
+                                    onClick={() => {
+                                        setAuthorizedNpcIds(prev => 
+                                            prev.includes(npc.id) ? prev.filter(id => id !== npc.id) : [...prev, npc.id]
+                                        );
+                                    }}
+                                    className={`flex items-center justify-between p-3 rounded-xl transition-all border cursor-pointer ${
+                                        authorizedNpcIds.includes(npc.id) 
+                                            ? 'bg-brand-accent/10 border-brand-accent/40 shadow-[0_0_10px_rgba(62,207,142,0.1)]' 
+                                            : 'bg-brand-primary/40 border-transparent opacity-60 grayscale'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
+                                            authorizedNpcIds.includes(npc.id) ? 'bg-brand-accent border-brand-accent shadow-glow text-black' : 'bg-brand-surface border-brand-primary/20 text-brand-text-muted'
+                                        }`}>
+                                            <Icon name="character" className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className={`text-body-sm font-bold leading-none ${authorizedNpcIds.includes(npc.id) ? 'text-brand-text' : 'text-brand-text-muted'}`}>{npc.name}</span>
+                                            <span className="text-[9px] text-brand-text-muted font-normal mt-1">Authorized for travel</span>
+                                        </div>
+                                    </div>
+                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                        authorizedNpcIds.includes(npc.id) ? 'bg-brand-accent border-brand-accent text-black' : 'bg-brand-surface border-brand-primary/30'
+                                    }`}>
+                                        {authorizedNpcIds.includes(npc.id) && <Icon name="check" className="w-3.5 h-3.5 bold" />}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 
                 <div className="grid grid-cols-1 gap-3 w-full">
                     <button 

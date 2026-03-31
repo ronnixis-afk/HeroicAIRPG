@@ -161,7 +161,7 @@ export const DiceTray: React.FC<{ rolls: DiceRoll[] }> = ({ rolls }) => {
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 title="Dice Rolls"
-                maxWidth="full"
+                maxWidth="lg"
             >
                 <div className="space-y-0.5">
                     {visibleRolls.map((roll, index) => {

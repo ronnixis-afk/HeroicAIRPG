@@ -86,6 +86,15 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
             };
         case 'MARK_ALL_NPCS_SEEN':
             return { ...state, npcs: currentNpcs.map(n => ({ ...n, isNew: false })) };
+        case 'SET_NPCS_WILL_TRAVEL': {
+            const { ids, willTravel } = action.payload;
+            return {
+                ...state,
+                npcs: currentNpcs.map(npc => 
+                    ids.includes(npc.id) ? { ...npc, willTravel } : npc
+                )
+            };
+        }
 
         case 'AI_UPDATE': {
             const { npc_resolution, location_update } = action.payload;
@@ -106,8 +115,18 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                         }
                         
                         if (isPOIChange) {
-                            // DISCONNECT: Party moved too far; NPC stays put.
-                            return { ...npc, isFollowing: false };
+                            if (npc.willTravel) {
+                                // AUTHORIZED TRAVEL: Move NPC to new location
+                                return {
+                                    ...npc,
+                                    currentPOI: location_update.site_name || 'Current',
+                                    site_id: location_update.site_id,
+                                    willTravel: false // Reset authorization after travel
+                                };
+                            } else {
+                                // DISCONNECT: Party moved too far; NPC stays put.
+                                return { ...npc, isFollowing: false };
+                            }
                         } else {
                             // NARRATIVE SYNC: Party moved within the same POI; NPC follows.
                             return {
@@ -142,7 +161,8 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                             ...updatedNpcs[index],
                             currentPOI: 'Unknown',
                             site_id: undefined,
-                            isFollowing: false
+                            isFollowing: false,
+                            presenceMode: 'Physical' // Reset on departure
                         };
                     }
                 } else if (res.action === 'existing' || res.action === 'new') {
@@ -151,7 +171,8 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                         name: res.name,
                         currentPOI: location_update?.site_name || 'Current',
                         site_id: location_update?.site_id,
-                        isFollowing: res.isFollowing
+                        isFollowing: res.isFollowing,
+                        presenceMode: res.presenceMode || 'Physical'
                     };
 
                     if (index > -1) {

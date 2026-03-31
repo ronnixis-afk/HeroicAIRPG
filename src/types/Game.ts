@@ -209,6 +209,7 @@ export type GameAction =
   | { type: 'UPDATE_NPC'; payload: NPC }
   | { type: 'DELETE_NPC'; payload: string }
   | { type: 'MARK_ALL_NPCS_SEEN' }
+  | { type: 'SET_NPCS_WILL_TRAVEL'; payload: { ids: string[]; willTravel: boolean } }
   | { type: 'ADD_GALLERY_ENTRY'; payload: GalleryEntry }
   | { type: 'DELETE_GALLERY_ENTRY'; payload: string }
   | { type: 'SET_GAME_DATA'; payload: GameData }

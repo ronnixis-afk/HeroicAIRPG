@@ -89,7 +89,12 @@ export const PartyQuickStatus: React.FC = () => {
         const partyShip = activeCompanions.find(c => c.isShip === true);
 
         // Find highest perception among nearby observers
-        const nearbyNPCs = (gameData.npcs || []).filter(n => n.currentPOI === gameData.currentLocale && n.status !== 'Dead' && !n.isShip);
+        const nearbyNPCs = (gameData.npcs || []).filter(n => 
+            n.currentPOI === gameData.currentLocale && 
+            n.status !== 'Dead' && 
+            !n.isShip &&
+            n.presenceMode !== 'Remote'
+        );
         const highestInsight = nearbyNPCs.length > 0
             ? Math.max(...nearbyNPCs.map(n => npcToCombatActor(n, playerCharacter.level).skills?.Insight?.passiveScore || 10))
             : 10;

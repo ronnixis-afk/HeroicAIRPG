@@ -84,6 +84,7 @@ export const auditSystemState = async (
     3. **Npc Discovery**: ${flags?.socialChange ? `Identify new characters introduced. 
        - **Strict Ancestry Rule**: You must select the "race" field from the [Valid Ancestries] list.
        - **Essential Status Rule**: Set "is_essential" as true for unique named characters.
+       - **Presence Rule**: Identify if the NPC is interacting Remotely (telepathy, intercom, vision, ghost) or is Physically present. Set "presenceMode" to 'Remote' or 'Physical' (default).
        - **NAME PROTECTION**: You MUST NOT extract any character whose name matches a name in the [MANDATORY NAME EXCLUSION LIST]. If a character in the narrative has one of these names, it is the player or an existing companion—ignore them for discovery.` : "SKIP: No new characters were introduced."}
 
     4. **Engagement Check (Critical)**: ${flags?.engagementChange ? `Determine if the scene has escalated to active combat.
@@ -102,8 +103,8 @@ export const auditSystemState = async (
       "currentLocale": "string (Site Name)",
       "currentSubLocation": "string",
       "timePassedMinutes": number,
-      "newNPCs": [ { "name": "Full Name (First and Last/Family Name) CONSISTENT with their gender (minimum 2 words)", "description", "race", "gender", "is_essential" } ],
-      "npcUpdates": [ { "id", "currentPOI", "status" } ],
+      "newNPCs": [ { "name": "...", "description", "race", "gender", "is_essential", "presenceMode": "Physical | Remote" } ],
+      "npcUpdates": [ { "id", "currentPOI", "status", "presenceMode": "Physical | Remote" } ],
       "inventoryUpdates": [ 
         { 
           "ownerId": "player | CompanionID", 
