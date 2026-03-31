@@ -451,6 +451,10 @@
   50% { transform: translateY(-4px); }
 }
 
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
 @keyframes pulse-slow {
   0%, 100% {
     opacity: 1;

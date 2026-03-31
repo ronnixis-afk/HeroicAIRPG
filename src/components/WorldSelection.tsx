@@ -17,11 +17,35 @@ interface WorldSelectionProps {
 }
 
 const SETTINGS = ['Fantasy', 'Sci-Fi', 'Modern', 'Magitech'];
-const THEMES = [
-    'Post-Apocalyptic', 'Alien Horror', 'Supernatural', 'High-Tech',
-    'No-Magic', 'High-Magic', 'Cyberpunk', 'Steampunk', 'Dystopian',
-    'Exploration', 'Survival', 'Grimdark', 'Whimsical'
-];
+const SETTING_IMAGES: Record<string, string> = {
+    'Fantasy': '/login-bg.png',
+    'Sci-Fi': '/bg-scifi.png',
+    'Modern': '/bg-modern.png',
+    'Magitech': '/bg-magitech.png'
+};
+const GENRE_THEMES: Record<string, string[]> = {
+    'Fantasy': [
+        'High-Magic', 'No-Magic', 'Supernatural', 'Grimdark', 'Whimsical', 
+        'Exploration', 'Survival', 'Sword & Sorcery', 'Dark Fantasy', 
+        'High Fantasy', 'Mythic', 'Heroic Age', 'Lost Civilizations'
+    ],
+    'Sci-Fi': [
+        'Alien Horror', 'High-Tech', 'Cyberpunk', 'Dystopian', 'Exploration', 
+        'Survival', 'Space Opera', 'Hard Sci-Fi', 'Mecha', 'Transhumanism',
+        'Galactic Empire', 'Cybernetic Revolt', 'Star-Faring'
+    ],
+    'Modern': [
+        'Supernatural', 'Post-Apocalyptic', 'Dystopian', 'Survival', 
+        'Urban Fantasy', 'Contemporary', 'Noir', 'Espionage', 'Thriller', 
+        'Zombie Apocalypse', 'Hidden World', 'Occult Detective'
+    ],
+    'Magitech': [
+        'Steampunk', 'High-Magic', 'High-Tech', 'Clockwork', 'Airships', 
+        'Rune-Tech', 'Industrial Gothic', 'Whimsical', 'Grimdark',
+        'Alchemical', 'Steam & Sorcery', 'Automata'
+    ]
+};
+const THEMES = Array.from(new Set(Object.values(GENRE_THEMES).flat()));
 
 const INITIAL_GEN_RADIUS = 13;
 const formatCoordinates = (x: number, y: number): string => {
@@ -54,6 +78,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     // Modal & Drawer State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [wizardStep, setWizardStep] = useState(1);
 
     // Form State
     const [setting, setSetting] = useState('Fantasy');
@@ -86,6 +111,24 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     const [credits, setCredits] = useState({ currentCredits: 0, maxCredits: 1000 });
     const [consumptionData, setConsumptionData] = useState<{ logs: any[], stats: any } | null>(null);
     const [isLoadingConsumption, setIsLoadingConsumption] = useState(false);
+    
+    // Per-Realm Sync Status
+    const [syncingRealms, setSyncingRealms] = useState<Record<string, 'loading' | 'synced'>>({});
+
+    const formatRelativeTime = (dateInput: string | Date | number) => {
+        const date = new Date(dateInput);
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMins = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffSecs < 60) return 'Just Now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ${diffMins % 60}m ago`;
+        return `${diffDays}d ${diffHours % 24}h ago`;
+    };
 
     const fetchWorlds = async () => {
         setIsLoadingWorlds(true);
@@ -193,6 +236,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
         setSelectedThemes([]);
         setAdditionalContext('');
         setIsGenerating(false);
+        setWizardStep(1);
     };
     
     // Auto-focus world name input when modal opens
@@ -236,8 +280,10 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
     const handleUploadToCloud = async (realm: any) => {
         if (!realm.local) return;
-        setIsLoadingCloud(true);
-        setCloudMessage(`Archiving ${realm.name} to celestial cloud...`);
+        
+        // Use per-realm loading state instead of global
+        setSyncingRealms(prev => ({ ...prev, [realm.id]: 'loading' }));
+        
         try {
             const result = await cloudSaveService.pushSaveToCloud(realm.id, realm.name, realm.local.gameData);
             // Sync local timestamp to match cloud for "synced" status
@@ -245,21 +291,54 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             
             await fetchWorlds(); // Refresh local list to get updated timestamp
             await handleFetchCloudSaves(); // Refresh cloud list
-            setCloudMessage('Archive successful!');
+            
+            // Set success state for 3 seconds
+            setSyncingRealms(prev => ({ ...prev, [realm.id]: 'synced' }));
+            setTimeout(() => {
+                setSyncingRealms(prev => {
+                    const next = { ...prev };
+                    delete next[realm.id];
+                    return next;
+                });
+            }, 3000);
         } catch (e: any) {
+            console.error("Failed to sync with cloud:", e);
+            // Keep error as cloudError for visibility or alert? 
+            // The user wants checks/circles, so we'll just clear on error for now?
+            // Actually, keep cloudError for generic "failure" if needed, but remove the UI message block as requested.
             setCloudError(e.message || 'Failed to sync with cloud.');
         } finally {
-            setIsLoadingCloud(false);
-            setTimeout(() => setCloudMessage(''), 3000);
+            if (syncingRealms[realm.id] === 'loading') {
+                setSyncingRealms(prev => {
+                    const next = { ...prev };
+                    delete next[realm.id];
+                    return next;
+                });
+            }
         }
     };
 
     const handleThemeToggle = (theme: string) => {
-        setSelectedThemes(prev =>
-            prev.includes(theme)
-                ? prev.filter(t => t !== theme)
-                : [...prev, theme]
-        );
+        setSelectedThemes(prev => {
+            const isSelected = prev.includes(theme);
+            
+            // Limit to 3 tags
+            if (!isSelected && prev.length >= 3) return prev;
+
+            let next = isSelected ? prev.filter(t => t !== theme) : [...prev, theme];
+            
+            // Conflict Validation: High-Magic vs No-Magic
+            if (!isSelected) {
+                if (theme === 'High-Magic') {
+                    next = next.filter(t => t !== 'No-Magic');
+                } else if (theme === 'No-Magic') {
+                    next = next.filter(t => t !== 'High-Magic' && t !== 'Supernatural');
+                } else if (theme === 'Supernatural') {
+                    next = next.filter(t => t !== 'No-Magic');
+                }
+            }
+            return next;
+        });
     };
 
     const handleGeneratePreview = async () => {
@@ -531,18 +610,20 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
     return (
         <div className="min-h-screen bg-[#0a0f12] text-brand-text flex flex-col relative overflow-x-hidden hide-scrollbar animate-page">
             {/* Top Navigation Bar */}
-            <header className="flex flex-row items-center justify-between px-6 py-5 sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
-                <div className="flex items-center gap-3">
-                    <Icon name="heroicAction" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
-                    <h3 className="text-2xl font-bold text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">RPG</span></h3>
+            <header className="sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
+                <div className="max-w-screen-2xl mx-auto flex flex-row items-center justify-between px-6 md:px-12 lg:px-20 xl:px-28 py-5">
+                    <div className="flex items-center gap-3">
+                        <Icon name="heroicAction" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
+                        <h3 className="text-2xl font-bold text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">Rpg</span></h3>
+                    </div>
+                    <button
+                        onClick={() => setIsDrawerOpen(true)}
+                        className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
+                        aria-label="Open User Menu"
+                    >
+                        <Icon name="menu" className="w-7 h-7" />
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsDrawerOpen(true)}
-                    className="p-2 -mr-2 text-brand-text-muted hover:text-brand-accent transition-colors focus:outline-none"
-                    aria-label="Open User Menu"
-                >
-                    <Icon name="menu" className="w-7 h-7" />
-                </button>
             </header>
 
             {/* User Account Drawer Overlay */}
@@ -566,7 +647,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <Icon name="sparkles" className="w-4 h-4 text-brand-accent" />
-                                <span className="text-xs font-bold text-brand-text tracking-wide inter">Credits & Usage</span>
+                                <span className="text-xs font-bold text-brand-text inter">Credits & Usage</span>
                             </div>
                             <button className="text-[10px] font-bold text-brand-accent px-2 py-1 rounded-lg bg-brand-accent/10 border border-brand-accent/20 hover:bg-brand-accent hover:text-black transition-all inter">
                                 Buy More
@@ -731,7 +812,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         <span className="text-xs font-bold inter">Log Out</span>
                     </button>
                     <div className="mt-4 text-center opacity-30 select-none">
-                        <p className="text-[8px] text-brand-text-muted font-bold tracking-[0.2em]">Powered By Gemini 3</p>
+                        <p className="text-[8px] text-brand-text-muted font-bold">Powered By Gemini 3</p>
                     </div>
                 </div>
             </div>
@@ -739,7 +820,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             <main className="flex-1 pb-20 mt-2">
                 {/* Local Worlds Horizontal Scroll (Netflix Style) */}
                 <section className="mb-10">
-                    <div className="flex flex-col px-6 mb-4">
+                    <div className="max-w-screen-2xl mx-auto flex flex-col px-6 md:px-12 lg:px-20 xl:px-28 mb-4">
                         <div className="flex items-center justify-between">
                             <h5 className="text-lg font-bold text-brand-text m-0 inter">Your Realms</h5>
                             <button
@@ -751,14 +832,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 Sync Cloud
                             </button>
                         </div>
-                        {(cloudMessage || cloudError) && (
-                            <p className={`text-[10px] font-bold mt-1.5 animate-fade-in ${cloudError ? 'text-brand-danger' : 'text-brand-accent'} inter`}>
-                                <Icon name={cloudError ? 'exclamation' : 'info'} className="w-2.5 h-2.5 inline mr-1" />
-                                {cloudError || cloudMessage}
-                            </p>
-                        )}
                     </div>
-                    <div className="flex gap-4 overflow-x-auto px-6 pb-6 pt-2 snap-x hide-scrollbar">
+                    <div className="max-w-screen-2xl mx-auto flex gap-4 overflow-x-auto px-6 md:px-12 lg:px-20 xl:px-28 pb-6 pt-2 snap-x hide-scrollbar">
                         {/* Forge New Realm Card */}
                         <button
                             onClick={() => { resetForm(); setIsCreateModalOpen(true); }}
@@ -803,12 +878,18 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 <div className="absolute top-2 right-2 z-10 flex flex-col gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                                     {(realm.status === 'local-only' || realm.status === 'local-newer') && (
                                         <button 
-                                            disabled={isLoadingCloud}
+                                            disabled={syncingRealms[realm.id] === 'loading'}
                                             onClick={(e) => { e.stopPropagation(); handleUploadToCloud(realm); }} 
-                                            className="bg-black/60 hover:bg-brand-accent/20 text-brand-text-muted hover:text-brand-accent p-2 rounded-full backdrop-blur-md transition-all shadow-md transform hover:scale-110"
-                                            title="Backup to Cloud"
+                                            className={`p-2 rounded-full backdrop-blur-md transition-all shadow-md transform hover:scale-110 ${syncingRealms[realm.id] === 'synced' ? 'bg-brand-accent text-black' : 'bg-black/60 text-brand-text-muted hover:bg-brand-accent/20 hover:text-brand-accent'}`}
+                                            title={syncingRealms[realm.id] === 'synced' ? 'Synced' : 'Backup to Cloud'}
                                         >
-                                            <Icon name="upload" className="w-4 h-4" />
+                                            {syncingRealms[realm.id] === 'loading' ? (
+                                                <Icon name="spinner" className="w-4 h-4 animate-spin text-brand-accent" />
+                                            ) : syncingRealms[realm.id] === 'synced' ? (
+                                                <Icon name="check" className="w-4 h-4" />
+                                            ) : (
+                                                <Icon name="upload" className="w-4 h-4" />
+                                            )}
                                         </button>
                                     )}
                                     <button 
@@ -822,9 +903,15 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
 
                                 <div className="mt-auto p-4 z-10 w-full flex flex-col relative pointer-events-none">
                                     <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {realm.name}</h5>
-                                    <p className="text-[10px] text-brand-text-muted font-medium mb-3 shadow-black drop-shadow-md">
-                                        {realm.local?.updatedAt ? `Saved ${new Date(realm.local.updatedAt).toLocaleDateString()}` : `Cloud Save ${new Date(realm.cloud?.updatedAt || 0).toLocaleDateString()}`}
-                                    </p>
+                                    
+                                    <div className="flex flex-col mb-3 shadow-black drop-shadow-md">
+                                        <p className="text-[9px] text-brand-accent/70 font-bold inter mb-0.5">
+                                            {formatRelativeTime(realm.local?.updatedAt || realm.cloud?.updatedAt || 0)}
+                                        </p>
+                                        <p className="text-[10px] text-brand-text-muted font-medium">
+                                            {realm.local?.updatedAt ? `Saved ${new Date(realm.local.updatedAt).toLocaleDateString()}` : `Cloud Save ${new Date(realm.cloud?.updatedAt || 0).toLocaleDateString()}`}
+                                        </p>
+                                    </div>
                                     <div className="w-full bg-brand-accent text-black font-bold text-xs py-2 rounded flex items-center justify-center gap-1 opacity-100 md:opacity-0 md:translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 shadow-xl transition-all duration-300">
                                         {isRestoringCloud && (realm.status === 'cloud-only' || realm.status === 'cloud-newer') ? (
                                             <Icon name="spinner" className="w-3 h-3 animate-spin" />
@@ -915,113 +1002,241 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-8 animate-page py-2">
-                        <div className="space-y-2">
-                            <label className="text-body-sm font-bold text-brand-text-muted ml-1">World Name</label>
-                            <input
-                                ref={worldNameInputRef}
-                                value={worldName}
-                                onChange={(e) => setWorldName(e.target.value)}
-                                placeholder="e.g. Eldoria, Neo-Tokyo, Sector 7..."
-                                className="w-full bg-brand-primary h-12 px-4 rounded-xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-sm font-bold"
-                            />
+                    <div className="space-y-6 animate-page py-2 flex flex-col h-full">
+                        {/* Wizard Progress Bar */}
+                        <div className="flex justify-between items-center mb-8 px-2 gap-2 flex-shrink-0">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                                <div key={s} className="flex-1">
+                                    <div 
+                                        className={`h-1 w-full rounded-full transition-all duration-500 ${
+                                            wizardStep >= s 
+                                                ? 'bg-brand-accent' 
+                                                : 'bg-brand-primary'
+                                        }`} 
+                                    />
+                                </div>
+                            ))}
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-body-sm font-bold text-brand-text-muted ml-1">Genre And Setting</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {SETTINGS.map(s => (
-                                    <button
-                                        key={s}
-                                        onClick={() => setSetting(s)}
-                                        type="button"
-                                        className={`btn-md focus:outline-none ${setting === s ? 'btn-primary' : 'btn-secondary'}`}
-                                    >
-                                        {s}
-                                    </button>
-                                ))}
-                            </div>
+                        <div className="flex-1 overflow-y-auto custom-scroll pr-1">
+                            {wizardStep === 1 && (
+                                <div className="space-y-6 animate-page">
+                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Prime Genesis</h4>
+                                    <p className="text-body-sm text-brand-text-muted mb-4">Select the core genre and technological foundation of your new realm.</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {SETTINGS.map(s => (
+                                            <button
+                                                key={s}
+                                                onClick={() => { setSetting(s); setWizardStep(2); }}
+                                                type="button"
+                                                className={`group relative aspect-video rounded-3xl overflow-hidden border-2 transition-all duration-500 ${
+                                                    setting === s 
+                                                        ? 'border-brand-accent shadow-[0_0_20px_rgba(62,207,142,0.3)] scale-[1.02]' 
+                                                        : 'border-brand-primary/30 hover:border-brand-accent/50'
+                                                }`}
+                                            >
+                                                {/* Background Image */}
+                                                <div 
+                                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                                                    style={{ backgroundImage: `url('${SETTING_IMAGES[s]}')` }}
+                                                />
+                                                {/* Overlay */}
+                                                <div className={`absolute inset-0 transition-opacity duration-300 ${setting === s ? 'bg-brand-accent/20' : 'bg-black/40 group-hover:bg-black/20'}`} />
+                                                
+                                                {/* Centered Label Button */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <span className={`px-5 py-2 rounded-full font-bold text-sm backdrop-blur-md border transition-all duration-300 ${
+                                                        setting === s 
+                                                            ? 'bg-brand-accent text-black border-brand-accent shadow-lg' 
+                                                            : 'bg-brand-bg/80 text-brand-text border-white/10 group-hover:border-brand-accent/50 group-hover:text-brand-accent'
+                                                    }`}>
+                                                        {s}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {wizardStep === 2 && (
+                                <div className="space-y-6 animate-page">
+                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Thematic Threads</h4>
+                                    
+                                    {/* Active Threads (Selected) */}
+                                    {selectedThemes.length > 0 && (
+                                        <div className="space-y-3 animate-fade-in">
+                                            <label className="text-[10px] font-bold text-brand-accent ml-1">Active Threads ({selectedThemes.length}/3)</label>
+                                            <div className="flex flex-wrap gap-2 p-4 bg-brand-accent/5 rounded-2xl border border-brand-accent/20">
+                                                {selectedThemes.map(theme => (
+                                                    <button
+                                                        key={theme}
+                                                        onClick={() => handleThemeToggle(theme)}
+                                                        type="button"
+                                                        className="btn-primary btn-sm rounded-full flex items-center gap-2 group pr-3 transition-all animate-bounce-subtle"
+                                                    >
+                                                        {theme}
+                                                        <Icon name="close" className="w-3 h-3 opacity-50 group-hover:opacity-100" />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Available Threads */}
+                                    <div className="space-y-3">
+                                        <label className="text-[10px] font-bold text-brand-text-muted ml-1">Available Threads</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {(GENRE_THEMES[setting] || []).filter(t => !selectedThemes.includes(t)).map(theme => (
+                                                <button
+                                                    key={theme}
+                                                    onClick={() => handleThemeToggle(theme)}
+                                                    type="button"
+                                                    disabled={selectedThemes.length >= 3}
+                                                    className={`btn-sm rounded-lg transition-all ${
+                                                        selectedThemes.length >= 3 
+                                                            ? 'btn-secondary opacity-30 cursor-not-allowed' 
+                                                            : 'btn-secondary opacity-60 hover:opacity-100 hover:border-brand-accent/50'
+                                                    }`}
+                                                >
+                                                    {theme}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-brand-primary/10 p-4 rounded-xl border border-brand-primary/20 mt-4">
+                                        <p className="text-[10px] text-brand-text-muted italic">Note: Select up to 3 threads. Conflicting themes like High-Magic and No-Magic will automatically adjust.</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {wizardStep === 3 && (
+                                <div className="space-y-8 animate-page">
+                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Mortal Presence</h4>
+                                    <p className="text-body-sm text-brand-text-muted mb-6">Determine the complexity of the sentient societies within the realm.</p>
+                                    
+                                    <div className="space-y-8">
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center ml-1">
+                                                <label className="text-sm font-bold text-brand-text">Major Ancestries</label>
+                                                <span className="text-xs font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full">{numRaces} Species</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1" max="10"
+                                                value={numRaces}
+                                                onChange={(e) => setNumRaces(parseInt(e.target.value))}
+                                                className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center ml-1">
+                                                <label className="text-sm font-bold text-brand-text">Major Factions</label>
+                                                <span className="text-xs font-bold text-brand-accent bg-brand-accent/10 px-3 py-1 rounded-full">{numFactions} Powers</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1" max="10"
+                                                value={numFactions}
+                                                onChange={(e) => setNumFactions(parseInt(e.target.value))}
+                                                className="w-full accent-brand-accent bg-brand-primary h-1.5 rounded-full appearance-none cursor-pointer"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {wizardStep === 4 && (
+                                <div className="space-y-6 animate-page">
+                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Space And Time</h4>
+                                    
+                                    <div className="grid grid-cols-2 gap-4 bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30 mb-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Starting Date</label>
+                                            <input
+                                                type="date"
+                                                value={startingDate}
+                                                onChange={(e) => setStartingDate(e.target.value)}
+                                                className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold text-brand-text-muted ml-0.5">Time</label>
+                                            <input
+                                                type="time"
+                                                value={startingTime}
+                                                onChange={(e) => setStartingTime(e.target.value)}
+                                                className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none focus:border-brand-accent text-brand-text"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-brand-text-muted ml-1">Architectural Context</label>
+                                        <textarea
+                                            value={additionalContext}
+                                            onChange={(e) => setAdditionalContext(e.target.value)}
+                                            placeholder="Provide specific details for the architect... e.g. Single giant city, Floating islands, or Low magic technology..."
+                                            className="w-full bg-brand-primary p-4 rounded-2xl border border-brand-surface focus:border-brand-accent focus:outline-none h-32 text-sm leading-relaxed text-brand-text"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {wizardStep === 5 && (
+                                <div className="space-y-6 animate-page">
+                                    <h4 className="text-xl font-bold text-brand-text mb-6 inter">Naming The Void</h4>
+                                    <p className="text-body-sm text-brand-text-muted mb-6">Every legend begins with a name. How shall history remember this realm?</p>
+                                    
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-brand-text-muted ml-1">Realm Name</label>
+                                        <input
+                                            ref={worldNameInputRef}
+                                            value={worldName}
+                                            onChange={(e) => setWorldName(e.target.value)}
+                                            placeholder="e.g. Eldoria, Neo-Tokyo, Sector 7..."
+                                            className="w-full bg-brand-primary h-14 px-6 rounded-2xl focus:ring-brand-accent focus:ring-1 focus:outline-none border border-brand-surface focus:border-brand-accent text-lg font-bold text-brand-text"
+                                        />
+                                    </div>
+
+                                    {error && <p className="text-brand-danger text-body-sm text-center font-bold animate-pulse">{error}</p>}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="space-y-3">
-                            <label className="text-body-sm font-bold text-brand-text-muted ml-1">Thematic Threads</label>
-                            <div className="flex flex-wrap gap-2">
-                                {THEMES.map(theme => (
-                                    <button
-                                        key={theme}
-                                        onClick={() => handleThemeToggle(theme)}
-                                        type="button"
-                                        className={`btn-sm rounded-lg focus:outline-none ${selectedThemes.includes(theme) ? 'btn-primary' : 'btn-secondary opacity-60'}`}
-                                    >
-                                        {theme}
-                                    </button>
-                                ))}
-                            </div>
+                        {/* Wizard Navigation Footer */}
+                        <div className="pt-8 flex items-center justify-between border-t border-brand-primary/10 mt-auto flex-shrink-0">
+                            <button 
+                                onClick={() => setWizardStep(s => Math.max(1, s - 1))}
+                                className={`btn-secondary btn-md rounded-full px-8 transition-all ${wizardStep === 1 ? 'opacity-0 pointer-events-none' : ''}`}
+                            >
+                                Back
+                            </button>
+                            
+                            {wizardStep < 5 ? (
+                                <button
+                                    onClick={() => setWizardStep(s => s + 1)}
+                                    className="btn-primary btn-md rounded-full px-12 shadow-xl shadow-brand-accent/20 flex items-center gap-2"
+                                >
+                                    Next Step
+                                    <Icon name="chevronDown" className="w-4 h-4 -rotate-90" />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleGeneratePreview}
+                                    disabled={!worldName.trim() || isGenerating}
+                                    className="btn-primary btn-lg rounded-full px-12 shadow-xl shadow-brand-accent/20 flex items-center gap-2"
+                                >
+                                    {isGenerating ? (
+                                        <><Icon name="spinner" className="w-5 h-5 animate-spin" /> Scattering Seeds...</>
+                                    ) : (
+                                        <><Icon name="play" className="w-5 h-5" /> Breathe Life into Realm</>
+                                    )}
+                                </button>
+                            )}
                         </div>
-
-                        <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-body-sm font-bold text-brand-text-muted ml-1">Additional Races</label>
-                                <input
-                                    type="number"
-                                    min="0" max="10"
-                                    value={numRaces}
-                                    onChange={(e) => setNumRaces(parseInt(e.target.value))}
-                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-bold border border-brand-surface focus:border-brand-accent focus:outline-none"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-body-sm font-bold text-brand-text-muted ml-1">Factions</label>
-                                <input
-                                    type="number"
-                                    min="1" max="10"
-                                    value={numFactions}
-                                    onChange={(e) => setNumFactions(parseInt(e.target.value))}
-                                    className="w-full bg-brand-primary h-12 rounded-xl text-center font-bold border border-brand-surface focus:border-brand-accent focus:outline-none"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6 bg-brand-primary/10 p-5 rounded-2xl border border-brand-primary/30">
-                            <div className="space-y-2">
-                                <label className="text-body-sm font-bold text-brand-text-muted ml-1">Starting Date</label>
-                                <input
-                                    type="date"
-                                    value={startingDate}
-                                    onChange={(e) => setStartingDate(e.target.value)}
-                                    className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-body-sm font-bold text-brand-text-muted ml-1">Time</label>
-                                <input
-                                    type="time"
-                                    value={startingTime}
-                                    onChange={(e) => setStartingTime(e.target.value)}
-                                    className="w-full bg-brand-primary h-10 rounded-lg text-xs px-3 border border-brand-surface focus:outline-none"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="text-body-sm font-bold text-brand-text-muted ml-1">Additional Context</label>
-                            <textarea
-                                value={additionalContext}
-                                onChange={(e) => setAdditionalContext(e.target.value)}
-                                placeholder="Provide specific details for the architect... e.g. Low magic, high technology, or the world is a single giant city..."
-                                className="w-full bg-brand-primary p-4 rounded-2xl border border-brand-surface focus:border-brand-accent focus:outline-none h-28 text-sm leading-relaxed"
-                            />
-                        </div>
-
-                        {error && <p className="text-brand-danger text-body-sm text-center font-bold animate-pulse">{error}</p>}
-
-                        <button
-                            onClick={handleGeneratePreview}
-                            disabled={!worldName.trim() || isGenerating}
-                            className="btn-primary btn-lg w-full mt-4 shadow-xl shadow-brand-accent/20"
-                        >
-                            {isGenerating ? <span className="flex items-center justify-center gap-2"><Icon name="spinner" className="w-5 h-5 animate-spin" /> Generating...</span> : 'Scout The Realm'}
-                        </button>
                     </div>
                 )}
             </Modal>
