@@ -85,8 +85,17 @@ export const generateWorldPreview = async (
     numRaces: number,
     numFactions: number,
     name: string,
-    context: string
+    context: string,
+    raceNames?: string[],
+    factionNames?: string[]
 ): Promise<WorldPreview> => {
+    const requestedRacesText = raceNames && raceNames.filter(n => n.trim()).length > 0
+        ? `Use these specific names for the major races if possible: [${raceNames.filter(n => n.trim()).join(', ')}]. If fewer names are provided than the target count of ${numRaces + 1}, generate additional thematic names.`
+        : "";
+    const requestedFactionsText = factionNames && factionNames.filter(n => n.trim()).length > 0
+        ? `Use these specific names for the major factions if possible: [${factionNames.filter(n => n.trim()).join(', ')}]. If fewer names are provided than the target count of ${numFactions}, generate additional thematic names.`
+        : "";
+
     const prompt = `You are a World-Building Architect. Create a cohesive TTRPG world preview.
     
     [INPUTS]
@@ -94,22 +103,22 @@ export const generateWorldPreview = async (
     Setting: ${setting}
     Themes: ${themes.join(', ')}
     User Context: ${context}
+    ${requestedRacesText}
+    ${requestedFactionsText}
     
     [INSTRUCTIONS]
     1. SUMMARY: Write exactly 2 paragraphs explaining the current state of the world.
     2. RACES: Generate EXACTLY ${numRaces + 1} major races. One MUST be 'Humans'.
-       - Each race MUST have a unique 'description', 'appearance', and 'qualities'.
-       - description: MAX 30 WORDS. Sentence Case.
-       - appearance: MAX 15 WORDS. Sentence Case.
-       - qualities: MAX 15 WORDS. Sentence Case. (e.g. "Translucent skin", "Can walk on water", "Floats", "Can see in the dark").
     3. FACTIONS: Generate EXACTLY ${numFactions} organizations.
+    4. CUSTOM NAMES: If specific names were requested above, prioritize using them for the races and factions.
     
     [CASING RULES]
     - Use Title Case for ALL names and titles.
     - Use Sentence Case for descriptions, goals, and other text blocks.
     - DO NOT use ALL CAPS or ALL UPPERCASE for any portion of the response.
-
-    Ensure all elements are internally consistent. If a race belongs to a specific faction, mention it in their description.`;
+    - MAXIMUM 30 WORDS for descriptions.
+    - MAXIMUM 15 WORDS for qualities.
+    - MAXIMUM 20 WORDS for faction goals.`;
 
     try {
         const ai = getAi();
