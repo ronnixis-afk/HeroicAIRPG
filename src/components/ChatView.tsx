@@ -440,18 +440,7 @@ const ChatView: React.FC = () => {
                         </div>
                     )}
 
-                    {gameData && !loadingConfig && (
-                        <CombatControls
-                            gameData={gameData}
-                            isLoading={!!loadingConfig}
-                            onManualAction={(actorId) => {
-                                setActingCharacterId(actorId || 'player');
-                                setActivePanel('abilities');
-                            }}
-                            onAutoResolve={performAutomatedPlayerTurn}
-                            onNpcTurn={playNpcTurn}
-                        />
-                    )}
+
 
                     <div ref={chatEndRef} className="h-1" />
                 </div>

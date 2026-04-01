@@ -34,6 +34,7 @@ import { Icon } from './components/Icon';
 import ZoneDetailsPanel from './components/map/ZoneDetailsPanel';
 import { UnsavedChangesModal } from './components/modals/UnsavedChangesModal';
 import { ChatInputBar } from './components/chat/ChatInputBar';
+import { CombatControls } from './components/chat/CombatControls';
 import { SpeechToTextModal } from './components/SpeechToTextButton';
 import { generateSceneVisuals } from './services/imageGenerationService';
 import { useAudioPlayback } from './components/chat/useAudioPlayback';
@@ -115,6 +116,7 @@ const GameInterface: React.FC = () => {
     markAllMapZonesAsSeen,
     switchWorld,
     performAutomatedPlayerTurn,
+    playNpcTurn,
     addGalleryEntry,
     useHeroicPoint
   } = useContext(GameDataContext);
@@ -122,7 +124,7 @@ const GameInterface: React.FC = () => {
   const {
     activeView, setActiveView,
     activePanel, setActivePanel,
-    actingCharacterId,
+    actingCharacterId, setActingCharacterId,
     combatInitiationStatus,
     isTimeModalOpen, setIsTimeModalOpen,
     isLocationModalOpen, setIsLocationModalOpen,
@@ -386,26 +388,39 @@ const GameInterface: React.FC = () => {
 
       <div className="flex-shrink-0 bg-brand-bg/95 backdrop-blur-sm border-t border-brand-primary/10">
         <div className="max-w-3xl mx-auto p-2">
-          <ChatInputBar
-            value={chatInput}
-            onChange={setChatInput}
-            onSubmit={handleSubmitChat}
-            onViewScene={handleViewScene}
-            onMicClick={() => setIsSpeechModalOpen(true)}
-            isGeneratingImage={isGeneratingScene}
-            isHandsFree={gameData?.isHandsFree ?? false}
-            onRepeatLast={handleRepeatLast}
-            isCombatActive={isCombatActive}
-            isPlayerTurn={isPlayerTurn}
-            onAutoResolve={performAutomatedPlayerTurn}
-            isLocked={isLoading || isAiGenerating || isAssessing || isAuditing || !!pendingCombat || !hasPlayer}
-            onMenuClick={() => setIsHeaderMenuOpen(true)}
-            onInteraction={ensureChatView}
-            isChatViewActive={activeView === 'chat'}
-            mode={chatMode}
-            onModeChange={setChatMode}
-            hasPlayer={hasPlayer}
-          />
+          {isCombatActive && activeView === 'chat' && gameData ? (
+            <CombatControls
+              gameData={gameData}
+              isLoading={isLoading || isAiGenerating || isAssessing || isAuditing || !!pendingCombat}
+              onManualAction={(actorId) => {
+                setActingCharacterId(actorId || 'player');
+                setActivePanel('abilities');
+              }}
+              onAutoResolve={performAutomatedPlayerTurn}
+              onNpcTurn={playNpcTurn}
+            />
+          ) : (
+            <ChatInputBar
+              value={chatInput}
+              onChange={setChatInput}
+              onSubmit={handleSubmitChat}
+              onViewScene={handleViewScene}
+              onMicClick={() => setIsSpeechModalOpen(true)}
+              isGeneratingImage={isGeneratingScene}
+              isHandsFree={gameData?.isHandsFree ?? false}
+              onRepeatLast={handleRepeatLast}
+              isCombatActive={isCombatActive}
+              isPlayerTurn={isPlayerTurn}
+              onAutoResolve={performAutomatedPlayerTurn}
+              isLocked={isLoading || isAiGenerating || isAssessing || isAuditing || !!pendingCombat || !hasPlayer}
+              onMenuClick={() => setIsHeaderMenuOpen(true)}
+              onInteraction={ensureChatView}
+              isChatViewActive={activeView === 'chat'}
+              mode={chatMode}
+              onModeChange={setChatMode}
+              hasPlayer={hasPlayer}
+            />
+          )}
         </div>
       </div>
 

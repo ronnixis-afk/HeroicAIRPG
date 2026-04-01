@@ -35,13 +35,13 @@ export const CombatControls: React.FC<CombatControlsProps> = ({ gameData, isLoad
     }
 
     return (
-        <div className="flex flex-col items-center gap-6 my-8 animate-fade-in w-full min-h-[50px]">
+        <div className="flex flex-col items-center gap-4 py-3 animate-fade-in w-full min-h-[100px]">
             <div className="flex items-center gap-4">
-                <div className="h-[1px] w-16 bg-brand-primary/50"></div>
-                <div className="text-body-sm font-medium text-brand-text-muted">
+                <div className="h-[1px] w-12 bg-brand-primary/30"></div>
+                <div className="text-body-sm font-bold text-brand-text">
                     {isPlayerTurn ? "It's Your Turn" : `${actorName} Turn`}
                 </div>
-                <div className="h-[1px] w-16 bg-brand-primary/50"></div>
+                <div className="h-[1px] w-12 bg-brand-primary/30"></div>
             </div>
             <div className="flex items-center justify-center gap-4">
                 {isManualTurn ? (
