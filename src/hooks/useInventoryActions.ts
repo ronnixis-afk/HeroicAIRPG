@@ -38,7 +38,7 @@ const getShopRarityCounts = (level: number, totalCount: number = 10): Record<str
 export const useInventoryActions = (
     gameData: GameData | null, 
     dispatch: React.Dispatch<GameAction>,
-    submitUserMessage?: (message: any, isHeroic?: boolean) => Promise<void>
+    submitUserMessage?: (message: any, isHeroic?: boolean) => Promise<string>
 ) => {
 
     const updateItem = useCallback(async (item: Item, ownerId: string) => {
