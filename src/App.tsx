@@ -40,6 +40,7 @@ import { generateSceneVisuals } from './services/imageGenerationService';
 import { useAudioPlayback } from './components/chat/useAudioPlayback';
 import { PickpocketModal } from './components/modals/PickpocketModal';
 import { TravelConfirmationModal } from './components/map/TravelConfirmationModal';
+import { useHandsFreeVoice } from './hooks/useHandsFreeVoice';
 
 interface HeaderProps {
   currentTime: string;
@@ -142,6 +143,22 @@ const GameInterface: React.FC = () => {
   const [chatMode, setChatMode] = useState<'CHAR' | 'OOC'>('CHAR');
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [hasSavedGeneratedImage, setHasSavedGeneratedImage] = useState(false);
+
+  // Hands-Free Voice Mode
+  const { voiceStatus, connectVoice, disconnectVoice, isVoiceActive } = useHandsFreeVoice();
+
+  // Sync Hands-Free connection with settings
+  useEffect(() => {
+    if (gameData?.isHandsFree) {
+      if (!isVoiceActive && voiceStatus === 'idle') {
+        connectVoice();
+      }
+    } else {
+      if (isVoiceActive) {
+        disconnectVoice();
+      }
+    }
+  }, [gameData?.isHandsFree, isVoiceActive, voiceStatus, connectVoice, disconnectVoice]);
 
   // Audio Logic
   /* Fix: Use narrationTone for the third parameter to ensure correct TTS persona scaling */
@@ -408,6 +425,7 @@ const GameInterface: React.FC = () => {
               onMicClick={() => setIsSpeechModalOpen(true)}
               isGeneratingImage={isGeneratingScene}
               isHandsFree={gameData?.isHandsFree ?? false}
+              voiceStatus={voiceStatus}
               onRepeatLast={handleRepeatLast}
               isCombatActive={isCombatActive}
               isPlayerTurn={isPlayerTurn}

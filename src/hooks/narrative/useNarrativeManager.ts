@@ -79,8 +79,8 @@ export const useNarrativeManager = (
      */
     const executePipeline = useCallback(async (
         input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean, targetCoordinates?: string }
-    ) => {
-        if (!gameData) return;
+    ): Promise<string> => {
+        if (!gameData) return "";
 
         // Safety Guard: Reset lock if it's been active for more than 30 seconds (emergency recovery)
         const now = Date.now();
@@ -89,7 +89,7 @@ export const useNarrativeManager = (
             isPipelineActiveRef.current = false;
         }
 
-        if (isPipelineActiveRef.current && !input.bypassLock) return;
+        if (isPipelineActiveRef.current && !input.bypassLock) return "";
 
         isPipelineActiveRef.current = true;
         lastPipelineStartTime.current = now;
@@ -127,8 +127,8 @@ export const useNarrativeManager = (
 
                 if (assessment.intentType === 'travel' && assessment.travelData && processUserInitiatedTravel) {
                     setIsAssessing(false);
-                    await processUserInitiatedTravel(userMessage.content, assessment.travelData);
-                    return;
+                    const result = await processUserInitiatedTravel(userMessage.content, assessment.travelData);
+                    return result || "";
                 }
                 resolution = await resolveMechanics(assessment, gameData, isHeroic);
                 setIsAssessing(false);
@@ -178,16 +178,17 @@ export const useNarrativeManager = (
             // --- ERROR RECOVERY: If the narrator returned a fallback error, skip auditing and notify ---
             if (aiResponse._error) {
                 console.warn('Narrator returned error fallback, skipping Phase 4:', aiResponse._error);
+                const errorMsg = `**Connection Issue**: The AI service encountered an error. Please try sending your message again.`;
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `sys-err-${Date.now()}`,
                         sender: 'system',
-                        content: `**Connection Issue**: The AI service encountered an error. Please try sending your message again.`,
+                        content: errorMsg,
                         type: 'negative'
                     }
                 });
-                return;
+                return errorMsg;
             }
 
             // --- PHASE 4: EXTRACTION (Auditor/State Sync) - BACKGROUND ---
@@ -222,17 +223,20 @@ export const useNarrativeManager = (
                 setIsHousekeeping(false);
             });
 
+            return narrationText;
         } catch (e: any) {
             console.error("Master Pipeline Failed:", e?.message || e, e);
+            const errorMsg = `**Error**: Something went wrong while processing your action. Please try again.`;
             dispatch({
                 type: 'ADD_MESSAGE',
                 payload: {
                     id: `sys-pipeline-err-${Date.now()}`,
                     sender: 'system',
-                    content: `**Error**: Something went wrong while processing your action. Please try again.`,
+                    content: errorMsg,
                     type: 'negative'
                 }
             });
+            return errorMsg;
         } finally {
             setIsAiGenerating(false);
             setIsAuditing(false);
@@ -243,7 +247,7 @@ export const useNarrativeManager = (
     }, [gameData, dispatch, assessIntent, resolveMechanics, generateNarrative, processConsequences, getCombatSlots, combatActions, processUserInitiatedTravel, setIsAiGenerating, setIsAssessing, setIsAuditing, setIsHousekeeping]);
 
     const submitUserMessage = useCallback(async (message: ChatMessage, isHeroic: boolean = false) => {
-        if (!gameData) return;
+        if (!gameData) return "";
         dispatch({ type: 'ADD_MESSAGE', payload: message });
 
         if (isHeroic) {
@@ -251,7 +255,7 @@ export const useNarrativeManager = (
             setIsHeroicModeActive(false);
         }
 
-        await executePipeline({ userMessage: message, isHeroic });
+        return await executePipeline({ userMessage: message, isHeroic });
     }, [gameData, dispatch, executePipeline, setIsHeroicModeActive]);
 
     /**
@@ -262,9 +266,9 @@ export const useNarrativeManager = (
         mechanics: { diceRolls: any[], mechanicsSummary: string, combatInstruction: string, isHostileIntent: boolean, newGmNotes?: string, targetCoordinates?: string },
         systemInstruction?: string
     ) => {
-        if (!gameData) return;
+        if (!gameData) return "";
         const msg: ChatMessage = { id: `auto-${Date.now()}`, sender: 'user', mode: 'CHAR', content: intentText };
-        await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true, targetCoordinates: mechanics.targetCoordinates });
+        return await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true, targetCoordinates: mechanics.targetCoordinates });
     }, [gameData, executePipeline]);
 
     const summarizeDayLog = useCallback(async (day: string, dayEntries: StoryLog[], previousDayEntries: StoryLog[]) => {
@@ -404,7 +408,7 @@ export const useNarrativeManager = (
 interface NarrativeDependencies {
     combatActions: ReturnType<typeof useCombatActions>;
     setIsAiGenerating: (isGenerating: boolean) => void;
-    processUserInitiatedTravel?: (content: string, intent?: { destination: string, method: string }) => Promise<void>;
+    processUserInitiatedTravel?: (content: string, intent?: { destination: string, method: string }) => Promise<string>;
     weaveGrandDesign?: () => Promise<void>;
     npcActions?: any;
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Merriweather } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import PreloadIcons from "@/components/PreloadIcons";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,6 +29,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={`${inter.variable} ${merriweather.variable} h-full`}>
         <body className="h-full overflow-hidden font-sans">
+          <PreloadIcons />
           {children}
         </body>
       </html>

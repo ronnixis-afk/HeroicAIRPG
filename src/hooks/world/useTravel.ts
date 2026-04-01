@@ -34,7 +34,7 @@ export const useTravel = (
         travelMethod?: string,
         targetLocale?: string
     ) => {
-        if (!gameData || !submitAutomatedEvent) return;
+        if (!gameData || !submitAutomatedEvent) return "";
 
         let zone = gameData.mapZones?.find(z => z.coordinates === coordinates);
         let localeEntry = targetLocale ? gameData.knowledge?.find(k => k.title === targetLocale && k.coordinates === coordinates) : null;
@@ -247,7 +247,7 @@ export const useTravel = (
                     .catch(e => console.error("Silent preloading failed:", e));
 
                 setIsAiGenerating(false);
-                return;
+                return chosenMessage;
             }
 
             dispatch({
@@ -285,23 +285,27 @@ export const useTravel = (
             ${usedShip ? `[PRIMARY ENVIRONMENT]: The party is currently aboard the ${usedShip.name}.` : ''}
             NARRATIVE DIRECTIVE: The transition is complete. ${usedShip ? `Narrate the arrival while emphasizing the party is still aboard the ${usedShip.name} which is at rest within ${zone?.name || locationName}.` : `Narrate the arrival at ${zone?.name || locationName} (${coordinates}).`} Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" (or ${usedShip ? usedShip.name : 'your landing site'}) as your immediate locale while framing other landmarks as distant features or nearby points of interest.`;
 
-            await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
+            return await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
 
             // Trigger silent preloading
             const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
             const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
-            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
-                .catch(e => console.error("Silent preloading failed:", e));
+            const currentData = gameData;
+            if (currentData) {
+                preloadAdjacentZones(coordinates, currentData.mapZones || [], currentData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, currentData.knowledge || [])
+                    .catch(e => console.error("Silent preloading failed:", e));
+            }
 
         } catch (e) {
             console.error("Arrival failed", e);
+            return "";
         } finally {
             setIsAiGenerating(false);
         }
     }, [gameData, dispatch, getCombatSlots, setIsAiGenerating, submitAutomatedEvent]);
 
     const initiateTravel = useCallback(async (destination: string, method: string, targetCoordinates?: string) => {
-        if (!gameData) return;
+        if (!gameData) return "";
 
         const currentCoords = gameData.playerCoordinates;
         let travelTimeHours = 1;
@@ -345,12 +349,13 @@ export const useTravel = (
             }
 
             dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: targetCoordinates });
-            await processArrival(targetCoordinates, destination, gameData.messages, method, finalTargetLocale);
+            return await processArrival(targetCoordinates, destination, gameData.messages, method, finalTargetLocale);
         }
+        return "";
     }, [gameData, dispatch, processArrival]);
 
     const processUserInitiatedTravel = useCallback(async (userContent: string, preParsedIntent?: { destination: string, method: string }) => {
-        if (!gameData) return;
+        if (!gameData) return "";
         
         // 1. Parse Intent (with available landmarks context)
         setIsAiGenerating(true);
@@ -422,7 +427,7 @@ export const useTravel = (
                                 type: 'neutral'
                             }
                         });
-                        return;
+                        return `You are already at or near ${matchedZoneName}.`;
                     }
 
                     if (isKnownZone) {
@@ -434,7 +439,7 @@ export const useTravel = (
                         });
                     } else {
                         // Uncharted exploration
-                        await initiateTravel(dest, method, targetCoords);
+                        return await initiateTravel(dest, method, targetCoords);
                     }
                 } else if (!directionMap[normalizedDest]) {
                     // Named destination provided but no Map POI matched.
@@ -496,7 +501,9 @@ export const useTravel = (
         } catch (e) {
             console.error("Travel intent parsing failed", e);
             setIsAiGenerating(false);
+            return "";
         }
+        return "";
     }, [gameData, dispatch, initiateTravel, setIsAiGenerating, setPendingTravelConfirmation]);
 
     return { processArrival, initiateTravel, processUserInitiatedTravel };

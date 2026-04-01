@@ -19,26 +19,8 @@ export const useHandsFreeVoice = () => {
     const [status, setStatus] = useState<LiveVoiceStatus>('idle');
     const { gameData, submitUserMessage, setMessages } = useContext(GameDataContext);
 
-    // Track the latest narration for the function call response
-    const pendingNarrationResolveRef = useRef<((value: string) => void) | null>(null);
-
-    // Subscribe to AI message additions to capture narration results
-    // We watch for new AI messages by monitoring messages length changes
-    const messagesLengthRef = useRef(0);
     const gameDataRef = useRef(gameData);
     gameDataRef.current = gameData;
-
-    useEffect(() => {
-        const currentLength = gameData?.messages?.length || 0;
-        if (currentLength > messagesLengthRef.current && pendingNarrationResolveRef.current) {
-            const lastMessage = gameData?.messages?.[currentLength - 1];
-            if (lastMessage?.sender === 'ai' && lastMessage.content) {
-                pendingNarrationResolveRef.current(lastMessage.content);
-                pendingNarrationResolveRef.current = null;
-            }
-        }
-        messagesLengthRef.current = currentLength;
-    }, [gameData?.messages?.length]);
 
     const connect = useCallback(async () => {
         if (!gameData || (status !== 'idle' && status !== 'error')) return;
@@ -52,14 +34,11 @@ export const useHandsFreeVoice = () => {
             },
 
             onInputTranscription: (text) => {
-                // Add the player's spoken words to chat history
+                // Transcription from Gemini Live is useful for console/debugging, 
+                // but we let submitUserMessage handle the formal ChatMessage dispatch
+                // to avoid the "Duplicate Message" bug.
                 if (text.trim()) {
-                    setMessages(prev => [...prev, {
-                        id: `user-voice-${Date.now()}`,
-                        sender: 'user' as const,
-                        mode: 'CHAR' as const,
-                        content: text.trim()
-                    }]);
+                    console.log('[Voice] Input transcribed:', text.trim());
                 }
             },
 
@@ -83,33 +62,18 @@ export const useHandsFreeVoice = () => {
                     }
 
                     try {
-                        // Create a promise that will be resolved when the AI message is dispatched
-                        const narrationPromise = new Promise<string>((resolve) => {
-                            pendingNarrationResolveRef.current = resolve;
-
-                            // Timeout after 30 seconds
-                            setTimeout(() => {
-                                if (pendingNarrationResolveRef.current === resolve) {
-                                    pendingNarrationResolveRef.current = null;
-                                    resolve("The Game Master is gathering their thoughts...");
-                                }
-                            }, 30000);
-                        });
-
                         // Run the full game pipeline
                         const userMessage: ChatMessage = {
-                            id: `user-pipeline-${Date.now()}`,
+                            id: `user-voice-${Date.now()}`,
                             sender: 'user',
                             mode: 'CHAR',
                             content: playerAction
                         };
 
-                        // We don't dispatch the user message here since onInputTranscription already did
-                        await submitUserMessage(userMessage, false);
-
-                        // Wait for the narrative result
-                        const narration = await narrationPromise;
-                        return narration;
+                        // The pipeline now returns the narration text directly
+                        const narration = await submitUserMessage(userMessage, false);
+                        
+                        return narration || "The Game Master nods in acknowledgement.";
                     } catch (error) {
                         console.error('[VoiceHook] Pipeline execution failed:', error);
                         return "The game engine encountered a momentary disruption. The world steadies itself around you.";

@@ -16,6 +16,7 @@ interface ChatInputBarProps {
     onMicClick: () => void;
     isGeneratingImage: boolean;
     isHandsFree: boolean;
+    voiceStatus?: 'idle' | 'connecting' | 'connected' | 'listening' | 'thinking' | 'speaking' | 'error';
     onRepeatLast: () => void;
     isCombatActive: boolean;
     isPlayerTurn: boolean;
@@ -191,8 +192,18 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     </button>
                 )}
 
-                <button onClick={props.onMicClick} className="w-16 h-16 rounded-full bg-brand-accent flex items-center justify-center text-black hover:opacity-90 transition-all active:scale-95 shadow-[0_0_20px_rgba(62,207,142,0.3)]">
-                    <Icon name="microphone" className="w-8 h-8" />
+                <button 
+                    onClick={props.onMicClick} 
+                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg border-2
+                        ${props.voiceStatus === 'connected' || props.voiceStatus === 'listening' ? 'bg-brand-accent text-black border-white animate-pulse shadow-[0_0_25px_rgba(62,207,142,0.5)]' : 
+                          props.voiceStatus === 'thinking' ? 'bg-amber-400 text-black border-white animate-pulse shadow-[0_0_20px_rgba(251,191,36,0.5)]' :
+                          props.voiceStatus === 'speaking' ? 'bg-brand-primary text-white border-brand-accent animate-pulse shadow-[0_0_20px_rgba(62,207,142,0.3)]' :
+                          'bg-brand-surface text-brand-text-muted border-brand-primary/30'}`}
+                >
+                    <Icon 
+                        name={props.voiceStatus === 'thinking' ? 'spinner' : 'microphone'} 
+                        className={`w-8 h-8 ${props.voiceStatus === 'thinking' ? 'animate-spin' : ''}`} 
+                    />
                 </button>
 
                 <NavigationOverlay />
