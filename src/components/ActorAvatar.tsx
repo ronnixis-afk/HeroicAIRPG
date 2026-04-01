@@ -258,7 +258,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                 {/* Dead Status Overlay */}
                 {isDead && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none animate-fade-in">
-                        <Icon name="close" className="w-[85%] h-[85%] text-brand-danger drop-shadow-[0_0_12px_rgba(239,68,68,0.8)]" />
+                        <Icon name="close" className="w-[64%] h-[64%] text-brand-danger drop-shadow-[0_0_12px_rgba(239,68,68,0.8)]" />
                     </div>
                 )}
 
