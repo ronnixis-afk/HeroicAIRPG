@@ -292,7 +292,7 @@ export const useTravel = (
             const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
             const currentData = gameData;
             if (currentData) {
-                preloadAdjacentZones(coordinates, currentData.mapZones || [], currentData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, currentData.knowledge || [])
+                preloadAdjacentZones(coordinates, currentData!.mapZones || [], currentData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, currentData!.knowledge || [])
                     .catch(e => console.error("Silent preloading failed:", e));
             }
 
