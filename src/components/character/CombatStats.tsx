@@ -281,7 +281,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
                                     type="number"
                                     value={character.stamina ?? 0}
                                     onChange={e => onChange(['stamina'], parseInt(e.target.value) || 0)}
-                                    className="w-full input-md text-center font-bold text-2xl text-[#f59e0b]"
+                                    className="w-full input-md text-center font-bold text-2xl text-[var(--color-status-stamina)]"
                                     aria-label="Current Stamina"
                                 />
                                 <span className="text-brand-text-muted text-xl font-bold">/</span>

@@ -44,7 +44,7 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
 
     const color = hpRatio > 0.5 ? '#3ecf8e' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
     const tempColor = '#38bdf8'; // Shield blue
-    const staminaColor = '#f59e0b'; // Stamina Gold
+    const staminaColor = 'var(--color-status-stamina)'; // Muted Stamina Gold
 
     const isDead = currentHp <= 0;
     const isLowHp = !isDead && hpRatio <= 0.25;

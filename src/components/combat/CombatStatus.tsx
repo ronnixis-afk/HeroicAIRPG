@@ -7,7 +7,7 @@ import { useUI } from '../../context/UIContext';
 import { type StatusEffect, type CombatActor, PlayerCharacter, Companion } from '../../types';
 import { ActorAvatar } from '../ActorAvatar';
 import { Icon } from '../Icon';
-import { getTempHpLabel } from '../../utils/itemModifiers';
+
 
 interface CombatAvatarProps {
     name: string;
@@ -54,7 +54,7 @@ const CombatStatusDisplay: React.FC = () => {
         return null;
     }
 
-    const tempHpLabel = getTempHpLabel(gameData?.skillConfiguration);
+
 
     // Build normalized actor objects for display logic
     const allActors = [
@@ -183,17 +183,17 @@ const CombatStatusDisplay: React.FC = () => {
                                             </div>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-brand-text-muted mt-1">
                                                 <span className={`font-bold ${actor.currentHitPoints && actor.currentHitPoints <= 0 ? 'text-brand-danger' : ''}`}>
-                                                    Hit Points: {actor.currentHitPoints}/{actor.maxHitPoints}
+                                                    ❤️  {actor.currentHitPoints}/{actor.maxHitPoints}
                                                 </span>
                                                 {/* Fix: Explicitly cast actor to any to safely access normalized temporary HP properties */}
                                                 {((actor as any).temporaryHitPoints !== undefined && ((actor as any).temporaryHitPoints > 0 || ((actor as any).maxTemporaryHitPoints || 0) > 0)) && (
                                                     <span className="font-bold text-sky-400">
-                                                        {tempHpLabel}: {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
+                                                    🛡️  {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
                                                     </span>
                                                 )}
                                                 {((actor as any).stamina !== undefined && ((actor as any).maxStamina || 0) > 0) && (
-                                                    <span className="font-bold text-[#f59e0b]">
-                                                        Stamina: {(actor as any).stamina}/{(actor as any).maxStamina}
+                                                    <span className="font-bold text-[var(--color-status-stamina)]">
+                                                    ⚡  {(actor as any).stamina}/{(actor as any).maxStamina}
                                                     </span>
                                                 )}
                                                 {actor.statusEffects && actor.statusEffects.length > 0 && (
@@ -213,17 +213,17 @@ const CombatStatusDisplay: React.FC = () => {
                                             </div>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-brand-text-muted mt-1">
                                                 <span className={`font-bold ${actor.currentHitPoints && actor.currentHitPoints <= 0 ? 'text-brand-danger' : ''}`}>
-                                                    Hit Points: {actor.currentHitPoints}/{actor.maxHitPoints}
+                                                    ❤️  {actor.currentHitPoints}/{actor.maxHitPoints}
                                                 </span>
                                                 {/* Fix: Explicitly cast actor to any to safely access normalized temporary HP properties */}
                                                 {((actor as any).temporaryHitPoints !== undefined && ((actor as any).temporaryHitPoints > 0 || ((actor as any).maxTemporaryHitPoints || 0) > 0)) && (
                                                     <span className="font-bold text-sky-400">
-                                                        {tempHpLabel}: {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
+                                                    🛡️  {(actor as any).temporaryHitPoints}/{(actor as any).maxTemporaryHitPoints}
                                                     </span>
                                                 )}
                                                 {((actor as any).stamina !== undefined && ((actor as any).maxStamina || 0) > 0) && (
-                                                    <span className="font-bold text-[#f59e0b]">
-                                                        Stamina: {(actor as any).stamina}/{(actor as any).maxStamina}
+                                                    <span className="font-bold text-[var(--color-status-stamina)]">
+                                                    ⚡  {(actor as any).stamina}/{(actor as any).maxStamina}
                                                     </span>
                                                 )}
                                                 {actor.statusEffects && actor.statusEffects.length > 0 && (
