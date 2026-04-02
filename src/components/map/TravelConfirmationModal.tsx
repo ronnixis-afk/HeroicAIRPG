@@ -41,7 +41,20 @@ export const TravelConfirmationModal: React.FC = () => {
     // Track authorised NPCs locally in the modal
     const initialFollowing = useMemo(() => {
         if (!gameData) return [];
-        return gameData.npcs.filter(n => n.isFollowing);
+        const partyCompanionIds = (gameData.companions || []).map(c => c.id);
+        
+        return gameData.npcs.filter(n => {
+            if (!n.isFollowing) return false;
+            
+            // A character is a party member if their ID matches a companion ID,
+            // or if they are the NPC-registered version of a companion,
+            // or if they have an explicit companionId link.
+            const isPartyMember = partyCompanionIds.includes(n.id) || 
+                                 (n.id.startsWith('npc-') && partyCompanionIds.includes(n.id.replace('npc-', ''))) ||
+                                 (n.companionId && partyCompanionIds.includes(n.companionId));
+            
+            return !isPartyMember;
+        });
     }, [gameData]);
 
     const [authorizedNpcIds, setAuthorizedNpcIds] = useState<string[]>([]);
@@ -105,8 +118,12 @@ export const TravelConfirmationModal: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in p-4">
             <div className="bg-brand-surface border border-brand-primary/30 rounded-3xl shadow-2xl overflow-hidden p-8 flex flex-col items-center text-center max-w-md w-full animate-page">
                 
-                <div className="w-16 h-16 rounded-full bg-brand-primary/10 border border-brand-primary/30 flex items-center justify-center mb-6 shadow-[0_0_25px_rgba(var(--brand-primary-rgb),0.1)]">
-                    <Icon name="map" className="w-8 h-8 text-brand-primary animate-pulse" />
+                <div className="mb-6 animate-entrance flex items-center justify-center">
+                    <img 
+                        src="/icons/map.png" 
+                        alt="Map" 
+                        className="w-24 h-24 object-contain animate-bounce-subtle drop-shadow-[0_0_15px_rgba(var(--brand-accent-rgb),0.2)]" 
+                    />
                 </div>
                 
                 <div className="space-y-2 mb-6 w-full text-center">
@@ -136,7 +153,7 @@ export const TravelConfirmationModal: React.FC = () => {
 
                 {initialFollowing.length > 0 && (
                     <div className="w-full space-y-3 mb-8 text-left animate-fade-in">
-                        <label className="text-[10px] font-bold text-brand-text-muted ml-1">Authorized Followers</label>
+                        <label className="text-[10px] font-bold text-brand-text-muted ml-1 uppercase-none">Choose Who Follows You</label>
                         <div className="grid grid-cols-2 gap-2 bg-brand-primary/10 p-4 rounded-2xl border border-brand-surface shadow-inner max-h-[30vh] overflow-y-auto custom-scrollbar">
                             {initialFollowing.map(npc => (
                                 <div 

@@ -138,7 +138,7 @@ ${preRolledMechanics}
                     paragraph3: { type: Type.STRING, description: "Paragraph 3: Optional narrative flare or character moment. Use ONLY if the scene is complex or transformative." },
                     dialogues: {
                         type: Type.ARRAY,
-                        description: "Structured dialogue lines. Max 1 dialogue per actor. DO NOT include player ('You') dialogue.",
+                        description: "Structured dialogue lines. Exactly 2-3 sentences per actor. DO NOT include player ('You') dialogue.",
                         items: {
                             type: Type.OBJECT,
                             properties: {
@@ -322,7 +322,7 @@ The player has expended a HEROIC POINT this round.
     2. Write exactly two to three paragraphs (paragraph1, paragraph2, and optional paragraph3).
     3. NO dialogues in 'paragraph1'. Use the structured 'dialogues' array instead.
     4. **SYSTEM DIALOGUE PROTOCOL**: 
-       - Max 1 dialogue entry per actor. 
+       - Each dialogue must be 2-3 sentences per actor. 
        - DO NOT include player ('You') dialogue.
        - Each entry must be in the 'dialogues' array.
        - PRIORITY: Favor NPCs who have a distinct reaction to the player's specific alignment action.

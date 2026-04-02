@@ -498,14 +498,13 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
         syncCurrentLocaleToPoi
     } = useContext(GameDataContext);
 
-    const { setActiveView } = useUI();
+    const { setActiveView, setPendingTravelConfirmation } = useUI();
 
     const [name, setName] = useState('');
     const [hostility, setHostility] = useState<number>(0);
     const [description, setDescription] = useState('');
     const [keywords, setKeywords] = useState<string[]>([]);
     const [isEditing, setIsEditing] = useState(false);
-    const [travelMethod, setTravelMethod] = useState('');
     const [isBackfilling, setIsBackfilling] = useState(false);
     const [isDiscoveringLocale, setIsDiscoveringLocale] = useState(false);
     const [expandedPoiId, setExpandedPoiId] = useState<string | null>(null);
@@ -549,22 +548,10 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
             setDescription(zone?.description || '');
             setKeywords(zone?.keywords || []);
             setIsEditing(false);
-            setTravelMethod('');
         }
     }, [coordinates, zone, isOpen]);
 
-    const travelMethods = useMemo(() => {
-        const baseMethods = ['Walk', 'Public Transport'];
-        const allItems = [...playerInventory.assets, ...playerInventory.carried, ...playerInventory.equipped];
-        const vehicleNames = allItems.filter(item => item.tags?.some(t => t.toLowerCase() === 'vehicle')).map(item => item.name);
-        const shipNames = companions.filter(c => c.isShip).map(c => c.name);
-        let methods = Array.from(new Set([...baseMethods, ...vehicleNames, ...shipNames]));
 
-        if (mapSettings?.style === 'sci-fi') {
-            methods = methods.filter(m => m.toLowerCase() !== 'walk');
-        }
-        return methods;
-    }, [playerInventory, companions, mapSettings]);
 
     const handleSave = () => {
         const updatedZone: MapZone = {
@@ -585,11 +572,12 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
         onClose();
     };
 
-    const handleTravel = () => {
-        if (travelMethod) {
-            initiateTravel(name || 'Uncharted Territory', travelMethod, coordinates);
-            onClose();
-        }
+    const handleTravelIntent = () => {
+        setPendingTravelConfirmation({
+            destination: name || zone?.name || 'Uncharted Territory',
+            targetCoords: coordinates,
+            method: 'Walk'
+        });
     };
 
     const hInfo = getHostilityLabel(hostility);
@@ -603,7 +591,16 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                 onClick={onClose}
             />
             <div className={`fixed bottom-0 right-0 top-0 w-full sm:w-[450px] bg-brand-bg z-[70] transform transition-transform duration-500 ease-out border-l border-brand-primary shadow-2xl flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="flex justify-end p-4 flex-shrink-0">
+                <div className="flex justify-end items-center p-4 gap-2 flex-shrink-0">
+                    {!isEditing && (
+                        <button 
+                            onClick={() => setIsEditing(true)} 
+                            className="btn-icon p-2 hover:bg-brand-primary/20 rounded-full transition-colors group"
+                            title="Edit Zone Details"
+                        >
+                            <Icon name="edit" className="w-5 h-5 text-brand-text-muted group-hover:text-brand-accent transition-colors" />
+                        </button>
+                    )}
                     <button onClick={onClose} className="btn-icon p-2 hover:bg-brand-primary/20 rounded-full transition-colors">
                         <Icon name="close" className="w-6 h-6" />
                     </button>
@@ -722,54 +719,24 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                     </div>
                                 </div>
 
-                                {!isPlayerHere && (
-                                    <div className="pt-8 border-t border-brand-primary/10 space-y-6">
-                                        <div className="space-y-3">
-                                            <label className="text-body-sm font-bold text-brand-text-muted ml-1">Travel Method</label>
-                                            <div className="relative">
-                                                <select
-                                                    value={travelMethod}
-                                                    onChange={e => setTravelMethod(e.target.value)}
-                                                    className="w-full bg-brand-primary h-12 px-4 rounded-xl border border-brand-surface focus:border-brand-accent appearance-none text-sm font-bold"
-                                                >
-                                                    <option value="">Select transport...</option>
-                                                    {travelMethods.map(m => <option key={m} value={m}>{m}</option>)}
-                                                </select>
-                                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-brand-text-muted">
-                                                    <Icon name="chevronDown" className="w-4 h-4" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={handleTravel}
-                                            disabled={!travelMethod || isCombatActive}
-                                            className="btn-primary btn-lg w-full gap-3 shadow-brand-accent/20 rounded-2xl"
-                                        >
-                                            <Icon name="play" className="w-5 h-5" />
-                                            Travel To Zone
-                                        </button>
-                                    </div>
-                                )}
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="btn-secondary btn-md w-full mt-6 gap-2"
-                                >
-                                    <Icon name="edit" className="w-4 h-4 text-brand-text-muted" />
-                                    Edit Zone Details
-                                </button>
+
                             </div>
                         )}
                     </div>
                 </div>
 
                 <div className="p-6 pt-2 bg-brand-bg border-t border-brand-primary/10 flex-shrink-0">
-                    <button
-                        onClick={() => { setActiveView('knowledge'); onClose(); }}
-                        className="btn-primary btn-md w-full rounded-xl gap-2 shadow-lg shadow-brand-accent/20"
-                    >
-                        <Icon name="map" className="w-4 h-4" />
-                        Open Map
-                    </button>
+                    {!isPlayerHere && (
+                        <button
+                            onClick={handleTravelIntent}
+                            disabled={isCombatActive}
+                            className="btn-primary btn-md w-full rounded-xl gap-2 shadow-lg shadow-brand-accent/20"
+                        >
+                            <Icon name="play" className="w-4 h-4" />
+                            Travel Here
+                        </button>
+                    )}
+
                 </div>
             </div>
         </>

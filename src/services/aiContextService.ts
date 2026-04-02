@@ -269,7 +269,7 @@ Every 'narration' field MUST be exactly TWO TO THREE paragraphs (paragraph1, par
 **Structured Dialogues (dialogues array):**
 - Populate the 'dialogues' array with direct speech from NPCs or Companions present in the scene.
 - DO NOT include player ('You') dialogue under any circumstances.
-- Max 1 dialogue line per actor.
+- Each dialogue must be 2-3 sentences per actor.
 - PRIORITY: Favor NPCs who have a distinct reaction to the player's specific alignment action.
 - Format: Each entry must be a separate object in the array.
 - CHARACTER REACTIONS: Populate the 'characterReactions' array for each character who speaks.

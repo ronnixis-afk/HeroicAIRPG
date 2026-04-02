@@ -86,11 +86,11 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleLines
                         <div key={idx} className={isJustRevealed ? 'animate-reveal-line' : 'animate-fade-in'}>
                             <div className="mb-3 pt-3 relative">
                                 <div className="absolute top-0 left-0 w-full h-[1px] bg-brand-primary/10" />
-                                <strong className="font-bold text-brand-text italic block mb-1">
-                                    <EntityLinker text={actorName} />
-                                </strong>
+                                <span className="font-bold text-brand-text text-body-base mr-1">
+                                    <EntityLinker text={actorName} />:
+                                </span>
                                 {content && (
-                                    <span className="text-body-base leading-relaxed italic block pl-2 border-l-2 border-brand-primary/20">
+                                    <span className="text-body-base leading-relaxed">
                                         <EntityLinker text={content} />
                                     </span>
                                 )}
