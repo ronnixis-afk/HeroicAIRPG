@@ -25,6 +25,7 @@ export interface LibraryTrait extends Omit<Ability, 'id'> {
     category: 'general' | 'background' | 'combat' | 'ship_hull' | 'ship_module';
     isShipOnly?: boolean;
     requires?: string[];
+    minLevel?: number;
 }
 
 export interface CompanionAbility extends Ability { }
@@ -554,11 +555,18 @@ export function calculateCombatStats(character: PlayerCharacter | Companion, inv
 
     if (isFlurryActive) {
         mainHandAttacks += 1;
+        // Improved Flurry of Blows adds a second attack (total 2)
+        if (character.abilities.some(a => a.name === "Improved Flurry of Blows")) {
+            mainHandAttacks += 1;
+        }
     }
 
     if (isDualWielding) {
         offHandAttacks = 1;
-        if (hasTwoWeaponFighting) {
+        // Two-Weapon Style only removes the -2 penalty, does NOT grant extra off-hand attacks
+        
+        // Improved Two-Weapon Style grants exactly 1 additional off-hand attack (total 2)
+        if (character.abilities.some(a => a.name === "Improved Two-Weapon Style")) {
             offHandAttacks += 1;
         }
     }

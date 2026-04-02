@@ -10,9 +10,10 @@ interface WizardStepTraitsProps {
     onToggle: (trait: LibraryTrait) => void;
     limit: number;
     possessedTraitNames?: string[]; // Added to check requirements from previous steps
+    level?: number;
 }
 
-export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subtitle, traits, selectedTraits, onToggle, limit, possessedTraitNames = [] }) => {
+export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subtitle, traits, selectedTraits, onToggle, limit, possessedTraitNames = [], level }) => {
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
@@ -22,10 +23,12 @@ export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subti
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">
                 {traits.map(t => {
                     const isSelected = selectedTraits.some(st => st.name === t.name);
-                    const isLocked = t.requires?.some(req => 
+                    const isLockedByPrereq = t.requires?.some(req => 
                         !selectedTraits.some(st => st.name === req) && 
                         !possessedTraitNames.includes(req)
                     );
+                    const isLockedByLevel = t.minLevel !== undefined && (level || 1) < t.minLevel;
+                    const isLocked = isLockedByPrereq || isLockedByLevel;
 
                     return (
                         <button 
@@ -47,9 +50,14 @@ export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subti
                             </div>
                             <p className="text-xs text-brand-text-muted leading-relaxed">{t.description}</p>
                             
-                            {isLocked && t.requires && (
-                                <div className="mt-1">
-                                    <p className="text-brand-danger text-[10px] font-bold">Requires: {t.requires.join(', ')}</p>
+                            {isLocked && (
+                                <div className="mt-1 space-y-0.5">
+                                    {isLockedByPrereq && t.requires && (
+                                        <p className="text-brand-danger text-[10px] font-bold">Requires: {t.requires.join(', ')}</p>
+                                    )}
+                                    {isLockedByLevel && t.minLevel && (
+                                        <p className="text-brand-danger text-[10px] font-bold">Requires: Level {t.minLevel}</p>
+                                    )}
                                 </div>
                             )}
                         </button>

@@ -538,7 +538,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                     />
                                                 )}
                                                 {step === 2 && <WizardStepTraits title="Systems & Modules" subtitle="Select up to 3 characteristic hull and module components." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 3)} limit={3} />}
-                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} />}
+                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 4 && (
                                                     <WizardStepIdentity
                                                         isCompanion={isCompanion}
@@ -567,9 +567,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                         libraryTraits={libraryTraits}
                                                     />
                                                 )}
-                                                {step === 3 && <WizardStepTraits title={isCompanion ? "What is their story?" : "What was your past like?"} subtitle="Select two background markers that defined them." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 2)} limit={2} />}
-                                                {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} />}
-                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} />}
+                                                {step === 3 && <WizardStepTraits title={isCompanion ? "What is their story?" : "What was your past like?"} subtitle="Select two background markers that defined them." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 2)} limit={2} level={level} />}
+                                                {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} level={level} />}
+                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 6 && (
                                                     <WizardStepAttributes
                                                         abilityScores={abilityScores || {}}

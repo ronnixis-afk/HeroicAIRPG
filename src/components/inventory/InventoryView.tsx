@@ -311,7 +311,7 @@ const InventoryView: React.FC = () => {
                                 <Icon name="info" className="w-3.5 h-3.5" />
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-brand-surface text-brand-text text-[10px] p-3 rounded-xl shadow-2xl border border-brand-primary opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-all z-50 leading-relaxed font-normal text-left">
-                                Your mastery of unarmed combat allows you to strike with incredible speed. Your number of attacks per round is doubled while your hands are free.
+                                Your mastery of unarmed combat allows you to strike with incredible speed. You gain bonus strikes per round while your hands are free ({combatStats.numberOfAttacks} total).
                             </div>
                         </div>
                     )}
@@ -323,7 +323,7 @@ const InventoryView: React.FC = () => {
                                 <Icon name="info" className="w-3.5 h-3.5" />
                             </div>
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-brand-surface text-brand-text text-[10px] p-3 rounded-xl shadow-2xl border border-brand-primary opacity-0 group-hover/tooltip:opacity-100 pointer-events-none transition-all z-50 leading-relaxed font-normal text-left">
-                                You can attack {combatStats.numberOfAttacks} times per round (split between hands) at a -2 global penalty to attack rolls.
+                                You gain {combatStats.offHandAttacks} extra off-hand attack{combatStats.offHandAttacks > 1 ? 's' : ''} per round ({combatStats.numberOfAttacks} total){combatStats.hasTwoWeaponFighting ? '.' : ', but all attacks suffer a -2 penalty.'}
                             </div>
                         </div>
                     )}

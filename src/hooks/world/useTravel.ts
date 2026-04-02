@@ -150,6 +150,28 @@ export const useTravel = (
                 }
             }
 
+            // 1.5 Final Locale Resolution: 
+            // If targetLocale was specified, try to find it in the current set of POIs.
+            // If it's a cardinal direction or not found, always fallback to "Open Area".
+            const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
+            const isCardinal = directions.includes((targetLocale || "").toLowerCase());
+            
+            if (targetLocale && !isCardinal) {
+                const matchedPoi = currentPois.find(p => 
+                    (p.title || "").toLowerCase() === targetLocale.toLowerCase() ||
+                    (p.title || "").toLowerCase().includes(targetLocale.toLowerCase()) || 
+                    targetLocale.toLowerCase().includes((p.title || "").toLowerCase())
+                );
+                if (matchedPoi) {
+                    localeEntry = matchedPoi as LoreEntry;
+                }
+            }
+
+            // Secondary fallback: If still no localeEntry, definitively use "Open Area"
+            if (!localeEntry) {
+                localeEntry = currentPois.find(p => (p.title || "").toLowerCase().includes('open area'));
+            }
+
             const poisText = currentPois.map(p => `- ${p.title}: ${p.content}`).join('\n');
 
             const lastSiteName = gameData.current_site_name || 'your previous location';
@@ -428,7 +450,9 @@ export const useTravel = (
             const isShipTravel = /ship|boat|sail|vessel|scout|fly|airship|pilot|command|transit/i.test(method) || 
                                (shipCompanion && method.toLowerCase().trim() === shipCompanion.name.toLowerCase().trim());
             
-            let finalTargetLocale = destination;
+            const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
+            const isCardinal = directions.includes(destination.toLowerCase());
+            let finalTargetLocale: string | undefined = isCardinal ? undefined : destination;
 
             if (isShipTravel && shipCompanion) {
                 // Ensure ship is in party and party is marked as aboard

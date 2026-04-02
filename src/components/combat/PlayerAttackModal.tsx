@@ -88,6 +88,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
     const isDualWielding = combatStats?.isDualWielding || false;
     const attacksPerHand: number = combatStats?.baseAttacksPerHand || 1;
+    const offHandAttacksAllowed: number = combatStats?.offHandAttacks || 0;
     const maxTotalAttacks: number = mode === 'weapon' ? (combatStats?.numberOfAttacks || 1) : 1;
 
     const heroicPoints = gameData?.playerCharacter?.heroicPoints ?? 0;
@@ -176,7 +177,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
             if (totalMain < attacksPerHand) {
                 setAssignments([...assignments, { targetId, hand: 'main' }]);
-            } else if (isDualWielding && totalOff < attacksPerHand) {
+            } else if (isDualWielding && totalOff < offHandAttacksAllowed) {
                 setAssignments([...assignments, { targetId, hand: 'off' }]);
             } else {
                 if (targetMain > 0 || targetOff > 0) {

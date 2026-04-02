@@ -8,9 +8,10 @@ interface WizardStepSpecialtyProps {
     selected: LibraryTrait | null;
     onSelect: (trait: LibraryTrait) => void;
     possessedTraitNames?: string[]; // Added for cross-step requirement validation
+    level?: number;
 }
 
-export const WizardStepSpecialty: React.FC<WizardStepSpecialtyProps> = ({ isCompanion, options, selected, onSelect, possessedTraitNames = [] }) => {
+export const WizardStepSpecialty: React.FC<WizardStepSpecialtyProps> = ({ isCompanion, options, selected, onSelect, possessedTraitNames = [], level }) => {
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
@@ -22,7 +23,9 @@ export const WizardStepSpecialty: React.FC<WizardStepSpecialtyProps> = ({ isComp
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">
                 {options.map(t => {
                     const isSelected = selected?.name === t.name;
-                    const isLocked = t.requires?.some(req => !possessedTraitNames.includes(req));
+                    const isLockedByPrereq = t.requires?.some(req => !possessedTraitNames.includes(req));
+                    const isLockedByLevel = t.minLevel !== undefined && (level || 1) < t.minLevel;
+                    const isLocked = isLockedByPrereq || isLockedByLevel;
 
                     return (
                         <button 
@@ -44,9 +47,14 @@ export const WizardStepSpecialty: React.FC<WizardStepSpecialtyProps> = ({ isComp
                             </div>
                             <p className="text-xs text-brand-text-muted leading-relaxed">{t.description}</p>
 
-                            {isLocked && t.requires && (
-                                <div className="mt-1">
-                                    <p className="text-brand-danger text-[10px] font-bold">Requires: {t.requires.join(', ')}</p>
+                            {isLocked && (
+                                <div className="mt-1 space-y-0.5">
+                                    {isLockedByPrereq && t.requires && (
+                                        <p className="text-brand-danger text-[10px] font-bold">Requires: {t.requires.join(', ')}</p>
+                                    )}
+                                    {isLockedByLevel && t.minLevel && (
+                                        <p className="text-brand-danger text-[10px] font-bold">Requires: Level {t.minLevel}</p>
+                                    )}
                                 </div>
                             )}
                         </button>

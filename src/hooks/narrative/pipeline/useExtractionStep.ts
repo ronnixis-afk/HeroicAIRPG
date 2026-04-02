@@ -129,8 +129,12 @@ export const useExtractionStep = (
 
                 const anyShip = (gameData.companions || []).find(c => c.isShip);
                 const isShipTravel = !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty);
-                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (narratorLoc.site_name || 'Open Area');
-                const forcedSiteId = isShipTravel && anyShip ? `ship-${anyShip.id}` : (narratorLoc.site_id || `open-area-${newCoords}`);
+                
+                // STICKY SITE PREVENTION: If AI suggests we are at the same POI but we moved zones (and not on a ship), 
+                // we assume it's a hallucination or carry-over of the previous POI and force it to "Open Area".
+                const isStickyPOI = !isShipTravel && (narratorLoc.site_name === gameData.current_site_name);
+                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (isStickyPOI ? 'Open Area' : (narratorLoc.site_name || 'Open Area'));
+                const forcedSiteId = isShipTravel && anyShip ? `ship-${anyShip.id}` : (isStickyPOI ? `open-area-${newCoords}` : (narratorLoc.site_id || `open-area-${newCoords}`));
 
                 if (targetZone) {
                     newCoords = targetZone.coordinates;

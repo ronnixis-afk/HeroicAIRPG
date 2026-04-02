@@ -111,7 +111,8 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
         isAttackBuffed,
         isDamageBuffed,
         isOffHandAttackBuffed,
-        isOffHandDamageBuffed
+        isOffHandDamageBuffed,
+        offHandAttacks
     } = stats;
 
     const thpLabel = getTempHpLabel(skillConfig);
@@ -312,7 +313,10 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         {isFlurryActive && (
                             <p className="text-body-sm text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20 animate-fade-in">
-                                Flurry Of Blows: Your unarmed strikes are a rapid blur. You gain 1 additional strike per round.
+                                {character.abilities.some(a => a.name === "Improved Flurry of Blows")
+                                    ? "Improved Flurry of Blows: Your fists are a rapid blur. You gain 2 additional strikes per round."
+                                    : "Flurry Of Blows: Your fists are a rapid blur. You gain 1 additional strike per round."
+                                }
                             </p>
                         )}
 
@@ -324,9 +328,11 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         {isDualWielding && (
                             <p className="text-body-sm text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20">
-                                {hasTwoWeaponFighting
-                                    ? "Two-Weapon Style: You gain 1 additional off-hand strike and no longer take a -2 penalty to attack rolls when dual wielding."
-                                    : `Dual Wielding: Split your attacks per round between hands with a -2 penalty.`
+                                {character.abilities.some(a => a.name === "Improved Two-Weapon Style")
+                                    ? `Improved Two-Weapon Style: You gain 2 extra off-hand attacks per round (total ${numberOfAttacks}).`
+                                    : (hasTwoWeaponFighting
+                                        ? "Two-Weapon Style: You no longer suffer the -2 penalty to attack rolls when dual wielding."
+                                        : `Dual Wielding: You gain 1 extra off-hand attack per round, but all attacks suffer a -2 penalty.`)
                                 }
                             </p>
                         )}

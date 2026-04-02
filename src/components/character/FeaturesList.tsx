@@ -446,7 +446,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                         <div className="flex flex-col gap-4 pb-8">
                             {filteredLibrary.length > 0 ? filteredLibrary.map((trait, idx) => {
                                 const isOwned = character.abilities.some(a => a.name === trait.name);
-                                const isLocked = trait.requires?.some(reqName => !character.abilities.some(a => a.name === reqName));
+                                const isLockedByPrereq = trait.requires?.some(reqName => !character.abilities.some(a => a.name === reqName));
+                                const isLockedByLevel = trait.minLevel !== undefined && (character.level || 1) < trait.minLevel;
+                                const isLocked = isLockedByPrereq || isLockedByLevel;
 
                                 return (
                                     <button
@@ -471,9 +473,14 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                         </div>
                                         <p className="text-body-sm text-brand-text-muted line-clamp-2 leading-relaxed italic">{trait.description}</p>
 
-                                        {isLocked && trait.requires && (
-                                            <div className="mt-1">
-                                                <p className="text-brand-danger text-[10px] font-bold">Requires: {trait.requires.join(', ')}</p>
+                                        {isLocked && (
+                                            <div className="mt-1 space-y-0.5">
+                                                {isLockedByPrereq && trait.requires && (
+                                                    <p className="text-brand-danger text-[10px] font-bold">Requires: {trait.requires.join(', ')}</p>
+                                                )}
+                                                {isLockedByLevel && trait.minLevel && (
+                                                    <p className="text-brand-danger text-[10px] font-bold">Requires: Level {trait.minLevel}</p>
+                                                )}
                                             </div>
                                         )}
 

@@ -100,7 +100,16 @@ export const GENERIC_TRAITS: LibraryTrait[] = [
     {
         name: "Two-Weapon Style",
         category: 'general',
-        description: "You are a master of the twin-blade. You gain 1 additional off-hand strike and no longer take a -2 penalty to attack rolls when dual-wielding.",
+        description: "You are a master of the twin-blade. When dual-wielding, you no longer suffer the -2 penalty to attack rolls.",
+        usage: { type: 'passive', maxUses: 0, currentUses: 0 },
+        tags: ['universal', 'combat_style']
+    },
+    {
+        name: "Improved Two-Weapon Style",
+        category: 'general',
+        requires: ['Two-Weapon Style'],
+        minLevel: 6,
+        description: "Your mastery of the dual-blade is unequaled. You gain 1 additional off-hand strike per round when dual-wielding (Total 2).",
         usage: { type: 'passive', maxUses: 0, currentUses: 0 },
         tags: ['universal', 'combat_style']
     },
@@ -134,6 +143,15 @@ export const GENERIC_TRAITS: LibraryTrait[] = [
         tags: ['universal', 'martial', 'passive']
     },
     {
+        name: "Improved Flurry of Blows",
+        category: 'general',
+        requires: ['Flurry of Blows'],
+        minLevel: 6,
+        description: "Your fists strike with the speed of lightning. You gain another additional strike per round while your hands are free (Total +2).",
+        usage: { type: 'passive', maxUses: 0, currentUses: 0 },
+        tags: ['universal', 'martial', 'passive']
+    },
+    {
         name: "Sneak Attack",
         category: 'general',
         description: "You strike with lethal precision when your foe is distracted. Deal an extra 1d6 damage per 2 character levels on your first successful hit each turn, provided you have advantage on the attack roll.",
@@ -144,6 +162,16 @@ export const GENERIC_TRAITS: LibraryTrait[] = [
         name: "Heroic Soul",
         category: 'general',
         description: "Your spirit burns brighter than others. Your maximum Heroic Point capacity is increased by 1.",
+        usage: { type: 'passive', maxUses: 0, currentUses: 0 },
+        buffs: [{ type: 'hero_points', bonus: 1 }],
+        tags: ['universal', 'heroic']
+    },
+    {
+        name: "Improved Heroic Soul",
+        category: 'general',
+        requires: ['Heroic Soul'],
+        minLevel: 6,
+        description: "Your destiny is grander than any other. Your maximum Heroic Point capacity is increased by an additional 1 (Total +2).",
         usage: { type: 'passive', maxUses: 0, currentUses: 0 },
         buffs: [{ type: 'hero_points', bonus: 1 }],
         tags: ['universal', 'heroic']

@@ -248,7 +248,16 @@ Aggregator pattern for physical attacks:
 Number of strikes per hand is determined by character level and combat traits:
 1. Base Attacks: Math.ceil(Level / 5).
 2. Flurry Of Blows: Adds 1 additional main-hand strike while unarmed.
-3. Two-Weapon Style: Adds 1 additional off-hand strike while dual-wielding.
+3. Improved Flurry of Blows: Adds another additional main-hand strike while unarmed (Total +2).
+3. Dual-Wielding: Grants 1 extra off-hand strike at a -2 penalty to all attacks.
+4. Two-Weapon Style: Removes the -2 dual-wielding penalty to attack rolls.
+5. Improved Two-Weapon Style: Grants 1 additional (second) off-hand strike (Total 2).
+ 
+## 4.5 Heroic Point Scaling
+Max Heroic Points are determined by Level + Traits:
+1. Base Capacity: calculateBaseHeroicPoints(level).
+2. Heroic Soul: Adds +1 Max Heroic Point capacity.
+3. Improved Heroic Soul: Adds another +1 Max Heroic Point capacity (Total +2).
 
 ## 5. Group Stealth and Detection
 Hiding phase: Player and companions roll stealth. Success if >= 50% succeed.
