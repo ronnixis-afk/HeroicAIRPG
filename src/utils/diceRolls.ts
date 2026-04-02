@@ -18,7 +18,10 @@ export interface GroupCheckResult {
     totalSuccesses: number;
     totalFailures: number;
     participants: string[];
+    succeededBy: string[];
+    failedBy: string[];
     isGroupSuccess: boolean;
+    hasCriticalSuccess: boolean;
     hasCriticalFailure: boolean;
 }
 
@@ -280,12 +283,19 @@ export const calculateDiceRolls = (gameData: GameData, requests: DiceRollRequest
     Object.entries(grouped).forEach(([key, rolls]) => {
         if (rolls.length > 1) {
             const [rollType, checkName] = key.split(':');
-            const totalSuccesses = rolls.filter(r => r.outcome?.includes('Success')).length;
-            const totalFailures = rolls.length - totalSuccesses;
-            const hasCriticalFailure = rolls.some(r => r.dieRoll === 1);
+            const successes = rolls.filter(r => r.outcome?.includes('Success'));
+            const failures = rolls.filter(r => !r.outcome?.includes('Success'));
+            
+            const totalSuccesses = successes.length;
+            const totalFailures = failures.length;
+            const hasCriticalSuccess = rolls.some(r => r.outcome === 'Critical Success');
+            const hasCriticalFailure = rolls.some(r => r.outcome === 'Critical Fail');
 
             // ANY SUCCESS POLICY: Group succeeds if ANY single member succeeds
             const isGroupSuccess = totalSuccesses > 0;
+
+            const succeededBy = successes.map(r => r.rollerName);
+            const failedBy = failures.map(r => r.rollerName);
 
             groupOutcomes.push({
                 checkName,
@@ -293,12 +303,25 @@ export const calculateDiceRolls = (gameData: GameData, requests: DiceRollRequest
                 totalSuccesses,
                 totalFailures,
                 participants: rolls.map(r => r.rollerName),
+                succeededBy,
+                failedBy,
                 isGroupSuccess,
+                hasCriticalSuccess,
                 hasCriticalFailure
             });
 
-            const outcomeText = isGroupSuccess ? 'SUCCESS' : 'FAILURE';
-            summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - ${outcomeText} (${totalSuccesses} Successes vs ${totalFailures} Failures)`);
+            if (hasCriticalSuccess && hasCriticalFailure) {
+                summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - CRITICAL SUCCESS (with a CRITICAL FAILURE). Succeeded: ${succeededBy.join(', ')}. Failed: ${failedBy.join(', ')}`);
+            } else if (hasCriticalSuccess) {
+                summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - CRITICAL SUCCESS. Succeeded: ${succeededBy.join(', ')}. Failed: ${failedBy.join(', ')}`);
+            } else if (hasCriticalFailure) {
+                summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - CRITICAL FAILURE (${totalFailures} Failures)`);
+            } else if (isGroupSuccess) {
+                const failNote = failedBy.length > 0 ? `. Failed: ${failedBy.join(', ')}` : "";
+                summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - SUCCESS. Succeeded: ${succeededBy.join(', ')}${failNote}`);
+            } else {
+                summaryLines.push(`[GROUP RESULT]: ${checkName} ${rollType} - FAILURE (${totalFailures} Failures)`);
+            }
         }
     });
 

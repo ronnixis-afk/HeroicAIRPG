@@ -65,7 +65,17 @@ export const generateNarrativeResponse = async (
 
     let promptContent = lastMessage.content;
     if (preRolledMechanics) {
-        promptContent += `\n\n### The Dice Truth (Unmodifiable)\n${preRolledMechanics}\n\n**Strict Narrative Invariants**: Make the dice results feel natural but absolute. Do not contradict them.`;
+        promptContent += `
+### The Dice Truth (Unmodifiable)
+${preRolledMechanics}
+
+[CRITICAL INSTRUCTION - DICE OUTCOME PROTOCOL]:
+- SUCCESS: Progress the situation narratively. The new scene should NOT be similar to the previous scene.
+- FAILURE: The party is STUCK in the same scene as previously and must find another way.
+- CRITICAL SUCCESS: Progress the situation significantly. The new scene must be THREE STEPS ahead of the previous one (skip the intermediate obstacles/build-up).
+- CRITICAL FAILURE: The party regresses from the current situation or alerts hostiles nearby.
+
+**Strict Narrative Invariants**: Make the dice results feel natural but absolute. Do not contradict them.`;
     }
 
     // STEALTH DOCTRINE
@@ -354,7 +364,19 @@ The player has expended a HEROIC POINT this round.
     }
     `;
 
-    const prompt = `[Scene Context]: ${sceneContext || 'Standard combat arena.'}\n[Player's Intended Action]: "${playerActionFlavor || 'A direct engagement.'}"\n### The Dice Truth (Round Summary)\n${batchMechanicsSummary}`;
+    const prompt = `[Scene Context]: ${sceneContext || 'Standard combat arena.'}
+[Player's Intended Action]: "${playerActionFlavor || 'A direct engagement.'}"
+
+### The Dice Truth (Round Summary)
+${batchMechanicsSummary}
+
+[CRITICAL INSTRUCTION - DICE OUTCOME PROTOCOL]:
+- SUCCESS: Progress the situation narratively. The new scene should NOT be similar to the previous scene.
+- FAILURE: The party is STUCK in the same scene as previously and must find another way.
+- CRITICAL SUCCESS: Progress the situation significantly. The new scene must be THREE STEPS ahead of the previous one (skip the intermediate obstacles/build-up).
+- CRITICAL FAILURE: The party regresses from the current situation or alerts hostiles nearby.
+
+**Strict Narrative Invariants**: Make the dice results feel natural but absolute. Do not contradict them.`;
 
     try {
         const ai = getAi();
