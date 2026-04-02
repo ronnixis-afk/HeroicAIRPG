@@ -1,6 +1,6 @@
 
 import { GameData, GameAction, LoreEntry, GalleryMetadata } from '../types';
-import { getPOITheme, resolveSettlementTags, normalizeCoords } from '../utils/mapUtils';
+import { getPOITheme, resolveSettlementTags, normalizeCoords, normalizeLocale } from '../utils/mapUtils';
 
 export const narrativeReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
@@ -70,9 +70,20 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
 
         case 'ADD_KNOWLEDGE': {
             const theme = getPOITheme(state.worldSummary || '');
-            const existingKeys = new Set(state.knowledge.map(k => `${k.title?.toLowerCase()}|${k.coordinates}`));
+            // System Managed Validation: Enforce global title uniqueness by normalizing compared strings
+            const existingTitles = new Set(state.knowledge.map(k => normalizeLocale(k.title || "")));
+            const payloadNames = new Set<string>();
+
             const newKn = action.payload
-                .filter(k => !existingKeys.has(`${k.title?.toLowerCase()}|${k.coordinates}`))
+                .filter(k => {
+                    const normalized = normalizeLocale(k.title || "");
+                    if (!normalized) return false;
+                    
+                    // Rejection gate: Must be unique across existing world AND current payload batch
+                    const isUnique = !existingTitles.has(normalized) && !payloadNames.has(normalized);
+                    if (isUnique) payloadNames.add(normalized);
+                    return isUnique;
+                })
                 .map((k, i) => {
                     let tags = [...(k.tags || [])];
                     if (tags.some(t => t.toLowerCase().trim().replace(/\s+/g, '-') === 'population-center')) {

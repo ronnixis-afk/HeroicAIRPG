@@ -33,6 +33,8 @@ export const resolveLocaleCreation = async (
         ?.filter(k => k.coordinates === currentCoords && k.tags?.includes('location'))
         .map(k => ({ title: k.title, content: k.content })) || [];
 
+    const localPOIsText = localPOIs.map(p => `- ${p.title}: ${p.content}`).join('\n');
+    
     const prompt = `
     You are the "Location Specialist AI & Validation Gate". 
     Determine if a requested spatial move is valid and resolve it into a Physical Container (Site) and Sub-Location (Spot).
@@ -41,25 +43,23 @@ export const resolveLocaleCreation = async (
     [CURRENT ZONE]: "${currentZoneName}"
     [CURRENT SITE]: "${gameData.current_site_name || "Open Area"}"
 
+    [EXISTING POIS IN THIS ZONE]:
+    ${localPOIsText || "None (only uninhabited wilderness)"}
+
     [VALIDATION RULES]
-    1. MOVE FEASIBILITY: Is the [REQUESTED DESTINATION] physically reachable?
-       - Moving between rooms in the same building is VALID.
-       - Moving to a spot within the current room (e.g. "at the bar", "corner table") is VALID.
-       - Moving between zones without a travel action is INVALID.
-    
-    2. PHYSICAL BARRIERS: Respect solid surfaces (walls, locked doors, iron bars).
-       - If the user's path is blocked by a solid surface, the move is INVALID unless they have a narrative justification (e.g. they mention a key, use magic, or have high enough strength to break it).
+    1. NO NEW LANDMARKS: You are FORBIDDEN from creating new Map POIs (Buildings, Cities, Major Landmarks) if they are not in the [EXISTING POIS IN THIS ZONE] list.
+    2. SUB-LOCATION ONLY: If the user describes a spot (e.g. "by the tree", "at the bar"), resolve it as a 'sub_location' within the [CURRENT SITE]. Set 'isLiteralTransition' to false.
+    3. MOVE FEASIBILITY: Is the [REQUESTED DESTINATION] physically reachable?
+       - Moving between rooms in the same building is VALID (isLiteralTransition: false).
+       - Moving between buildings (POIs) is ONLY VALID if both buildings are in the [EXISTING POIS] list.
 
-    - If it is a SUB-LOCATION, set 'isLiteralTransition' to false (since they aren't changing their map POI).
-
-    [IMMERSIVE FAILURE]
-    - If 'validation_passed' is false, you MUST provide an 'immersive_failure_message'.
-    - STYLE: Immersive RPG/Game-like prose. Explain WHY it doesn't exist based on the logic (e.g. "There is no couch in this barren room...").
+    [OUTPUT CONSTRAINTS]
+    - If the requested destination does not exist and isn't a sub-location, 'validation_passed' MUST be false.
+    - If 'validation_passed' is false, provide an 'immersive_failure_message' (e.g. "Scanning the horizon, you see no signs of a blacksmith in this desolate forest.").
 
     [PHYSICALITY FILTER]
-    1. SITE NAME: The building/area (e.g., "The Iron Forge"). Proper Noun. MAX 3 WORDS.
+    1. SITE NAME: The building/area (e.g., "The Iron Forge"). MAX 3 WORDS.
     2. SUB-LOCATION: The specific spot (e.g., "Anvil Area", "Main Desk"). MAX 3 WORDS.
-    3. FORBIDDEN: Do not use "Hiding", "Combat", or event-based names (e.g., "Death of [Name]") as locations. A locale must be a PHYSICAL CONTAINER or landmark.
 
     [OUTPUT JSON SCHEMA]
     {

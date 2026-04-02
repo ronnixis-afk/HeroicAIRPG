@@ -61,6 +61,9 @@ export const auditSystemState = async (
     Gm Narrative: "${narrativeResult}"
     Party Stealth Status: ${isHidden ? "Hidden (Enemies are unaware)" : "Visible (Enemies can see you)"}
 
+    [MANDATORY SYSTEM TRUTH]
+    You are NOT allowed to change the player's physical location (POI or Site Name). The spatial state is fixed and managed by the host system. Your role is restricted to extracting social, inventory, and engagement updates from the narrative.
+
     [MANDATORY NAME EXCLUSION LIST]
     ${excludeList.join(', ')} (DO NOT create new characters with these names)
 
@@ -71,23 +74,16 @@ export const auditSystemState = async (
     Male, Female, Non-binary, Unspecified.
 
     [Instructions]
-    1. **Spatial Anchoring**: ${flags?.spatialChange ? `Did the narrative describe moving to a new building or room?
-       - Identify the **Site Name** (e.g., "The Silver Spire"). Max 3 words.
-       - Identify the **Sub-Location** (e.g., "Observatory Deck"). Max 3 words.
-       - **Uniqueness Rule**: The site name must not be identical to the current zone name ("${currentZoneName}").
-       - **EVENT PROTECTION**: Do NOT use narrative event names as site names (e.g., "Death of X", "Aftermath of Battle", "The Ambush"). Use physical container names only.` : "SKIP: No physical movement occurred."}
-
-    2. **Social Reconciliation**: ${flags?.socialChange ? `
-       - Update "currentPOI" for present npcs to match the new site.
+    1. **Social Reconciliation**: ${flags?.socialChange ? `
        - Identify deaths: if an npc is killed in the narrative, set "status": "Dead".` : "SKIP: No social or status changes occurred."}
 
-    3. **Npc Discovery**: ${flags?.socialChange ? `Identify new characters introduced. 
+    2. **Npc Discovery**: ${flags?.socialChange ? `Identify new characters introduced. 
        - **Strict Ancestry Rule**: You must select the "race" field from the [Valid Ancestries] list.
        - **Essential Status Rule**: Set "is_essential" as true for unique named characters.
        - **Presence Rule**: Identify if the NPC is interacting Remotely (telepathy, intercom, vision, ghost) or is Physically present. Set "presenceMode" to 'Remote' or 'Physical' (default).
        - **NAME PROTECTION**: You MUST NOT extract any character whose name matches a name in the [MANDATORY NAME EXCLUSION LIST]. If a character in the narrative has one of these names, it is the player or an existing companion—ignore them for discovery.` : "SKIP: No new characters were introduced."}
 
-    4. **Engagement Check (Critical)**: ${flags?.engagementChange ? `Determine if the scene has escalated to active combat.
+    3. **Engagement Check (Critical)**: ${flags?.engagementChange ? `Determine if the scene has escalated to active combat.
        - set "activeEngagement" to true only if:
          a) Hostiles have explicitly attacked the player.
          b) The player has explicitly attacked a target.
@@ -100,11 +96,9 @@ export const auditSystemState = async (
 
     [Output Json Schema]
     {
-      "currentLocale": "string (Site Name)",
-      "currentSubLocation": "string",
       "timePassedMinutes": number,
       "newNPCs": [ { "name": "...", "description", "race", "gender", "is_essential", "presenceMode": "Physical | Remote" } ],
-      "npcUpdates": [ { "id", "currentPOI", "status", "presenceMode": "Physical | Remote" } ],
+      "npcUpdates": [ { "id", "status", "presenceMode": "Physical | Remote" } ],
       "inventoryUpdates": [ 
         { 
           "ownerId": "player | CompanionID", 
@@ -144,7 +138,7 @@ export const auditSystemState = async (
         });
 
         return {
-            currentLocale: result.currentLocale || gameData.currentLocale || '',
+            currentLocale: gameData.currentLocale || '',
             timePassedMinutes: Number(result.timePassedMinutes) || 0,
             newNPCs: filteredNewNPCs,
             npcUpdates: result.npcUpdates || [],
@@ -184,14 +178,13 @@ export const detectExtractionScope = async (
     [NARRATIVE]: "${aiNarrative}"
 
     [CLASSIFICATION RULES]
-    - spatialChange: Player moved to a new building, room, or zone.
     - socialChange: New NPCs appeared, or existing NPCs died/changed status.
     - itemChange: Items were picked up, looted, lost, or consumed.
     - alignmentChange: Actions with moral weight (Good/Evil/Law/Chaos).
     - engagementChange: Combat started, ended, or aggressive intent was resolved.
     - timeChange: Significant time passed (minutes/hours).
 
-    Return JSON: { "spatialChange": bool, "socialChange": bool, "itemChange": bool, "alignmentChange": bool, "engagementChange": bool, "timeChange": bool }
+    Return JSON: { "socialChange": bool, "itemChange": bool, "alignmentChange": bool, "engagementChange": bool, "timeChange": bool }
     `;
 
     try {
@@ -211,7 +204,7 @@ export const detectExtractionScope = async (
         return {
             required,
             flags: {
-                spatialChange: !!flags.spatialChange,
+                spatialChange: false, // Permanently disabled for Auditor
                 socialChange: !!flags.socialChange,
                 itemChange: !!flags.itemChange,
                 alignmentChange: !!flags.alignmentChange,
@@ -220,12 +213,16 @@ export const detectExtractionScope = async (
             }
         };
     } catch (e) {
-        // Fallback: Default to true on error to ensure consistency
+        // Fallback: Default to true on error to ensure consistency (except spatial)
         return {
             required: true,
             flags: {
-                spatialChange: true, socialChange: true, itemChange: true,
-                alignmentChange: true, engagementChange: true, timeChange: true
+                spatialChange: false, 
+                socialChange: true, 
+                itemChange: true,
+                alignmentChange: true, 
+                engagementChange: true, 
+                timeChange: true
             }
         };
     }

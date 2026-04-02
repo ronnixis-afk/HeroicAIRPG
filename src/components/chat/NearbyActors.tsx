@@ -32,14 +32,11 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
 
         return (npcs || []).filter(npc => {
             const npcPOI = npc.currentPOI || "";
-            // 1. ID Match (Highest Priority)
-            if (npc.site_id && current_site_id && npc.site_id === current_site_id) {
-                return true;
-            }
-
-            // 2. Name Match (with coordinate gate for generic areas)
+            // 1. Physical Location Matching (Zone-Aware)
             const isAtLocale = isLocaleMatch(npcPOI, currentLocale || "");
             const isGeneric = npcPOI.toLowerCase().includes('open area') || npcPOI === 'The Wilds';
+            
+            // Require exact coordinate match for generic zones to prevent cross-zone leakage
             const coordMatch = !npc.location_coords || !playerCoordinates || npc.location_coords === playerCoordinates;
             
             const finalLocaleMatch = isAtLocale && (!isGeneric || coordMatch);

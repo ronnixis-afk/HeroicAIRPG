@@ -3,11 +3,14 @@ import { useUI } from '../../context/UIContext';
 import { GameDataContext } from '../../context/GameDataContext';
 import { useWorldActions } from '../../hooks/useWorldActions';
 import { Icon } from '../Icon';
+import { NPC } from '../../types';
 
 export const TravelConfirmationModal: React.FC = () => {
     const { pendingTravelConfirmation, setPendingTravelConfirmation } = useUI();
     const { gameData, initiateTravel, dispatch } = useContext(GameDataContext);
     const [selectedMethod, setSelectedMethod] = useState('');
+    const [eligibleNpcs, setEligibleNpcs] = useState<NPC[]>([]);
+    const [authorizedNpcIds, setAuthorizedNpcIds] = useState<string[]>([]);
 
     const travelMethods = useMemo(() => {
         if (!gameData) return ['Walk', 'Public Transport'];
@@ -38,33 +41,32 @@ export const TravelConfirmationModal: React.FC = () => {
         return methods;
     }, [gameData]);
     
-    // Track authorised NPCs locally in the modal
-    const initialFollowing = useMemo(() => {
-        if (!gameData) return [];
-        const partyCompanionIds = (gameData.companions || []).map(c => c.id);
-        
-        return gameData.npcs.filter(n => {
-            if (!n.isFollowing) return false;
-            
-            // A character is a party member if their ID matches a companion ID,
-            // or if they are the NPC-registered version of a companion,
-            // or if they have an explicit companionId link.
-            const isPartyMember = partyCompanionIds.includes(n.id) || 
-                                 (n.id.startsWith('npc-') && partyCompanionIds.includes(n.id.replace('npc-', ''))) ||
-                                 (n.companionId && partyCompanionIds.includes(n.companionId));
-            
-            return !isPartyMember;
-        });
-    }, [gameData]);
-
-    const [authorizedNpcIds, setAuthorizedNpcIds] = useState<string[]>([]);
-    
-    // Sync initial state
+    // Sync initial state when modal opens
     useEffect(() => {
         if (pendingTravelConfirmation) {
-            setAuthorizedNpcIds(initialFollowing.map(n => n.id));
+            // One-time capture of eligible followers when modal opens
+            if (gameData && eligibleNpcs.length === 0) {
+                const partyCompanionIds = (gameData.companions || []).map(c => c.id);
+                
+                const followers = gameData.npcs.filter(n => {
+                    if (!n.isFollowing) return false;
+                    
+                    const isPartyMember = partyCompanionIds.includes(n.id) || 
+                                         (n.id.startsWith('npc-') && partyCompanionIds.includes(n.id.replace('npc-', ''))) ||
+                                         (n.companionId && partyCompanionIds.includes(n.companionId));
+                    
+                    return !isPartyMember;
+                });
+                
+                setEligibleNpcs(followers);
+                setAuthorizedNpcIds(followers.map(n => n.id));
+            }
+        } else {
+            // Reset when closed
+            setEligibleNpcs([]);
+            setAuthorizedNpcIds([]);
         }
-    }, [pendingTravelConfirmation, initialFollowing]);
+    }, [pendingTravelConfirmation, gameData, eligibleNpcs.length]);
 
     useEffect(() => {
         if (pendingTravelConfirmation && !selectedMethod) {
@@ -79,19 +81,8 @@ export const TravelConfirmationModal: React.FC = () => {
         const { destination, targetCoords } = pendingTravelConfirmation;
         const finalMethod = selectedMethod || 'Walk';
         
-        // 1. Synchronize NPC travel status
+        // Finalize travel authorization for selected NPCs
         if (dispatch) {
-            // Identify which NPCs were REJECTED (were following but now unselected)
-            const rejectedNpcIds = initialFollowing
-                .map(n => n.id)
-                .filter(id => !authorizedNpcIds.includes(id));
-
-            // Clear follow state for rejected NPCs so they stay at the current location
-            rejectedNpcIds.forEach(id => {
-                dispatch({ type: 'UPDATE_NPC', payload: { id, isFollowing: false } });
-            });
-
-            // Finally, mark authorized NPCs for travel
             dispatch({
                 type: 'SET_NPCS_WILL_TRAVEL',
                 payload: { ids: authorizedNpcIds, willTravel: true }
@@ -154,37 +145,51 @@ export const TravelConfirmationModal: React.FC = () => {
                     </div>
                 </div>
 
-                {initialFollowing.length > 0 && (
+                {eligibleNpcs.length > 0 && (
                     <div className="w-full space-y-3 mb-8 text-left animate-fade-in">
                         <label className="text-[10px] font-bold text-brand-text-muted ml-1 uppercase-none">Choose Who Follows You</label>
                         <div className="grid grid-cols-2 gap-2 bg-brand-primary/10 p-4 rounded-2xl border border-brand-surface shadow-inner max-h-[30vh] overflow-y-auto custom-scrollbar">
-                            {initialFollowing.map(npc => (
-                                <div 
-                                    key={npc.id} 
-                                    onClick={() => {
-                                        setAuthorizedNpcIds(prev => 
-                                            prev.includes(npc.id) ? prev.filter(id => id !== npc.id) : [...prev, npc.id]
-                                        );
-                                    }}
-                                    className={`flex items-center justify-between p-3 rounded-xl transition-all border cursor-pointer ${
-                                        authorizedNpcIds.includes(npc.id) 
-                                            ? 'bg-brand-accent/10 border-brand-accent/40 shadow-[0_0_10px_rgba(62,207,142,0.1)]' 
-                                            : 'bg-brand-primary/40 border-transparent opacity-60 grayscale'
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex flex-col">
-                                            <span className={`text-body-sm font-bold leading-none ${authorizedNpcIds.includes(npc.id) ? 'text-brand-text' : 'text-brand-text-muted'}`}>{npc.name}</span>
-                                            <span className="text-[9px] text-brand-text-muted font-normal mt-1">Authorized for travel</span>
+                            {eligibleNpcs.map(npc => {
+                                const isAuthorized = authorizedNpcIds.includes(npc.id);
+                                return (
+                                    <div 
+                                        key={npc.id} 
+                                        onClick={() => {
+                                            const newAuthorizedIds = isAuthorized 
+                                                ? authorizedNpcIds.filter(id => id !== npc.id) 
+                                                : [...authorizedNpcIds, npc.id];
+                                            
+                                            setAuthorizedNpcIds(newAuthorizedIds);
+                                            
+                                            // IMMEDIATE GLOBAL SYNC: If we uncheck, immediately stop following.
+                                            // If we re-check, they follow again.
+                                            if (dispatch) {
+                                                dispatch({
+                                                    type: 'UPDATE_NPC',
+                                                    payload: { id: npc.id, isFollowing: !isAuthorized }
+                                                });
+                                            }
+                                        }}
+                                        className={`flex items-center justify-between p-3 rounded-xl transition-all border cursor-pointer ${
+                                            isAuthorized 
+                                                ? 'bg-brand-accent/10 border-brand-accent/40 shadow-[0_0_10px_rgba(62,207,142,0.1)]' 
+                                                : 'bg-brand-primary/40 border-transparent opacity-60 grayscale'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex flex-col">
+                                                <span className={`text-body-sm font-bold leading-none ${isAuthorized ? 'text-brand-text' : 'text-brand-text-muted'}`}>{npc.name}</span>
+                                                <span className="text-[9px] text-brand-text-muted font-normal mt-1">Authorized for travel</span>
+                                            </div>
+                                        </div>
+                                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
+                                            isAuthorized ? 'bg-brand-accent border-brand-accent text-black' : 'bg-brand-surface border-brand-primary/30'
+                                        }`}>
+                                            {isAuthorized && <Icon name="check" className="w-3.5 h-3.5 bold" />}
                                         </div>
                                     </div>
-                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all ${
-                                        authorizedNpcIds.includes(npc.id) ? 'bg-brand-accent border-brand-accent text-black' : 'bg-brand-surface border-brand-primary/30'
-                                    }`}>
-                                        {authorizedNpcIds.includes(npc.id) && <Icon name="check" className="w-3.5 h-3.5 bold" />}
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 )}

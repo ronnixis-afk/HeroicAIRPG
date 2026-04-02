@@ -78,7 +78,16 @@ export const useNarrativeManager = (
      * Standardizes the execution of AI Agents: P1 (Librarian) -> P2 (Mechanics) -> P3 (Narrator) -> P4 (Auditor)
      */
     const executePipeline = useCallback(async (
-        input: { userMessage: ChatMessage, mechanicsOverride?: any, systemInstruction?: string, isHeroic?: boolean, bypassLock?: boolean, targetCoordinates?: string }
+        input: { 
+            userMessage: ChatMessage, 
+            mechanicsOverride?: any, 
+            systemInstruction?: string, 
+            isHeroic?: boolean, 
+            bypassLock?: boolean, 
+            targetCoordinates?: string,
+            forcedLocale?: string,
+            forcedSiteId?: string
+        }
     ): Promise<string> => {
         if (!gameData) return "";
 
@@ -93,7 +102,7 @@ export const useNarrativeManager = (
 
         isPipelineActiveRef.current = true;
         lastPipelineStartTime.current = now;
-        const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false, targetCoordinates } = input;
+        const { userMessage, mechanicsOverride, systemInstruction, isHeroic = false, targetCoordinates, forcedLocale, forcedSiteId } = input;
 
         try {
             const startTime = performance.now();

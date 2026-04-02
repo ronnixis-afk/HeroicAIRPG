@@ -13,7 +13,7 @@ export interface LocationUpdate {
   site_name: string;
   site_id: string;
   is_new_site: boolean;
-  transition_type?: 'staying' | 'returning' | 'exploring_new' | 'zone_change';
+  transition_type?: 'staying' | 'returning' | 'exploring_new' | 'zone_change' | 'poi_entry';
   destination_zone_hint?: string;
   is_aboard_ship?: boolean;
   ship_name?: string;

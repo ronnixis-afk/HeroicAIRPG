@@ -23,7 +23,9 @@ export const useExtractionStep = (
         aiMessageId: string,
         aiResponse: AIResponse,
         isExplicit: boolean = false,
-        forcedCoordinates?: string
+        forcedCoordinates?: string,
+        forcedLocale?: string,
+        forcedSiteId?: string
     ) => {
         const registryNpcNames = (gameData.npcs ?? []).map(n => n.name ? String(n.name).toLowerCase().trim() : 'unknown');
         const companionNames = (gameData.companions ?? []).flatMap(c => {
@@ -89,217 +91,41 @@ export const useExtractionStep = (
             isAboard: auditResult.isAboard !== undefined ? auditResult.isAboard : gameData.isAboard
         };
 
-        // --- SPATIAL SNAPPING & VALIDATION GATE ---
-        const narratorLoc = aiResponse.location_update;
-        let resolvedLocale = gameData.currentLocale || '';
+        // --- SPATIAL SNAPPING & VALIDATION GATE (HARDENED) ---
+        // SYSTEM TRUTH: We only allow the location to change if its a forced system-move (e.g. Travel or Investigation)
+        let resolvedLocale: string | undefined = undefined;
 
-        if (narratorLoc) {
-            const isShipDestination = (gameData.companions ?? []).some(c => c.isShip && c.name.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim());
-
-            // EVENT LANGUAGE FILTER: Prevent dramatic narrative events from creating fake POIs.
-            const eventPatterns = /\b(death|dying|killed|slain|fallen|aftermath|battle|slaughter|massacre|murder|grave|corpse|remains|memorial|execution|ambush|tomb|victim|demise)\b/i;
+        if (forcedCoordinates || forcedLocale) {
+            // AUTHORIZED MOVEMENT: This branch is only taken during formal /travel or /exploration sequences
+            const narratorLoc = aiResponse.location_update;
+            const targetCoords = forcedCoordinates || gameData.playerCoordinates || "";
+            const targetZone = (gameData.mapZones || []).find(z => z.coordinates === targetCoords);
+            const anyShip = (gameData.companions || []).find(c => c.isShip);
+            const isShipTravel = !!forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty;
             
-            // NPC NAME PROTECTION: If the name contains any NPC that was JUST marked as dead.
-            const deadNpcNames = (aiResponse.npc_resolution || [])
-                .filter(res => res.isFollowing === false && /dead|killed|slain|dies/i.test(res.summary))
-                .map(res => res.name.toLowerCase().trim());
+            // Resolve Landing Site name
+            const currentZoneName = targetZone?.name || (gameData.mapZones || []).find(z => z.coordinates === targetCoords)?.name || 'The Wilds';
+            
+            // PRIORITY: Forced Locale -> Ship -> Default Open Area
+            const finalSiteName = forcedLocale || (isShipTravel && anyShip ? anyShip.name : `Open Area of ${currentZoneName}`);
+            const finalSiteId = forcedSiteId || (isShipTravel && anyShip ? `ship-${anyShip.id}` : `open-area-${targetCoords}`);
 
-            const isNpcDeathSite = deadNpcNames.some(name => narratorLoc.site_name.toLowerCase().includes(name));
-            const isEventName = eventPatterns.test(narratorLoc.site_name) || isNpcDeathSite;
-
-            if (narratorLoc.transition_type === 'zone_change' && !isEventName) {
-                const destHint = narratorLoc.destination_zone_hint || narratorLoc.site_name;
-                const destHintLower = destHint.toLowerCase().trim();
-
-                // 1. Try to find the zone explicitly at the forced coordinates first
-                let targetZone = forcedCoordinates ? (gameData.mapZones || []).find(z => z.coordinates === forcedCoordinates) : undefined;
-                
-                // If not forced, fallback to matching by narrative hint
-                if (!targetZone) {
-                    targetZone = (gameData.mapZones || []).find(z => z.name.toLowerCase().includes(destHintLower) || destHintLower.includes(z.name.toLowerCase()));
-                }
-
-                let newCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
-
-                // CROSS-REFERENCE: If narrative hint found a zone, but it's not where we are forcing the move, 
-                // we discard the hint's coordinates in favor of the system truth.
-                if (forcedCoordinates && targetZone && targetZone.coordinates !== forcedCoordinates) {
-                    targetZone = (gameData.mapZones || []).find(z => z.coordinates === forcedCoordinates);
-                }
-
-                const anyShip = (gameData.companions || []).find(c => c.isShip);
-                const isShipTravel = !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty);
-                
-                const isStickyPOI = !isShipTravel && (narratorLoc.site_name === gameData.current_site_name);
-                const currentZoneName = targetZone ? targetZone.name : ((gameData.mapZones || []).find(z => z.coordinates === newCoords)?.name || 'The Wilds');
-                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (isStickyPOI ? `Open Area of ${currentZoneName}` : (narratorLoc.site_name || `Open Area of ${currentZoneName}`));
-                const forcedSiteId = isShipTravel && anyShip ? `ship-${anyShip.id}` : (isStickyPOI ? `open-area-${newCoords}` : (narratorLoc.site_id || `open-area-${newCoords}`));
-
-                if (targetZone) {
-                    newCoords = targetZone.coordinates;
-                    finalUpdates.location_update = {
-                        ...narratorLoc,
-                        coordinates: newCoords,
-                        zone: targetZone.name,
-                        site_name: forcedSiteName,
-                        site_id: forcedSiteId,
-                        is_new_site: true,
-                        transition_type: 'zone_change'
-                    };
-                } else {
-                    // Use forced coordinates if available, otherwise generate new offset
-                    if (forcedCoordinates) {
-                        newCoords = forcedCoordinates;
-                    } else {
-                        const p = newCoords.split('-');
-                        let nx = parseInt(p[0]) || 0;
-                        let ny = parseInt(p[1]) || 0;
-                        nx += (Math.random() > 0.5 ? 1 : -1);
-                        ny += (Math.random() > 0.5 ? 1 : -1);
-                        newCoords = `${nx}-${ny}`;
-                    }
-
-                    try {
-                        const existingZoneNames = (gameData.mapZones || []).map(z => z.name);
-                        const details = await generateZoneDetails(newCoords, destHint, undefined, gameData.mapSettings, gameData.worldSummary, existingZoneNames);
-                        const newZone: MapZone = {
-                            id: `zone-${newCoords}-${Date.now()}`,
-                            coordinates: newCoords,
-                            name: details.name || destHint,
-                            description: details.description,
-                            hostility: typeof details.hostility === 'string' ? parseInt(details.hostility) || 0 : (details.hostility || 0),
-                            visited: true,
-                            tags: ['location'],
-                            keywords: details.keywords || []
-                        };
-                        dispatch({ type: 'UPDATE_MAP_ZONE', payload: newZone });
-
-                        finalUpdates.location_update = {
-                            ...narratorLoc,
-                            coordinates: newCoords,
-                            zone: details.name || destHint,
-                            site_name: forcedSiteName,
-                            site_id: forcedSiteId,
-                            is_new_site: true,
-                            transition_type: 'zone_change'
-                        };
-                    } catch (e) {
-                        finalUpdates.location_update = {
-                            ...narratorLoc,
-                            coordinates: newCoords,
-                            zone: destHint,
-                            site_name: forcedSiteName,
-                            site_id: forcedSiteId,
-                            is_new_site: true,
-                            transition_type: 'zone_change'
-                        };
-                    }
-                }
-                resolvedLocale = finalUpdates.location_update.site_name || 'Open Area';
-            } else if (narratorLoc.transition_type === 'staying' || isEventName) {
-                // Snap back to current location — no physical movement occurred.
-                const snapCoords = forcedCoordinates || gameData.playerCoordinates || '0-0';
-                
-                // If we are forcing a move (e.g. traveling), but the narrator thinks we stayed, 
-                // we force the location update to the target coordinates regardless.
-                const currentZone = (gameData.mapZones || []).find(z => z.coordinates === snapCoords);
-                const anyShip = (gameData.companions || []).find(c => c.isShip);
-                const isShipTravel = forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty;
-                const forcedSiteName = isShipTravel ? anyShip.name : `Open Area of ${currentZone?.name || 'The Wilds'}`;
-
-                finalUpdates.location_update = {
-                    ...narratorLoc,
-                    coordinates: snapCoords,
-                    zone: currentZone?.name || gameData.current_site_name || 'The Wilds',
-                    site_name: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? forcedSiteName : (gameData.current_site_name || 'Open Area'),
-                    site_id: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? (isShipTravel ? `ship-${anyShip.id}` : `open-area-${snapCoords}`) : (gameData.current_site_id || `open-area-${snapCoords}`),
-                    is_new_site: !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates),
-                    transition_type: (forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates) ? 'zone_change' : 'staying'
-                };
-                resolvedLocale = finalUpdates.location_update.site_name;
-            } else if (narratorLoc.transition_type === 'returning') {
-                // Try to find the existing location in knowledge
-                const lookupCoords = forcedCoordinates || gameData.playerCoordinates;
-                const knownLocation = (gameData.knowledge || []).find(k => {
-                    if (!k.tags?.includes('location') || k.coordinates !== lookupCoords) return false;
-
-                    const kTitleParts = k.title.toLowerCase().trim().split(/\s+/);
-                    const nTitleParts = narratorLoc.site_name.toLowerCase().trim().split(/\s+/);
-
-                    // Simple similarity check: do they share significant words?
-                    const sharedWords = kTitleParts.filter(word => nTitleParts.includes(word) && word.length > 3);
-
-                    // Exact match or at least one significant shared word (like 'interrogation')
-                    return k.title.toLowerCase().trim() === narratorLoc.site_name.toLowerCase().trim() || sharedWords.length > 0;
-                });
-
-                if (knownLocation) {
-                    // Snap to the known POI
-                    finalUpdates.location_update = {
-                        ...narratorLoc,
-                        coordinates: lookupCoords || '0-0',
-                        zone: gameData.current_site_name || 'The Wilds',
-                        site_name: knownLocation.title,
-                        site_id: knownLocation.id,
-                        is_new_site: false,
-                        transition_type: 'returning'
-                    };
-                    resolvedLocale = knownLocation.title;
-                } else {
-                    // Fallback to exploring_new if we can't find it to prevent game breaking
-                    narratorLoc.transition_type = 'exploring_new';
-                }
-            }
-
-            // Note: Not an 'else if' because a failed 'returning' falls through to this block
-            if ((narratorLoc.transition_type === 'exploring_new' || !narratorLoc.transition_type) && !isEventName) {
-                try {
-                    const existingPois = (gameData.knowledge || [])
-                        .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'))
-                        .map(k => k.title);
-
-                    const validationResult = await resolveLocaleCreation(narratorLoc.site_name, gameData, existingPois);
-                    if (!validationResult.validation_passed) {
-                        finalUpdates.location_update = {
-                            ...narratorLoc,
-                            coordinates: gameData.playerCoordinates || '0-0',
-                            zone: gameData.current_site_name || 'The Wilds',
-                            site_name: gameData.current_site_name || `Open Area of ${gameData.current_site_name || 'The Wilds'}`,
-                            site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
-                            is_new_site: false,
-                            transition_type: 'staying'
-                        };
-                        resolvedLocale = gameData.current_site_name || '';
-                    } else {
-                        resolvedLocale = validationResult.name;
-                        // Inject the validated details
-                        finalUpdates.location_update = {
-                            ...narratorLoc,
-                            site_name: validationResult.name,
-                            site_id: `poi-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                            is_new_site: validationResult.isNew,
-                            transition_type: 'exploring_new'
-                        };
-
-                        if (validationResult.isNew && validationResult.isLiteralTransition && !isShipDestination) {
-                            const newEntry: Omit<LoreEntry, 'id'> = {
-                                title: validationResult.name,
-                                content: validationResult.content,
-                                coordinates: narratorLoc.coordinates || gameData.playerCoordinates,
-                                tags: ['location'],
-                                isNew: true,
-                                visited: true
-                            };
-                            dispatch({ type: 'ADD_KNOWLEDGE', payload: [newEntry] });
-                        }
-                    }
-                } catch (e) {
-                    resolvedLocale = narratorLoc.site_name;
-                }
-            }
-
+            finalUpdates.location_update = {
+                ...narratorLoc,
+                coordinates: targetCoords,
+                zone: currentZoneName,
+                site_name: finalSiteName,
+                site_id: finalSiteId,
+                is_new_site: targetCoords !== gameData.playerCoordinates || !!forcedLocale,
+                transition_type: forcedLocale ? 'poi_entry' : 'zone_change'
+            };
+            resolvedLocale = finalSiteName;
+            finalUpdates.currentLocale = finalSiteName;
         } else {
-            resolvedLocale = auditResult.currentLocale || gameData.currentLocale || '';
+            // CHAT ENFORCEMENT: No movement allowed during regular conversation.
+            // We strip any location updates suggested by the AI or Auditor.
+            finalUpdates.location_update = undefined; 
+            finalUpdates.currentLocale = undefined; // Never emit currentLocale unless moving
         }
 
         // 2. Resolve Inventory Transitions

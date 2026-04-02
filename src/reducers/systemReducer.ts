@@ -614,16 +614,6 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 });
             }
 
-            if (updates.npcUpdates && Array.isArray(updates.npcUpdates)) {
-                newState.npcs = (newState.npcs || []).map(existing => {
-                    const update = updates.npcUpdates!.find(u => u.id === existing.id);
-                    if (update) {
-                        return { ...existing, ...update };
-                    }
-                    return existing;
-                });
-            }
-
             if (updates.inventoryUpdates && Array.isArray(updates.inventoryUpdates)) {
                 updates.inventoryUpdates.forEach(batch => {
                     if (!batch) return;

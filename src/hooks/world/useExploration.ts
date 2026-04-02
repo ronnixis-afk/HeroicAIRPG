@@ -56,11 +56,27 @@ export const useExploration = (
             newGmNotes
         };
 
+        // --- SYSTEM SNAP: Set the Truth immediately ---
+        dispatch({
+            type: 'AI_UPDATE',
+            payload: {
+                current_site_name: entry.title,
+                current_site_id: entry.id,
+                currentLocale: entry.title
+            }
+        });
+
         const systemContext = `[SYSTEM] Player is ${isRevisit ? 'REVISITING' : 'DISCOVERING'} "${entry.title}" in ${locationName}. LORE: ${entry.content}`;
 
         setIsAiGenerating(true);
         try {
-            await submitAutomatedEvent(isRevisit ? `I return to ${entry.title}.` : `I investigate ${entry.title}.`, mechanicsResult, systemContext);
+            await submitAutomatedEvent(
+                isRevisit ? `I return to ${entry.title}.` : `I investigate ${entry.title}.`, 
+                mechanicsResult, 
+                systemContext,
+                entry.title,
+                entry.id
+            );
             
             if (!entry.visited) {
                 dispatch({ type: 'UPDATE_KNOWLEDGE', payload: { ...entry, visited: true } });

@@ -98,42 +98,56 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
         }
 
         case 'AI_UPDATE': {
-            const { npc_resolution, location_update } = action.payload;
-            if (!npc_resolution) return state;
+            const updates = action.payload;
+            // Ensure we have a valid payload
+            if (!updates) return state;
 
             let updatedNpcs = [...currentNpcs];
+            const locationUpdate = updates.location_update;
+            const isPOIChange = locationUpdate && locationUpdate.transition_type !== 'staying';
 
-            // 1. AUTOMATIC FOLLOWERS: Resolve spatial anchoring for NPCs flagged as following
-            if (location_update) {
-                // REGISTRY FOLLOW RULE: NPCs only follow for "locale" moves (transition_type: 'staying').
-                // If the party moves to a new POI or Zone, they stop following and remain at their last location.
-                const isPOIChange = location_update.transition_type !== 'staying';
+            // 1. Process Structured npcUpdates (System/Direct updates)
+            if (updates.npcUpdates && Array.isArray(updates.npcUpdates)) {
+                updatedNpcs = updatedNpcs.map(existing => {
+                    const update = updates.npcUpdates!.find(u => u.id === existing.id);
+                    if (update) {
+                        // --- TRAVEL GUARD: npcUpdates ---
+                        // If it's a POI change and this update tries to move a non-authorized NPC, block the loc change.
+                        const isMovingToNewSite = isPOIChange && update.currentPOI && update.currentPOI !== existing.currentPOI;
+                        if (isMovingToNewSite && !existing.willTravel) {
+                            // Strip location data from hallucinated move
+                            const { currentPOI, site_id, ...safeData } = update;
+                            return { ...existing, ...safeData };
+                        }
 
+                        return { ...existing, ...update };
+                    }
+                    return existing;
+                });
+            }
+
+            // 2. AUTOMATIC FOLLOWERS (Legacy logic for compatibility)
+            if (locationUpdate) {
                 updatedNpcs = updatedNpcs.map(npc => {
                     if (npc.isFollowing) {
-                        if (npc.status === 'Dead') {
-                            return { ...npc, isFollowing: false };
-                        }
+                        if (npc.status === 'Dead') return { ...npc, isFollowing: false };
                         
                         if (isPOIChange) {
                             if (npc.willTravel) {
-                                // AUTHORIZED TRAVEL: Move NPC to new location
                                 return {
                                     ...npc,
-                                    currentPOI: location_update.site_name || 'Current',
-                                    site_id: location_update.site_id,
-                                    willTravel: false // Reset authorization after travel
+                                    currentPOI: locationUpdate.site_name || 'Current',
+                                    site_id: locationUpdate.site_id,
+                                    willTravel: false 
                                 };
                             } else {
-                                // DISCONNECT: Party moved too far; NPC stays put.
                                 return { ...npc, isFollowing: false };
                             }
                         } else {
-                            // NARRATIVE SYNC: Party moved within the same POI; NPC follows.
                             return {
                                 ...npc,
-                                currentPOI: location_update.site_name || 'Current',
-                                site_id: location_update.site_id
+                                currentPOI: locationUpdate.site_name || 'Current',
+                                site_id: locationUpdate.site_id
                             };
                         }
                     }
@@ -141,56 +155,62 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                 });
             }
 
-            npc_resolution.forEach(res => {
-                if (!res.name) return;
+            // 3. Narrative npc_resolution (Narrative Snappings)
+            if (updates.npc_resolution) {
+                updates.npc_resolution.forEach(res => {
+                    if (!res.name) return;
+                    const normalizedName = res.name.toLowerCase().trim();
 
-                const normalizedName = res.name.toLowerCase().trim();
+                    // Filter out player/companions
+                    const isPlayer = state.playerCharacter?.name && state.playerCharacter.name.toLowerCase().trim() === normalizedName;
+                    const isCompanion = state.companions?.some(c => c.name && c.name.toLowerCase().trim() === normalizedName);
+                    if (isPlayer || isCompanion) return;
 
-                // Prevent duplicating the player or companions as an NPC
-                const isPlayer = state.playerCharacter?.name && state.playerCharacter.name.toLowerCase().trim() === normalizedName;
-                const isCompanion = state.companions?.some(c => c.name && c.name.toLowerCase().trim() === normalizedName);
-                if (isPlayer || isCompanion) {
-                    return; // Skip resolution for player/companion entities
-                }
+                    const index = updatedNpcs.findIndex(n => n.name && n.name.toLowerCase().trim() === normalizedName);
 
-                const index = updatedNpcs.findIndex(n => n.name && n.name.toLowerCase().trim() === normalizedName);
-
-                if (res.action === 'leaves') {
-                    // DEPARTURE LOGIC: Clear spatial anchors to remove from active scene
-                    if (index > -1) {
-                        updatedNpcs[index] = {
-                            ...updatedNpcs[index],
-                            currentPOI: 'Unknown',
-                            site_id: undefined,
-                            isFollowing: false,
-                            presenceMode: 'Physical' // Reset on departure
+                    if (res.action === 'leaves') {
+                        if (index > -1) {
+                            updatedNpcs[index] = {
+                                ...updatedNpcs[index],
+                                currentPOI: 'Unknown',
+                                site_id: undefined,
+                                isFollowing: false,
+                                presenceMode: 'Physical'
+                            };
+                        }
+                    } else if (res.action === 'existing' || res.action === 'new') {
+                        const npcData: Partial<NPC> = {
+                            name: res.name,
+                            currentPOI: locationUpdate?.site_name || 'Current',
+                            site_id: locationUpdate?.site_id,
+                            isFollowing: res.isFollowing,
+                            presenceMode: res.presenceMode || 'Physical'
                         };
-                    }
-                } else if (res.action === 'existing' || res.action === 'new') {
-                    // SNAPPING LOGIC: Anchor to the current site context
-                    const npcData: Partial<NPC> = {
-                        name: res.name,
-                        currentPOI: location_update?.site_name || 'Current',
-                        site_id: location_update?.site_id,
-                        isFollowing: res.isFollowing,
-                        presenceMode: res.presenceMode || 'Physical'
-                    };
 
-                    if (index > -1) {
-                        // Update existing actor with new narrative context
-                        updatedNpcs[index] = { ...updatedNpcs[index], ...npcData };
-                    } else if (res.action === 'new') {
-                        // Instantiate new actor in registry
-                        updatedNpcs.push({
-                            id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                            relationship: 0,
-                            status: 'Alive', // Auditor will refine this if the extraction says they are dead
-                            ...npcData,
-                            isNew: true
-                        } as NPC);
+                        if (index > -1) {
+                            // --- TRAVEL GUARD: npc_resolution ---
+                            // Check if this NPC is being "teleported" to a new site without authorization.
+                            const existing = updatedNpcs[index];
+                            const isMovingToNewSite = isPOIChange && npcData.currentPOI !== existing.currentPOI;
+                            
+                            // If they are stationary or staying behind, block any snap to the new site.
+                            if (isMovingToNewSite && !existing.willTravel) {
+                                return; // Hard block: DO NOT snap their location
+                            }
+
+                            updatedNpcs[index] = { ...updatedNpcs[index], ...npcData };
+                        } else if (res.action === 'new') {
+                            updatedNpcs.push({
+                                id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                                relationship: 0,
+                                status: 'Alive',
+                                ...npcData,
+                                isNew: true
+                            } as NPC);
+                        }
                     }
-                }
-            });
+                });
+            }
 
             return { ...state, npcs: updatedNpcs };
         }

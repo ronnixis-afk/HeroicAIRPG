@@ -6,7 +6,7 @@ import { GameAction, GameData, ChatMessage, ActorSuggestion, MapZone, DiceRollRe
 import { generateZoneDetails, generatePoisForZone, parseTravelIntent, verifyCombatRelevance, expandEncounterPlot, preloadAdjacentZones, resolveLocaleCreation } from '../../services/geminiService';
 import { generateEncounterRoll, getUnifiedProceduralPrompt, getClearPlotPrompt, getSkillFailurePrompt, getSkillSuccessPrompt } from '../../utils/EncounterMechanics';
 import { parseGameTime, addDuration, formatGameTime } from '../../utils/timeUtils';
-import { getTravelSpeed, parseCoords, parseHostility, getPOITheme } from '../../utils/mapUtils';
+import { getTravelSpeed, parseCoords, parseHostility, getPOITheme, ensureUniqueTitle, isLocaleMatch } from '../../utils/mapUtils';
 import { useWorldSelectors } from './useWorldSelectors';
 import { useUI } from '../../context/UIContext';
 
@@ -43,6 +43,11 @@ export const useTravel = (
         let generatedDescription = "";
         let currentPois: any[] = [];
 
+        const globalReservedNames = [
+            ...(gameData.mapZones || []).map(z => z.name),
+            ...(gameData.knowledge || []).map(k => k.title)
+        ];
+
         setIsAiGenerating(true);
 
         try {
@@ -53,7 +58,7 @@ export const useTravel = (
                 const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
                 const effectiveHint = directions.includes(locationName.toLowerCase()) ? "Uncharted Lands" : locationName;
 
-                const details = await generateZoneDetails(coordinates, effectiveHint, "", gameData.mapSettings, gameData.worldSummary);
+                const details = await generateZoneDetails(coordinates, effectiveHint, "", gameData.mapSettings, gameData.worldSummary, globalReservedNames);
                 generatedDescription = details.description;
                 const newZone: MapZone = {
                     id: `zone-${coordinates}-${Date.now()}`,
@@ -68,33 +73,62 @@ export const useTravel = (
                     keywords: details.keywords || []
                 };
                 zone = newZone;
-                dispatch({ type: 'UPDATE_MAP_ZONE', payload: newZone });
-
                 // Generate POIs on-the-fly for the newly discovered zone
-                currentPois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings);
+                const existingPoisAtCoords = gameData.knowledge?.filter(k => k.coordinates === coordinates && (k.tags?.includes('location') || k.tags?.includes('poi'))) || [];
+                
+                const localTakenNames = [...globalReservedNames];
+                currentPois = await generatePoisForZone(newZone, gameData.worldSummary || "", gameData.mapSettings, localTakenNames);
                 const knowledgeEntries: Omit<LoreEntry, 'id'>[] = currentPois.map(p => {
-                    const tags = ['location'];
+                    const tags = ['location', 'poi'];
                     if (p.isPopulationCenter) tags.push('population-center');
                     if (p.baseType) tags.push(p.baseType);
                     
+                    // Smart Match for discovery too, in case some POIs were preloaded
+                    const localMatch = existingPoisAtCoords.find(ep => isLocaleMatch(ep.title, p.title));
+                    const uniqueTitle = localMatch 
+                        ? localMatch.title 
+                        : ensureUniqueTitle(p.title, localTakenNames, newZone.name);
+                    
+                    localTakenNames.push(uniqueTitle);
+
                     return {
-                        title: p.title,
+                        title: uniqueTitle,
                         content: p.content,
                         coordinates: newZone.coordinates,
                         tags: tags,
-                        isNew: true,
-                        visited: p.title.toLowerCase().includes('open area')
+                        isNew: !localMatch,
+                        visited: uniqueTitle.toLowerCase().includes('open area')
                     };
                 });
-                dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledgeEntries });
 
-                // If no target locale was specified, land in the newly created unique "Open Area"
-                if (!targetLocale) {
-                    const openArea = knowledgeEntries.find(k => (k.title || "").toLowerCase().includes('open area'));
-                    if (openArea) {
-                        localeEntry = openArea as LoreEntry;
+                // --- FINAL SYSTEM SYNC: Resolve Discovery Landing Site ---
+                // Now that the zone name is officially generated, re-snap the system state to the official name.
+                const finalizedArrivalSite = `Open Area of ${newZone.name}`;
+                
+                // Deduplicate before dispatching
+                const filteredEntries = knowledgeEntries.filter(ke => !existingPoisAtCoords.some(ep => (ep.title || "").toLowerCase().trim() === (ke.title || "").toLowerCase().trim())).map(k => ({
+                    ...k,
+                    id: `know-disc-${Date.now()}-${Math.random()}`
+                } as LoreEntry));
+
+                dispatch({
+                    type: 'AI_UPDATE',
+                    payload: {
+                        current_site_name: finalizedArrivalSite,
+                        currentLocale: finalizedArrivalSite,
+                        mapZones: [newZone],
+                        knowledge: filteredEntries, // Added as knowledge
+                        // Correction for discovery: Move traveling NPCs to the actual zone name landing site
+                        npcUpdates: (gameData.npcs || [])
+                            .filter(n => n.currentPOI && n.currentPOI.toLowerCase().includes('open area'))
+                            .map(n => ({ id: n.id, currentPOI: finalizedArrivalSite }))
                     }
-                }
+                });
+                
+                // Update our local reference for narration
+                currentPois = knowledgeEntries;
+                const openArea = filteredEntries.find(k => k.title.toLowerCase().includes('open area'));
+                if (openArea) localeEntry = openArea;
             } else {
                 // Return visit or Preloaded zone
                 if (!zone.visited) {
@@ -103,9 +137,10 @@ export const useTravel = (
                     dispatch({ type: 'UPDATE_MAP_ZONE', payload: { ...zone, visited: true, isLoading: false } });
                 }
 
-                // CHECK FOR LAZY POIs: If knowledge only has "Open Area", trigger generation
+                // CHECK FOR LAZY POIs: If knowledge only has "Open Area" (or just one other landmark), trigger generation
                 const existingPoisAtCoords = gameData.knowledge?.filter(k => k.coordinates === coordinates && k.tags?.includes('location')) || [];
-                const hasDetailedPois = existingPoisAtCoords.some(k => !k.title.toLowerCase().includes('open area'));
+                // If we have fewer than 3 POIs, it's likely a skeleton zone (Open Area + Settlement) that needs its 3 landmarks.
+                const hasDetailedPois = existingPoisAtCoords.length >= 3;
 
                 if (!hasDetailedPois) {
                     dispatch({
@@ -118,24 +153,30 @@ export const useTravel = (
                         }
                     });
 
-                    const allKnownNames = [
-                        ...(gameData.mapZones || []).map(z => z.name),
-                        ...(gameData.knowledge || []).map(k => k.title)
-                    ];
-                    currentPois = await generatePoisForZone(zone, gameData.worldSummary || "", gameData.mapSettings, allKnownNames);
+                    const localTakenNames = [...globalReservedNames];
+                    currentPois = await generatePoisForZone(zone, gameData.worldSummary || "", gameData.mapSettings, localTakenNames);
                     const knowledgeEntries: LoreEntry[] = currentPois.map(p => {
-                        const tags = ['location'];
+                        const tags = ['location', 'poi'];
                         if (p.isPopulationCenter) tags.push('population-center');
                         if (p.baseType) tags.push(p.baseType);
                         
+                        // Smart Match: If this landmark (or something very similar) already exists AT THESE COORDS, reuse its name.
+                        // This prevents creating "Iron Forge 2" when we are just lazy-loading details for "Iron Forge".
+                        const localMatch = existingPoisAtCoords.find(ep => isLocaleMatch(ep.title, p.title));
+                        const uniqueTitle = localMatch 
+                            ? localMatch.title 
+                            : ensureUniqueTitle(p.title, localTakenNames, zone?.name);
+                            
+                        localTakenNames.push(uniqueTitle);
+
                         return {
-                            id: `know-lazy-${Date.now()}-${Math.random()}`,
-                            title: p.title,
+                            id: localMatch?.id || `know-lazy-${Date.now()}-${Math.random()}`,
+                            title: uniqueTitle,
                             content: p.content,
                             coordinates: zone?.coordinates || coordinates,
                             tags: tags,
-                            isNew: true,
-                            visited: p.title.toLowerCase().includes('open area')
+                            isNew: !localMatch,
+                            visited: uniqueTitle.toLowerCase().includes('open area')
                         };
                     });
                     
@@ -151,26 +192,12 @@ export const useTravel = (
             }
 
             // 1.5 Final Locale Resolution: 
-            // If targetLocale was specified, try to find it in the current set of POIs.
-            // If it's a cardinal direction or not found, always fallback to "Open Area".
-            const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
-            const isCardinal = directions.includes((targetLocale || "").toLowerCase());
-            
-            if (targetLocale && !isCardinal) {
-                const matchedPoi = currentPois.find(p => 
-                    (p.title || "").toLowerCase() === targetLocale.toLowerCase() ||
-                    (p.title || "").toLowerCase().includes(targetLocale.toLowerCase()) || 
-                    targetLocale.toLowerCase().includes((p.title || "").toLowerCase())
-                );
-                if (matchedPoi) {
-                    localeEntry = matchedPoi as LoreEntry;
-                }
-            }
-
-            // Secondary fallback: If still no localeEntry, definitively use "Open Area"
-            if (!localeEntry) {
-                localeEntry = currentPois.find(p => (p.title || "").toLowerCase().includes('open area'));
-            }
+            // Simplified: Always land in the zone's "Open Area" (landing site) first.
+            // Players can then move to specific POIs from there.
+            const openAreaTitle = `Open Area of ${zone?.name}`;
+            localeEntry = currentPois.find(p => p.title === openAreaTitle) || 
+                          currentPois.find(p => (p.title || "").toLowerCase().includes('open area')) || 
+                          null;
 
             const poisText = currentPois.map(p => `- ${p.title}: ${p.content}`).join('\n');
 
@@ -394,19 +421,48 @@ export const useTravel = (
                 ? gameData.companions.find(c => c.isShip) 
                 : null;
 
-            const systemContext = `[SYSTEM] Player has arrived at: ${zone?.name || locationName} (Coordinates: ${coordinates}) ${travelMethod ? `via ${travelMethod}` : ''}.
+            const travelers = gameData.npcs.filter(n => n.willTravel).map(n => n.name).join(', ');
+            const stayedBehind = gameData.npcs.filter(n => n.isFollowing && !n.willTravel).map(n => n.name).join(', ');
+
+            const systemContext = `[SYSTEM] Player has arrived at: ${locationName} (Coordinates: ${coordinates}) ${travelMethod ? `via ${travelMethod}` : ''}.
             ${isDiscovery ? 'STATUS: Discovery / First-time arrival.' : 'STATUS: Return visit.'}
             Visual Base: "${generatedDescription || zone?.description || 'A mysterious location.'}"
+            [AUTHORIZED FOLLOWERS]: ${travelers || 'None (only player party)'}.
+            [STAYED BEHIND]: ${stayedBehind || 'None'}.
             [AVAILABLE POINTS OF INTEREST]:
             ${poisText || 'Generic wilderness.'}
             ${newGmNotes ? `[ENCOUNTER PLOT]: ${newGmNotes}` : ''}
             ${localeEntry ? `Focal Point Lore: ${localeEntry.content}` : ''}
             ${usedShip ? `[PRIMARY ENVIRONMENT]: The party is currently aboard the ${usedShip.name}.` : ''}
-            NARRATIVE DIRECTIVE: The transition is complete. ${usedShip ? `Narrate the arrival while emphasizing the party is still aboard the ${usedShip.name} which is at rest within ${zone?.name || locationName}.` : `Narrate the arrival at ${zone?.name || locationName} (${coordinates}).`} Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" (or ${usedShip ? usedShip.name : 'your landing site'}) as your immediate locale while framing other landmarks as distant features or nearby points of interest.`;
+            NARRATIVE DIRECTIVE: The transition is complete. ${usedShip ? `Narrate the arrival while emphasizing the party is still aboard the ${usedShip.name} which is at rest within ${zone?.name || locationName}.` : `Narrate the arrival at ${zone?.name || locationName} (${coordinates}).`} IMPORTANT: Narrate the arrival for the player ${travelers ? `and following NPCs: ${travelers}` : 'only'}. If any NPCs [STAYED BEHIND], they are NOT present in this scene. Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" (or ${usedShip ? usedShip.name : 'your landing site'}) as your immediate locale while framing other landmarks as distant features or nearby points of interest.`;
 
-            const resultNarration = await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
+            const matchedPoi = (gameData.knowledge || []).find(k => 
+                k.coordinates === coordinates && 
+                k.tags?.includes('location') && 
+                isLocaleMatch(k.title, locationName)
+            );
+
+            const resultNarration = await submitAutomatedEvent(
+                `I have arrived at ${locationName}.`, 
+                mechanicsResult, 
+                systemContext,
+                locationName,
+                matchedPoi?.id
+            );
             
-            // Sequence Preloading AFTER AI narrative generation is finished
+            // --- FINAL TRUTH RE-SNAP ---
+            // Re-assert our standardized landing site after the AI narrative.
+            // This ensures that any generic 'location_update' accidentally returned during 
+            // combat initiation doesn't overwrite our zone-aware landing site.
+            dispatch({
+                type: 'AI_UPDATE',
+                payload: {
+                    current_site_name: locationName,
+                    current_site_id: matchedPoi?.id || "",
+                    currentSubLocation: "", // Clear sub-location on inter-zone travel
+                    currentLocale: (usedShip && travelMethod && /ship|boat|sail|vessel|scout|fly|airship/i.test(travelMethod)) ? usedShip.name : locationName
+                }
+            });
             const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
             const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
             preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
@@ -454,22 +510,52 @@ export const useTravel = (
             let finalTargetLocale: string | undefined = isCardinal ? undefined : destination;
 
             if (isShipTravel && shipCompanion) {
-                // Ensure ship is in party and party is marked as aboard
-                // This triggers the automatic boarding narrative in systemReducer
-                dispatch({ 
-                    type: 'AI_UPDATE', 
-                    payload: { 
-                        isAboard: true,
-                        companions: [{ id: shipCompanion.id, isInParty: true }] 
-                    } 
-                });
-                
-                // Override target locale to the ship's name to force narrative snapping
+                // Pre-boarding is already dispatched for the modal/narrative sync if needed, 
+                // but we'll include it in our Final Truth update below as well.
                 finalTargetLocale = shipCompanion.name;
             }
 
+            // --- THE ULTIMATE SYSTEM TRUTH: IMMEDIATE SYNC ---
+            // Update all location and traveler metadata immediately before the AI response.
+            const targetZone = gameData.mapZones?.find(z => z.coordinates === targetCoordinates);
+            const zoneTitle = targetZone?.name || destination;
+            
+            // Resolve if we are 'landing' at a specific known POI
+            const matchedLandmark = (gameData.knowledge || []).find(k => 
+                k.coordinates === targetCoordinates && 
+                k.tags?.includes('location') && 
+                isLocaleMatch(k.title, finalTargetLocale || destination)
+            );
+
+            const arrivalSiteName = matchedLandmark ? matchedLandmark.title : `Open Area of ${zoneTitle}`;
+            
+            // FORCE SYSTEM TRUTH: Location name is the POI if matched, otherwise 'Open Area'.
+            const systemSiteTruth = (isShipTravel && shipCompanion) ? shipCompanion.name : arrivalSiteName;
+
+            dispatch({
+                type: 'AI_UPDATE',
+                payload: {
+                    playerCoordinates: targetCoordinates,
+                    current_site_name: arrivalSiteName,
+                    current_site_id: matchedLandmark?.id || "",
+                    currentLocale: systemSiteTruth, 
+                    isAboard: isShipTravel ? true : false,
+                    // Finalize NPC positions immediately
+                    npcUpdates: gameData.npcs.map(n => {
+                        if (n.willTravel) {
+                            return { id: n.id, currentPOI: systemSiteTruth, willTravel: false };
+                        }
+                        // For those who stayed behind, just reset the willTravel flag so it doesn't linger
+                        return { id: n.id, willTravel: false };
+                    })
+                }
+            });
+
             dispatch({ type: 'MOVE_PLAYER_ON_MAP', payload: targetCoordinates });
-            return await processArrival(targetCoordinates, destination, gameData.messages, method, finalTargetLocale);
+            
+            // --- ENFORCE LANDING SITE TRUTH ---
+            // We pass the specific landing site (POI or Open Area) for system consistency.
+            return await processArrival(targetCoordinates, arrivalSiteName, gameData.messages, method, finalTargetLocale || destination);
         }
         return "";
     }, [gameData, dispatch, processArrival]);
@@ -570,10 +656,17 @@ export const useTravel = (
                         
                         if (resolution.validation_passed) {
                             // If it's a sub-location, or a valid new site in the same area
+                            const matchedSite = (gameData.knowledge || []).find(k => 
+                                k.coordinates === gameData.playerCoordinates && 
+                                k.tags?.includes('location') && 
+                                isLocaleMatch(k.title, resolution.name)
+                            );
+
                             dispatch({
                                 type: 'AI_UPDATE',
                                 payload: {
                                     current_site_name: resolution.name,
+                                    current_site_id: matchedSite?.id || "",
                                     currentSubLocation: resolution.sub_location,
                                     // If it's NOT a literal transition, we stay at the same coordinates
                                     playerCoordinates: resolution.isLiteralTransition ? undefined : gameData.playerCoordinates
@@ -590,16 +683,17 @@ export const useTravel = (
                                 }
                             });
                         } else {
-                            // Immersive failure from AI reasoning
+                            // --- IMMERSIVE FAILURE HANDLER ---
                             dispatch({
                                 type: 'ADD_MESSAGE',
                                 payload: {
-                                    id: `sys-travel-fail-imm-${Date.now()}`,
+                                    id: `sys-loc-fail-${Date.now()}`,
                                     sender: 'ai',
-                                    content: resolution.immersive_failure_message || `You search for ${dest}, but it is not here.`,
+                                    content: resolution.immersive_failure_message || `You find no sign of that location in this area.`,
                                     type: 'neutral'
                                 }
                             });
+                            return resolution.immersive_failure_message || "Location not found.";
                         }
                     } catch (e) {
                          dispatch({

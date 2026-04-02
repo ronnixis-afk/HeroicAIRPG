@@ -6,6 +6,7 @@ import NPCDetailsModal from './NPCDetailsModal';
 import PageHeader from '../PageHeader';
 import { companionToNPC } from '../../utils/npcUtils';
 import { type NPC, Companion } from '../../types';
+import { isLocaleMatch } from '../../utils/mapUtils';
 
 const NPCsView: React.FC = () => {
     const { gameData, addNPC, updateNPC, deleteNPC, updateCompanion } = useContext(GameDataContext);
@@ -44,18 +45,25 @@ const NPCsView: React.FC = () => {
         });
         const all = Array.from(uniqueMap.values());
 
-        // 2. Filter based on essential status or party membership
+        // 2. Filter strictly based on current locale OR party membership
         const filtered = all.filter(npc => {
             const isCompanion = !!npc.companionId;
-            const isEssential = npc.is_essential === true;
+            if (isCompanion) return true;
 
-            // Show if essential OR already in our party
-            if (!isEssential && !isCompanion) return false;
+            const npcLoc = (npc.currentPOI || "").toLowerCase().trim();
+            const playerLoc = (gameData.currentLocale || "").toLowerCase().trim();
+
+            const isMatch = isLocaleMatch(npc.currentPOI || "", gameData.currentLocale || "") || 
+                           npcLoc === 'with party' || 
+                           npcLoc === 'current';
+
+            if (!isMatch) return false;
 
             if (searchQuery.trim()) {
                 return npc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     npc.description?.toLowerCase().includes(searchQuery.toLowerCase());
             }
+
             return true;
         });
 

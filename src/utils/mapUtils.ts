@@ -71,11 +71,17 @@ export const isLocaleMatch = (poi1: string, poi2: string): boolean => {
     const n2 = normalizeLocale(poi2);
     if (!n1 || !n2) return false;
     
-    // Exact normalized match
+    // Exact normalized match (Always truth)
     if (n1 === n2) return true;
 
-    // Word-boundary aware prefix matching
-    // Allows "The Bar" to match "The Bar Table" or "The Bar (Restroom)"
+    // --- HARDENED GENERIC CHECK ---
+    // If either side is an 'Open Area' or 'The Wilds', we REQUIRE an exact match.
+    // This prevents 'Open Area' (Old Zone) from matching 'Open Area of New Zone' via prefix.
+    const genericNames = ['open area', 'the wilds', 'wilderness', 'uncharted', 'landing site'];
+    if (genericNames.includes(n1) || genericNames.includes(n2)) return false;
+
+    // Word-boundary aware prefix matching for sub-sites (e.g. 'The Tavern' matches 'The Tavern (Upstairs)')
+    // Only applied if we aren't dealing with generic landing areas.
     const checkPrefix = (a: string, b: string) => a.startsWith(b) && (a.length === b.length || a[b.length] === ' ' || a[b.length] === '(');
     
     return checkPrefix(n1, n2) || checkPrefix(n2, n1);
@@ -241,4 +247,33 @@ export const resolveSettlementTags = (zone: MapZone | undefined, theme: string):
     }
 
     return tags;
+};
+
+/**
+ * Ensures a title is unique within a set of reserved names.
+ * If a collision is found (highly similar name), it attempts to resolve it
+ * by appending thematic context (the zone name) or a numerical suffix.
+ */
+export const ensureUniqueTitle = (title: string, reservedNames: string[], zoneName?: string): string => {
+    if (!title) return "Uncharted Landmark";
+    
+    // Threshold 0.7 is use for the final unique guard to catch very close matches
+    if (!isNameTooSimilar(title, reservedNames, 0.7)) return title;
+
+    // Strategy 1: Append Zone name (e.g. "The Forge" -> "The Forge of Oakhaven")
+    let resolvedTitle = zoneName && !title.includes(zoneName) 
+        ? `${title} of ${zoneName}` 
+        : title;
+    
+    if (!isNameTooSimilar(resolvedTitle, reservedNames, 0.7)) return resolvedTitle;
+
+    // Strategy 2: Numerical suffix (e.g. "The Forge 2")
+    let i = 2;
+    let finalTitle = resolvedTitle;
+    while (isNameTooSimilar(finalTitle, reservedNames, 0.7) && i < 10) {
+        finalTitle = `${resolvedTitle} ${i}`;
+        i++;
+    }
+    
+    return finalTitle;
 };
