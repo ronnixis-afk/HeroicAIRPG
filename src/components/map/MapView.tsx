@@ -167,7 +167,7 @@ const MapView: React.FC = () => {
                 const isNew = zone?.isNew ?? false;
 
                 let cellStyle: React.CSSProperties = {};
-                let borderClass = isCombatActive ? 'border-transparent cursor-not-allowed opacity-50' : 'border-transparent hover:border-brand-primary/30';
+                let borderClass = isCombatActive ? 'border-transparent cursor-not-allowed' : 'border-transparent hover:border-brand-primary/30';
                 let content = null;
 
                 if (zone) {
@@ -193,6 +193,10 @@ const MapView: React.FC = () => {
                         );
                     } else {
                         // Preloaded but unvisited zones
+                        const popLevel = zone.populationLevel;
+                        const showPopIcon = popLevel && popLevel !== 'Barren';
+                        const popIconName = popLevel ? popLevel.toLowerCase() : 'settlement';
+
                         content = (
                             <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative pointer-events-none">
                                 <span
@@ -201,6 +205,13 @@ const MapView: React.FC = () => {
                                 >
                                     {zoneName}
                                 </span>
+                                {showPopIcon && (
+                                    <img 
+                                        src={`/icons/${popIconName}.png`} 
+                                        alt={popLevel} 
+                                        className="absolute bottom-0.5 right-0.5 w-4 h-4 object-contain opacity-50 z-10"
+                                    />
+                                )}
                             </div>
                         );
                     }
@@ -241,16 +252,24 @@ const MapView: React.FC = () => {
                         {content}
 
                         {isPlayerHere && (
-                            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none drop-shadow-lg">
-                                <div className={`${isCombatActive ? 'animate-pulse ring-2 ring-red-500 rounded-[var(--avatar-radius)]' : ''} transition-all duration-300`}>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none drop-shadow-lg">
+                                <div className="transition-all duration-300">
                                     <ActorAvatar 
                                         actor={gameData.playerCharacter} 
                                         size={20} 
                                         showBars={false} 
                                         showName={false}
-                                        className="!scale-100" // Ensure it doesn't scale on hover etc unless we want it to
+                                        className="!scale-100"
                                     />
                                 </div>
+                                {isCombatActive && (
+                                    <span 
+                                        className="mt-0.5 text-brand-danger font-bold leading-tight text-center whitespace-nowrap"
+                                        style={{ fontSize: `${Math.max(5, Math.min(14, 9 / scale))}px`, fontFamily: 'var(--font-inter, Inter, sans-serif)' }}
+                                    >
+                                        Travel Restricted During Combat
+                                    </span>
+                                )}
                             </div>
                         )}
                     </div>

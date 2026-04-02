@@ -136,7 +136,8 @@ const NPCViewContent: React.FC<{
 
             <div className="space-y-8">
                 <DataRow label="Appearance" value={npc.appearance} noTitle />
-                <DataRow label="History and Background" value={npc.description} noTitle />
+                {npc.companionId && <DataRow label="Personality" value={npc.personality} noTitle />}
+                <DataRow label="Background" value={npc.description} noTitle />
             </div>
 
             {(npc.location || npc.currentPOI) && (
@@ -437,7 +438,13 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
                             <AutoResizingTextarea value={editedNPC.appearance || ''} onChange={(e) => handleChange('appearance', e.target.value)} className={`${textareaClass} min-h-[80px]`} />
                         </StyledInputGroup>
 
-                        <StyledInputGroup label="History and Background">
+                        {editedNPC.companionId && (
+                            <StyledInputGroup label="Personality Profile">
+                                <AutoResizingTextarea value={editedNPC.personality || ''} onChange={(e) => handleChange('personality', e.target.value)} className={`${textareaClass} min-h-[80px]`} />
+                            </StyledInputGroup>
+                        )}
+
+                        <StyledInputGroup label="Background">
                             <AutoResizingTextarea value={editedNPC.description || ''} onChange={(e) => handleChange('description', e.target.value)} className={`${textareaClass} min-h-[100px]`} />
                         </StyledInputGroup>
 

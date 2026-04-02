@@ -16,7 +16,7 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
                 newState.combatState.currentTurnIndex = 0;
             }
 
-            const actors = [
+            const rawActors = [
                 { id: newState.playerCharacter.id, dex: newState.playerCharacter.abilityScores.dexterity.score },
                 ...newState.companions.filter(c => c.isInParty !== false).map(c => ({ id: c.id, dex: c.abilityScores.dexterity.score })),
                 // Only include actors who are NOT neutral in the initiative loop
@@ -24,6 +24,14 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
                     .filter(e => e.alignment !== 'neutral')
                     .map(e => ({ id: e.id, dex: e.abilityScores?.dexterity?.score || 10 }))
             ];
+
+            // Ensure unique actors by ID to prevent duplicate turn order entries
+            const seenIds = new Set<string>();
+            const actors = rawActors.filter(a => {
+                if (seenIds.has(a.id)) return false;
+                seenIds.add(a.id);
+                return true;
+            });
 
             const initiatives = actors.map(a => ({
                 id: a.id,
@@ -49,7 +57,15 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
             if (!newState.combatState) {
                 newState.combatState = { isActive: false, enemies: [], round: 0, turnOrder: [], currentTurnIndex: 0 };
             }
-            newState.combatState.enemies.push(action.payload);
+            
+            const existingIndex = newState.combatState.enemies.findIndex(e => e.id === action.payload.id);
+            if (existingIndex > -1) {
+                // Update existing instead of pushing duplicate
+                newState.combatState.enemies[existingIndex] = action.payload;
+            } else {
+                newState.combatState.enemies.push(action.payload);
+            }
+            
             return newState;
         }
 

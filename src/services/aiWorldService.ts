@@ -652,6 +652,7 @@ export const preloadAdjacentZones = async (
     if (missingNeighbors.length === 0) return;
 
     try {
+        const ai = getAi();
         const batchDetails = await generateBatchZoneDetails(
             missingNeighbors.map(m => ({ coords: m.coords, popLevel: m.popLevel })),
             gameData.worldSummary || "",
@@ -659,14 +660,14 @@ export const preloadAdjacentZones = async (
         );
 
         const updatedCoords = new Set<string>();
-        batchDetails.forEach(details => {
+        for (const details of batchDetails) {
             const rawCoords = (details.coordinates || "").toString().trim();
             // Fuzzy match: Extract X-Y from potentially messy AI strings
             const match = rawCoords.match(/(-?\d+)-(-?\d+)/);
             const sanitizedCoords = match ? `${match[1]}-${match[2]}` : rawCoords;
             
             const config = missingNeighbors.find(m => m.coords === sanitizedCoords);
-            if (!config) return;
+            if (!config) continue;
 
             const newZone: MapZone = {
                 id: `zone-${sanitizedCoords}-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
@@ -696,9 +697,54 @@ export const preloadAdjacentZones = async (
                     isNew: true,
                     visited: true
                 };
-                dispatchKnowledgeUpdate([openArea]);
+
+                // Generate and inject a Population Center POI for non-Barren zones
+                if (config.popLevel !== 'Barren') {
+                    const popLevel = config.popLevel.toLowerCase();
+                    try {
+                        const popRes = await ai.models.generateContent({
+                            type: 'World Building',
+                            model: 'gemini-3.1-flash-lite-preview',
+                            contents: `Generate a thematic name and brief description for a ${config.popLevel}-scale settlement that exists in the zone "${newZone.name}" (${newZone.description}).
+                            World: ${gameData.worldSummary || ''}
+                            [STRICT CONSTRAINTS]
+                            - title: MAX 3 WORDS. Must be a DISTINCT settlement name, NOT similar to "${newZone.name}".
+                            - content: MAX 20 WORDS.
+                            Return JSON: { "title": "string", "content": "string" }`,
+                            config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+                        });
+                        const popData = JSON.parse(cleanJson(popRes.text || '{}'));
+                        if (popData.title) {
+                            const popCenterPoi: Omit<LoreEntry, 'id'> = {
+                                title: popData.title,
+                                content: popData.content || `A ${config.popLevel.toLowerCase()} within ${newZone.name}.`,
+                                coordinates: newZone.coordinates,
+                                tags: ['location', 'population-center', popLevel],
+                                isNew: true,
+                                visited: false
+                            };
+                            dispatchKnowledgeUpdate([openArea, popCenterPoi]);
+                        } else {
+                            dispatchKnowledgeUpdate([openArea]);
+                        }
+                    } catch (popErr) {
+                        console.error("Pop center preload generation failed for", newZone.name, popErr);
+                        // Fallback: create a generic pop center
+                        const fallbackPop: Omit<LoreEntry, 'id'> = {
+                            title: `Local ${config.popLevel}`,
+                            content: `A modest ${config.popLevel.toLowerCase()} within the region of ${newZone.name}.`,
+                            coordinates: newZone.coordinates,
+                            tags: ['location', 'population-center', popLevel],
+                            isNew: true,
+                            visited: false
+                        };
+                        dispatchKnowledgeUpdate([openArea, fallbackPop]);
+                    }
+                } else {
+                    dispatchKnowledgeUpdate([openArea]);
+                }
             }
-        });
+        }
 
         // Fallback for any missing entries in the batch
         missingNeighbors.forEach(m => {

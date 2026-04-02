@@ -423,15 +423,9 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
     const worldContext = getWorldContext(gameData);
     const selectedHook = STORY_HOOKS[hookIndex - 1] || STORY_HOOKS[0];
 
-    const popRoll = Math.floor(Math.random() * 20) + 1;
-    let popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Barren';
-    let features: string[] = [];
-
-    if (popRoll >= 20) { popLevel = 'Capital'; features = ['Tavern', 'Market', 'Item Forge', 'Shipyard']; }
-    else if (popRoll >= 18) { popLevel = 'City'; features = ['Tavern', 'Market', 'Shipyard']; }
-    else if (popRoll >= 15) { popLevel = 'Town'; features = ['Tavern', 'Market']; }
-    else if (popRoll >= 10) { popLevel = 'Settlement'; features = ['Tavern']; }
-    else { popLevel = 'Barren'; features = []; }
+    // Starting location bypass: Always begin in a Town for a balanced early-game experience
+    const popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Town';
+    const features: string[] = ['Tavern', 'Market'];
 
     const companionContext = companions.length > 0
         ? `\n[COMPANION PROFILES]\n${companions.map(c => `Name: ${c.name}, Race: ${c.race}, Level: ${c.level}, Profession: ${c.profession}, Background: ${c.background}`).join('\n')}`
@@ -441,7 +435,8 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
 
 
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
-    const rolledThemes = [1, 2].map(() => {
+    // Roll 3 themes: all non-pop-center POIs get a system-rolled base type
+    const rolledThemes = [1, 2, 3].map(() => {
         const r1 = Math.floor(Math.random() * 10);
         const r2 = Math.floor(Math.random() * 10);
         const r3 = Math.floor(Math.random() * 10);
@@ -472,6 +467,7 @@ You MUST base the catalyst of this adventure on the following scenario:
 You MUST generate the starting zone's POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
 1. Theme: ${rolledThemes[0].themeStr}
 2. Theme: ${rolledThemes[1].themeStr}
+3. Theme: ${rolledThemes[2].themeStr}
 
 [INSTRUCTIONS]
 1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
@@ -483,9 +479,8 @@ You MUST generate the starting zone's POIs following these specific rolled theme
 4. startingZone: Create a safe haven or starting area with unique points of interest.
    - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
    - You MUST generate exactly 4 'knowledge' entries (POIs).
-     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
-     - Entry 2: [MANDATORY] Background-related landmark. This POI MUST be directly tied to ${character.name}'s past, origin, or background as a ${character.race} ${character.profession}.
-     - Entries 3-4: The 2 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1 and 2).
+     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the Town scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
+     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1, 2, and 3). One of these entries MUST also be thematically tied to ${character.name}'s past, origin, or background as a ${character.race} ${character.profession} — set "isBackgroundRelated": true on that entry.
    - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
 5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
    - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
@@ -527,18 +522,15 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             const filteredKnowledge = (data.startingZone.knowledge || []).filter((k: any) => !k.title?.toLowerCase().includes("open area"));
             
             const poisWithTypes = filteredKnowledge.map((p: any, i: number) => {
-                // Entry 0 (Pop Center) and Entry 1 (Background) don't use rolled themes
-                // Entry 2 and 3 use Themes 1 and 2
-                if (i === 1) {
-                    return { ...p, isBackgroundRelated: true };
+                // Entry 0: Population Center (no rolled theme)
+                // Entries 1-3: All use rolled themes from POI_MATRIX; background is woven into one by AI
+                if (i >= 1 && i - 1 < rolledThemes.length) {
+                    return { ...p, baseType: rolledThemes[i - 1]?.baseType, isBackgroundRelated: !!p.isBackgroundRelated };
                 }
-                if (i >= 2 && i - 2 < rolledThemes.length) {
-                    return { ...p, baseType: rolledThemes[i - 2]?.baseType, isBackgroundRelated: false };
-                }
-                return { ...p, isBackgroundRelated: false };
+                return { ...p, isBackgroundRelated: !!p.isBackgroundRelated };
             });
 
-            if (poisWithTypes.length > 0 && popLevel !== 'Barren') {
+            if (poisWithTypes.length > 0) {
                  poisWithTypes[0].isPopulationCenter = true;
             }
 

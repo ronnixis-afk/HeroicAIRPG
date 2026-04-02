@@ -138,6 +138,7 @@ export interface NPC {
   gender?: string;
   race?: string;
   appearance?: string;
+  personality?: string; // Link to companion personality if applicable
   companionId?: string; // Link to companion if applicable
   image?: string; // Optional avatar
   isNew?: boolean; // Notification flag

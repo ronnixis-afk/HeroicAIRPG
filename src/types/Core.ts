@@ -311,7 +311,26 @@ export type ItemTag = typeof ITEM_TAGS[number];
 
 export const LORE_TAGS = [
     'location', 'npc', 'faction', 'history', 'magic', 'quest', 'race',
-    'population-center', 'village', 'settlement', 'town', 'city', 'capital'
+    'population-center', 'village', 'settlement', 'town', 'city', 'capital',
+    // POI Matrix baseTypes (Fantasy)
+    'Cave / Cavern', 'Ancient Ruin', 'Shrine / Altar', 'Encampment',
+    'Tower / Spire', 'Excavation Site', 'Tunnel / Shaft', 'Bridge / Crossing',
+    'Monolith / Obelisk', 'Crossroads',
+    // POI Matrix baseTypes (Modern)
+    'Industrial Warehouse', 'Transit Station', 'Corporate Office / Clinic',
+    'Underground Network / Sewer', 'Parking Structure', 'Construction Site',
+    'Recreation Area / Park', 'Intersection / Overpass', 'Disposal Site / Junkyard',
+    'Rooftop / Helipad',
+    // POI Matrix baseTypes (Sci-Fi)
+    'Derelict Vessel', 'Research Outpost', 'Mining Extraction Facility',
+    'Spatial Anomaly', 'Relay Station / Comm Buoy', 'Orbital Habitat',
+    'Debris Field / Wreckage', 'Automated Drone Hive', "Smuggler's Cache",
+    'Alien Monolith / Precursor Ruin',
+    // POI Matrix baseTypes (Magitech)
+    'Etheric Spire', 'Synchronized Citadel', 'Prime-Logic Depot',
+    'Essence-Forge Precinct', 'Crystal-Link Relay', 'Arcane Factory',
+    'Golemetric Lab', 'Pneumatic Transit Hub', 'Alchemical Refinery',
+    'Levitation Platform'
 ] as const;
 export type LoreTag = typeof LORE_TAGS[number];
 

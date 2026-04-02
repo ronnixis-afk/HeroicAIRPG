@@ -122,7 +122,8 @@ export const companionToNPC = (companion: Companion): NPC => {
     return {
         id: `npc-${companion.id}`,
         name: companion.name,
-        description: companion.personality || companion.background || 'A trusted companion.',
+        description: companion.background || 'A trusted companion.',
+        personality: companion.personality,
         relationship: Number(companion.relationship || 0),
         status: 'Alive',
         location: 'With Party',
