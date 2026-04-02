@@ -207,7 +207,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
 
     return (
         <div id={`msg-${msg.id}`} className="flex flex-col items-start animate-fade-in w-full scroll-mt-6">
-            <div className={`relative group w-full transition-all mb-10 ${msg.mode === 'OOC' ? 'italic text-brand-text-muted/70' : ''}`}>
+            <div className={`relative group w-[90%] max-w-2xl ml-0 transition-all mb-10 ${msg.mode === 'OOC' ? 'italic text-brand-text-muted/70' : ''}`}>
                 {isUser ? (
                     <div className={`text-body-base leading-relaxed font-medium py-1 ${msg.mode === 'OOC' ? 'text-brand-text-muted/60' : 'text-brand-text-muted/50'}`}>
                         <EntityLinker text={msg.content || ''} />
