@@ -390,7 +390,7 @@ const ChatView: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto chat-scroll-container">
-                <div className="max-w-3xl mx-auto p-4 space-y-4">
+                <div className="w-[90%] max-w-2xl ml-0 p-4 space-y-4">
                     {processedMessages.map((msg, index) => {
                         if (!msg) return null;
 
