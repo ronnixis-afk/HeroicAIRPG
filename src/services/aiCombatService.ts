@@ -263,14 +263,19 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
     
     [INSTRUCTIONS]
     1. Write a brief, immersive narration of the victory and transition to exploration.
-    2. ALIGNMENT ACTIONS: Provide 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
+    2. ALIGNMENT ACTIONS (MANDATORY): You MUST provide EXACTLY 4 logical next steps. One for each alignment: 'Good', 'Evil', 'Lawful', and 'Chaotic'. 
+    - These must be distinct, high-impact choices that reflect the character's moral standing after victory.
+    - DO NOT skip any alignment. DO NOT provide fewer than 4.
 
     Return JSON: { 
       "narrative": "string (plain text prose)", 
       "location": "string", 
       "turnSummary": "string (STRICT MAX 10 WORDS concise but detailed memory for the log)",
       "alignmentOptions": [
-          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic" }
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Good" },
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Evil" },
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Lawful" },
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Chaotic" }
       ]
     }`;
 

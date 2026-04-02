@@ -21,6 +21,7 @@ import { SystemToastManager } from './chat/SystemToastManager';
 // Custom Hooks
 import { useAudioPlayback } from './chat/useAudioPlayback';
 import { DiceTray } from './chat/DiceTray';
+import { AlignmentActionTray } from './chat/AlignmentActionTray';
 
 const ChatView: React.FC = () => {
     const {
@@ -301,20 +302,36 @@ const ChatView: React.FC = () => {
         return null;
     }, [isAssessing, isAiGenerating, isAuditing, isHousekeeping]);
 
-    const latestAiMessageWithAlignment = useMemo(() => {
+    const activeAlignmentOptions = useMemo(() => {
         if (gameData?.combatState?.isActive) return null;
 
+        // Search backwards for the latest alignment offering
         for (let i = processedMessages.length - 1; i >= 0; i--) {
             const msg = processedMessages[i];
-            if (msg && msg.sender === 'user') {
-                return null; // A user message was sent after, hide options
+            
+            // FENCING: If we hit a combat start/end boundary, stop searching.
+            // We don't want to show options from before a previous fight.
+            const content = msg.content || '';
+            if (msg.sender === 'system' && (
+                content.includes('**Combat begins**') || 
+                content.includes('**Victory**') ||
+                content.includes('**Combat concludes**')
+            )) {
+                return null;
             }
-            if (msg && msg.sender === 'ai') {
-                if (msg.alignmentOptions && msg.alignmentOptions.length > 0) {
-                    return msg.id;
-                }
-                return null; // Another AI message without options was sent
+
+            // If the user already made an alignment choice, the current context is consumed
+            if (msg && msg.sender === 'user' && msg.explicitAlignment) {
+                return null;
             }
+
+            // If we find an AI message with options, these are the active ones
+            if (msg && msg.sender === 'ai' && msg.alignmentOptions && msg.alignmentOptions.length > 0) {
+                return msg.alignmentOptions;
+            }
+
+            // Skip any other messages (System logs, regular User chat, AI narration without choices)
+            // to ensure alignment buttons persist through transitions like travel or boarding.
         }
         return null;
     }, [processedMessages, gameData?.combatState?.isActive]);
@@ -415,7 +432,7 @@ const ChatView: React.FC = () => {
                                     msg={msg}
                                     onSpeak={speak}
                                     isPlaying={playingMessageId === msg.id}
-                                    showAlignmentOptions={msg.id === latestAiMessageWithAlignment}
+                                    showAlignmentOptions={false}
                                     onClearChat={() => handleClearPrevious(msg.id)}
                                     isLatest={isLatest}
                                 />
@@ -445,9 +462,13 @@ const ChatView: React.FC = () => {
                     <div ref={chatEndRef} className="h-1" />
                 </div>
             </div>
+
+            {activeAlignmentOptions && activeAlignmentOptions.length > 0 && (
+                <AlignmentActionTray options={activeAlignmentOptions} />
+            )}
             {charactersWithUnspentTraits.length > 0 && (
                 <div 
-                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce-subtle cursor-pointer"
+                    className={`absolute ${activeAlignmentOptions && activeAlignmentOptions.length > 0 ? 'bottom-[92px]' : 'bottom-[44px]'} left-1/2 -translate-x-1/2 z-50 animate-bounce-subtle cursor-pointer transition-all duration-500`}
                     onClick={() => {
                         const first = charactersWithUnspentTraits[0];
                         setSelectedCharacterId(first.id);

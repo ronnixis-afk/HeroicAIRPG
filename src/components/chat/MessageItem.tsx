@@ -207,9 +207,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
 
     return (
         <div id={`msg-${msg.id}`} className="flex flex-col items-start animate-fade-in w-full scroll-mt-6">
-            <div className={`relative group w-full ${isUser
-                ? "bg-transparent border-none max-w-[83%]"
-                : "bg-transparent max-w-[83%] font-normal mb-1"
+            <div className={`relative group w-full px-4 py-3 rounded-2xl border border-white/[0.04] mb-4 max-w-[88%] lg:max-w-[83%] transition-all ${isUser
+                ? "bg-white/[0.01]"
+                : "bg-white/[0.02] font-normal"
                 } ${msg.mode === 'OOC' ? 'italic text-brand-text-muted/70' : ''}`}>
                 {isUser ? (
                     <div className={`text-body-base leading-relaxed font-medium py-1 ${msg.mode === 'OOC' ? 'text-brand-text-muted/60' : 'text-brand-text-muted/50'}`}>
@@ -225,35 +225,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                         
                         {!isRevealing && msg.rolls && <DiceTray rolls={msg.rolls} />}
 
-                        {!isRevealing && showAlignmentOptions && msg.alignmentOptions && msg.alignmentOptions.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-4 animate-fade-in">
-                                {msg.alignmentOptions.map((opt, idx) => {
-                                    let iconFile = '';
-                                    if (opt.alignment === 'Good') iconFile = '/icons/good-alignment.png';
-                                    else if (opt.alignment === 'Evil') iconFile = '/icons/evil-alignment.png';
-                                    else if (opt.alignment === 'Lawful') iconFile = '/icons/lawful-alignment.png';
-                                    else if (opt.alignment === 'Chaotic') iconFile = '/icons/chaotic-alignment.png';
 
-                                    return (
-                                        <button
-                                            key={idx}
-                                            onClick={() => {
-                                                const event = new CustomEvent('alignment-action', {
-                                                    detail: { label: opt.label, alignment: opt.alignment }
-                                                });
-                                                window.dispatchEvent(event);
-                                            }}
-                                            className="px-4 h-8 text-xs font-bold rounded-full transition-all flex items-center gap-2 text-white bg-[#1C1C1E] hover:bg-[#2C2C2E] shadow-sm transform hover:scale-[1.02] active:scale-95"
-                                        >
-                                            {iconFile && (
-                                                <img src={iconFile} alt={opt.alignment} className="w-[25px] h-[25px] object-contain drop-shadow-md" />
-                                            )}
-                                            {opt.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
 
                         {/* Contextual Action Tray: Slides out on hover/focus */}
                         {!isRevealing && (

@@ -155,7 +155,14 @@ export const useCombatLootHandler = (
                         sender: 'ai',
                         content: res.narrative,
                         location: res.location || preCombatLocation,
-                        alignmentOptions: res.alignmentOptions
+                        alignmentOptions: (res.alignmentOptions && res.alignmentOptions.length > 0) 
+                            ? res.alignmentOptions 
+                            : [
+                                { label: 'Celebrate Honorably', alignment: 'Good' },
+                                { label: 'Loot Mercilessly', alignment: 'Evil' },
+                                { label: 'Establish Order', alignment: 'Lawful' },
+                                { label: 'Embrace the Chaos', alignment: 'Chaotic' }
+                              ]
                     };
 
                     dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
