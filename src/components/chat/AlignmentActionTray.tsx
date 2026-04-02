@@ -58,7 +58,7 @@ export const AlignmentActionTray: React.FC<AlignmentActionTrayProps> = ({ option
                                 });
                                 window.dispatchEvent(event);
                             }}
-                            className="shrink-0 px-2 h-9 text-body-tiny font-bold rounded-xl transition-all flex items-center gap-2 text-white bg-brand-surface/90 hover:bg-brand-surface border border-white/5 active:scale-95 shadow-lg backdrop-blur-md"
+                            className="shrink-0 px-3 h-9 text-body-sm font-bold rounded-xl transition-all flex items-center gap-2 text-white bg-brand-surface/90 hover:bg-brand-surface border border-white/5 active:scale-95 shadow-lg backdrop-blur-md"
                         >
                             {iconFile && (
                                 <img src={iconFile} alt={opt.alignment} className="shrink-0 w-[20px] h-[20px] object-contain drop-shadow-md" />

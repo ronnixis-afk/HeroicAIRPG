@@ -403,7 +403,7 @@ const GameInterface: React.FC = () => {
         </div>
       </main>
 
-      <div className="flex-shrink-0 bg-brand-bg/95 backdrop-blur-sm border-t border-brand-primary/10">
+      <div className="flex-shrink-0 bg-brand-bg/95 backdrop-blur-sm border-t border-brand-primary/10 relative z-50">
         <div className="max-w-3xl mx-auto p-2">
           {isCombatActive && activeView === 'chat' && gameData ? (
             <CombatControls
