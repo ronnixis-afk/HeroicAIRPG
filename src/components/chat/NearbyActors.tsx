@@ -27,18 +27,30 @@ export const NearbyActors: React.FC<NearbyActorsProps> = ({ gameData, refineNPC 
     }, [gameData.companions]);
 
     const nearbyNPCs = useMemo(() => {
-        const { npcs, currentLocale } = gameData;
+        const { npcs, currentLocale, current_site_id, playerCoordinates } = gameData;
         const partyNames = new Set(activeCompanions.map(c => c.name.toLowerCase().trim()));
 
         return (npcs || []).filter(npc => {
             const npcPOI = npc.currentPOI || "";
+            // 1. ID Match (Highest Priority)
+            if (npc.site_id && current_site_id && npc.site_id === current_site_id) {
+                return true;
+            }
+
+            // 2. Name Match (with coordinate gate for generic areas)
             const isAtLocale = isLocaleMatch(npcPOI, currentLocale || "");
+            const isGeneric = npcPOI.toLowerCase().includes('open area') || npcPOI === 'The Wilds';
+            const coordMatch = !npc.location_coords || !playerCoordinates || npc.location_coords === playerCoordinates;
+            
+            const finalLocaleMatch = isAtLocale && (!isGeneric || coordMatch);
+
             const inParty = npc.companionId || partyNames.has(npc.name?.toLowerCase() || '');
             const isPresent = npc.status?.toLowerCase() !== 'dead' || !npc.isBodyCleared;
             const isPhysical = npc.presenceMode !== 'Remote';
-            return isAtLocale && !inParty && !npc.isShip && isPresent && isPhysical;
+            
+            return finalLocaleMatch && !inParty && !npc.isShip && isPresent && isPhysical;
         });
-    }, [gameData.npcs, gameData.currentLocale, activeCompanions]);
+    }, [gameData.npcs, gameData.currentLocale, gameData.current_site_id, gameData.playerCoordinates, activeCompanions]);
 
     // Close menu when clicking outside
     useEffect(() => {

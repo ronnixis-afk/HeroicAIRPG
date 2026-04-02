@@ -133,6 +133,7 @@ export interface NPC {
   isBodyCleared?: boolean; // True if the corpse was removed
   location?: string; // The Zone name
   currentPOI?: string; // The specific site/locale name
+  location_coords?: string; // NEW: The coordinates of the zone
   // Fix: Added site_id to NPC interface to support machine-readable spatial anchoring
   site_id?: string;
   gender?: string;

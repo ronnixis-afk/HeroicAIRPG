@@ -401,7 +401,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
 
     // SYSTEM MANAGED: Always inject the "Open Area" as the 4th/primary POI
     const openArea = {
-        title: "Open Area",
+        title: `Open Area of ${zone.name}`,
         content: `The immediate arrival area of ${zone.name}. ${zone.description || "A localized region in the world."}`
     };
 
@@ -690,7 +690,7 @@ export const preloadAdjacentZones = async (
             // Inject "Open Area" immediately so the zone is technically landing-ready
             if (dispatchKnowledgeUpdate) {
                 const openArea: Omit<LoreEntry, 'id'> = {
-                    title: "Open Area",
+                    title: `Open Area of ${newZone.name}`,
                     content: `The immediate arrival area of ${newZone.name}. ${newZone.description}`,
                     coordinates: newZone.coordinates,
                     tags: ['location'],
@@ -768,7 +768,7 @@ export const preloadAdjacentZones = async (
 
                 if (dispatchKnowledgeUpdate) {
                     const openArea: Omit<LoreEntry, 'id'> = {
-                        title: "Open Area",
+                        title: `Open Area of ${fallbackZone.name}`,
                         content: `The immediate arrival area of ${fallbackZone.name}. ${fallbackZone.description}`,
                         coordinates: fallbackZone.coordinates,
                         tags: ['location'],

@@ -130,10 +130,9 @@ export const useExtractionStep = (
                 const anyShip = (gameData.companions || []).find(c => c.isShip);
                 const isShipTravel = !!(forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty);
                 
-                // STICKY SITE PREVENTION: If AI suggests we are at the same POI but we moved zones (and not on a ship), 
-                // we assume it's a hallucination or carry-over of the previous POI and force it to "Open Area".
                 const isStickyPOI = !isShipTravel && (narratorLoc.site_name === gameData.current_site_name);
-                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (isStickyPOI ? 'Open Area' : (narratorLoc.site_name || 'Open Area'));
+                const currentZoneName = targetZone ? targetZone.name : ((gameData.mapZones || []).find(z => z.coordinates === newCoords)?.name || 'The Wilds');
+                const forcedSiteName = isShipTravel && anyShip ? anyShip.name : (isStickyPOI ? `Open Area of ${currentZoneName}` : (narratorLoc.site_name || `Open Area of ${currentZoneName}`));
                 const forcedSiteId = isShipTravel && anyShip ? `ship-${anyShip.id}` : (isStickyPOI ? `open-area-${newCoords}` : (narratorLoc.site_id || `open-area-${newCoords}`));
 
                 if (targetZone) {
@@ -204,10 +203,9 @@ export const useExtractionStep = (
                 // If we are forcing a move (e.g. traveling), but the narrator thinks we stayed, 
                 // we force the location update to the target coordinates regardless.
                 const currentZone = (gameData.mapZones || []).find(z => z.coordinates === snapCoords);
-                
                 const anyShip = (gameData.companions || []).find(c => c.isShip);
                 const isShipTravel = forcedCoordinates && forcedCoordinates !== gameData.playerCoordinates && anyShip?.isInParty;
-                const forcedSiteName = isShipTravel ? anyShip.name : 'Open Area';
+                const forcedSiteName = isShipTravel ? anyShip.name : `Open Area of ${currentZone?.name || 'The Wilds'}`;
 
                 finalUpdates.location_update = {
                     ...narratorLoc,
@@ -266,7 +264,7 @@ export const useExtractionStep = (
                             ...narratorLoc,
                             coordinates: gameData.playerCoordinates || '0-0',
                             zone: gameData.current_site_name || 'The Wilds',
-                            site_name: gameData.current_site_name || 'Open Area',
+                            site_name: gameData.current_site_name || `Open Area of ${gameData.current_site_name || 'The Wilds'}`,
                             site_id: gameData.current_site_id || `open-area-${gameData.playerCoordinates}`,
                             is_new_site: false,
                             transition_type: 'staying'

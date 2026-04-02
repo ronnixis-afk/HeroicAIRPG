@@ -206,7 +206,7 @@ export type GameAction =
   | { type: 'MARK_ALL_PLOT_POINTS_SEEN' }
 
   | { type: 'ADD_NPC'; payload: NPC }
-  | { type: 'UPDATE_NPC'; payload: NPC }
+  | { type: 'UPDATE_NPC'; payload: Partial<NPC> & { id: string } }
   | { type: 'DELETE_NPC'; payload: string }
   | { type: 'MARK_ALL_NPCS_SEEN' }
   | { type: 'SET_NPCS_WILL_TRAVEL'; payload: { ids: string[]; willTravel: boolean } }

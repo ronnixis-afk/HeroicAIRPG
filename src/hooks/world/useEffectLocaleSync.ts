@@ -30,13 +30,24 @@ export const useEffectLocaleSync = (
         // 1. Identify NPCs at the current locale using semantic container matching
         const nearbyNPCs = (gameData.npcs || []).filter(npc => {
             const npcPOI = npc.currentPOI || "";
-            // NPCs are nearby if they match the narrative locale, OR if they are following the party.
-            // This ensures characters like followers appear even when the party is 'enclosed' on a ship.
-            const isAtLocale = isLocaleMatch(npcPOI, currentLocale) || npc.isFollowing === true;
+            
+            // 1. ID Match or Following (Highest Priority)
+            if ((npc.site_id && gameData.current_site_id && npc.site_id === gameData.current_site_id) || npc.isFollowing) {
+                return true;
+            }
+
+            // 2. Name Match (with coordinate gate for generic areas)
+            const isAtLocale = isLocaleMatch(npcPOI, currentLocale);
+            const isGeneric = npcPOI.toLowerCase().includes('open area') || npcPOI === 'The Wilds';
+            const coordMatch = !npc.location_coords || !gameData.playerCoordinates || npc.location_coords === gameData.playerCoordinates;
+            
+            const finalLocaleMatch = isAtLocale && (!isGeneric || coordMatch);
+
             const inParty = npc.companionId || partyNames.has(npc.name?.toLowerCase().trim() || '');
             const isAlive = npc.status !== 'Dead';
             const isPhysical = npc.presenceMode !== 'Remote';
-            return isAtLocale && !inParty && !npc.isShip && isAlive && isPhysical;
+            
+            return finalLocaleMatch && !inParty && !npc.isShip && isAlive && isPhysical;
         });
 
         // 2. Comparison Logic (Performance optimized string check)

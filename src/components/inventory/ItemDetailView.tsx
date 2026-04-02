@@ -30,12 +30,15 @@ interface ItemDetailViewProps {
     onEquipRequest?: () => void;
     onUnequipRequest?: () => void;
     onActionCompleted?: () => void;
+    isEditing?: boolean;
+    onIsEditingChange?: (isEditing: boolean) => void;
     hideName?: boolean;
 }
 
 export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     item, ownerId, character, fromList, primaryCurrencyItemId,
-    onEquipRequest, onUnequipRequest, onActionCompleted, hideName
+    onEquipRequest, onUnequipRequest, onActionCompleted, 
+    isEditing: externalIsEditing, onIsEditingChange, hideName
 }) => {
     const { gameData, dropItem, splitItem, updateItem, moveItem, useItem, sellItem, transferItem, consolidateCurrency, performPlayerAttack } = useContext(GameDataContext) as GameDataContextType;
 
@@ -47,7 +50,12 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
     const [isDropModalOpen, setIsDropModalOpen] = useState(false);
     const [isSplitModalOpen, setIsSplitModalOpen] = useState(false);
     const [isSellModalOpen, setIsSellModalOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditingInternal, setIsEditingInternal] = useState(false);
+    const isEditing = externalIsEditing !== undefined ? externalIsEditing : isEditingInternal;
+    const setIsEditing = (val: boolean) => {
+        if (onIsEditingChange) onIsEditingChange(val);
+        else setIsEditingInternal(val);
+    };
     const [isTargetDropdownOpen, setIsTargetDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const targetDropdownRef = useRef<HTMLDivElement>(null);
@@ -712,14 +720,6 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             </div>
                         </div>
 
-                         <Button
-                            onClick={() => setIsEditing(true)}
-                            variant="secondary"
-                            className="w-full mt-6"
-                            icon="edit"
-                        >
-                            Edit Item
-                        </Button>
 
                         <Button 
                             onClick={() => setIsDropModalOpen(true)} 

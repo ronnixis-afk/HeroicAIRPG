@@ -75,8 +75,9 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
             return {
                 ...state,
                 npcs: currentNpcs.map(npc => npc.id === action.payload.id ? {
+                    ...npc,
                     ...action.payload,
-                    relationship: Number(action.payload.relationship || 0)
+                    relationship: Number(action.payload.relationship !== undefined ? action.payload.relationship : npc.relationship || 0)
                 } : npc)
             };
         case 'DELETE_NPC':

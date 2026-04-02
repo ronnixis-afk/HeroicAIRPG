@@ -88,9 +88,9 @@ export const useTravel = (
                 });
                 dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledgeEntries });
 
-                // If no target locale was specified, land in the newly created "Open Area"
+                // If no target locale was specified, land in the newly created unique "Open Area"
                 if (!targetLocale) {
-                    const openArea = knowledgeEntries.find(k => k.title.toLowerCase().includes('open area'));
+                    const openArea = knowledgeEntries.find(k => (k.title || "").toLowerCase().includes('open area'));
                     if (openArea) {
                         localeEntry = openArea as LoreEntry;
                     }

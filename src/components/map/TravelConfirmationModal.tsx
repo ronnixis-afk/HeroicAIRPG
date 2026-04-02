@@ -75,24 +75,27 @@ export const TravelConfirmationModal: React.FC = () => {
     if (!pendingTravelConfirmation) return null;
 
     const handleConfirm = async () => {
-        const { destination, targetCoords } = pendingTravelConfirmation!;
+        if (!pendingTravelConfirmation) return;
+        const { destination, targetCoords } = pendingTravelConfirmation;
         const finalMethod = selectedMethod || 'Walk';
         
-        // 1. Authorize selected NPCs for travel in the state
+        // 1. Synchronize NPC travel status
         if (dispatch) {
+            // Identify which NPCs were REJECTED (were following but now unselected)
+            const rejectedNpcIds = initialFollowing
+                .map(n => n.id)
+                .filter(id => !authorizedNpcIds.includes(id));
+
+            // Clear follow state for rejected NPCs so they stay at the current location
+            rejectedNpcIds.forEach(id => {
+                dispatch({ type: 'UPDATE_NPC', payload: { id, isFollowing: false } });
+            });
+
+            // Finally, mark authorized NPCs for travel
             dispatch({
                 type: 'SET_NPCS_WILL_TRAVEL',
                 payload: { ids: authorizedNpcIds, willTravel: true }
             });
-            
-            // De-authorize others that were following but not selected
-            const toDeauthorize = initialFollowing.filter(n => !authorizedNpcIds.includes(n.id)).map(n => n.id);
-            if (toDeauthorize.length > 0) {
-                dispatch({
-                    type: 'SET_NPCS_WILL_TRAVEL',
-                    payload: { ids: toDeauthorize, willTravel: false }
-                });
-            }
         }
 
         setPendingTravelConfirmation(null);

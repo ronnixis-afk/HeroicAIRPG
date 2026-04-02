@@ -9,6 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   hideHeader?: boolean;
+  onEdit?: () => void;
   children: ReactNode;
   footer?: ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
@@ -19,6 +20,7 @@ const Modal: React.FC<ModalProps> = ({
   onClose, 
   title, 
   hideHeader, 
+  onEdit,
   children, 
   footer,
   maxWidth = 'lg' 
@@ -54,13 +56,27 @@ const Modal: React.FC<ModalProps> = ({
             <h3 id="modal-title" className="text-brand-text truncate pr-4 mb-0">
               {title}
             </h3>
-            <button
-              onClick={onClose}
-              className="btn-icon text-brand-text-muted hover:text-brand-text hover:bg-white/5 transition-all p-2 rounded-full"
-              aria-label="Close modal"
-            >
-              <Icon name="close" className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  className="btn-icon text-brand-text-muted hover:text-brand-accent hover:bg-white/5 transition-all p-2 rounded-full group"
+                  aria-label="Edit"
+                >
+                  <Icon name="edit" className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="btn-icon text-brand-text-muted hover:text-brand-text hover:bg-white/5 transition-all p-2 rounded-full"
+                aria-label="Close modal"
+              >
+                <Icon name="close" className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         )}
 

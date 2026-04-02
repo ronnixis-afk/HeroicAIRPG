@@ -52,10 +52,9 @@ const PillSelect: React.FC<{
 
 const NPCViewContent: React.FC<{
     npc: NPC;
-    onEdit: () => void;
     onInvite: () => void;
     isInviting: boolean;
-}> = ({ npc, onEdit, onInvite, isInviting }) => {
+}> = ({ npc, onInvite, isInviting }) => {
     const [isMemoriesOpen, setIsMemoriesOpen] = useState(false);
     const relInfo = getRelationshipLabel(npc.relationship);
 
@@ -90,47 +89,56 @@ const NPCViewContent: React.FC<{
 
     return (
         <div className="space-y-8 animate-fade-in pb-4">
+            <div className="space-y-1">
+                <h3 className="text-brand-text mb-0 truncate">{toTitleCase(npc.name)}</h3>
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold text-brand-accent/60 bg-brand-accent/5 px-2 py-0.5 rounded border border-brand-accent/10">
+                        NPC ID: {npc.id.replace('npc-', '')}
+                    </span>
+                    <span className={`text-[10px] font-bold ${relInfo.color.replace('bg-', 'text-')} bg-brand-bg px-2 py-0.5 rounded border border-brand-surface`}>
+                        {toTitleCase(relInfo.label)}
+                    </span>
+                </div>
+            </div>
+
             <div className="space-y-5">
-                <div className="flex justify-between items-center gap-4">
-                    <div className="flex flex-wrap gap-2">
-                        {npc.race && (
-                            <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border ${getRaceColor(npc.race)}`}>
-                                {toTitleCase(npc.race)}
-                            </span>
-                        )}
-                        {npc.gender && (
-                            <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border ${getGenderColor(npc.gender)}`}>
-                                {toTitleCase(npc.gender)}
-                            </span>
-                        )}
-                        {npc.status !== 'Alive' && (
-                            <span className="text-[10px] font-bold text-brand-danger bg-brand-danger/10 px-3 py-1 rounded-lg border border-brand-danger/20">
-                                {toTitleCase(npc.status)}
-                            </span>
-                        )}
-                        {npc.presenceMode === 'Remote' && (
-                            <span className="text-[10px] font-bold text-blue-400 bg-blue-900/20 px-3 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1">
-                                <Icon name="radio" className="w-3 h-3" />
-                                Remote
-                            </span>
-                        )}
-                        {npc.is_essential && (
-                            <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-lg border border-yellow-500/20 flex items-center gap-1">
-                                <Icon name="starFill" className="w-3 h-3" />
-                                Essential
-                            </span>
-                        )}
-                    </div>
+                <div className="flex flex-wrap gap-2">
+                    {npc.race && (
+                        <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border ${getRaceColor(npc.race)}`}>
+                            {toTitleCase(npc.race)}
+                        </span>
+                    )}
+                    {npc.gender && (
+                        <span className={`text-[10px] font-bold px-3 py-1 rounded-lg border ${getGenderColor(npc.gender)}`}>
+                            {toTitleCase(npc.gender)}
+                        </span>
+                    )}
+                    {npc.status !== 'Alive' && (
+                        <span className="text-[10px] font-bold text-brand-danger bg-brand-danger/10 px-3 py-1 rounded-lg border border-brand-danger/20">
+                            {toTitleCase(npc.status)}
+                        </span>
+                    )}
+                    {npc.presenceMode === 'Remote' && (
+                        <span className="text-[10px] font-bold text-blue-400 bg-blue-900/20 px-3 py-1 rounded-lg border border-blue-500/20 flex items-center gap-1">
+                            <Icon name="radio" className="w-3 h-3" />
+                            Remote
+                        </span>
+                    )}
+                    {npc.is_essential && (
+                        <span className="text-[10px] font-bold text-yellow-400 bg-yellow-900/20 px-3 py-1 rounded-lg border border-yellow-500/20 flex items-center gap-1">
+                            <Icon name="starFill" className="w-3 h-3" />
+                            Essential
+                        </span>
+                    )}
                 </div>
 
                 <div className="bg-brand-primary/10 p-5 rounded-2xl border border-brand-surface shadow-inner">
-                    <div className="flex justify-between items-center mb-3">
-                        <label className="text-xs font-bold text-brand-text-muted opacity-60">Current Standing</label>
+                    <div className="flex justify-between items-center">
+                        <label className="text-xs font-bold text-brand-text-muted opacity-60">Relationship Progress</label>
                         <span className={`text-xs font-bold ${relInfo.color.replace('bg-', 'text-')}`}>
-                            {toTitleCase(relInfo.label)} ({npc.relationship > 0 ? '+' : ''}{npc.relationship})
+                            {npc.relationship > 0 ? '+' : ''}{npc.relationship} / 50
                         </span>
                     </div>
-
                 </div>
             </div>
 
@@ -169,7 +177,7 @@ const NPCViewContent: React.FC<{
                     onClick={() => setIsMemoriesOpen(true)}
                     variant="secondary"
                     size="sm"
-                    className="w-full py-3 rounded-xl border-dashed border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all font-bold"
+                    className="w-full py-4 rounded-xl border-dashed border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all font-bold"
                     icon="history"
                 >
                     View Memories
@@ -227,16 +235,6 @@ const NPCViewContent: React.FC<{
                         icon="character"
                     >
                         Invite to Party
-                    </Button>
-
-                    <Button
-                        onClick={onEdit}
-                        variant="secondary"
-                        size="lg"
-                        className="w-full"
-                        icon="edit"
-                    >
-                        Edit Profile
                     </Button>
                 </div>
             )}
@@ -346,11 +344,15 @@ const NPCDetailsModal: React.FC<NPCDetailsModalProps> = ({ isOpen, onClose, npc,
     const difficultyPresets: DifficultyPreset[] = ['Weak', 'Normal', 'Elite', 'Boss'];
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? toTitleCase("Edit Record") : toTitleCase(editedNPC.name)}>
+        <Modal 
+            isOpen={isOpen} 
+            onClose={onClose} 
+            title={isEditing ? toTitleCase("Edit Record") : ""}
+            onEdit={!isEditing ? () => setIsEditing(true) : undefined}
+        >
             {!isEditing ? (
                 <NPCViewContent
                     npc={editedNPC}
-                    onEdit={() => setIsEditing(true)}
                     onInvite={handleInvite}
                     isInviting={isInviting}
                 />

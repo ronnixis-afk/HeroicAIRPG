@@ -5,7 +5,7 @@ import Modal from '../Modal';
 import { ItemDetailView } from '../inventory/ItemDetailView';
 import NPCDetailsModal from '../npcs/NPCDetailsModal';
 import { LoreEntry, NPC, Item, MapZone, Companion } from '../../types';
-import { companionToNPC, fixCasing } from '../../utils/npcUtils';
+import { companionToNPC, fixCasing, toTitleCase } from '../../utils/npcUtils';
 
 const getHostilityLabel = (value: number): { label: string, color: string } => {
     if (value <= -16) return { label: 'Sanctuary', color: 'text-emerald-400' };
@@ -16,13 +16,17 @@ const getHostilityLabel = (value: number): { label: string, color: string } => {
 };
 
 export const EntityLightbox: React.FC = () => {
+    const [isItemEditing, setIsItemEditing] = React.useState(false);
     const { inspectedEntity, setInspectedEntity } = useUI();
     const { gameData, updateNPC, deleteNPC, updateCompanion } = useContext(GameDataContext);
 
     if (!inspectedEntity || !gameData) return null;
 
     const { type, data } = inspectedEntity;
-    const onClose = () => setInspectedEntity(null);
+    const onClose = () => {
+        setInspectedEntity(null);
+        setIsItemEditing(false);
+    };
 
     const handleNpcSave = (updatedNpc: NPC) => {
         updateNPC(updatedNpc);
@@ -62,13 +66,15 @@ export const EntityLightbox: React.FC = () => {
                         character={gameData.playerCharacter}
                         fromList="carried"
                         onActionCompleted={onClose}
-                        hideName={true}
+                        isEditing={isItemEditing}
+                        onIsEditingChange={setIsItemEditing}
+                        hideName={false}
                     />
                 );
             case 'npc':
                 let npcData: NPC;
                 if ('experiencePoints' in data) {
-                    const registryEntry = gameData.npcs?.find(n => n.companionId === data.id);
+                    const registryEntry = gameData.npcs?.find(n => n.companionId === (data as Companion).id);
                     npcData = registryEntry || companionToNPC(data as Companion);
                 } else {
                     npcData = data as NPC;
@@ -175,10 +181,10 @@ export const EntityLightbox: React.FC = () => {
     if (type === 'npc') return renderContent();
 
     const getTitle = () => {
-        if (type === 'item') return (data as Item).name;
+        if (type === 'item') return "";
         if (type === 'location') return (data as any).name || 'Discovery Detail';
         if (type === 'lore' || type === 'objective') return (data as LoreEntry).title;
-        return 'Information';
+        return "";
     };
 
     return (
@@ -186,6 +192,7 @@ export const EntityLightbox: React.FC = () => {
             isOpen={true}
             onClose={onClose}
             title={getTitle()}
+            onEdit={type === 'item' && !isItemEditing ? () => setIsItemEditing(true) : undefined}
         >
             {renderContent()}
         </Modal>

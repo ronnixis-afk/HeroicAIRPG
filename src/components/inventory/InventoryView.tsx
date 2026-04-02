@@ -13,6 +13,7 @@ import Modal from '../Modal';
 import { InventoryTab } from './InventoryTab';
 import { InventoryGridItem } from './InventoryGridItem';
 import { ItemDetailView } from './ItemDetailView';
+import { toTitleCase } from '../../utils/npcUtils';
 import PageHeader from '../PageHeader';
 
 type InventoryListType = 'carried' | 'storage' | 'assets';
@@ -57,6 +58,7 @@ const InventoryView: React.FC = () => {
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
     const [equipModalItemId, setEquipModalItemId] = useState<string | null>(null);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isItemEditing, setIsItemEditing] = useState(false);
 
     // Batch Selection State
     const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -167,6 +169,7 @@ const InventoryView: React.FC = () => {
         } else {
             if (item.isNew) markInventoryItemAsSeen(item.id, activeOwner);
             setSelectedItemId(item.id);
+            setIsItemEditing(false);
         }
     };
 
@@ -458,7 +461,12 @@ const InventoryView: React.FC = () => {
             )}
 
             {selectedItemData && (
-                <Modal isOpen={!!selectedItemId} onClose={() => setSelectedItemId(null)} hideHeader={true}>
+                <Modal 
+                    isOpen={!!selectedItemId} 
+                    onClose={() => setSelectedItemId(null)}
+                    title=""
+                    onEdit={!isItemEditing ? () => setIsItemEditing(true) : undefined}
+                >
                     <ItemDetailView
                         item={selectedItemData.item}
                         ownerId={activeOwner}
@@ -471,6 +479,8 @@ const InventoryView: React.FC = () => {
                             setSelectedItemId(null);
                         }}
                         onActionCompleted={() => setSelectedItemId(null)}
+                        isEditing={isItemEditing}
+                        onIsEditingChange={setIsItemEditing}
                     />
                 </Modal>
             )}

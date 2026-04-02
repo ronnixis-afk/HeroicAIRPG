@@ -30,17 +30,18 @@ export const AlignmentActionTray: React.FC<AlignmentActionTrayProps> = ({ option
     if (!options || options.length === 0) return null;
 
     return (
-        <div className="w-full relative px-1 pb-3 pt-2 animate-entrance z-10">
-            {/* Left Edge Fade Indicator */}
-            <div 
-                className={`absolute left-0 top-0 bottom-3 w-12 bg-gradient-to-r from-brand-bg to-transparent z-10 pointer-events-none transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`} 
-            />
+        <div className="w-full flex justify-start pointer-events-none">
+            <div className="w-fit max-w-full relative px-1 pb-3 pt-2 animate-entrance z-10 pointer-events-auto">
+                {/* Left Edge Fade Indicator */}
+                <div 
+                    className={`absolute left-0 top-0 bottom-3 w-12 bg-gradient-to-r from-brand-bg to-transparent z-10 pointer-events-none transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`} 
+                />
 
             {/* Scrollable Container */}
             <div 
                 ref={scrollRef}
                 onScroll={checkScrollOverflow}
-                className="flex flex-nowrap justify-start gap-2 overflow-x-auto no-scrollbar scroll-smooth px-4"
+                className="grid grid-rows-2 grid-flow-col gap-2 overflow-x-auto no-scrollbar scroll-smooth px-4 h-[84px] content-start"
             >
                 {options.map((opt, idx) => {
                     let iconFile = '';
@@ -73,6 +74,7 @@ export const AlignmentActionTray: React.FC<AlignmentActionTrayProps> = ({ option
             <div 
                 className={`absolute right-0 top-0 bottom-3 w-12 bg-gradient-to-l from-brand-bg to-transparent z-10 pointer-events-none transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0'}`} 
             />
+        </div>
         </div>
     );
 };

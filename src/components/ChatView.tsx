@@ -463,12 +463,14 @@ const ChatView: React.FC = () => {
                 </div>
             </div>
 
-            {activeAlignmentOptions && activeAlignmentOptions.length > 0 && (
-                <AlignmentActionTray options={activeAlignmentOptions} />
-            )}
+            <div className="w-full max-w-4xl mx-auto">
+                {activeAlignmentOptions && activeAlignmentOptions.length > 0 && (
+                    <AlignmentActionTray options={activeAlignmentOptions} />
+                )}
+            </div>
             {charactersWithUnspentTraits.length > 0 && (
                 <div 
-                    className={`absolute ${activeAlignmentOptions && activeAlignmentOptions.length > 0 ? 'bottom-[92px]' : 'bottom-[44px]'} left-1/2 -translate-x-1/2 z-50 animate-bounce-subtle cursor-pointer transition-all duration-500`}
+                    className={`absolute ${activeAlignmentOptions && activeAlignmentOptions.length > 0 ? 'bottom-[136px]' : 'bottom-[44px]'} left-1/2 -translate-x-1/2 z-50 animate-bounce-subtle cursor-pointer transition-all duration-500`}
                     onClick={() => {
                         const first = charactersWithUnspentTraits[0];
                         setSelectedCharacterId(first.id);

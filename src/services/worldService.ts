@@ -135,9 +135,11 @@ const hydrateWorldData = (savedGameData: any): GameData => {
 
         // Legacy site_id fallback
         if (!hydratedNpc.site_id && hydratedNpc.currentPOI) {
-            const isLocalOpenArea = hydratedNpc.currentPOI === 'Open Area' || hydratedNpc.currentPOI === 'The Wilds';
-            hydratedNpc.site_id = isLocalOpenArea && npc.location_coords 
-                ? `open-area-${npc.location_coords}` 
+            const isLocalOpenArea = (hydratedNpc.currentPOI || "").toLowerCase().includes('open area') || hydratedNpc.currentPOI === 'The Wilds';
+            // Use coordinates if available for uniqueness, otherwise slugify the name
+            const coords = npc.location_coords || mergedData.playerCoordinates || '0-0';
+            hydratedNpc.site_id = isLocalOpenArea 
+                ? `open-area-${coords}` 
                 : slugify(hydratedNpc.currentPOI);
         }
 
@@ -196,10 +198,11 @@ const hydrateWorldData = (savedGameData: any): GameData => {
     // Story Logs Site ID Injection
     mergedData.story = mergedData.story.map((log: any) => {
         if (!log.site_id && (log.locale || log.location)) {
-            const isGeneric = log.locale === 'Open Area' || log.location === 'Open Area';
+            const locName = log.locale || log.location || "";
+            const isGeneric = locName.toLowerCase().includes('open area') || locName === 'Open Area';
             log.site_id = isGeneric && log.coordinates 
                 ? `open-area-${log.coordinates}` 
-                : slugify(log.locale || log.location);
+                : slugify(locName);
         }
         return log;
     });
