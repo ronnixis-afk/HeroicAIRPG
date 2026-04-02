@@ -359,7 +359,7 @@ export const useTravel = (
                     }
                 });
 
-                // Manual preloading of adjacent zones
+                // Sequence Preloading AFTER narrative message is dispatched
                 const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
                 const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
                 preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
@@ -404,16 +404,15 @@ export const useTravel = (
             ${usedShip ? `[PRIMARY ENVIRONMENT]: The party is currently aboard the ${usedShip.name}.` : ''}
             NARRATIVE DIRECTIVE: The transition is complete. ${usedShip ? `Narrate the arrival while emphasizing the party is still aboard the ${usedShip.name} which is at rest within ${zone?.name || locationName}.` : `Narrate the arrival at ${zone?.name || locationName} (${coordinates}).`} Seamlessly weave the [AVAILABLE POINTS OF INTEREST] and [ENCOUNTER PLOT] into the description. Portray the "Open Area" (or ${usedShip ? usedShip.name : 'your landing site'}) as your immediate locale while framing other landmarks as distant features or nearby points of interest.`;
 
-            return await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
-
-            // Trigger silent preloading
+            const resultNarration = await submitAutomatedEvent(`I have arrived at ${locationName}.`, mechanicsResult, systemContext);
+            
+            // Sequence Preloading AFTER AI narrative generation is finished
             const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
             const dispatchKnowledgeUpdate = (knowledge: Omit<LoreEntry, 'id'>[]) => dispatch({ type: 'ADD_KNOWLEDGE', payload: knowledge });
-            const currentData = gameData;
-            if (currentData) {
-                preloadAdjacentZones(coordinates, currentData!.mapZones || [], currentData!, dispatchZoneUpdate, dispatchKnowledgeUpdate, currentData!.knowledge || [])
-                    .catch(e => console.error("Silent preloading failed:", e));
-            }
+            preloadAdjacentZones(coordinates, gameData.mapZones || [], gameData, dispatchZoneUpdate, dispatchKnowledgeUpdate, gameData.knowledge || [])
+                .catch(e => console.error("Silent preloading failed:", e));
+
+            return resultNarration;
 
         } catch (e) {
             console.error("Arrival failed", e);

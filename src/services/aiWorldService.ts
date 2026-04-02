@@ -746,10 +746,10 @@ export const preloadAdjacentZones = async (
             }
         }
 
-        // Fallback for any missing entries in the batch
+        // Fallback for any missing entries in the batch or failed generations
         missingNeighbors.forEach(m => {
             if (!updatedCoords.has(m.coords)) {
-                dispatchZoneUpdate({
+                const fallbackZone: MapZone = {
                     id: `zone-${m.coords}-fallback-${Date.now()}`,
                     coordinates: m.coords,
                     name: "Uncharted Wilds",
@@ -762,7 +762,35 @@ export const preloadAdjacentZones = async (
                     isLoading: false,
                     tags: ['location'],
                     keywords: []
-                } as MapZone);
+                };
+
+                dispatchZoneUpdate(fallbackZone);
+
+                if (dispatchKnowledgeUpdate) {
+                    const openArea: Omit<LoreEntry, 'id'> = {
+                        title: "Open Area",
+                        content: `The immediate arrival area of ${fallbackZone.name}. ${fallbackZone.description}`,
+                        coordinates: fallbackZone.coordinates,
+                        tags: ['location'],
+                        isNew: true,
+                        visited: true
+                    };
+
+                    if (m.popLevel !== 'Barren') {
+                        const popLevelLabel = m.popLevel.toLowerCase();
+                        const fallbackPop: Omit<LoreEntry, 'id'> = {
+                            title: `Local ${m.popLevel}`,
+                            content: `A modest ${popLevelLabel} within the region of ${fallbackZone.name}.`,
+                            coordinates: fallbackZone.coordinates,
+                            tags: ['location', 'population-center', popLevelLabel],
+                            isNew: true,
+                            visited: false
+                        };
+                        dispatchKnowledgeUpdate([openArea, fallbackPop]);
+                    } else {
+                        dispatchKnowledgeUpdate([openArea]);
+                    }
+                }
             }
         });
     } catch (e) {
