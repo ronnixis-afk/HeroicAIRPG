@@ -287,7 +287,7 @@ const WorldView: React.FC = () => {
                             if (rest.length > 0) {
                                 return (
                                     <div key={i} className="pl-4 border-l-2 border-brand-accent/20">
-                                        <div className="text-[10px] font-bold text-brand-accent uppercase tracking-wider mb-1">{header}</div>
+                                        <div className="text-[10px] font-bold text-brand-accent mb-1">{header}</div>
                                         <div className="text-body-base text-brand-text leading-relaxed opacity-90 italic">
                                             {rest.join(':').trim()}
                                         </div>

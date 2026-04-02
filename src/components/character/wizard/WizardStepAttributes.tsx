@@ -76,7 +76,7 @@ export const WizardStepAttributes: React.FC<WizardStepAttributesProps> = ({
                 </p>
                 <div className="mt-4 inline-flex items-center gap-3 bg-brand-primary/30 px-6 py-2 rounded-full border border-brand-primary">
                     <span className="font-bold text-brand-text-muted text-sm">Points Remaining</span>
-                    <span className={`text-xl font-black ${remainingPoints > 0 ? 'text-brand-accent' : (remainingPoints < 0 ? 'text-brand-danger' : 'text-brand-text')}`}>
+                    <span className={`text-xl font-bold ${remainingPoints > 0 ? 'text-brand-accent' : (remainingPoints < 0 ? 'text-brand-danger' : 'text-brand-text')}`}>
                         {remainingPoints} / 32
                     </span>
                 </div>
@@ -185,7 +185,7 @@ export const WizardStepAttributes: React.FC<WizardStepAttributesProps> = ({
                                         {isGuaranteed && <span className="text-[9px] text-brand-accent bg-brand-accent/10 px-1.5 py-0.5 rounded-sm border border-brand-accent/20">Trait</span>}
                                     </span>
                                 </div>
-                                <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize tracking-normal">{ability.slice(0, 3)}</span>
+                                <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize">{ability.slice(0, 3)}</span>
                             </div>
                         );
                     })}

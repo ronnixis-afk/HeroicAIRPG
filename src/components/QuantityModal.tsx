@@ -170,7 +170,7 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
                 
                 {showCompare && (
                   <div className="p-4 bg-brand-surface border border-white/10 rounded-2xl animate-modal shadow-xl">
-                    <p className="text-[10px] font-bold text-brand-text-muted mb-2 tracking-wider opacity-60">Currently Equipped</p>
+                    <p className="text-[10px] font-bold text-brand-text-muted mb-2 opacity-60">Currently Equipped</p>
                     <div className="flex justify-between items-start mb-2">
                       <h4 className={`text-sm mb-0 ${getItemRarityColor(equippedInSlot.rarity)}`}>{equippedInSlot.name}</h4>
                       {equippedInSlot.armorStats && (

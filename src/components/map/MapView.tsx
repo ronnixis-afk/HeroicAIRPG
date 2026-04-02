@@ -184,7 +184,7 @@ const MapView: React.FC = () => {
                         content = (
                             <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative">
                                 <span
-                                    className="font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none tracking-normal"
+                                    className="font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none"
                                     style={{ fontSize: `${fontSize}px` }}
                                 >
                                     {zoneName}
@@ -200,7 +200,7 @@ const MapView: React.FC = () => {
                         content = (
                             <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative pointer-events-none">
                                 <span
-                                    className="font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 tracking-normal"
+                                    className="font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10"
                                     style={{ fontSize: `${fontSize}px` }}
                                 >
                                     {zoneName}
@@ -303,7 +303,7 @@ const MapView: React.FC = () => {
 
             <div className="absolute top-4 left-4 z-30 bg-brand-surface/90 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-brand-primary shadow-lg pointer-events-none">
                 <div className="flex flex-col">
-                    <span className="text-xs font-mono text-brand-accent font-bold mb-1.5 tracking-normal">{selectedCoords || playerCoordinates}</span>
+                    <span className="text-xs font-mono text-brand-accent font-bold mb-1.5">{selectedCoords || playerCoordinates}</span>
                     <div className="flex items-center gap-2 text-[10px] text-brand-text-muted border-t border-brand-primary/30 pt-1.5 mt-0.5">
                         <div className="w-10 h-3 border border-brand-text-muted/30 flex items-center justify-center text-[7px] font-bold">1 Cell</div>
                         <span className="font-bold">≈ {mapSettings.gridDistance} {mapSettings.gridUnit}</span>

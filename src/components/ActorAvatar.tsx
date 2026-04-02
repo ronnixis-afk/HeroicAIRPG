@@ -97,7 +97,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
     const isDead = isStatusDead || (maxHp > 0 && currentHp <= 0);
     const isLowHp = maxHp > 0 && !isDead && hpRatio <= 0.25;
     const hasStatus = (a.statusEffects?.length || 0) > 0;
-    const initials = a.name ? a.name.slice(0, 2).toUpperCase() : '??';
+    const initials = a.name ? a.name.slice(0, 1).toUpperCase() + a.name.slice(1, 2).toLowerCase() : '??';
     
     // Health bar always uses the green brand accent
     const finalHpColor = 'var(--color-status-hp)';
@@ -135,7 +135,7 @@ export const ActorAvatar: React.FC<ActorAvatarProps> = ({
                     {popups.map(popup => (
                         <span 
                             key={popup.id}
-                            className={`absolute font-black text-sm filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] animate-float-up ${popup.type === 'damage' ? 'text-brand-danger' : 'text-brand-accent'}`}
+                            className={`absolute font-bold text-sm filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] animate-float-up ${popup.type === 'damage' ? 'text-brand-danger' : 'text-brand-accent'}`}
                         >
                             {popup.value}
                         </span>

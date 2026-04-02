@@ -189,7 +189,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
-                                <label className="text-body-sm font-bold text-brand-text tracking-normal">
+                                <label className="text-body-sm font-bold text-brand-text">
                                     {getGoodEvilLabel(character.alignment?.goodEvil || 0)}({character.alignment?.goodEvil || 0})
                                 </label>
                             </div>
@@ -205,7 +205,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
 
                         <div className="w-full">
                             <div className="flex justify-center items-end mb-2 px-1">
-                                <label className="text-body-sm font-bold text-brand-text tracking-normal">
+                                <label className="text-body-sm font-bold text-brand-text">
                                     {getLawChaosLabel(character.alignment?.lawChaos || 0)}({character.alignment?.lawChaos || 0})
                                 </label>
                             </div>

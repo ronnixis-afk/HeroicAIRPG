@@ -41,7 +41,7 @@ export const SystemMessageGroup: React.FC<{ messages: ChatMessage[] }> = ({ mess
                         name="chevronDown" 
                         className={`w-2.5 h-2.5 transition-transform duration-300 ${isOpen ? '' : '-rotate-90'} opacity-60 group-hover:opacity-100`} 
                     />
-                    <span className="text-body-sm font-bold tracking-normal">Logs ({messages.length})</span>
+                    <span className="text-body-sm font-bold">Logs ({messages.length})</span>
                 </div>
 
                 {/* Trailing Line */}

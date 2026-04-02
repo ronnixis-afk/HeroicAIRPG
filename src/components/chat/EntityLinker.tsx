@@ -46,7 +46,7 @@ export const EntityLinker: React.FC<EntityLinkerProps> = ({ text }) => {
                             e.stopPropagation();
                             setInspectedEntity({ type: match.type, data: match.data });
                         }}
-                        className="inline font-bold text-white underline decoration-white/40 decoration-dotted underline-offset-4 hover:decoration-brand-accent hover:text-brand-accent transition-all cursor-pointer select-text tracking-normal"
+                        className="inline font-bold text-white underline decoration-white/40 decoration-dotted underline-offset-4 hover:decoration-brand-accent hover:text-brand-accent transition-all cursor-pointer select-text"
                     >
                         {part}
                     </button>

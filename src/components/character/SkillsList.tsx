@@ -35,7 +35,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
         <div className="animate-fade-in space-y-6">
             <div className="px-1">
                 <h5 className="mb-0">Character Skills</h5>
-                <p className="text-body-sm text-brand-text-muted font-medium tracking-normal opacity-70">
+                <p className="text-body-sm text-brand-text-muted font-medium opacity-70">
                     Configuration: <span className="text-brand-accent font-bold">{config}</span>
                 </p>
             </div>
@@ -89,7 +89,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
                              <div className="flex flex-col min-w-0 flex-grow">
                                  <span className="text-body-sm font-semibold truncate group-hover:text-brand-text transition-colors">{skill}</span>
                              </div>
-                             <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize tracking-normal">{ability.slice(0, 3)}</span>
+                             <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize">{ability.slice(0, 3)}</span>
                          </div>
                      );
                  })}

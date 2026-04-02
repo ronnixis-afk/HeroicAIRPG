@@ -101,7 +101,7 @@ const RecruitView: React.FC = () => {
                                     <h4 className="text-lg font-bold text-brand-text-muted">{getFeatureLabel('mount')}</h4>
                                     <p className="text-xs text-brand-text-muted mt-1 leading-relaxed">Acquire a loyal mount to travel faster across the dangerous wilderness.</p>
                                 </div>
-                                <div className="absolute top-4 right-4 bg-brand-primary/20 px-2 py-0.5 rounded-full text-[8px] font-bold text-brand-text-muted uppercase tracking-widest">
+                                <div className="absolute top-4 right-4 bg-brand-primary/20 px-2 py-0.5 rounded-full text-[8px] font-bold text-brand-text-muted">
                                     Planned
                                 </div>
                             </button>

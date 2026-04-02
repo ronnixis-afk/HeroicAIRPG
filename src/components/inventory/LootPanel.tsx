@@ -63,7 +63,7 @@ const LootPanel: React.FC = () => {
                 ) : (
                     <div className="space-y-8 pb-4">
                         <div className="bg-brand-primary/10 p-5 rounded-3xl border border-brand-surface shadow-inner">
-                            <h5 className="text-[10px] font-bold text-brand-text-muted tracking-normal mb-4 px-1 leading-none">Defeated Foes</h5>
+                            <h5 className="text-[10px] font-bold text-brand-text-muted mb-4 px-1 leading-none">Defeated Foes</h5>
                             <div className="flex flex-wrap gap-2">
                                 {lootState.defeatedEnemies.map(enemy => (
                                     <span key={enemy.id} className="bg-brand-danger/10 text-brand-danger text-[10px] font-bold px-4 py-1.5 rounded-lg border border-brand-danger/20 shadow-sm leading-none">
@@ -74,7 +74,7 @@ const LootPanel: React.FC = () => {
                         </div>
 
                         <div className="space-y-3">
-                            <label className="block text-[10px] font-bold text-brand-text-muted tracking-normal mb-4 px-1 leading-none">Found Loot</label>
+                            <label className="block text-[10px] font-bold text-brand-text-muted mb-4 px-1 leading-none">Found Loot</label>
                             <div className="space-y-3 max-h-[40vh] overflow-y-auto custom-scroll pr-2">
                                 {lootState.items.length > 0 ? (
                                     lootState.items.map(item => <LootItemDisplay key={item.id} item={item} />)

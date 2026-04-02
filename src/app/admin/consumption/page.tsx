@@ -49,7 +49,7 @@ export default function AdminConsumptionPage() {
                 </p>
                 <button 
                     onClick={() => window.location.href = '/'}
-                    className="px-6 py-3 rounded-xl bg-brand-primary/10 border border-brand-primary/20 hover:bg-brand-primary/20 transition-all font-bold text-brand-accent tracking-wide"
+                    className="px-6 py-3 rounded-xl bg-brand-primary/10 border border-brand-primary/20 hover:bg-brand-primary/20 transition-all font-bold text-brand-accent"
                 >
                     Return to the Outer Realms
                 </button>

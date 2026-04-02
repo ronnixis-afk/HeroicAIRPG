@@ -381,8 +381,8 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                                         <span className={`text-body-base font-bold truncate ${isSelected ? 'text-brand-accent' : 'text-brand-text'}`}>{source.name}</span>
                                                         <div className="flex items-center gap-2">
                                                             {rarity && <span className={`text-[8px] font-bold ${rarityColorClass} opacity-80`}>{toTitleCase(rarity || 'Core')}</span>}
-                                                            {costDisplay && <span className="text-[8px] font-bold text-brand-accent bg-brand-accent/10 px-1.5 py-0.5 rounded border border-brand-accent/20 tracking-normal">{costDisplay}</span>}
-                                                            {disabledReason && <span className="text-[8px] font-bold text-brand-danger bg-brand-danger/10 px-1.5 py-0.5 rounded border border-brand-danger/20 tracking-normal">{disabledReason}</span>}
+                                                            {costDisplay && <span className="text-[8px] font-bold text-brand-accent bg-brand-accent/10 px-1.5 py-0.5 rounded border border-brand-accent/20">{costDisplay}</span>}
+                                                            {disabledReason && <span className="text-[8px] font-bold text-brand-danger bg-brand-danger/10 px-1.5 py-0.5 rounded border border-brand-danger/20">{disabledReason}</span>}
                                                         </div>
                                                     </div>
                                                 </div>

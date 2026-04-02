@@ -40,19 +40,19 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                     </h5>
 
                     {npc.isNew && (
-                        <span className="bg-brand-accent text-black text-[10px] px-2 py-0.5 rounded-lg shadow-sm animate-pulse tracking-normal font-bold">
+                        <span className="bg-brand-accent text-black text-[10px] px-2 py-0.5 rounded-lg shadow-sm animate-pulse font-bold">
                             New
                         </span>
                     )}
 
                     {isDead && (
-                        <span className="text-[10px] bg-brand-danger/10 text-brand-danger px-2 py-0.5 rounded-lg border border-brand-danger/20 tracking-normal font-bold">
+                        <span className="text-[10px] bg-brand-danger/10 text-brand-danger px-2 py-0.5 rounded-lg border border-brand-danger/20 font-bold">
                             Deceased
                         </span>
                     )}
 
                     {npc.companionId && !isDead && (
-                        <span className="text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-lg border border-brand-accent/20 tracking-normal font-bold">
+                        <span className="text-[10px] bg-brand-accent/10 text-brand-accent px-2 py-0.5 rounded-lg border border-brand-accent/20 font-bold">
                             Companion
                         </span>
                     )}
@@ -62,12 +62,12 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                     <div className="flex flex-wrap items-center gap-2">
                         {npc.gender && (
-                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border tracking-normal font-bold ${getGenderColor(npc.gender)}`}>
+                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border font-bold ${getGenderColor(npc.gender)}`}>
                                 {toTitleCase(npc.gender)}
                             </span>
                         )}
                         {npc.race && (
-                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border tracking-normal font-bold ${getRaceColor(npc.race)}`}>
+                            <span className={`text-[10px] px-2.5 py-1 rounded-lg border font-bold ${getRaceColor(npc.race)}`}>
                                 {toTitleCase(npc.race)}
                             </span>
                         )}

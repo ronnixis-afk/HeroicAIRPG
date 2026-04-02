@@ -93,7 +93,7 @@ export const WizardStepMethod: React.FC<WizardStepMethodProps> = ({
 
                 <div className="flex items-center gap-4 py-4">
                     <div className="h-px bg-brand-primary/30 flex-1"></div>
-                    <span className="text-[10px] font-bold text-brand-text-muted tracking-normal normal-case">Available Blueprints</span>
+                    <span className="text-[10px] font-bold text-brand-text-muted">Available Blueprints</span>
                     <div className="h-px bg-brand-primary/30 flex-1"></div>
                 </div>
 
@@ -128,19 +128,19 @@ export const WizardStepMethod: React.FC<WizardStepMethodProps> = ({
                                 <div className="grid grid-cols-2 gap-4 pt-3 border-t border-brand-primary/20">
                                     <div className="space-y-3">
                                         <div>
-                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1 tracking-normal normal-case">
+                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1">
                                                 {isShip ? 'Modules' : 'Expertise'}
                                             </label>
                                             <p className="text-[10px] font-bold text-brand-accent leading-snug line-clamp-2 capitalize">{skillList || 'Standard'}</p>
                                         </div>
                                         <div>
-                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1 tracking-normal normal-case">Combat</label>
+                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1">Combat</label>
                                             <p className="text-[10px] font-bold text-purple-400 leading-snug truncate capitalize">{combatSkill}</p>
                                         </div>
                                     </div>
                                     <div className="space-y-3">
                                         <div>
-                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1 tracking-normal normal-case">
+                                            <label className="text-[8px] font-bold text-brand-text-muted block mb-1">
                                                 {isShip ? 'Hull Reinforcement' : 'Passive Bonuses'}
                                             </label>
                                             <p className="text-[10px] font-bold text-orange-400 leading-snug line-clamp-2 capitalize">{bonusList || 'Standard'}</p>

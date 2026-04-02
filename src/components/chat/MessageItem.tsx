@@ -236,7 +236,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                                 title={isPlaying ? "Stop" : "Read aloud"}
                                             >
                                                 <Icon name={isPlaying ? "close" : "play"} className="w-3.5 h-3.5" />
-                                                <span className="font-bold tracking-normal">{isPlaying ? "Stop" : "Listen"}</span>
+                                                <span className="font-bold">{isPlaying ? "Stop" : "Listen"}</span>
                                             </button>
                                         </div>
                                         <button

@@ -1031,12 +1031,12 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         <label className="text-[10px] font-bold text-brand-text-muted opacity-60 inter ml-0.5">Foundations</label>
                                         <div className="flex flex-wrap gap-2">
                                             {setting && (
-                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent tracking-normal shadow-sm">
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent shadow-sm">
                                                     {setting}
                                                 </span>
                                             )}
                                             {selectedThemes.map(theme => (
-                                                <span key={theme} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                <span key={theme} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted">
                                                     {theme}
                                                 </span>
                                             ))}
@@ -1048,10 +1048,10 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-bold text-brand-text-muted opacity-60 inter ml-0.5">Composition</label>
                                             <div className="flex flex-wrap gap-2">
-                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted">
                                                     {numRaces} Species
                                                 </span>
-                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted tracking-normal">
+                                                <span className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-surface bg-brand-primary/30 text-brand-text-muted">
                                                     {numFactions} Powers
                                                 </span>
                                             </div>
@@ -1106,7 +1106,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                         <div className="mt-8 space-y-6 animate-fade-in max-w-4xl mx-auto px-2">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-px flex-1 bg-brand-primary/10"></div>
-                                                <h4 className="text-xl font-bold text-brand-text inter shrink-0 tracking-tight">Archetype & Skills</h4>
+                                                <h4 className="text-xl font-bold text-brand-text inter shrink-0">Archetype & Skills</h4>
                                                 <div className="h-px flex-1 bg-brand-primary/10"></div>
                                             </div>
                                             
@@ -1114,7 +1114,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                                 {Object.entries(SKILL_DEFINITIONS)
                                                     .filter(([_, def]) => def.usedIn === 'All' || (Array.isArray(def.usedIn) && (def.usedIn as any).includes(setting)))
                                                     .map(([name]) => (
-                                                        <span key={name} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent tracking-normal shadow-sm animate-fade-in">
+                                                        <span key={name} className="text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 text-brand-accent shadow-sm animate-fade-in">
                                                             {name}
                                                         </span>
                                                     ))}
@@ -1196,7 +1196,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center ml-1">
                                                     <label className="text-sm font-bold text-brand-text">Major Ancestries</label>
-                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 tracking-normal shadow-sm">{numRaces} Species</span>
+                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 shadow-sm">{numRaces} Species</span>
                                                 </div>
                                                 <input
                                                     type="range"
@@ -1228,7 +1228,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center ml-1">
                                                     <label className="text-sm font-bold text-brand-text">Major Factions</label>
-                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 tracking-normal shadow-sm">{numFactions} Powers</span>
+                                                    <span className="text-[10px] font-bold text-brand-accent px-3 py-1.5 rounded-lg border border-brand-accent/20 bg-brand-accent/5 shadow-sm">{numFactions} Powers</span>
                                                 </div>
                                                 <input
                                                     type="range"

@@ -44,8 +44,8 @@ const StatusEffectsEditor: React.FC<StatusEffectsEditorProps> = ({ statusEffects
         <div className="bg-brand-primary/10 p-4 rounded-2xl space-y-4 border border-brand-primary/30 shadow-inner">
             <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-x-4 px-2">
-                    <label className="col-span-6 text-[10px] font-bold text-brand-text-muted tracking-normal">Effect</label>
-                    <label className="col-span-4 text-[10px] font-bold text-brand-text-muted tracking-normal">Rounds</label>
+                    <label className="col-span-6 text-[10px] font-bold text-brand-text-muted">Effect</label>
+                    <label className="col-span-4 text-[10px] font-bold text-brand-text-muted">Rounds</label>
                 </div>
                 {statusEffects.map((effect, index) => (
                     <div key={index} className="grid grid-cols-12 gap-3 items-center bg-brand-surface/40 p-2 rounded-xl border border-brand-primary/50 shadow-sm animate-fade-in">

@@ -117,7 +117,7 @@ export const TravelConfirmationModal: React.FC = () => {
                 </div>
                 
                 <div className="w-full space-y-2 mb-8 text-left">
-                    <label className="text-[10px] font-bold text-brand-text-muted ml-1 tracking-normal">Choose Travel Mode</label>
+                    <label className="text-[10px] font-bold text-brand-text-muted ml-1">Choose Travel Mode</label>
                     <div className="relative">
                         <select
                             value={selectedMethod}
@@ -136,8 +136,8 @@ export const TravelConfirmationModal: React.FC = () => {
 
                 {initialFollowing.length > 0 && (
                     <div className="w-full space-y-3 mb-8 text-left animate-fade-in">
-                        <label className="text-[10px] font-bold text-brand-text-muted ml-1 tracking-normal uppercase">Authorized Followers</label>
-                        <div className="space-y-2 bg-brand-primary/10 p-4 rounded-2xl border border-brand-surface shadow-inner max-h-[30vh] overflow-y-auto custom-scrollbar">
+                        <label className="text-[10px] font-bold text-brand-text-muted ml-1">Authorized Followers</label>
+                        <div className="grid grid-cols-2 gap-2 bg-brand-primary/10 p-4 rounded-2xl border border-brand-surface shadow-inner max-h-[30vh] overflow-y-auto custom-scrollbar">
                             {initialFollowing.map(npc => (
                                 <div 
                                     key={npc.id} 
@@ -152,12 +152,7 @@ export const TravelConfirmationModal: React.FC = () => {
                                             : 'bg-brand-primary/40 border-transparent opacity-60 grayscale'
                                     }`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${
-                                            authorizedNpcIds.includes(npc.id) ? 'bg-brand-accent border-brand-accent shadow-glow text-black' : 'bg-brand-surface border-brand-primary/20 text-brand-text-muted'
-                                        }`}>
-                                            <Icon name="character" className="w-4 h-4" />
-                                        </div>
+                                    <div className="flex items-center gap-2">
                                         <div className="flex flex-col">
                                             <span className={`text-body-sm font-bold leading-none ${authorizedNpcIds.includes(npc.id) ? 'text-brand-text' : 'text-brand-text-muted'}`}>{npc.name}</span>
                                             <span className="text-[9px] text-brand-text-muted font-normal mt-1">Authorized for travel</span>

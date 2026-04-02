@@ -329,7 +329,7 @@ const POIListItem: React.FC<{
                                 </h6>
                                 <div className="flex flex-wrap gap-2 mb-2">
                                     {popLevelLabel && (
-                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 tracking-normal">
+                                        <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30">
                                             {popLevelLabel}
                                         </span>
                                     )}
@@ -344,7 +344,7 @@ const POIListItem: React.FC<{
                                             t !== 'population-center' && 
                                             !possibleLevels.includes(t.toLowerCase())
                                         ).map(tag => (
-                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 whitespace-nowrap tracking-normal">
+                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 whitespace-nowrap">
                                                 {toTitleCase(tag.replace(/-/g, ' '))}
                                             </span>
                                         ));
@@ -358,10 +358,10 @@ const POIListItem: React.FC<{
                                 {isExpanded && sortedPoiMemories.length > 0 && (
                                     <div className="mt-4 space-y-2">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal">
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60">
                                                 Location Chronicle
                                             </label>
-                                            <span className="text-[9px] font-bold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/5 border border-brand-accent/20 tracking-normal">
+                                            <span className="text-[9px] font-bold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/5 border border-brand-accent/20">
                                                 {sortedPoiMemories.length} {sortedPoiMemories.length === 1 ? 'event' : 'events'}
                                             </span>
                                         </div>
@@ -386,7 +386,7 @@ const POIListItem: React.FC<{
                                             <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
                                                 {sortedPoiMemories.map((m, i) => (
                                                     <div key={i} className="p-5 flex flex-col gap-2 group/mem hover:bg-brand-primary/20 transition-colors">
-                                                        <div className="text-[10px] font-mono font-bold text-brand-accent/60 tracking-normal">
+                                                        <div className="text-[10px] font-mono font-bold text-brand-accent/60">
                                                             {m.timestamp}
                                                         </div>
                                                         <div className="w-full">
@@ -405,7 +405,7 @@ const POIListItem: React.FC<{
                                 {isExpanded && connectedNpcs.length > 0 && (
                                     <div className="mt-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60 tracking-normal">
+                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60">
                                                 Local Denizens
                                             </label>
                                             <span className="text-[9px] font-bold text-brand-text-muted opacity-40">
@@ -462,7 +462,7 @@ const POIListItem: React.FC<{
                             {toTitleCase('Edit')}
                         </button>
                         {isPlayerHere ? (
-                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent tracking-normal bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent bg-brand-accent/10 rounded-xl border border-brand-accent/20">
                                 {toTitleCase('You Are Here')}
                             </div>
                         ) : (
@@ -666,14 +666,14 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                         )}
                                         <h3 className="mb-2 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20 tracking-normal">
+                                            <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20">
                                                 {coordinates}
                                             </span>
-                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border tracking-normal ${hInfo.bg} ${hInfo.color} ${hInfo.border}`}>
+                                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${hInfo.bg} ${hInfo.color} ${hInfo.border}`}>
                                                 {toTitleCase(hInfo.label)}
                                             </span>
                                             {keywords.map((kw, i) => (
-                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border tracking-normal ${getPropertyColor(kw)} whitespace-nowrap`}>
+                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getPropertyColor(kw)} whitespace-nowrap`}>
                                                     {toTitleCase(kw.split(':')[0].trim())}
                                                 </span>
                                             ))}

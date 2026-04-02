@@ -482,7 +482,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                             return (
                                 <div className="flex flex-wrap gap-1.5 mb-3">
                                     {propTags.map((tag, i) => (
-                                        <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border inline-flex items-center tracking-normal ${tag.color}`}>
+                                        <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border inline-flex items-center ${tag.color}`}>
                                             {tag.label}
                                         </span>
                                     ))}
@@ -531,7 +531,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 {mechanicalPills.map((pill, idx) => (
                                     <span
                                         key={idx}
-                                        className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg tracking-normal shadow-sm flex items-center gap-1.5 ${pill.colorClass}`}
+                                        className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border bg-brand-bg shadow-sm flex items-center gap-1.5 ${pill.colorClass}`}
                                     >
                                         {pill.icon && <Icon name={pill.icon} className="w-3 h-3" />}
                                         {pill.label}
@@ -569,7 +569,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[200] p-4 animate-fade-in backdrop-blur-sm">
                                             <div className="w-full max-w-[320px] bg-brand-surface rounded-3xl shadow-2xl border border-brand-primary overflow-hidden flex flex-col max-h-[80vh]">
                                                 <div className="px-6 py-4 border-b border-brand-primary/10 flex justify-between items-center bg-brand-primary/5">
-                                                    <span className="text-[10px] font-bold text-brand-text-muted tracking-normal">Select Target</span>
+                                                    <span className="text-[10px] font-bold text-brand-text-muted">Select Target</span>
                                                      <Button 
                                                         onClick={() => setIsTargetDropdownOpen(false)} 
                                                         variant="tertiary" 
