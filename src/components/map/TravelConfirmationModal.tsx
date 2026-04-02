@@ -31,7 +31,7 @@ export const TravelConfirmationModal: React.FC = () => {
             
         let methods = Array.from(new Set([...baseMethods, ...vehicleNames, ...shipNames]));
 
-        if (mapSettings?.style === 'sci-fi') {
+        if (mapSettings?.style === 'sci-fi' || mapSettings?.style === 'magitech') {
             methods = methods.filter(m => m.toLowerCase() !== 'walk');
         }
 

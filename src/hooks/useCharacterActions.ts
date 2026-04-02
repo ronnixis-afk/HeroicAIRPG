@@ -14,10 +14,11 @@ import { forgeSkins } from '../services/ItemGeneratorService';
 import { weaveHero } from '../services/aiCharacterService';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
 import { useUI } from '../context/UIContext';
-import { companionToNPC } from '../utils/npcUtils';
 import { ABILITY_SCORES, type AbilityScoreName, type SkillName } from '../types';
+import { companionToNPC } from '../utils/npcUtils';
 
 import { getSystemRandom, getFairSystemRandom } from '../utils/systemRandom';
+import { STORY_HOOKS, SettingType } from '../constants/storyHooks';
 
 export const useCharacterActions = (
     gameData: GameData | null,
@@ -283,8 +284,12 @@ export const useCharacterActions = (
             if (!isCompanion && !deferGameStart) {
                 setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 75 });
 
-                const hookIndex = getFairSystemRandom(1, 20, 'starting_hook', 10);
-                scenario = await generateStartingScenario(character, gameData, hookIndex);
+                const setting = (gameData?.skillConfiguration as SettingType) || 'Fantasy';
+                const hooks = STORY_HOOKS[setting] || STORY_HOOKS.Fantasy;
+                const hookIndex = getFairSystemRandom(1, hooks.length, `starting_hook_${setting.toLowerCase()}`, 4);
+                const selectedHook = hooks[hookIndex - 1];
+
+                scenario = await generateStartingScenario(character, gameData, selectedHook);
 
                 const startingZone: MapZone = {
                     id: `zone-start-${Date.now()}`,
@@ -435,8 +440,8 @@ export const useCharacterActions = (
         }
     }, [gameData, dispatch, setCreationProgress, setError, setActiveView, weaveGrandDesign]);
 
-    const startJourney = useCallback(async (hookIndex: number = 10) => {
-        if (!gameData || !gameData.playerCharacter || gameData.playerCharacter.name === 'Adventurer') return;
+    const startJourney = useCallback(async (hookIndex?: number) => {
+        if (!gameData || !gameData.playerCharacter || (gameData.playerCharacter.name === 'Adventurer' && !gameData.playerCharacter.isInitialized)) return;
         
         setCreationProgress({ isActive: true, step: "Finalizing Party Data...", progress: 5 });
         try {
@@ -491,8 +496,17 @@ export const useCharacterActions = (
                 }
             }
 
+            const setting = (gameData.skillConfiguration as SettingType) || 'Fantasy';
+            const hooks = STORY_HOOKS[setting] || STORY_HOOKS.Fantasy;
+            
+            const finalHookIndex = hookIndex !== undefined 
+                ? Math.min(Math.max(1, hookIndex), hooks.length) 
+                : getFairSystemRandom(1, hooks.length, `starting_hook_${setting.toLowerCase()}`, 4);
+                
+            const selectedHook = hooks[finalHookIndex - 1];
+
             setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
-            const scenario = await generateStartingScenario(finalPlayerCharacter, gameData, hookIndex, finalCompanions);
+            const scenario = await generateStartingScenario(finalPlayerCharacter, gameData, selectedHook, finalCompanions);
 
             // Check if player's coordinates exist in the mapZones (from SET_PRE_GAME_STATE)
             // If not, we just use 0-0.

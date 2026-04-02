@@ -195,33 +195,127 @@ export const useTravel = (
                 const theme = getPOITheme(gameData.worldSummary || "");
                 const anyShip = gameData.companions.find(c => c.isShip);
                 const shipName = anyShip?.name || "your vessel";
+                const followers = gameData.companions.filter(c => !c.isShip && c.isInParty);
+                const hasParty = followers.length > 0;
+                const pSubject = hasParty ? 'your party' : 'you';
+                const pPossessive = hasParty ? "your party's" : 'your';
                 const m = (travelMethod || "walking").toLowerCase();
 
-                let chosenMessage = `You arrive at ${locationName}, the trip from ${lastSiteName} was fairly safe and uneventful. `;
+                const variationIdx = Math.floor(Math.random() * 4);
+                let chosenMessage = "";
+
                 if (m.includes('ship') || m.includes('boat') || m.includes('sail') || m.includes('vessel') || m.includes('scout') || m.includes('fly') || m.includes('airship')) {
                     const vesselMessages = {
-                        fantasy: `The ${shipName} cut smoothly through the waves, its sails catching a steady breeze that carried you to your destination without incident.`,
-                        modern: `With the ${shipName} guiding the way, the engine hummed a steady rhythm throughout the secure and efficient transit.`,
-                        scifi: `The ${shipName} performed a flawless burn across the void, its systems remaining quiet and stable until the final approach sequence.`,
-                        magitech: `Gliding along the shimmering ley-lines, the ${shipName} maintained perfect resonance as you traversed the aetheric currents safely.`
+                        fantasy: [
+                            `The ${shipName} cut smoothly through the waves from ${lastSiteName}, its sails catching a steady breeze that carried ${pSubject} to ${locationName} without incident.`,
+                            `With the waves of the clear blue sea behind you since leaving ${lastSiteName}, the ${shipName} guided ${pSubject} into the bustling harbor of ${locationName}.`,
+                            `The rhythmic creaking of the ${shipName}'s hull provided a steady backdrop as you traveled from ${lastSiteName}, arriving at the docks of ${locationName} under a clear sky.`,
+                            `Salt spray and sea air followed ${pSubject} all the way from ${lastSiteName} until the shadow of ${locationName} finally loomed ahead, marking a safe voyage.`
+                        ],
+                        modern: [
+                            `With the ${shipName} guiding the way from ${lastSiteName}, the engine hummed a steady rhythm throughout the secure and efficient transit to ${locationName}.`,
+                            `The wake trailed behind the ${shipName} like a white ribbon since departing ${lastSiteName}, finally smoothing out as you pulled into the marina at ${locationName}.`,
+                            `A gentle swell and a cooling breeze accompanied ${pSubject} from ${lastSiteName}, the ${shipName} ensuring a comfortable journey until ${locationName} appeared on the shoreline.`,
+                            `Following the coastal lights from ${lastSiteName}, the ${shipName} cut a steady path through the water, delivering ${pSubject} safely to the pier at ${locationName}.`
+                        ],
+                        scifi: [
+                            `The ${shipName} performed a flawless burn across the void from ${lastSiteName}, its systems remaining quiet and stable until the final approach sequence into ${locationName}.`,
+                            `Atmospheric entry was nominal as the ${shipName} descended from the stars of ${lastSiteName}, touching down on the landing pad of ${locationName} with mechanical precision.`,
+                            `After a brief transit through the cold vacuum since leaving ${lastSiteName}, the ${shipName} established a stable orbit over ${locationName}, signaling a successful jump.`,
+                            `Navigational computers held a perfect course from ${lastSiteName}, guided by the ${shipName}'s primary drive until the neon lights of ${locationName} filled the viewports.`
+                        ],
+                        magitech: [
+                            `Gliding along the shimmering ley-lines from ${lastSiteName}, the ${shipName} maintained perfect resonance as ${pSubject} traversed the aetheric currents safely to ${locationName}.`,
+                            `The aether-sails of the ${shipName} caught the invisible winds of the weave since leaving ${lastSiteName}, carrying ${pSubject} on a breath of pure magic toward ${locationName}.`,
+                            `Runes along the hull of the ${shipName} glowed with golden light during the transit from ${lastSiteName}, the arcane stabilization holding perfectly until you reached ${locationName}.`,
+                            `Riding the currents of the world's soul, the ${shipName} bypassed the mundane miles between ${lastSiteName} and ${locationName} in a haze of shimmering enchantments.`
+                        ]
                     };
-                    chosenMessage += vesselMessages[theme as keyof typeof vesselMessages] || vesselMessages.fantasy;
+                    chosenMessage = (vesselMessages[theme as keyof typeof vesselMessages] || vesselMessages.fantasy)[variationIdx];
                 } else if (m.includes('portal') || m.includes('teleport')) {
                     const portalMessages = {
-                        fantasy: `The arcane gateway held firm, the shimmering transition between locations occurring in a heartbeat of absolute silence.`,
-                        modern: `The digital synchronization was complete in an instant, your atoms reassembling flawlessly at the target terminal.`,
-                        scifi: `The quantum bridge remained stable throughout the jump, the localized distortion fading as quickly as it appeared.`,
-                        magitech: `The harmonic frequency of the portal remained in perfect tune, allowing for a seamless shift through the folds of the world.`
+                        fantasy: [
+                            `The arcane gateway held firm, the shimmering transition from ${lastSiteName} to ${locationName} occurring in a heartbeat of absolute silence.`,
+                            `A flash of silver light and a moment of weightlessness marked the shift from ${lastSiteName}, with ${pSubject} stepping through the threshold into the air of ${locationName}.`,
+                            `The fabric of reality rippled as the portal stabilized between ${lastSiteName} and ${locationName}, allowing for a seamless transition between distant lands.`,
+                            `Whispers of ancient magic echoed in the void between gates as you left ${lastSiteName}, the world reformulating itself into the sights and sounds of ${locationName}.`
+                        ],
+                        modern: [
+                            `The digital synchronization between ${lastSiteName} and ${locationName} was complete in an instant, ${pPossessive} atoms reassembling flawlessly at the target terminal.`,
+                            `A brief hum of high-voltage machinery was the only sound of the jump from ${lastSiteName}, the experimental bridge closing safely behind ${pSubject} at ${locationName}.`,
+                            `Data-streams encoded your arrival from ${lastSiteName} with total precision, the relay at ${locationName} hummed to silence as the transition finalized.`,
+                            `The screen-flicker of reality passed in a blink since leaving ${lastSiteName}, the familiar hum of the laboratory at ${locationName} signaling a successful relocate.`
+                        ],
+                        scifi: [
+                            `The quantum bridge between ${lastSiteName} and ${locationName} remained stable throughout the jump, the localized distortion fading as quickly as it appeared.`,
+                            `Cellular reconstruction was successful after the high-speed transit from ${lastSiteName}, the terminal at ${locationName} confirming a perfect sync for ${pSubject}.`,
+                            `The warp-gate hummed with a low-frequency vibration as you left ${lastSiteName}, the stars momentarily blurring before snapping into the familiar sky of ${locationName}.`,
+                            `Sub-atomic stabilization held firm during the blink from ${lastSiteName}, landing ${pSubject} exactly on target within the relocation chamber of ${locationName}.`
+                        ],
+                        magitech: [
+                            `The harmonic frequency of the portal remained in perfect tune, allowing for a seamless shift from ${lastSiteName} through the folds of the world to ${locationName}.`,
+                            `Shimmering mana-mist swirled around ${pSubject} during the blink from ${lastSiteName}, finally clearing to reveal the enchanted surroundings of ${locationName}.`,
+                            `The ritual circle at ${lastSiteName} held its charge perfectly, discharging ${pSubject} into the crystalline arrival bay of ${locationName} with a sharp chime.`,
+                            `Navigating the ephemeral paths between worlds since departing ${lastSiteName}, you felt the pull of the destination anchor as ${locationName} manifested around you.`
+                        ]
                     };
-                    chosenMessage += portalMessages[theme as keyof typeof portalMessages] || portalMessages.fantasy;
+                    chosenMessage = (portalMessages[theme as keyof typeof portalMessages] || portalMessages.fantasy)[variationIdx];
+                } else if (m.includes('transport') || m.includes('taxi') || m.includes('bus') || m.includes('public')) {
+                    const transitMessages = {
+                        fantasy: [
+                            `The bumpy carriage ride from ${lastSiteName} was filled with the talk of other travelers, the horse-drawn coach delivering ${pSubject} safely to ${locationName}.`,
+                            `Riding with a merchant caravan since leaving ${lastSiteName}, ${pSubject} enjoyed the relative safety and company of the group until reaching ${locationName}.`,
+                            `The public ferry wove through the river currents from ${lastSiteName}, the steady rowing bringing ${pSubject} to the busy docks of ${locationName} by midday.`,
+                            `Settling into the straw-lined wagon departing ${lastSiteName}, ${pSubject} watched the miles roll by until the familiar silhouette of ${locationName} appeared.`
+                        ],
+                        modern: [
+                            `The city bus wove through the traffic from ${lastSiteName}, the rhythmic stopping and starting eventually bringing ${pSubject} to the terminal at ${locationName}.`,
+                            `Catching a yellow cab from the outskirts of ${lastSiteName}, ${pSubject} watched the suburbs fade into the urban sprawl of ${locationName} during the quiet ride.`,
+                            `The subway train rumbled through the dark tunnels since leaving ${lastSiteName}, the overhead lights flickering until the conductor announced the stop for ${locationName}.`,
+                            `Snagging a seat on the commuter rail departing ${lastSiteName}, ${pSubject} relaxed as the train wove through the morning light toward the station at ${locationName}.`
+                        ],
+                        scifi: [
+                            `The humming grav-taxi wove through the skyscrapers since leaving ${lastSiteName}, the neon lights blurring until you coasted into the landing pad of ${locationName}.`,
+                            `Settling into the maglev shuttle from ${lastSiteName}, ${pSubject} felt the slight pull of acceleration as the craft shot toward the central hub of ${locationName}.`,
+                            `The automated transport pod glided silently along the transit rail from ${lastSiteName}, the internal displays signaling arrival as ${locationName} came into view.`,
+                            `Public transit drones wove through the orbital traffic since departing ${lastSiteName}, delivering ${pSubject} to the secure docking bay of ${locationName} on schedule.`
+                        ],
+                        magitech: [
+                            `The rune-carved steam-train hissed as it left ${lastSiteName}, the iron wheels clattering rhythmically until the brass station of ${locationName} loomed ahead.`,
+                            `Boarding an automated aether-tram in ${lastSiteName}, ${pSubject} watched the landscape blur through the enchanted glass until the magic-stop at ${locationName}.`,
+                            `The public skyliner drifted on mana-currents from ${lastSiteName}, its ornate gondola providing a bird's-eye view of the world until arriving at ${locationName}.`,
+                            `Riding a clockwork coach since leaving ${lastSiteName}, the intricate gears hummed a melodic tune that lasted until you reached the gates of ${locationName}.`
+                        ]
+                    };
+                    chosenMessage = (transitMessages[theme as keyof typeof transitMessages] || transitMessages.fantasy)[variationIdx];
                 } else {
                     const trekkingMessages = {
-                        fantasy: `Braving the wilderness on foot, the party maintained a steady pace as the terrain proved manageable and the local wildlife kept its distance.`,
-                        modern: `The trek was straightforward and quiet, with no unexpected obstacles or delays interrupting your steady progress across the region.`,
-                        scifi: `Through focus and steady movement, the party successfully traversed the sector, the local environment proving peaceful and undisturbed.`,
-                        magitech: `Navigating the shifting energies of the wilds, the party's journey was guided by a steady resolve that kept any potential threats at bay.`
+                        fantasy: [
+                            `Braving the wilderness on foot since leaving ${lastSiteName}, ${pSubject} maintained a steady pace as the terrain toward ${locationName} proved manageable.`,
+                            `Following the dusty road from ${lastSiteName}, ${pSubject} watched the sun cross the sky until the familiar gates of ${locationName} finally rose from the horizon.`,
+                            `The crunch of gravel under ${pPossessive} boots was the only sound on the long walk from ${lastSiteName}, the journey to ${locationName} proving quiet and safe.`,
+                            `Navigating the winding forest paths since leaving ${lastSiteName}, ${pSubject} skirted the edges of the wild until the welcoming smoke of ${locationName} appeared ahead.`
+                        ],
+                        modern: [
+                            `The trek from ${lastSiteName} to ${locationName} was straightforward and quiet, with no unexpected obstacles or delays interrupting ${pPossessive} steady progress across the region.`,
+                            `Pacing the concrete sidewalks since leaving ${lastSiteName}, ${pSubject} wove through the urban landscape until the signs for ${locationName} finally signaled the end.`,
+                            `A brisk walk through the outskirts of ${lastSiteName} led ${pSubject} onto the long stretch towards ${locationName}, the miles passing quickly under a clear sky.`,
+                            `Following the main highway on foot from ${lastSiteName}, ${pSubject} kept to the shoulder until the skyline of ${locationName} began to dominate the view.`
+                        ],
+                        scifi: [
+                            `Through focus and steady movement since departing ${lastSiteName}, ${pSubject} successfully traversed the sector, arriving at ${locationName} undisturbed.`,
+                            `Suit servos whirred rhythmically during the survey from ${lastSiteName}, the environmental seals holding perfectly as ${pSubject} reached the airlock of ${locationName}.`,
+                            `After a long trek across the planetary surface from ${lastSiteName}, the landing lights of ${locationName} served as a beacon for the final miles of ${pPossessive} journey.`,
+                            `Scanners remained clear of hostiles during the march from ${lastSiteName}, allowing ${pSubject} to reach the secure perimeter of ${locationName} without incident.`
+                        ],
+                        magitech: [
+                            `Navigating the shifting energies of the wilds from ${lastSiteName} to ${locationName}, ${pSubject} were guided by a steady resolve that kept any potential threats at bay.`,
+                            `Following the glowing trail of a leyline since departing ${lastSiteName}, ${pSubject} navigated the arcane-saturated wilds until ${locationName} finally appeared ahead.`,
+                            `The air tingled with ambient magic during the walk from ${lastSiteName}, the path to ${locationName} remaining stable and clear of any mana-storms.`,
+                            `With every step away from ${lastSiteName}, you felt the resonance change, finally reaching the harmonic balance that signaled your arrival at ${locationName}.`
+                        ]
                     };
-                    chosenMessage += trekkingMessages[theme as keyof typeof trekkingMessages] || trekkingMessages.fantasy;
+                    chosenMessage = (trekkingMessages[theme as keyof typeof trekkingMessages] || trekkingMessages.fantasy)[variationIdx];
                 }
 
                 dispatch({
@@ -232,9 +326,12 @@ export const useTravel = (
                         content: chosenMessage,
                         rolls: [{
                             ...roll,
-                            checkName: `Encounter Check: ${locationName}`,
+                            checkName: `Safe Arrival: ${locationName}`,
                             dc: 75,
-                            outcome: 'No Encounter'
+                            outcome: 'No Encounter',
+                            dieRoll: variationIdx + 1,
+                            total: variationIdx + 1,
+                            notes: `Variation ${variationIdx + 1}`
                         }],
                         type: 'neutral'
                     }

@@ -419,9 +419,8 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 };
 
 
-export const generateStartingScenario = async (character: any, gameData: GameData, hookIndex: number, companions: Companion[] = []) => {
+export const generateStartingScenario = async (character: any, gameData: GameData, selectedHook: string, companions: Companion[] = []) => {
     const worldContext = getWorldContext(gameData);
-    const selectedHook = STORY_HOOKS[hookIndex - 1] || STORY_HOOKS[0];
 
     // Starting location bypass: Always begin in a Town for a balanced early-game experience
     const popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Town';

@@ -278,7 +278,7 @@ const CharacterView: React.FC = () => {
                                 Exit World
                             </button>
                             <button
-                                onClick={() => startJourney(10)}
+                                onClick={() => startJourney()}
                                 disabled={!hasPlayer}
                                 className={`btn-md rounded-lg px-12 transition-all ${hasPlayer ? 'btn-primary' : 'bg-brand-surface/50 text-brand-text-muted/50 border border-brand-primary/20 cursor-not-allowed'}`}
                             >
