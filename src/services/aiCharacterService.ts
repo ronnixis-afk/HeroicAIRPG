@@ -278,6 +278,7 @@ export const weaveHero = async (
     9. skinnedAbility: Transform the Combat Blueprint into a unique thematic signature power for ${selections.name}. 
        - Rename it evocatively.
        - Rewrite the description to match the flavor.
+       - IMPORTANT MECHANICAL RULE: If the Chosen Combat Blueprint already has a specific "damageType" (e.g. ${selections.combatAbility.effect?.damageType || 'not specified'}) or "status" (e.g. ${selections.combatAbility.effect?.status || 'not specified'}), you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
     10. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos from the [ALIGNMENT SCALES] that match this character's background and personality.
     11. NO ALL CAPS.
 

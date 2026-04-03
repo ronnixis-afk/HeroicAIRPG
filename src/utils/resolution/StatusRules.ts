@@ -1,7 +1,7 @@
 
 // utils/resolution/StatusRules.ts
 
-import { CombatActor, PlayerCharacter, Companion, RollMode, UNTARGETABLE_STATUS_NAMES, NPC } from '../../types';
+import { CombatActor, PlayerCharacter, Companion, RollMode, UNTARGETABLE_NAMES, NPC } from '../../types';
 
 interface StatusCheckResult {
     mode: RollMode;
@@ -19,11 +19,11 @@ export const canBeTargeted = (actor: CombatActor | PlayerCharacter | Companion |
     
     // Check if any active status effect or buff is in the untargetable registry
     const hasUntargetableStatus = statusEffects.some(effect => 
-        (UNTARGETABLE_STATUS_NAMES as readonly string[]).includes(effect.name)
+        (UNTARGETABLE_NAMES as readonly string[]).includes(effect.name)
     );
 
     const hasUntargetableBuff = activeBuffs.some(buff => 
-        buff.name && (UNTARGETABLE_STATUS_NAMES as readonly string[]).includes(buff.name)
+        buff.name && (UNTARGETABLE_NAMES as readonly string[]).includes(buff.name)
     );
 
     return !hasUntargetableStatus && !hasUntargetableBuff;
@@ -57,8 +57,8 @@ export const checkStatusBasedRollMode = (
         results.push({ mode: 'disadvantage', reason: 'Prone' });
     }
 
-    // Invisible: Advantage on Attacks
-    if (attackerEffects.some(e => e.name === 'Invisible') || (attacker.activeBuffs || []).some(b => b.name === 'Invisible')) {
+    // Invisible: Advantage on Attacks (Now only a Buff)
+    if ((attacker.activeBuffs || []).some(b => b.name === 'Invisible')) {
         results.push({ mode: 'advantage', reason: 'Invisible' });
     }
 
@@ -84,8 +84,8 @@ export const checkStatusBasedRollMode = (
             results.push({ mode: 'advantage', reason: `Target ${incapacitation.name}` });
         }
         
-        // Target Invisible
-        if (targetEffects.some(e => e.name === 'Invisible') || (target.activeBuffs || []).some(b => b.name === 'Invisible')) {
+        // Target Invisible (Now only a Buff)
+        if ((target.activeBuffs || []).some(b => b.name === 'Invisible')) {
             results.push({ mode: 'disadvantage', reason: 'Target Invisible' });
         }
     }

@@ -23,6 +23,7 @@ import { WizardStepIdentity } from './wizard/WizardStepIdentity';
 import { WizardNavigation } from './wizard/WizardNavigation';
 import { WizardStepMethod } from './wizard/WizardStepMethod';
 import { WizardStepAttributes } from './wizard/WizardStepAttributes';
+import { WizardEffectSelectorModal } from './wizard/WizardEffectSelectorModal';
 
 interface CharacterCreationWizardProps {
     isOpen: boolean;
@@ -63,6 +64,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     const [abilityScores, setAbilityScores] = useState<any>(null);
     const [savingThrows, setSavingThrows] = useState<AbilityScoreName[] | null>(null);
     const [skills, setSkills] = useState<Record<string, { proficient: boolean }>>({});
+    const [showEffectSelector, setShowEffectSelector] = useState(false);
+    const [effectSelectorType, setEffectSelectorType] = useState<'Damage' | 'Status'>('Damage');
 
     const isCompanion = type === 'companion';
     const activeSteps = isShip ? SHIP_STEPS : (isCompanion ? COMPANION_STEPS : PLAYER_STEPS);
@@ -229,6 +232,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setBackgroundTraits(bg);
         setGeneralTraits(gen);
         setCombatAbility(com);
+        setShowEffectSelector(false); // Reset selector on template load
 
         // Prefill background context with all template traits
         const traitSummary = [...bg, ...gen].map(t => t.name).join(', ');
@@ -448,6 +452,27 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         else if (set.length < limit) setter([...set, trait]);
     };
 
+    const handleCombatAbilitySelect = (trait: LibraryTrait) => {
+        setCombatAbility(trait);
+        if (trait.effect?.type === 'Damage' || trait.effect?.type === 'Status') {
+            setEffectSelectorType(trait.effect.type as 'Damage' | 'Status');
+            setShowEffectSelector(true);
+        }
+    };
+
+    const handleEffectSubtypeSelect = (value: string) => {
+        if (!combatAbility) return;
+        const updatedAbility = { ...combatAbility };
+        if (!updatedAbility.effect) updatedAbility.effect = { type: 'Damage' }; // Fallback
+
+        if (effectSelectorType === 'Damage') {
+            updatedAbility.effect.damageType = value;
+        } else {
+            updatedAbility.effect.status = value as any;
+        }
+        setCombatAbility(updatedAbility);
+    };
+
     const renderWeaving = () => (
         <div className="flex-1 flex flex-col items-center justify-center animate-fade-in py-12">
             <div className="w-20 h-20 text-brand-accent animate-dice mb-10">
@@ -538,7 +563,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                     />
                                                 )}
                                                 {step === 2 && <WizardStepTraits title="Systems & Modules" subtitle="Select up to 3 characteristic hull and module components." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 3)} limit={3} />}
-                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} level={level} />}
+                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 4 && (
                                                     <WizardStepIdentity
                                                         isCompanion={isCompanion}
@@ -569,7 +594,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 )}
                                                 {step === 3 && <WizardStepTraits title={isCompanion ? "What is their story?" : "What was your past like?"} subtitle="Select two background markers that defined them." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 2)} limit={2} level={level} />}
                                                 {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} level={level} />}
-                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={setCombatAbility} possessedTraitNames={allSelectedTraitNames} level={level} />}
+                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 6 && (
                                                     <WizardStepAttributes
                                                         abilityScores={abilityScores || {}}
@@ -639,6 +664,14 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                             </>
                         )}
                     </>
+                )}
+                {showEffectSelector && (
+                    <WizardEffectSelectorModal 
+                        isOpen={showEffectSelector} 
+                        onClose={() => setShowEffectSelector(false)} 
+                        type={effectSelectorType} 
+                        onSelect={handleEffectSubtypeSelect} 
+                    />
                 )}
             </div>
         </Modal>

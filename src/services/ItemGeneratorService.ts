@@ -312,7 +312,7 @@ export const generateMechanicalEffect = (
 
     const damageType = DAMAGE_TYPES[Math.floor(Math.random() * DAMAGE_TYPES.length)];
     
-    const offensiveStatuses = STATUS_EFFECT_NAMES.filter(s => s !== 'Invisible' && s !== 'Hidden' && s !== 'Disappeared');
+    const offensiveStatuses = [...STATUS_EFFECT_NAMES];
     const status = offensiveStatuses[Math.floor(Math.random() * offensiveStatuses.length)];
     
     const saveAbility = ABILITY_SCORES[Math.floor(Math.random() * ABILITY_SCORES.length)];

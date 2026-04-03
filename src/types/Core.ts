@@ -349,12 +349,13 @@ export const BODY_SLOT_TAGS = [
     'Ring', 'Accessory'
 ] as const;
 
-export const STATUS_EFFECT_NAMES = ['Stunned', 'Paralyzed', 'Poisoned', 'Prone', 'Blinded', 'Deafened', 'Invisible', 'Hidden', 'Disappeared'] as const;
+export const STATUS_EFFECT_NAMES = ['Stunned', 'Paralyzed', 'Poisoned', 'Prone', 'Blinded', 'Deafened'] as const;
 
 /**
- * Foundation for statuses that prevent an actor from being targeted.
+ * Foundation for names that prevent an actor from being targeted.
+ * These can be either statuses or buffs.
  */
-export const UNTARGETABLE_STATUS_NAMES = ['Invisible', 'Hidden', 'Disappeared'] as const;
+export const UNTARGETABLE_NAMES = ['Invisible', 'Hidden', 'Disappeared'] as const;
 
 export const ARCHETYPE_NAMES = ['Bipedal', 'Bestial', 'Aerial', 'Marine', 'Amphibian', 'Crawler', 'Hoverer', 'Sentry'] as const;
 export type ArchetypeName = typeof ARCHETYPE_NAMES[number];
