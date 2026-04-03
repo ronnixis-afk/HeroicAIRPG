@@ -178,7 +178,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
     const isRecentlyCreated = React.useMemo(() => Date.now() - msgTimestamp < 10000, [msgTimestamp]);
 
     React.useEffect(() => {
-        if (isUser || !isLatest || !isRecentlyCreated) {
+        if (isUser || !isLatest || !isRecentlyCreated || msg.isStreaming) {
             setVisibleLines(Infinity);
             setIsRevealing(false);
             return;
@@ -249,6 +249,16 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                        {msg.isStreaming && (
+                            <div className="flex items-center gap-2 mt-4 text-brand-accent animate-pulse">
+                                <div className="flex gap-1">
+                                    <span className="w-1 h-3 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                    <span className="w-1 h-5 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                    <span className="w-1 h-3 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </div>
+                                <span className="text-[10px] uppercase tracking-widest font-bold">Narrating...</span>
                             </div>
                         )}
                     </div>

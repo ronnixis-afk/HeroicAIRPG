@@ -28,6 +28,7 @@ export interface LiveVoiceCallbacks {
     onStatusChange: (status: LiveVoiceStatus) => void;
     onInputTranscription: (text: string) => void;
     onOutputTranscription: (text: string) => void;
+    onPartialOutputTranscription?: (text: string) => void;
     onToolCall: (functionName: string, args: any) => Promise<any>;
     onError: (error: string) => void;
     onDisconnect: () => void;
@@ -239,6 +240,7 @@ export class LiveVoiceService {
                 // Output transcription (what the AI said)
                 if (serverContent.outputTranscription?.text) {
                     this.accumulatedOutputTranscript += serverContent.outputTranscription.text;
+                    this.callbacks?.onPartialOutputTranscription?.(this.accumulatedOutputTranscript.trim());
                 }
 
                 // Model turn complete
@@ -347,7 +349,8 @@ export class LiveVoiceService {
         const source = this.audioContext.createMediaStreamSource(this.mediaStream);
         
         // Use ScriptProcessorNode for PCM capture (AudioWorklet would be better but requires module setup)
-        this.processorNode = this.audioContext.createScriptProcessor(4096, 1, 1);
+        // Optimized: Reduced buffer size from 4096 to 2048 for faster VTT response (approx 128ms latency at 16kHz)
+        this.processorNode = this.audioContext.createScriptProcessor(2048, 1, 1);
         
         this.processorNode.onaudioprocess = (event) => {
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {

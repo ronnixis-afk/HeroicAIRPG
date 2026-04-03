@@ -239,6 +239,7 @@ export interface ChatMessage {
     nextCombatantName: string;
   };
   dialogues?: DialogueLine[]; // Structured dialogue lines for consistent formatting
+  isStreaming?: boolean; // NEW: Indicates the message is currently being narrated/updated in real-time
 }
 
 export interface DiceRollRequest {

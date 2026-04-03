@@ -21,6 +21,7 @@ export const useHandsFreeVoice = () => {
 
     const gameDataRef = useRef(gameData);
     gameDataRef.current = gameData;
+    const streamingMessageIdRef = useRef<string | null>(null);
 
     const connect = useCallback(async () => {
         if (!gameData || (status !== 'idle' && status !== 'error')) return;
@@ -42,14 +43,43 @@ export const useHandsFreeVoice = () => {
                 }
             },
 
-            onOutputTranscription: (text) => {
-                // Add the AI's spoken words to chat history
-                if (text.trim()) {
+            onPartialOutputTranscription: (text) => {
+                if (!text.trim()) return;
+                
+                if (!streamingMessageIdRef.current) {
+                    const id = `ai-voice-stream-${Date.now()}`;
+                    streamingMessageIdRef.current = id;
                     setMessages(prev => [...prev, {
-                        id: `ai-voice-${Date.now()}`,
-                        sender: 'ai' as const,
-                        content: text.trim()
+                        id,
+                        sender: 'ai',
+                        content: text.trim(),
+                        isStreaming: true // Visual hint for UI
                     }]);
+                } else {
+                    const currentId = streamingMessageIdRef.current;
+                    setMessages(prev => prev.map(m => 
+                        m.id === currentId ? { ...m, content: text.trim() } : m
+                    ));
+                }
+            },
+
+            onOutputTranscription: (text) => {
+                // Finalize the streaming message
+                if (text.trim()) {
+                    if (streamingMessageIdRef.current) {
+                        const currentId = streamingMessageIdRef.current;
+                        setMessages(prev => prev.map(m => 
+                            m.id === currentId ? { ...m, content: text.trim(), isStreaming: false } : m
+                        ));
+                        streamingMessageIdRef.current = null;
+                    } else {
+                        // Fallback if partial didn't trigger
+                        setMessages(prev => [...prev, {
+                            id: `ai-voice-${Date.now()}`,
+                            sender: 'ai' as const,
+                            content: text.trim()
+                        }]);
+                    }
                 }
             },
 
@@ -71,7 +101,8 @@ export const useHandsFreeVoice = () => {
                         };
 
                         // The pipeline now returns the narration text directly
-                        const narration = await submitUserMessage(userMessage, false);
+                        // skipAdd: true ensures the user's spoken action doesn't create a redundant text bubble
+                        const narration = await submitUserMessage(userMessage, false, true);
                         
                         return narration || "The Game Master nods in acknowledgement.";
                     } catch (error) {

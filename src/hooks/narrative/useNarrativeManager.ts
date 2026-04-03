@@ -255,9 +255,13 @@ export const useNarrativeManager = (
         }
     }, [gameData, dispatch, assessIntent, resolveMechanics, generateNarrative, processConsequences, getCombatSlots, combatActions, processUserInitiatedTravel, setIsAiGenerating, setIsAssessing, setIsAuditing, setIsHousekeeping]);
 
-    const submitUserMessage = useCallback(async (message: ChatMessage, isHeroic: boolean = false) => {
+    const submitUserMessage = useCallback(async (message: ChatMessage, isHeroic: boolean = false, skipAdd: boolean = false) => {
         if (!gameData) return "";
-        dispatch({ type: 'ADD_MESSAGE', payload: message });
+        
+        // In Hands-Free mode, we skip adding the user message to chat to avoid visual clutter
+        if (!skipAdd) {
+            dispatch({ type: 'ADD_MESSAGE', payload: message });
+        }
 
         if (isHeroic) {
             dispatch({ type: 'USE_HEROIC_POINT' });

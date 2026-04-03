@@ -18,7 +18,7 @@ import CombatConsensusPanel from './combat/CombatConsensusModal';
 import { EntityLightbox } from './chat/EntityLightbox';
 import { SystemToastManager } from './chat/SystemToastManager';
 
-// Custom Hooks
+import { useHandsFreeVoice } from '../hooks/useHandsFreeVoice';
 import { useAudioPlayback } from './chat/useAudioPlayback';
 import { DiceTray } from './chat/DiceTray';
 import { AlignmentActionTray } from './chat/AlignmentActionTray';
@@ -50,6 +50,8 @@ const ChatView: React.FC = () => {
         gameData?.narrationVoice || "Classic Narrator (Male)",
         gameData?.narrationTone || "Classic Fantasy"
     );
+
+    const { isVoiceActive } = useHandsFreeVoice();
 
     const messages = gameData?.messages ?? [];
     const isHandsFree = gameData?.isHandsFree ?? false;
@@ -164,14 +166,15 @@ const ChatView: React.FC = () => {
 
     // HANDS-FREE AUTO-PLAY EFFECT
     useEffect(() => {
-        if (isHandsFree && processedMessages.length > 0) {
+        // GUARD: Only trigger if isHandsFree is on AND Gemini Live is NOT actively handles audio
+        if (isHandsFree && !isVoiceActive && processedMessages.length > 0) {
             const lastMsg = processedMessages[processedMessages.length - 1];
             // GUARD: Only trigger if the message is from AI and we aren't already playing it
             if (lastMsg && lastMsg.sender === 'ai' && lastMsg.content && playingMessageId !== lastMsg.id) {
                 speak(lastMsg.content, lastMsg.id);
             }
         }
-    }, [processedMessages.length, isHandsFree, speak, playingMessageId]);
+    }, [processedMessages.length, isHandsFree, isVoiceActive, speak, playingMessageId]);
 
     useEffect(() => {
         const handleAlignmentAction = async (e: Event) => {
