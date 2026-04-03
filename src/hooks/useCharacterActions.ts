@@ -364,6 +364,9 @@ export const useCharacterActions = (
                     currentLocale: scenario.startingZone.name
                 };
 
+                const openAreaTitle = scenario.startingZone.knowledge[0]?.title || scenario.startingZone.name;
+                const openAreaId = `know-start-${Date.now()}-0`;
+
                 // Extract NPCs directly from the scenario response (no Auditor AI call needed)
                 const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
                     id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -374,7 +377,8 @@ export const useCharacterActions = (
                     relationship: 0,
                     status: 'Alive',
                     isNew: true,
-                    currentPOI: scenario.startingZone.name
+                    currentPOI: openAreaTitle,
+                    site_id: openAreaId
                 } as NPC));
 
                 const restartPayload: Partial<GameData> = {
@@ -535,6 +539,9 @@ export const useCharacterActions = (
 
             setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 60 });
 
+            const openAreaTitle = scenario.startingZone.knowledge[0]?.title || scenario.startingZone.name;
+            const openAreaId = `know-start-${Date.now()}-0`;
+
             // Extract NPCs directly from the scenario response (no Auditor AI call needed)
             const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
                 id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -545,7 +552,8 @@ export const useCharacterActions = (
                 relationship: 0,
                 status: 'Alive',
                 isNew: true,
-                currentPOI: scenario.startingZone.name
+                currentPOI: openAreaTitle,
+                site_id: openAreaId
             } as NPC));
 
             const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;

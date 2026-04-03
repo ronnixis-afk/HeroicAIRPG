@@ -124,7 +124,8 @@ ${preRolledMechanics}
                         isFollowing: { type: Type.BOOLEAN, description: "TRUE if travelling with the player. FALSE if staying behind or if DEAD. Dead NPCs MUST be FALSE." },
                         race: { type: Type.STRING, description: "Required for 'new' NPCs. Must be from the established ancestries list." },
                         gender: { type: Type.STRING, description: "Required for 'new' NPCs. Male | Female | Non-binary" },
-                        status: { type: Type.STRING, description: "Alive | Dead. Set to 'Dead' if the NPC was killed in this turn." }
+                        status: { type: Type.STRING, description: "Alive | Dead. Set to 'Dead' if the NPC was killed in this turn." },
+                        presenceMode: { type: Type.STRING, description: "Physical | Remote. Set to 'Remote' if the NPC is communicating via radio, psychic bond, or other remote means." }
                     },
                     required: ["name", "action", "description"]
                 }

@@ -161,6 +161,7 @@ export const useExtractionStep = (
                 } else if (res.action === 'new') {
                     // Discovery: Narrative-driven character emergence with full enrichment from the Narrator
                     const id = `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                    const isRemote = res.presenceMode === 'Remote';
                     dispatch({ 
                         type: 'ADD_NPC', 
                         payload: { 
@@ -172,7 +173,9 @@ export const useExtractionStep = (
                             isNew: true, 
                             status: res.status || 'Alive', 
                             relationship: 0, 
-                            currentPOI: resolvedLocale || 'Current' 
+                            currentPOI: isRemote ? 'Remote Presence' : (resolvedLocale || gameData.current_site_name || 'Current'),
+                            site_id: isRemote ? 'remote' : (forcedSiteId || gameData.current_site_id),
+                            presenceMode: res.presenceMode || 'Physical'
                         } 
                     });
                 }

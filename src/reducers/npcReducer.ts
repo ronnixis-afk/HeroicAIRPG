@@ -179,10 +179,11 @@ export const npcReducer = (state: GameData, action: GameAction): GameData => {
                             };
                         }
                     } else if (res.action === 'existing' || res.action === 'new') {
+                        const isRemote = res.presenceMode === 'Remote';
                         const npcData: Partial<NPC> = {
                             name: res.name,
-                            currentPOI: locationUpdate?.site_name || 'Current',
-                            site_id: locationUpdate?.site_id,
+                            currentPOI: isRemote ? 'Remote Presence' : (locationUpdate?.site_name || state.current_site_name || 'Current'),
+                            site_id: isRemote ? 'remote' : (locationUpdate?.site_id || state.current_site_id),
                             isFollowing: res.isFollowing,
                             presenceMode: res.presenceMode || 'Physical'
                         };
