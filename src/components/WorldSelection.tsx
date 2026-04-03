@@ -618,8 +618,8 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
             <header className="sticky top-0 z-40 bg-gradient-to-b from-[#0a0f12] to-transparent w-full">
                 <div className="max-w-screen-2xl mx-auto flex flex-row items-center justify-between px-6 md:px-12 lg:px-20 xl:px-28 py-5">
                     <div className="flex items-center gap-3">
-                        <Icon name="heroicAction" className="w-8 h-8 text-brand-accent drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
-                        <h3 className="text-2xl font-bold text-brand-text m-0 leading-none font-merriweather">Heroic AI <span className="text-brand-accent">Rpg</span></h3>
+                        <Icon name="heroicAction" className="w-[1.6rem] h-[1.6rem] text-brand-accent drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
+                        <h3 className="text-2xl font-bold text-brand-text m-0 leading-none font-merriweather uppercase">Heroic <span className="text-brand-accent">AI RPG</span></h3>
                     </div>
                     <button
                         onClick={() => setIsDrawerOpen(true)}

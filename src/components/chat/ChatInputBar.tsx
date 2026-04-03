@@ -239,7 +239,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                 >
                     <Icon
                         name={isHeroicModeActive ? "heroicAction" : "heroicActionOutline"}
-                        className={`w-6 h-6 transition-colors duration-300 ${isHeroicModeActive ? 'text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-accent'}`}
+                        className={`w-[1.2rem] h-[1.2rem] transition-colors duration-300 ${isHeroicModeActive ? 'text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-accent'}`}
                     />
 
                     {/* Heroic Points Badge */}

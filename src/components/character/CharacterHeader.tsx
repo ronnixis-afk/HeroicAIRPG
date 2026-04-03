@@ -134,7 +134,7 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
                                 >
                                     <Icon
                                         name={i < currentHeroic ? "heroicAction" : "heroicActionOutline"}
-                                        className={`w-6 h-6 ${i < currentHeroic ? 'text-brand-accent drop-shadow-[0_0_10px_rgba(62,207,142,0.5)]' : 'text-brand-text-muted'}`}
+                                        className={`w-[1.2rem] h-[1.2rem] ${i < currentHeroic ? 'text-brand-accent drop-shadow-[0_0_10px_rgba(62,207,142,0.5)]' : 'text-brand-text-muted'}`}
                                     />
                                 </div>
                             ))}
