@@ -1,7 +1,7 @@
 
 // reducers/combatReducer.ts
 
-import { GameData, GameAction, PlayerCharacter, Companion, StatusEffect } from '../types';
+import { GameData, GameAction, PlayerCharacter, Companion, StatusEffect, ActiveBuff } from '../types';
 import { DEFAULT_SIZE_MODIFIERS, DEFAULT_ARCHETYPE_DEFINITIONS } from '../utils/mechanics';
 
 export const combatReducer = (state: GameData, action: GameAction): GameData => {
@@ -248,8 +248,8 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
                             newState.isPartyHidden = false;
                             const stripInvisible = (actor: any) => ({
                                 ...actor,
-                                statusEffects: (actor.statusEffects || []).filter((s: any) => s.name !== 'Invisible'),
-                                activeBuffs: (actor.activeBuffs || []).filter((b: any) => b.name !== 'Invisible')
+                                statusEffects: (actor.statusEffects || []).filter((s: StatusEffect) => s.name !== 'Invisible'),
+                                activeBuffs: (actor.activeBuffs || []).filter((b: ActiveBuff) => b.name !== 'Invisible')
                             });
                             newState.playerCharacter = new PlayerCharacter(stripInvisible(newState.playerCharacter));
                             newState.companions = newState.companions.map(c => new Companion(stripInvisible(c)));
@@ -319,8 +319,8 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
                         newState.isPartyHidden = false;
                         const stripInvisible = (actor: any) => ({
                             ...actor,
-                            statusEffects: (actor.statusEffects || []).filter((s: any) => s.name !== 'Invisible'),
-                            activeBuffs: (actor.activeBuffs || []).filter((b: any) => b.name !== 'Invisible')
+                            statusEffects: (actor.statusEffects || []).filter((s: StatusEffect) => s.name !== 'Invisible'),
+                            activeBuffs: (actor.activeBuffs || []).filter((b: ActiveBuff) => b.name !== 'Invisible')
                         });
                         newState.playerCharacter = new PlayerCharacter(stripInvisible(newState.playerCharacter));
                         newState.companions = newState.companions.map(c => new Companion(stripInvisible(c)));

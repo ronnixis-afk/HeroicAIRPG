@@ -349,7 +349,7 @@ export const BODY_SLOT_TAGS = [
     'Ring', 'Accessory'
 ] as const;
 
-export const STATUS_EFFECT_NAMES = ['Stunned', 'Paralyzed', 'Poisoned', 'Prone', 'Blinded', 'Deafened'] as const;
+export const STATUS_EFFECT_NAMES = ['Stunned', 'Paralyzed', 'Poisoned', 'Prone', 'Blinded', 'Deafened', 'Invisible', 'Hidden', 'Disappeared', 'Unconscious'] as const;
 
 /**
  * Foundation for names that prevent an actor from being targeted.
