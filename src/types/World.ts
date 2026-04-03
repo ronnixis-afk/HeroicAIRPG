@@ -9,10 +9,8 @@ export type PresenceMode = 'Physical' | 'Remote';
 // Fix: Added LocationUpdate interface to support structured AI spatial transition responses
 export interface LocationUpdate {
   coordinates: string;
-  zone: string;
   site_name: string;
   site_id: string;
-  is_new_site: boolean;
   transition_type?: 'staying' | 'returning' | 'exploring_new' | 'zone_change' | 'poi_entry';
   destination_zone_hint?: string;
   is_aboard_ship?: boolean;
@@ -37,13 +35,17 @@ export interface ExtractionScope {
   flags: ExtractionScopeFlags;
 }
 
-// Fix: Added NPCResolution interface to support structured AI social status updates
+// Structured AI social resolution — the Narrator is the single source of truth for NPC state commands.
 export interface NPCResolution {
   name: string;
-  action: string; // e.g., "existing", "new", "leaves"
-  summary: string;
+  action: 'existing' | 'new' | 'leaves' | string;
+  description: string; // Summary/description of the NPC or the event
   isFollowing?: boolean;
   presenceMode?: PresenceMode;
+  // Enriched fields for new NPC registration (action: 'new')
+  race?: string;
+  gender?: string;
+  status?: 'Alive' | 'Dead' | string;
 }
 
 export interface ObjectiveUpdate {

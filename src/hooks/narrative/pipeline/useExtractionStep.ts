@@ -2,11 +2,11 @@
 // hooks/narrative/pipeline/useExtractionStep.ts
 
 import React, { useCallback } from 'react';
-import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone, ExtractionScopeFlags } from '../../../types';
-import { auditSystemState, performHousekeeping, resolveLocaleCreation, generateZoneDetails, enrichItemDetails, detectExtractionScope } from '../../../services/geminiService';
+import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone } from '../../../types';
+import { resolveLocaleCreation, generateZoneDetails, enrichItemDetails } from '../../../services/geminiService';
 import { forgeSkins } from '../../../services/ItemGeneratorService';
 import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
-import { isLocaleMatch } from '../../../utils/mapUtils';
+import { isLocaleMatch, parseHostility } from '../../../utils/mapUtils';
 import { parseGameTime, addDuration, formatGameTime } from '../../../utils/timeUtils';
 
 export const useExtractionStep = (
@@ -45,50 +45,14 @@ export const useExtractionStep = (
             ...registryNpcNames
         ].filter((n): n is string => !!n);
 
-        // Step 0: Detection Gate (Relevance Optimization)
-        const scope = await detectExtractionScope(userContent, aiNarrative);
-
-        if (!scope.required) {
-            if (uiSetters) {
-                uiSetters.setIsAuditing(false);
-                uiSetters.setIsHousekeeping(false);
-            }
-            return { engagementConfirmed: false };
-        }
-
-        // 1. Concurrent Audit & Housekeeping (Gated)
-        const auditPromise = (scope.flags.spatialChange || scope.flags.socialChange || scope.flags.engagementChange || scope.flags.timeChange)
-            ? auditSystemState(userContent, aiNarrative, gameData, excludeList, scope.flags)
-            : Promise.resolve({
-                currentLocale: gameData.currentLocale || '',
-                timePassedMinutes: 0,
-                newNPCs: [],
-                npcUpdates: [],
-                activeEngagement: false,
-                missedRollRequests: [],
-                turnSummary: "",
-                inventoryUpdates: [],
-                isAboard: undefined
-            });
-
-        const housekeepingPromise = (scope.flags.itemChange || scope.flags.alignmentChange || scope.flags.socialChange)
-            ? performHousekeeping(userContent, aiNarrative, gameData, aiResponse.updates?.adventureBrief || (gameData.messages.slice(-1)[0]?.explicitAlignment), scope.flags)
-            : Promise.resolve({
-                inventoryUpdates: [],
-                userAlignmentShift: "Neutral",
-                npcMemories: [],
-                recruitedNpcIds: [],
-                poiMemory: undefined as { poiId: string, memory: string } | undefined
-            });
-
-        const [auditResult, housekeepingResult] = await Promise.all([auditPromise, housekeepingPromise]);
-
+        // --- PHASE 4 CONSOLIDATION: DIRECT SYNC ---
+        // We no longer call the Auditor or Housekeeper. Everything is extracted from aiResponse.
+        
         const finalUpdates: AIUpdatePayload = {
             ...(aiResponse.updates || {}),
             location_update: aiResponse.location_update,
             npc_resolution: aiResponse.npc_resolution,
-            adventureBrief: aiResponse.adventure_brief,
-            isAboard: auditResult.isAboard !== undefined ? auditResult.isAboard : gameData.isAboard
+            isAboard: aiResponse.is_aboard !== undefined ? aiResponse.is_aboard : gameData.isAboard
         };
 
         // --- SPATIAL SNAPPING & VALIDATION GATE (HARDENED) ---
@@ -113,10 +77,8 @@ export const useExtractionStep = (
             finalUpdates.location_update = {
                 ...narratorLoc,
                 coordinates: targetCoords,
-                zone: currentZoneName,
                 site_name: finalSiteName,
                 site_id: finalSiteId,
-                is_new_site: targetCoords !== gameData.playerCoordinates || !!forcedLocale,
                 transition_type: forcedLocale ? 'poi_entry' : 'zone_change'
             };
             resolvedLocale = finalSiteName;
@@ -128,80 +90,47 @@ export const useExtractionStep = (
             finalUpdates.currentLocale = undefined; // Never emit currentLocale unless moving
         }
 
-        // 2. Resolve Inventory Transitions
-        const allInventoryUpdates = [
-            ...(housekeepingResult.inventoryUpdates || []),
-            ...(auditResult.inventoryUpdates || [])
-        ];
-
-        if (allInventoryUpdates.length > 0) {
+        // 2. Resolve Inventory Transitions (Directly from Narrator Command)
+        if (aiResponse.items_to_generate && aiResponse.items_to_generate.length > 0) {
             const skillConfig = gameData.skillConfiguration || 'Fantasy';
             
             // Waterfall: Forge -> Enrich (Thematic Pass)
-            const skinnedUpdates = await Promise.all(allInventoryUpdates.map(async batch => {
-                if (batch.action === 'remove') return batch;
-                
-                const forgedItems = forgeSkins(batch.items, skillConfig);
-                const enrichedItems = await Promise.all(forgedItems.map(async (item) => {
-                    const enriched = await enrichItemDetails(item, gameData);
-                    return { ...item, ...enriched };
-                }));
-                
-                return { ...batch, items: enrichedItems };
+            const rawItems = aiResponse.items_to_generate.map(name => ({ name, quantity: 1 }));
+            const forgedItems = forgeSkins(rawItems, skillConfig);
+            const enrichedItems = await Promise.all(forgedItems.map(async (item) => {
+                const enriched = await enrichItemDetails(item, gameData);
+                return { ...item, ...enriched };
             }));
 
-            finalUpdates.inventoryUpdates = [...(finalUpdates.inventoryUpdates || []), ...skinnedUpdates];
+            const batch: InventoryUpdatePayload = {
+                ownerId: 'player',
+                list: 'carried',
+                action: 'add',
+                items: enrichedItems
+            };
 
-            skinnedUpdates.forEach(batch => {
-                if (!batch || !Array.isArray(batch.items)) return;
-                const owner = batch.ownerId === 'player' ? 'You' : (gameData.companions.find(c => c.id === batch.ownerId)?.name || 'Companion');
-                const action = batch.action || 'add';
-                const isRemoval = action === 'remove';
-                batch.items.forEach((item: any) => {
-                    if (!item || !item.name) return;
-                    dispatch({
-                        type: 'ADD_MESSAGE',
-                        payload: {
-                            id: `sys-inv-${isRemoval ? 'loss' : 'gain'}-${Date.now()}-${Math.random()}`,
-                            sender: 'system',
-                            content: `${owner} ${isRemoval ? 'lost' : 'acquired'}: **${item.name}**`,
-                            type: isRemoval ? 'neutral' : 'positive'
-                        }
-                    });
+            finalUpdates.inventoryUpdates = [...(finalUpdates.inventoryUpdates || []), batch];
+
+            enrichedItems.forEach((item: any) => {
+                if (!item || !item.name) return;
+                dispatch({
+                    type: 'ADD_MESSAGE',
+                    payload: {
+                        id: `sys-inv-gain-${Date.now()}-${Math.random()}`,
+                        sender: 'system',
+                        content: `You acquired: **${item.name}**`,
+                        type: 'positive'
+                    }
                 });
             });
         }
 
-        // 2.5 Resolve Recruitment (NEW)
-        if (housekeepingResult.recruitedNpcIds?.length > 0 && npcActions) {
-            housekeepingResult.recruitedNpcIds.forEach((id: string) => {
-                const npc = gameData.npcs?.find(n => n.id === id);
-                if (npc && !npc.companionId) {
-                    // Logic Gate: Ensure recursion safety by checking if they are already companions
-                    npcActions.inviteNpcToParty(npc, { skipNarrative: true });
-                }
-            });
-        }
 
         // 3. Resolve Social Updates (NPCs)
         const updatedNpcIds = new Set<string>();
         const mergedNpcUpdates: (Partial<NPC> & { id: string })[] = [];
 
-        // A. Auditor Updates (Status, POI)
-        if (auditResult.npcUpdates?.length > 0) {
-            auditResult.npcUpdates.forEach((upd: any) => {
-                if (!upd.id) return;
-                let finalUpd = { ...upd };
-                if (finalUpd.status === 'Dead') {
-                    finalUpd.isFollowing = false;
-                    finalUpd.deathTimestamp = gameData.currentTime;
-                }
-                mergedNpcUpdates.push(finalUpd);
-                updatedNpcIds.add(upd.id);
-            });
-        }
-
-        // B. AI Resolution Updates (Following, Leaves)
+        // Resolve AI Resolution Updates (Discovery, Following, Leaves)
         if (aiResponse.npc_resolution?.length > 0) {
             aiResponse.npc_resolution.forEach(res => {
                 const npc = gameData.npcs?.find(n => n.name && String(n.name).toLowerCase().trim() === String(res.name).toLowerCase().trim());
@@ -213,9 +142,14 @@ export const useExtractionStep = (
                         finalUpd.currentPOI = 'Departed';
                     }
 
+                    // Narrator-driven death: if the AI signals a character died this turn
+                    if (res.status === 'Dead') {
+                        finalUpd.status = 'Dead';
+                        finalUpd.isFollowing = false;
+                    }
+
                     // Enforce following rule again just in case
-                    const currentStatus = (mergedNpcUpdates.find(u => u.id === npc.id)?.status) || npc.status;
-                    if (currentStatus === 'Dead') finalUpd.isFollowing = false;
+                    if (npc.status === 'Dead') finalUpd.isFollowing = false;
 
                     const existingIdx = mergedNpcUpdates.findIndex(u => u.id === npc.id);
                     if (existingIdx > -1) {
@@ -224,15 +158,24 @@ export const useExtractionStep = (
                         mergedNpcUpdates.push(finalUpd);
                         updatedNpcIds.add(npc.id);
                     }
+                } else if (res.action === 'new') {
+                    // Discovery: Narrative-driven character emergence with full enrichment from the Narrator
+                    const id = `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+                    dispatch({ 
+                        type: 'ADD_NPC', 
+                        payload: { 
+                            name: res.name,
+                            description: res.description,
+                            race: res.race,
+                            gender: res.gender,
+                            id, 
+                            isNew: true, 
+                            status: res.status || 'Alive', 
+                            relationship: 0, 
+                            currentPOI: resolvedLocale || 'Current' 
+                        } 
+                    });
                 }
-            });
-        }
-
-        // C. New NPCs discovery
-        if (auditResult.newNPCs?.length > 0) {
-            auditResult.newNPCs.forEach((newNpc: any) => {
-                const id = `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-                dispatch({ type: 'ADD_NPC', payload: { ...newNpc, id, isNew: true, status: 'Alive', relationship: 0, currentPOI: resolvedLocale || 'Current' } });
             });
         }
 
@@ -271,8 +214,8 @@ export const useExtractionStep = (
                         }
                     }
                     // Or calculate relationship based on intent, if not immediately fighting them
-                    else if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
-                        changeAmount = calculateAlignmentRelationshipShift(housekeepingResult.userAlignmentShift, n.moralAlignment);
+                    else if (aiResponse.player_alignment_shift && aiResponse.player_alignment_shift !== 'Neutral') {
+                        changeAmount = calculateAlignmentRelationshipShift(aiResponse.player_alignment_shift, n.moralAlignment);
                     }
 
                     if (changeAmount !== 0) {
@@ -289,8 +232,6 @@ export const useExtractionStep = (
                                     type: 'negative'
                                 }
                             });
-                            // Combat Initialization should theoretically be called here via a pipeline trigger, 
-                            // but for now, the system message alerts the player.
                         }
 
                         if (!gameData.combatState?.isActive) {
@@ -301,13 +242,13 @@ export const useExtractionStep = (
             });
 
             // Announce the collective narrative alignment shift
-            if (housekeepingResult.userAlignmentShift && housekeepingResult.userAlignmentShift !== 'Neutral') {
+            if (aiResponse.player_alignment_shift && aiResponse.player_alignment_shift !== 'Neutral') {
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `sys-align-${Date.now()}`,
                         sender: 'system',
-                        content: `**Alignment Shift**: *${housekeepingResult.userAlignmentShift}*`,
+                        content: `**Alignment Shift**: *${aiResponse.player_alignment_shift}*`,
                         type: 'neutral'
                     }
                 });
@@ -326,24 +267,27 @@ export const useExtractionStep = (
             }
         }
 
-        if (!gameData.combatState?.isActive && housekeepingResult.npcMemories?.length > 0) {
-            housekeepingResult.npcMemories.forEach(m => {
-                const npc = gameData.npcs?.find(n => n.id === m.npcId || (n.name && String(n.name).toLowerCase().trim() === String(m.npcId).toLowerCase().trim()));
-                if (npc) {
-                    const newMemory: NPCMemory = { timestamp: gameData.currentTime, content: m.memory };
-                    const updatedMemories = [...(npc.memories || []), newMemory].slice(-20);
-                    dispatch({ type: 'UPDATE_NPC', payload: { ...npc, memories: updatedMemories } });
+        // NPC Memories: If we have turning summary, consider it as a broad memory for nearby NPCs
+        if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
+            const resolvedLocale = finalUpdates.currentLocale || gameData.currentLocale || "";
+            gameData.npcs?.forEach(n => {
+                const isAtLocale = isLocaleMatch(n.currentPOI || "", resolvedLocale);
+                if (isAtLocale && n.status !== 'Dead') {
+                    const newMemory: NPCMemory = { timestamp: gameData.currentTime, content: aiResponse.turn_summary! };
+                    const updatedMemories = [...(n.memories || []), newMemory].slice(-20);
+                    dispatch({ type: 'UPDATE_NPC', payload: { ...n, memories: updatedMemories } });
                 }
             });
         }
 
         // 4.5 POI Memory: Record event at current location
-        if (!gameData.combatState?.isActive && housekeepingResult.poiMemory?.memory) {
-            const poiMem = housekeepingResult.poiMemory;
-            // Resolve POI by site_id or by matching the current locale name in knowledge
-            const poiId = poiMem.poiId || gameData.current_site_id || '';
+        // Note: For now, we skip automated POI memory without the Housekeeper, 
+        // as the Narrator doesn't natively return structured memories yet.
+        // We could extract the summary as a memory.
+        if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
+            const poiId = gameData.current_site_id || '';
             if (poiId) {
-                finalUpdates.poiMemories = [{ poiId, memory: poiMem.memory }];
+                finalUpdates.poiMemories = [{ poiId, memory: aiResponse.turn_summary }];
             }
         }
 
@@ -357,34 +301,32 @@ export const useExtractionStep = (
         } else if (finalUpdates.location_update?.coordinates) {
             finalUpdates.playerCoordinates = finalUpdates.location_update.coordinates;
         }
-        if (auditResult.timePassedMinutes > 0) {
+        if (aiResponse.time_passed_minutes && aiResponse.time_passed_minutes > 0) {
             const currentDate = parseGameTime(gameData.currentTime);
             if (currentDate) {
-                const newDate = addDuration(currentDate, 0, auditResult.timePassedMinutes);
+                const newDate = addDuration(currentDate, 0, aiResponse.time_passed_minutes);
                 finalUpdates.currentTime = formatGameTime(newDate);
             }
         }
 
-        // 6. Missed Rolls Reconciliation
-        if (auditResult.missedRollRequests && auditResult.missedRollRequests.length > 0) {
-            const extraRes = combatActions.processDiceRolls(auditResult.missedRollRequests);
-            dispatch({
-                type: 'SET_MESSAGES',
-                payload: (prev: any[]) => prev.map(m => m.id === aiMessageId ? { ...m, rolls: [...(m.rolls || []), ...extraRes.rolls] } : m)
+        // 6. Recruitment Logic (Narrator signaled)
+        if (aiResponse.npc_resolution?.some(r => r.isFollowing && !gameData.companions?.some(c => c.name === r.name)) && npcActions) {
+            aiResponse.npc_resolution.forEach(res => {
+                if (res.isFollowing) {
+                    const npc = gameData.npcs?.find(n => n.name === res.name);
+                    if (npc && !npc.companionId) {
+                        npcActions.inviteNpcToParty(npc, { skipNarrative: true });
+                    }
+                }
             });
         }
 
         // 7. Story Log Creation
-        // Engagement Logic Gate: If an attack happened, don't create a peaceful story log yet.
-        const isEngaged = aiResponse.active_engagement || auditResult.activeEngagement;
-        if (!gameData.combatState?.isActive && !isEngaged) {
-            const logSummary = aiResponse.turnSummary || auditResult.turnSummary || "Interaction deed.";
-            const truncatedSummary = logSummary.split(' ').slice(0, 10).join(' ');
-
+        if (!gameData.combatState?.isActive && !aiResponse.combat_detected) {
             finalUpdates.storyUpdates = [{
                 id: `log-${Date.now()}`,
                 content: aiNarrative,
-                summary: truncatedSummary,
+                summary: aiResponse.turn_summary || "Interaction deed.",
                 isNew: true,
                 originatingMessageId: aiMessageId
             }];
@@ -392,7 +334,7 @@ export const useExtractionStep = (
 
         dispatch({ type: 'AI_UPDATE', payload: finalUpdates });
 
-        return { engagementConfirmed: isEngaged };
+        return { engagementConfirmed: !!aiResponse.combat_detected };
     }, [dispatch, combatActions, notifyInventoryChanges]);
 
 

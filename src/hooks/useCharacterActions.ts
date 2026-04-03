@@ -5,12 +5,9 @@ import { GameAction, GameData, LoreEntry, MapZone, Item, Inventory, PlayerCharac
 import {
     generatePersonalDiscoveries,
     generateStartingScenario,
-    auditSystemState,
-    performHousekeeping,
     skinItemsForCharacter,
     preloadAdjacentZones
 } from '../services/geminiService';
-import { forgeSkins } from '../services/ItemGeneratorService';
 import { weaveHero } from '../services/aiCharacterService';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
 import { useUI } from '../context/UIContext';
@@ -357,7 +354,7 @@ export const useCharacterActions = (
                 setCreationProgress({ isActive: false, step: '', progress: 0 });
                 // Note: We do NOT transition to 'chat' here; we stay on the party creation screen.
             } else if (scenario) {
-                setCreationProgress({ isActive: true, step: "Auditing initial timeline...", progress: 90 });
+                setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 90 });
 
                 const baselineData = {
                     ...gameData!,
@@ -367,29 +364,18 @@ export const useCharacterActions = (
                     currentLocale: scenario.startingZone.name
                 };
 
-                const [auditRes, houseRes] = await Promise.all([
-                    auditSystemState("Arrival", scenario.introNarrative, baselineData, [character.name]),
-                    performHousekeeping("Arrival", scenario.introNarrative, baselineData)
-                ]);
-
-                const introNpcs: NPC[] = (auditRes.newNPCs || []).map(n => ({
-                    id: n.id || `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                // Extract NPCs directly from the scenario response (no Auditor AI call needed)
+                const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
+                    id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                    name: n.name,
+                    description: n.description,
+                    race: n.race,
+                    gender: n.gender,
                     relationship: 0,
                     status: 'Alive',
                     isNew: true,
-                    ...n,
-                    currentPOI: auditRes.currentLocale || scenario.startingZone.name
+                    currentPOI: scenario.startingZone.name
                 } as NPC));
-
-                if (houseRes.inventoryUpdates) {
-                    houseRes.inventoryUpdates.forEach(batch => {
-                        if (batch.ownerId === 'player' && batch.action !== 'remove') {
-                            const skillConf = gameData?.skillConfiguration || 'Fantasy';
-                            const skinnedItems = forgeSkins(batch.items, skillConf);
-                            processedInventory[batch.list as keyof Inventory].push(...skinnedItems.map(i => new Item(i)));
-                        }
-                    });
-                }
 
                 const restartPayload: Partial<GameData> = {
                     playerCharacter: character as PlayerCharacter,
@@ -403,7 +389,7 @@ export const useCharacterActions = (
                     knowledge: knowledgeUpdates,
                     mapZones: mapZonesUpdate,
                     playerCoordinates: coords,
-                    currentLocale: auditRes.currentLocale || scenario.startingZone.name,
+                    currentLocale: scenario.startingZone.name,
                     npcs: introNpcs,
                     gmNotes: `Origin: ${scenario.introSummary}`
                 };
@@ -547,26 +533,19 @@ export const useCharacterActions = (
                 } as LoreEntry);
             });
 
-            setCreationProgress({ isActive: true, step: "Auditing initial timeline...", progress: 60 });
+            setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 60 });
 
-            const baselineData = {
-                ...gameData,
-                playerCoordinates: coords,
-                currentLocale: scenario.startingZone.name
-            };
-
-            const [auditRes, houseRes] = await Promise.all([
-                auditSystemState("Arrival", scenario.introNarrative, baselineData, [gameData.playerCharacter.name]),
-                performHousekeeping("Arrival", scenario.introNarrative, baselineData)
-            ]);
-
-            const introNpcs: NPC[] = (auditRes.newNPCs || []).map(n => ({
-                id: n.id || `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+            // Extract NPCs directly from the scenario response (no Auditor AI call needed)
+            const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
+                id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                name: n.name,
+                description: n.description,
+                race: n.race,
+                gender: n.gender,
                 relationship: 0,
                 status: 'Alive',
                 isNew: true,
-                ...n,
-                currentPOI: auditRes.currentLocale || scenario.startingZone.name
+                currentPOI: scenario.startingZone.name
             } as NPC));
 
             const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
@@ -586,7 +565,7 @@ export const useCharacterActions = (
                 knowledge: knowledgeUpdates,
                 mapZones: mapZonesUpdate,
                 playerCoordinates: coords,
-                currentLocale: auditRes.currentLocale || scenario.startingZone.name,
+                currentLocale: scenario.startingZone.name,
                 npcs: [...(gameData.npcs || []), ...introNpcs],
                 gmNotes: `Origin: ${scenario.introSummary}`
             };

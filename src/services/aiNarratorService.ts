@@ -91,9 +91,10 @@ ${preRolledMechanics}
 
     if (systemGeneratedCombatants && systemGeneratedCombatants.length > 0) {
         promptContent += `\n\n[MANDATORY SYSTEM DIRECTIVE - POTENTIAL COMBAT]: 
-        The world logic dictates potential hostiles are engaging. If the narrative confirms the start of battle, you MUST populate the 'suggestedActors' field and set 'active_engagement' to true.
+        The world logic dictates potential hostiles are engaging. If the narrative confirms the start of battle, you MUST populate the 'suggestedActors' field and set 'combat_detected' to true.
         - ANCESTRY ENFORCEMENT & NAMING: Choose from [${raceListStr}]. You MUST apply the matching Naming Style whenever an NPC name is created for that race.
         - FULL NAME & GENDER RULE: You MUST generate a "First Name" and a "Last Name or Family Name" for every unique NPC (minimum 2 words). Generated names MUST be consistent with the NPC's assigned gender (Male/Female). Generic units (e.g. "Guard 1") are exempt.
+        - NPC RESOLUTION: For every new character, you MUST also include them in 'npc_resolution' with action: 'new', a description, race, gender, and status.
         - Use unique names and match them to these mechanical slots:
         ${systemGeneratedCombatants.map((s, i) => `Slot ${i + 1}: [Difficulty: ${s.difficulty}, Template: ${s.template}]`).join('\n')}`;
     }
@@ -105,14 +106,12 @@ ${preRolledMechanics}
                 type: Type.OBJECT,
                 properties: {
                     coordinates: { type: Type.STRING },
-                    zone: { type: Type.STRING },
                     site_name: { type: Type.STRING, description: "Physical location name ONLY (e.g. 'The Iron Forge'). NEVER use event names like 'Death of X' or 'Aftermath of Y'. If no move occurred, return the current site_name unchanged." },
                     site_id: { type: Type.STRING },
-                    is_new_site: { type: Type.BOOLEAN, description: "TRUE only if transition_type is 'exploring_new' or 'zone_change'. FALSE otherwise." },
                     transition_type: { type: Type.STRING, description: "staying | returning | exploring_new | zone_change. 'staying' if no movement occurred. 'returning' if visiting a previously established POI. 'exploring_new' if moving to an entirely unestablished area in the current zone. 'zone_change' if moving across the world map to a new region/zone." },
                     destination_zone_hint: { type: Type.STRING, description: "Required ONLY if transition_type is 'zone_change'. Provide the name or a short description of the new zone being traveled to." }
                 },
-                required: ["coordinates", "zone", "site_name", "site_id", "is_new_site", "transition_type"]
+                required: ["coordinates", "site_name", "site_id", "transition_type"]
             },
             npc_resolution: {
                 type: Type.ARRAY,
@@ -121,10 +120,13 @@ ${preRolledMechanics}
                     properties: {
                         name: { type: Type.STRING },
                         action: { type: Type.STRING, description: "existing | new | leaves" },
-                        summary: { type: Type.STRING },
-                        isFollowing: { type: Type.BOOLEAN, description: "TRUE if travelling with the player. FALSE if staying behind or if DEAD. Dead NPCs MUST be FALSE." }
+                        description: { type: Type.STRING, description: "For 'new': A 1-2 sentence physical description. For 'existing'/'leaves': A brief note on what they did." },
+                        isFollowing: { type: Type.BOOLEAN, description: "TRUE if travelling with the player. FALSE if staying behind or if DEAD. Dead NPCs MUST be FALSE." },
+                        race: { type: Type.STRING, description: "Required for 'new' NPCs. Must be from the established ancestries list." },
+                        gender: { type: Type.STRING, description: "Required for 'new' NPCs. Male | Female | Non-binary" },
+                        status: { type: Type.STRING, description: "Alive | Dead. Set to 'Dead' if the NPC was killed in this turn." }
                     },
-                    required: ["name", "action", "summary"]
+                    required: ["name", "action", "description"]
                 }
             },
             narration: {
@@ -135,7 +137,6 @@ ${preRolledMechanics}
                         description: "Paragraph 1: Sensory & Atmospheric summary. Focus on the immediate environment and resulting mood. NO dialogue here." 
                     },
                     paragraph2: { type: Type.STRING, description: "Paragraph 2: Environmental Hook & Agency (2-3 POIs + status/threat hint)." },
-                    paragraph3: { type: Type.STRING, description: "Paragraph 3: Optional narrative flare or character moment. Use ONLY if the scene is complex or transformative." },
                     dialogues: {
                         type: Type.ARRAY,
                         description: "Structured dialogue lines. Exactly 2-3 sentences per actor. DO NOT include player ('You') dialogue.",
@@ -148,25 +149,24 @@ ${preRolledMechanics}
                             },
                             required: ["actorName", "content"]
                         }
-                    },
-                    characterReactions: {
-                        type: Type.ARRAY,
-                        description: "Internal metadata for character sentiment towards the player's action.",
-                        items: {
-                            type: Type.OBJECT,
-                            properties: {
-                                name: { type: Type.STRING, description: "First name of the character responding." },
-                                sentiment: { type: Type.STRING, enum: ["like", "dislike", "neutral"], description: "Whether they approve or disapprove of the action based on their alignment." }
-                            },
-                            required: ["name", "sentiment"]
-                        }
                     }
                 },
                 required: ["paragraph1", "paragraph2"]
             },
-            turnSummary: { type: Type.STRING },
-            adventure_brief: { type: Type.STRING },
-            active_engagement: { type: Type.BOOLEAN, description: "Set to TRUE only if an attack actually happens in this turn." },
+            combat_detected: { type: Type.BOOLEAN, description: "Set to TRUE only if an attack actually happens in this turn. FALSE otherwise." },
+            items_to_generate: { 
+                type: Type.ARRAY, 
+                items: { type: Type.STRING },
+                description: "List of item names to be procedurally generated and added to inventory (e.g. ['Rusted Key', 'Glowing Mushroom'])."
+            },
+            player_alignment_shift: { 
+                type: Type.STRING, 
+                enum: ["Good", "Evil", "Lawful", "Chaotic", "Neutral"],
+                description: "The moral weight of the player's last action. Use 'Neutral' if no significant shift occurred."
+            },
+            time_passed_minutes: { type: Type.NUMBER, description: "Amount of game time passed during this action (e.g. 5, 15, 60)." },
+            turn_summary: { type: Type.STRING, description: "A concise, 10-word summary of the turn's events for the story log." },
+            is_aboard: { type: Type.BOOLEAN, description: "TRUE if the party is currently inside or has boarded a ship/vehicle." },
             suggestedActors: {
                 type: Type.ARRAY,
                 items: {
@@ -213,7 +213,7 @@ ${preRolledMechanics}
                 }
             }
         },
-        required: ["location_update", "npc_resolution", "narration", "turnSummary", "adventure_brief", "active_engagement", "alignmentOptions", "updates"]
+        required: ["location_update", "npc_resolution", "narration", "combat_detected", "alignmentOptions", "updates", "player_alignment_shift", "time_passed_minutes", "turn_summary"]
     };
 
     try {
@@ -262,19 +262,18 @@ ${preRolledMechanics}
                 paragraph1: "The Game Master is gathering their thoughts...",
                 paragraph2: "Wait for it..."
             },
-            turnSummary: "System error occurred.",
-            adventure_brief: gameData.adventureBrief || "Continue investigation.",
-            active_engagement: false,
+            combat_detected: false,
             location_update: {
                 coordinates: gameData.playerCoordinates || "0-0",
-                zone: gameData.currentLocale || "The Wilds",
                 site_name: gameData.current_site_name || "The Wilds",
                 site_id: gameData.current_site_id || "the-wilds",
-                is_new_site: false,
                 transition_type: "staying"
             },
             npc_resolution: [],
             suggestedActors: [],
+            player_alignment_shift: "Neutral",
+            time_passed_minutes: 0,
+            turn_summary: "System processing.",
             usage: undefined,
             _error: errorMsg
         };
@@ -319,14 +318,12 @@ The player has expended a HEROIC POINT this round.
     ${heroicDirective}
     **Formatting Rules**: 
     1. Plain text only in paragraphs. NO bolding or italics in narration bodies.
-    2. Write exactly two to three paragraphs (paragraph1, paragraph2, and optional paragraph3).
+    2. Write exactly two paragraphs (paragraph1 and paragraph2).
     3. NO dialogues in 'paragraph1'. Use the structured 'dialogues' array instead.
     4. **SYSTEM DIALOGUE PROTOCOL**: 
-       - Each dialogue must be 2-3 sentences per actor. 
-       - DO NOT include player ('You') dialogue.
-       - Each entry must be in the 'dialogues' array.
-       - PRIORITY: Favor NPCs who have a distinct reaction to the player's specific alignment action.
-    5. PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
+       - Each dialogue must be 2-3 sentences per actor. PLAIN TEXT ONLY: No Markdown (**, #, etc.) in 'narration' or 'dialogues'.
+    5. NAME PROTECTION: DO NOT use the names of established NPCs for new random characters.
+    6. PERSPECTIVE: Always address the player in the second person ('You'). The player character's name is ${gameData.playerCharacter.name}.
 
     ${previously}
     [Actor Logic]: ${partyOverview || 'Standard party.'}
@@ -338,20 +335,15 @@ The player has expended a HEROIC POINT this round.
     5. ALIGNMENT ACTIONS: Provide 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
     
     [Output Schema (Json)]:
-    {
       "narration": {
           "paragraph1": "Atmospheric sensory summary. NO dialogue.",
           "paragraph2": "Environmental Hook & Agency (2-3 POIs + status/threat hint).",
-          "paragraph3": "Optional narrative flare/character moment.",
           "dialogues": [
             { "actorName": "string", "content": "string", "isAlignmentReaction": boolean }
           ]
       },
-      "turnSummary": "string",
-      "adventure_brief": "string",
-      "active_engagement": true,
       "location_update": { 
-          "coordinates": "string", "zone": "string", "site_name": "string", "site_id": "string", "is_new_site": false 
+          "coordinates": "string", "site_name": "string", "site_id": "string" 
       },
       "npc_resolution": [],
       "alignmentOptions": [
@@ -393,17 +385,9 @@ ${batchMechanicsSummary}
         return parsed;
     } catch (e) {
         return {
-            narration: {
-                paragraph1: "The fray erupts in a chaotic blur of steel and magic!",
-                paragraph2: "Dust settles over the field of battle."
-            },
-            turnSummary: "Chaos of battle.",
-            adventure_brief: gameData.adventureBrief || "Survive the encounter.",
-            active_engagement: true,
             location_update: {
-                coordinates: gameData.playerCoordinates || "Unknown", zone: gameData.currentLocale || "Unknown",
-                site_name: gameData.current_site_name || "Unknown", site_id: gameData.current_site_id || "unknown",
-                is_new_site: false
+                coordinates: gameData.playerCoordinates || "Unknown",
+                site_name: gameData.current_site_name || "Unknown", site_id: gameData.current_site_id || "unknown"
             },
             npc_resolution: [],
             alignmentOptions: []

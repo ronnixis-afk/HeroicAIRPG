@@ -32,7 +32,6 @@ export interface GameData {
   gmNotes?: string;
   grandDesign?: string;
   connectedNpcIds?: string[]; // NEW: Links NPCs mentioned in the Grand Design
-  adventureBrief?: string; // NEW: 10-word concise direction
   plotPoints?: PlotPoint[];
   worldSummary?: string;
   currentTime: string;
@@ -96,7 +95,6 @@ export interface AIUpdatePayload {
   combatState?: Partial<CombatState>;
   gmNotes?: string;
   grandDesign?: string;
-  adventureBrief?: string; // NEW: Consequence extraction field
   playerCoordinates?: string;
   currentLocale?: string;
   current_site_id?: string;
@@ -120,14 +118,20 @@ export interface AIResponse {
       isAlignmentReaction?: boolean;
     }[];
   };
-  turnSummary: string;
-  adventure_brief: string;
   // Metadata for internal plumbing
   usage?: UsageStats;
   updates?: AIUpdatePayload;
   suggestedActors?: ActorSuggestion[];
   alignmentOptions?: { label: string; alignment: 'Good' | 'Evil' | 'Lawful' | 'Chaotic' }[];
-  active_engagement?: boolean; // NEW: Specifically flags if the party is being attacked or attacking
+  combat_detected?: boolean; // Narrator signals if the party is being attacked or attacking
+  
+  // Direct State Command Fields (Phase 4 Consolidation)
+  items_to_generate?: string[]; // List of items to be enriched and added to inventory
+  player_alignment_shift?: 'Good' | 'Evil' | 'Lawful' | 'Chaotic' | 'Neutral';
+  time_passed_minutes?: number;
+  turn_summary?: string; // Concise summary for the story log
+  is_aboard?: boolean;
+
   _error?: string; // Internal: present when the narrator returned a fallback due to API failure
 }
 
