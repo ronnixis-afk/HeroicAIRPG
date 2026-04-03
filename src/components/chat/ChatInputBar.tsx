@@ -17,6 +17,7 @@ interface ChatInputBarProps {
     isGeneratingImage: boolean;
     isHandsFree: boolean;
     voiceStatus?: 'idle' | 'connecting' | 'connected' | 'listening' | 'thinking' | 'speaking' | 'error';
+    isSpeaking?: boolean;
     onRepeatLast: () => void;
     isCombatActive: boolean;
     isPlayerTurn: boolean;
@@ -178,8 +179,8 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                 onClick={handleInteraction}
                 className={`flex items-center justify-center p-4 gap-8 bg-brand-bg/80 rounded-3xl border border-brand-primary/30 shadow-2xl animate-fade-in relative overflow-hidden transition-all ${!props.isChatViewActive ? 'hover:scale-[1.02] active:scale-95' : ''}`}
             >
-                <button onClick={props.onRepeatLast} className="w-16 h-16 rounded-full bg-brand-surface flex items-center justify-center text-brand-text-muted hover:text-brand-text hover:bg-brand-primary transition-all active:scale-95 border border-brand-primary shadow-lg">
-                    <Icon name="play" className="w-8 h-8" />
+                <button onClick={props.onRepeatLast} className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-95 border shadow-lg ${props.isSpeaking ? 'bg-brand-accent text-black border-white animate-pulse' : 'bg-brand-surface text-brand-text-muted hover:text-brand-text hover:bg-brand-primary border-brand-primary'}`}>
+                    <Icon name={props.isSpeaking ? "pause" : "play"} className="w-8 h-8" />
                 </button>
 
                 {props.isCombatActive && props.isPlayerTurn && (

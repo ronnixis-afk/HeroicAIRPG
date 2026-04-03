@@ -162,7 +162,7 @@ const GameInterface: React.FC = () => {
 
   // Audio Logic
   /* Fix: Use narrationTone for the third parameter to ensure correct TTS persona scaling */
-  const { speak, stopAllSpeech } = useAudioPlayback(
+  const { speak, stopAllSpeech, isSpeaking } = useAudioPlayback(
     gameData?.useAiTts ?? false,
     gameData?.narrationVoice || "Classic Narrator (Male)",
     gameData?.narrationTone || "Classic Fantasy"
@@ -292,9 +292,9 @@ const GameInterface: React.FC = () => {
 
   const isSubmittingRef = React.useRef(false);
 
-  const handleSubmitChat = async () => {
+  const handleSubmitChat = async (overrideContent?: string) => {
     if (isSubmittingRef.current) return;
-    const content = chatInput.trim();
+    const content = (overrideContent ?? chatInput).trim();
     if (!content || !gameData) return;
 
     isSubmittingRef.current = true;
@@ -427,6 +427,7 @@ const GameInterface: React.FC = () => {
               isHandsFree={gameData?.isHandsFree ?? false}
               voiceStatus={voiceStatus}
               onRepeatLast={handleRepeatLast}
+              isSpeaking={isSpeaking}
               isCombatActive={isCombatActive}
               isPlayerTurn={isPlayerTurn}
               onAutoResolve={performAutomatedPlayerTurn}
@@ -500,7 +501,10 @@ const GameInterface: React.FC = () => {
       <SpeechToTextModal
         isOpen={isSpeechModalOpen}
         onClose={() => setIsSpeechModalOpen(false)}
-        onSendTranscript={(t) => { setIsSpeechModalOpen(false); setChatInput(t); handleSubmitChat(); }}
+        onSendTranscript={(t) => {
+          setIsSpeechModalOpen(false);
+          handleSubmitChat(t);
+        }}
       />
 
       {generatedImage && (
