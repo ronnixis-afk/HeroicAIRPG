@@ -461,18 +461,19 @@ const POIListItem: React.FC<{
                             <Icon name="edit" className="w-4 h-4" />
                             {toTitleCase('Edit')}
                         </button>
-                        {isPlayerHere ? (
-                            <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent bg-brand-accent/10 rounded-xl border border-brand-accent/20">
-                                {toTitleCase('You Are Here')}
-                            </div>
-                        ) : (
-                            <button
-                                onClick={handleInteract}
-                                className={`btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold transition-all ${isInSameZone && !isZoneVisited ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-                                disabled={isInSameZone && !isZoneVisited}
-                            >
-                                {toTitleCase(isInSameZone ? 'Enter' : 'Travel Here')}
-                            </button>
+                        {isZoneVisited && (
+                            isPlayerHere ? (
+                                <div className="h-10 flex-1 flex items-center justify-center text-[12px] font-bold text-brand-accent bg-brand-accent/10 rounded-xl border border-brand-accent/20">
+                                    {toTitleCase('You Are Here')}
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleInteract}
+                                    className="btn-primary h-10 flex-1 text-[12px] rounded-xl font-bold transition-all"
+                                >
+                                    {toTitleCase(isInSameZone ? 'Enter' : 'Travel Here')}
+                                </button>
+                            )
                         )}
                     </div>
                 </div>
