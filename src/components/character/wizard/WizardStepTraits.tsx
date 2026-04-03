@@ -17,7 +17,7 @@ export const WizardStepTraits: React.FC<WizardStepTraitsProps> = ({ title, subti
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <h4 className="text-2xl font-bold text-brand-text">{title}</h4>
+                <h3 className="text-brand-text mb-0">{title}</h3>
                 <p className="text-sm text-brand-text-muted italic">{subtitle}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto">

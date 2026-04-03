@@ -12,9 +12,9 @@ export const WizardStepAncestry: React.FC<WizardStepAncestryProps> = ({ races, s
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <h4 className="text-2xl font-bold text-brand-text">
+                <h3 className="text-brand-text mb-0">
                     {isCompanion ? "Who is this traveler?" : "Where do you come from?"}
-                </h4>
+                </h3>
                 <p className="text-sm text-brand-text-muted italic">
                     {isCompanion ? "Select their ancestry from the world lore." : "Choose your ancestry from the world lore."}
                 </p>

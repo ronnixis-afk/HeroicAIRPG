@@ -61,9 +61,9 @@ export const WizardStepIdentity: React.FC<WizardStepIdentityProps> = ({
     return (
         <div className="space-y-10 max-w-2xl mx-auto pb-6">
             <div className="text-center space-y-2">
-                <h4 className="text-2xl font-bold text-brand-text">
+                <h3 className="text-brand-text mb-0">
                     {isShip ? "Commission Your Vessel" : (isCompanion ? "Enlist Your Ally" : "Finalize Your Legacy")}
-                </h4>
+                </h3>
                 <p className="text-sm text-brand-text-muted italic">
                     {isShip ? "Give your new craft a name to be feared or respected." : (isCompanion ? "Give your new companion a name to be remembered." : "By what name shall the world know you?")}
                 </p>

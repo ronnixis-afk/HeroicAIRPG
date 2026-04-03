@@ -60,7 +60,7 @@ export const WizardStepMethod: React.FC<WizardStepMethodProps> = ({
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="text-center space-y-2">
-                <h4 className="text-2xl font-bold text-brand-text">The Path of Creation</h4>
+                <h3 className="text-brand-text mb-0">The Path of Creation</h3>
                 <p className="text-sm text-brand-text-muted italic">
                     {isShip ? 'Choose to forge a custom vessel or select an established blueprint.' : 'Choose to forge a custom legend or select an established archetype.'}
                 </p>

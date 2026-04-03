@@ -13,7 +13,7 @@ export const WizardAIForge: React.FC<WizardAIForgeProps> = ({ prompt, onPromptCh
     return (
         <div className="flex-1 flex flex-col justify-start py-8 space-y-8 animate-fade-in overflow-y-auto custom-scroll px-1">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-bold text-brand-text">Ai Companion Forge</h2>
+                <h3 className="text-brand-text mb-0">AI Companion Forge</h3>
                 <p className="text-xs text-brand-text-muted italic px-4">The architect will manifest a fitting ally based on your prompt and story context.</p>
             </div>
 

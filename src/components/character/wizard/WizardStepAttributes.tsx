@@ -21,9 +21,9 @@ const POINT_COSTS: Record<number, number> = {
     11: 3,
     12: 4,
     13: 5,
-    14: 7,
-    15: 9,
-    16: 11
+    14: 6,
+    15: 8,
+    16: 10
 };
 
 export const WizardStepAttributes: React.FC<WizardStepAttributesProps> = ({
@@ -70,7 +70,7 @@ export const WizardStepAttributes: React.FC<WizardStepAttributesProps> = ({
     return (
         <div className="space-y-10 max-w-2xl mx-auto pb-6">
             <div className="text-center space-y-2">
-                <h4 className="text-2xl font-bold text-brand-text">Determine Attributes</h4>
+                <h3 className="text-brand-text mb-0">Determine Attributes</h3>
                 <p className="text-sm text-brand-text-muted italic">
                     Allocate points to define your core abilities, then select your practiced skills.
                 </p>

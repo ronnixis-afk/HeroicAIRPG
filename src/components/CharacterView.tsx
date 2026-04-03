@@ -133,7 +133,7 @@ const CharacterView: React.FC = () => {
                             <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
                         </div>
                         <div className="text-center space-y-3 w-full max-w-xs px-6">
-                            <h5 className="font-bold text-brand-text">{creationProgress.step || "Consulting The Fates..."}</h5>
+                            <h3 className="text-brand-text mb-0">{creationProgress.step || "Consulting The Fates..."}</h3>
                             <p className="text-xs text-brand-text-muted italic animate-pulse">
                                 The Architect Is Weaving Your Legend Into The World...
                             </p>
