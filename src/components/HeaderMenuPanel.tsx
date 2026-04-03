@@ -219,7 +219,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="p-6 bg-brand-primary/10 border-t border-brand-primary/10 grid grid-cols-2 gap-3">
+          <div className="p-6 border-t border-brand-primary/10 grid grid-cols-2 gap-3">
             <button
               onClick={() => handleAction('settings')}
               className="w-full flex flex-row items-center justify-center gap-3 p-3 bg-brand-surface rounded-xl border border-brand-primary transition-all group hover:border-brand-accent/30"
