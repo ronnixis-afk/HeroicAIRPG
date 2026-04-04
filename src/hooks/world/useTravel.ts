@@ -51,6 +51,18 @@ export const useTravel = (
         setIsAiGenerating(true);
 
         try {
+            // --- SYSTEM MANAGED ERROR CORRECTION ---
+            if (zone && !zone.visited && zone.name === "Uncharted Wilds") {
+                // Remove legacy knowledge associated with the uncharted fallback
+                const legacyEntries = gameData.knowledge?.filter(k => k.coordinates === coordinates && k.title.includes("Uncharted Wilds")) || [];
+                legacyEntries.forEach(k => {
+                    dispatch({ type: 'DELETE_KNOWLEDGE', payload: k.id });
+                });
+                
+                // Set zone to undefined to force a full regeneration, randomising population and open area
+                zone = undefined;
+            }
+
             // 1. Resolve Geography and Discovery Status
             if (!zone) {
                 isDiscovery = true;
