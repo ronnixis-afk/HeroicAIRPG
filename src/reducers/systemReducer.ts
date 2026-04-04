@@ -336,12 +336,21 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
             return newState;
         }
 
-        case 'RESET_WORLD':
+        case 'RESET_WORLD': {
+            const hasSnapshot = !!state.startingPartySnapshot;
+            const playerFromSnapshot = hasSnapshot 
+                ? new PlayerCharacter(state.startingPartySnapshot!.player as Partial<PlayerCharacter>)
+                : getNewDndCharacter();
+            
+            const companionsFromSnapshot = hasSnapshot
+                ? (state.startingPartySnapshot!.companions || []).map(c => new Companion(c as Partial<Companion>))
+                : [];
+
             return {
                 ...state,
-                playerCharacter: getNewDndCharacter(),
+                playerCharacter: playerFromSnapshot,
                 playerInventory: { equipped: [], carried: [], storage: [], assets: [] },
-                companions: [],
+                companions: companionsFromSnapshot,
                 companionInventories: {},
                 story: [],
                 gallery: [],
@@ -361,8 +370,10 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 currentTime: state.currentTime || "Day 1, 08:00",
                 skillConfiguration: state.skillConfiguration || 'Fantasy',
                 isPartyHidden: false,
-                partyStealthScore: 10
+                partyStealthScore: 10,
+                startingPartySnapshot: state.startingPartySnapshot
             };
+        }
 
         case 'RESTART_ADVENTURE':
             return {
@@ -450,7 +461,8 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 combatState: null,
                 gmNotes: restartPayload.gmNotes || "",
                 isPartyHidden: false,
-                partyStealthScore: 10
+                partyStealthScore: 10,
+                startingPartySnapshot: restartPayload.startingPartySnapshot || state.startingPartySnapshot
             };
             return consolidateCurrencyToPlayer(newState);
         }

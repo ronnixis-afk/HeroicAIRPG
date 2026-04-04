@@ -28,6 +28,36 @@ export interface LibraryTrait extends Omit<Ability, 'id'> {
     minLevel?: number;
 }
 
+export interface CharacterSnapshot {
+    name: string;
+    gender: string;
+    race: string;
+    level: number;
+    abilityScores: Record<AbilityScoreName, AbilityScore>;
+    abilities: Ability[];
+    profession: string;
+    appearance: string;
+    background: string;
+    personality?: string;
+    isShip?: boolean;
+}
+
+export const createSnapshot = (character: PlayerCharacter | Companion): CharacterSnapshot => {
+    return {
+        name: character.name,
+        gender: character.gender,
+        race: character.race,
+        level: character.level,
+        abilityScores: JSON.parse(JSON.stringify(character.abilityScores)),
+        abilities: (character.abilities || []).filter(a => !a.isLevelUpTrait),
+        profession: character.profession,
+        appearance: character.appearance,
+        background: character.background,
+        personality: (character as Companion).personality || '',
+        isShip: character.isShip
+    };
+};
+
 export interface CompanionAbility extends Ability { }
 
 export interface CalculatedCombatStats {

@@ -12,7 +12,7 @@ import PageHeader from './PageHeader';
 
 const CharacterView: React.FC = () => {
     const { gameData, updateCompanion, startJourney, switchWorld, deleteCompanion, dispatch } = useContext(GameDataContext);
-    const { selectedCharacterId, setSelectedCharacterId, creationProgress } = useUI();
+    const { selectedCharacterId, setSelectedCharacterId, creationProgress, setCreationProgress } = useUI();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
     const [wizardType, setWizardType] = useState<'player' | 'companion'>('player');
@@ -129,17 +129,40 @@ const CharacterView: React.FC = () => {
             {isPreGame ? (
                 creationProgress.isActive ? (
                     <div className="flex-1 flex flex-col items-center justify-center animate-fade-in py-12 min-h-[70vh]">
-                        <div className="w-20 h-20 text-brand-accent animate-dice mb-10">
-                            <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
+                        <div className={`w-20 h-20 mb-10 transition-all duration-700 ${creationProgress.errorString ? 'text-red-400 animate-pulse scale-110' : 'text-brand-accent animate-dice'}`}>
+                            <Icon name="dice" className={`w-full h-full ${creationProgress.errorString ? 'drop-shadow-[0_0_15px_rgba(248,113,113,0.5)]' : 'drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]'}`} />
                         </div>
                         <div className="text-center space-y-3 w-full max-w-xs px-6">
-                            <h3 className="text-brand-text mb-0">{creationProgress.step || "Consulting The Fates..."}</h3>
-                            <p className="text-xs text-brand-text-muted italic animate-pulse">
-                                The Architect Is Weaving Your Legend Into The World...
+                            <h3 className={`text-lg font-bold transition-colors ${creationProgress.errorString ? 'text-red-400' : 'text-brand-text'}`}>
+                                {creationProgress.errorString ? creationProgress.step : (creationProgress.step || "Consulting The Fates...")}
+                            </h3>
+                            <p className="text-xs text-brand-text-muted italic leading-relaxed">
+                                {creationProgress.errorString 
+                                    ? creationProgress.errorString 
+                                    : "The Architect Is Weaving Your Legend Into The World..."}
                             </p>
-                            <div className="w-full mt-8 bg-brand-primary/30 h-1.5 rounded-full overflow-hidden border border-brand-surface">
-                                <div className="bg-brand-accent h-full transition-all duration-1000 ease-out" style={{ width: `${creationProgress.progress}%` }} />
-                            </div>
+                            
+                            {creationProgress.errorString ? (
+                                <div className="flex flex-col gap-3 mt-8 w-full animate-fade-in">
+                                    <button 
+                                        onClick={() => creationProgress.onRetry?.()}
+                                        className="btn-md btn-primary w-full flex items-center justify-center gap-2 shadow-lg shadow-brand-accent/5"
+                                    >
+                                        <Icon name="dice" className="w-4 h-4" />
+                                        <span>Retry Journey</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setCreationProgress({ isActive: false, step: '', progress: 0 })}
+                                        className="text-xs font-bold text-brand-text-muted hover:text-brand-text transition-colors underline underline-offset-4 decoration-brand-primary"
+                                    >
+                                        Return to Forge
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="w-full mt-8 bg-brand-primary/30 h-1.5 rounded-full overflow-hidden border border-brand-surface">
+                                    <div className="bg-brand-accent h-full transition-all duration-1000 ease-out" style={{ width: `${creationProgress.progress}%` }} />
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (

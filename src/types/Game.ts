@@ -1,7 +1,7 @@
 
 // types/Game.ts
 
-import { PlayerCharacter, Companion } from './Characters';
+import { PlayerCharacter, Companion, CharacterSnapshot } from './Characters';
 import { Inventory, Item, StoreItem, InventoryUpdatePayload } from './Items';
 import { StoryLog, LoreEntry, GalleryEntry, GalleryMetadata, ChatMessage, PlotPoint, CombatState, MapZone, MapSettings, Shop, NPC, ActorSuggestion, DiceRoll, DiceRollRequest, CombatActor, EnemyTemplate, AffinityDefinition, UsageStats, LocationUpdate, NPCResolution, POIMemory } from './World';
 import { NarrationTone, NarrationVoice, ImageGenerationStyle, Difficulty, SkillConfiguration, BodySlot, CombatActorSize, StatusEffect, ArchetypeName, ActiveBuff } from './Core';
@@ -64,6 +64,10 @@ export interface GameData {
   partyStealthScore?: number;
   isAboard?: boolean; // NEW: Tracks if the party is currently inside their vessel
   currentSubLocation?: string; // NEW: Tracks the specific spot within a POI (e.g. "at the bar")
+  startingPartySnapshot?: {
+    player: CharacterSnapshot;
+    companions: CharacterSnapshot[];
+  };
 }
 
 export interface World {

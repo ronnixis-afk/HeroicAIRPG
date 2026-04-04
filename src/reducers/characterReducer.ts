@@ -1,6 +1,6 @@
 // reducers/characterReducer.ts
 
-import { GameData, PlayerCharacter, Companion, Inventory, GameAction, ChatMessage } from '../types';
+import { GameData, PlayerCharacter, Companion, Inventory, GameAction, ChatMessage, createSnapshot } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNextLevelXP, getXPForLevel } from '../utils/mechanics';
 import { getPOITheme } from '../utils/mapUtils';
@@ -67,6 +67,20 @@ const LEAVING_SHIP_MESSAGES = {
     ]
 };
 
+const syncSnapshotIfPreGame = (state: GameData): GameData => {
+    // Audit Logic: Only sync the starting snapshot if we haven't begun the story yet.
+    // Once story.length > 0, the snapshot is "locked" until the next reset.
+    if (state.story && state.story.length > 0) return state;
+
+    return {
+        ...state,
+        startingPartySnapshot: {
+            player: createSnapshot(state.playerCharacter),
+            companions: (state.companions || []).map(c => createSnapshot(c))
+        }
+    };
+};
+
 export const characterReducer = (state: GameData, action: GameAction): GameData => {
     switch (action.type) {
         case 'UPDATE_PLAYER': {
@@ -78,10 +92,10 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             // Re-apply item-based bonuses that require inventory context
             pc.maxHeroicPoints = pc.getMaxHeroicPoints(state.playerInventory);
             
-            return { 
+            return syncSnapshotIfPreGame({ 
                 ...state, 
                 playerCharacter: pc 
-            };
+            });
         }
         
         case 'UPDATE_COMPANION': {
@@ -152,13 +166,13 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                 return c;
             });
 
-            return {
+            return syncSnapshotIfPreGame({
                 ...state,
                 companions: updatedCompanions,
                 currentLocale: newLocale,
                 isAboard: newAboard !== undefined ? newAboard : state.isAboard,
                 messages: vesselMsg ? [...state.messages, vesselMsg] : state.messages
-            };
+            });
         }
         
         case 'ADD_COMPANION': {
@@ -210,7 +224,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                     isAboard: companionInstance.isShip ? (companionInstance.isInParty !== false) : state.isAboard,
                     messages: boardingMsg ? [...state.messages, boardingMsg] : state.messages
                 };
-                return consolidateCurrencyToPlayer(newState);
+                return syncSnapshotIfPreGame(consolidateCurrencyToPlayer(newState));
             }
 
             const newState = {
@@ -226,17 +240,17 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             };
             
             // Automatic consolidation: ensure any currency received during companion creation is moved to player
-            return consolidateCurrencyToPlayer(newState);
+            return syncSnapshotIfPreGame(consolidateCurrencyToPlayer(newState));
         }
         
         case 'DELETE_COMPANION':
             const newInventories = { ...state.companionInventories };
             delete newInventories[action.payload];
-            return {
+            return syncSnapshotIfPreGame({
                 ...state,
                 companions: (state.companions ?? []).filter(c => c.id !== action.payload),
                 companionInventories: newInventories
-            };
+            });
             
         case 'USE_ABILITY': {
             const { abilityId, ownerId } = action.payload;

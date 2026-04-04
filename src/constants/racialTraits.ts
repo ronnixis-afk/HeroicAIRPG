@@ -48,3 +48,49 @@ export const RACIAL_TRAIT_BLUEPRINTS: Omit<Ability, 'id'>[] = [
         tags: ['racial', 'social']
     }
 ];
+
+/**
+ * Maps common D&D race keywords to their primary attribute bonuses.
+ */
+export const RACE_ATTRIBUTE_MAPPING: Record<string, string> = {
+    'elf': 'dexterity',
+    'elven': 'dexterity',
+    'high-elf': 'dexterity',
+    'wood-elf': 'dexterity',
+    'halfling': 'dexterity',
+    'nimble': 'dexterity',
+    'dwarf': 'constitution',
+    'dwarven': 'constitution',
+    'mountain': 'constitution',
+    'tough': 'constitution',
+    'sturdy': 'constitution',
+    'gnome': 'intelligence',
+    'scholar': 'intelligence',
+    'orc': 'strength',
+    'half-orc': 'strength',
+    'warrior': 'strength',
+    'mighty': 'strength',
+    'dragonborn': 'strength',
+    'dragon': 'strength',
+    'tiefling': 'charisma',
+    'noble': 'charisma',
+    'social': 'charisma'
+};
+
+/**
+ * Returns the recommended racial trait (attribute bonus) for a race name based on keywords.
+ */
+export const getRacialTraitForRace = (raceName: string): Omit<Ability, 'id'> | null => {
+    const lowerName = raceName.toLowerCase();
+    
+    for (const [keyword, attribute] of Object.entries(RACE_ATTRIBUTE_MAPPING)) {
+        if (lowerName.includes(keyword)) {
+            const blueprint = RACIAL_TRAIT_BLUEPRINTS.find(b => 
+                b.buffs?.[0].abilityName === attribute
+            );
+            if (blueprint) return blueprint;
+        }
+    }
+    
+    return null;
+};

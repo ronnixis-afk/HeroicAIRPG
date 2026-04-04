@@ -1,7 +1,7 @@
 // hooks/useCharacterActions.ts
 
 import React, { useCallback } from 'react';
-import { GameAction, GameData, LoreEntry, MapZone, Item, Inventory, PlayerCharacter, Companion, NPC, ChatMessage, SKILL_NAMES, calculateModifier } from '../types';
+import { GameAction, GameData, LoreEntry, MapZone, Item, Inventory, PlayerCharacter, Companion, NPC, ChatMessage, SKILL_NAMES, calculateModifier, CharacterSnapshot, createSnapshot } from '../types';
 import {
     generatePersonalDiscoveries,
     generateStartingScenario,
@@ -424,8 +424,14 @@ export const useCharacterActions = (
 
         } catch (e) {
             console.error("Integration failed", e);
+            setCreationProgress({ 
+                isActive: true, 
+                step: "The Weaver's Hand Trembles...", 
+                progress: 85,
+                errorString: "The Architect's ink has dried or a cosmic hiccup has occurred. The Loom of Fate requires a gentle nudge.",
+                onRetry: () => integrateCharacter(character, isCompanion, deferGameStart)
+            });
             setError(e instanceof Error ? e : new Error("Character integration failed."));
-            setCreationProgress({ isActive: false, step: '', progress: 0 });
             throw e; // Re-throw to prevent wizard from closing
         }
     }, [gameData, dispatch, setCreationProgress, setError, setActiveView, weaveGrandDesign]);
@@ -575,7 +581,11 @@ export const useCharacterActions = (
                 playerCoordinates: coords,
                 currentLocale: scenario.startingZone.name,
                 npcs: [...(gameData.npcs || []), ...introNpcs],
-                gmNotes: `Origin: ${scenario.introSummary}`
+                gmNotes: `Origin: ${scenario.introSummary}`,
+                startingPartySnapshot: {
+                    player: createSnapshot(finalPlayerCharacter),
+                    companions: finalCompanions.map(c => createSnapshot(c))
+                }
             };
 
             dispatch({ type: 'COMPLETE_RESTART', payload: restartPayload });
@@ -601,8 +611,14 @@ export const useCharacterActions = (
 
         } catch (e) {
             console.error("Start Journey failed", e);
+            setCreationProgress({ 
+                isActive: true, 
+                step: "The Path Is Obscured...", 
+                progress: 90,
+                errorString: "The journey cannot begin while the stars are misaligned. A rogue thread has snagged the Loom of Fate.",
+                onRetry: () => startJourney(hookIndex)
+            });
             setError(e instanceof Error ? e : new Error("Failed to start journey."));
-            setCreationProgress({ isActive: false, step: '', progress: 0 });
         }
     }, [gameData, dispatch, setCreationProgress, setError, setActiveView, weaveGrandDesign]);
 

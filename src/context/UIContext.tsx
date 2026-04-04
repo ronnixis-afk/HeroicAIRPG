@@ -22,6 +22,8 @@ interface CreationProgress {
     isActive: boolean;
     step: string;
     progress: number;
+    errorString?: string;
+    onRetry?: () => void;
 }
 
 export type EntityType = 'npc' | 'item' | 'location' | 'lore' | 'plot' | 'objective';

@@ -6,8 +6,8 @@ import { Type } from "@google/genai";
 import { MapSettings, GameData, StoryLog, WorldPreview, MapZone, ChatMessage, LoreEntry } from '../types';
 import { EncounterMatrixResult } from '../utils/EncounterMechanics';
 import { parseCoords, isNameTooSimilar, getPOITheme, normalizeCoords } from '../utils/mapUtils';
-import { RACIAL_TRAIT_BLUEPRINTS } from '../constants/racialTraits';
-import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
+import { RACIAL_TRAIT_BLUEPRINTS, getRacialTraitForRace } from '../constants/racialTraits';
+import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE, getNamingStyleForRace } from '../constants/languageTechniques';
 import { POI_MATRIX } from '../constants';
 import { Ability } from '../types';
 
@@ -178,7 +178,10 @@ export const generateWorldPreview = async (
         let languageIndex = 0;
 
         const racesWithTraits = rawRaces.map((race: any, index: number) => {
-            const blueprint = shuffledTraits[index % shuffledTraits.length];
+            // Auto-detect racial trait (attribute bonus) for classic keywords
+            const detectedTrait = getRacialTraitForRace(race.name);
+            const blueprint = detectedTrait || shuffledTraits[index % shuffledTraits.length];
+            
             const racialTrait: Ability = {
                 ...blueprint,
                 id: `racial-${race.name.toLowerCase()}-${Date.now()}`,
@@ -187,8 +190,15 @@ export const generateWorldPreview = async (
             
             let languageConfig = HUMAN_LANGUAGE_TECHNIQUE;
             if (race.name.toLowerCase() !== 'humans' && race.name.toLowerCase() !== 'human') {
-                languageConfig = shuffledLanguages[languageIndex % shuffledLanguages.length];
-                languageIndex++;
+                // Auto-detect classic D&D race keywords for naming style
+                const detectedStyle = getNamingStyleForRace(race.name);
+                if (detectedStyle) {
+                    languageConfig = detectedStyle;
+                } else {
+                    // Fallback to random assignment from the pool
+                    languageConfig = shuffledLanguages[languageIndex % shuffledLanguages.length];
+                    languageIndex++;
+                }
             }
 
             return { ...race, racialTrait, languageConfig };

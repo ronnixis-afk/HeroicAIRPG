@@ -475,18 +475,44 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
     const renderWeaving = () => (
         <div className="flex-1 flex flex-col items-center justify-center animate-fade-in py-12">
-            <div className="w-20 h-20 text-brand-accent animate-dice mb-10">
-                <Icon name="dice" className="w-full h-full drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]" />
+            <div className={`w-20 h-20 mb-10 transition-all duration-700 ${creationProgress.errorString ? 'text-red-400 animate-pulse scale-110' : 'text-brand-accent animate-dice'}`}>
+                <Icon name="dice" className={`w-full h-full ${creationProgress.errorString ? 'drop-shadow-[0_0_15px_rgba(248,113,113,0.5)]' : 'drop-shadow-[0_0_15px_rgba(62,207,142,0.5)]'}`} />
             </div>
-            <div className="text-center space-y-3 w-full max-w-xs">
-                <h3 className="text-lg font-bold text-brand-text">{weavingMessage}</h3>
-                <p className="text-xs text-brand-text-muted italic animate-pulse">
-                    {isShip ? "Technical schematics are being finalized..." : (isCompanion ? "The architect is drafting your new ally..." : "The architect is weaving your legend into the world...")}
+            <div className="text-center space-y-3 w-full max-w-xs px-4">
+                <h3 className={`text-lg font-bold transition-colors ${creationProgress.errorString ? 'text-red-400' : 'text-brand-text'}`}>
+                    {creationProgress.errorString ? creationProgress.step : weavingMessage}
+                </h3>
+                <p className="text-xs text-brand-text-muted italic leading-relaxed">
+                    {creationProgress.errorString 
+                        ? creationProgress.errorString 
+                        : (isShip ? "Technical schematics are being finalized..." : (isCompanion ? "The architect is drafting your new ally..." : "The architect is weaving your legend into the world..."))}
                 </p>
-                {creationProgress.isActive && (
-                    <div className="w-full mt-8 bg-brand-primary/30 h-1.5 rounded-full overflow-hidden border border-brand-surface">
-                        <div className="bg-brand-accent h-full transition-all duration-1000 ease-out" style={{ width: `${creationProgress.progress}%` }} />
+                
+                {creationProgress.errorString ? (
+                    <div className="flex flex-col gap-3 mt-8 w-full animate-fade-in">
+                        <button 
+                            onClick={() => creationProgress.onRetry?.()}
+                            className="btn-md btn-primary w-full flex items-center justify-center gap-2 shadow-lg shadow-brand-accent/5"
+                        >
+                            <Icon name="dice" className="w-4 h-4" />
+                            <span>Retry Integration</span>
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setIsWeaving(false);
+                                setCreationProgress({ isActive: false, step: '', progress: 0 });
+                            }}
+                            className="text-xs font-bold text-brand-text-muted hover:text-brand-text transition-colors underline underline-offset-4 decoration-brand-primary"
+                        >
+                            Return to Wizard
+                        </button>
                     </div>
+                ) : (
+                    creationProgress.isActive && (
+                        <div className="w-full mt-8 bg-brand-primary/30 h-1.5 rounded-full overflow-hidden border border-brand-surface">
+                            <div className="bg-brand-accent h-full transition-all duration-1000 ease-out" style={{ width: `${creationProgress.progress}%` }} />
+                        </div>
+                    )
                 )}
             </div>
         </div>
