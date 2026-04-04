@@ -565,6 +565,19 @@ export const useCharacterActions = (
             const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
             const startingFundsName = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
 
+            // SYSTEMIC HEAL: Ensure characters are fully healed upon beginning a new journey
+            finalPlayerCharacter.currentHitPoints = finalPlayerCharacter.maxHitPoints;
+            finalPlayerCharacter.stamina = finalPlayerCharacter.maxStamina;
+            finalPlayerCharacter.heroicPoints = finalPlayerCharacter.maxHeroicPoints;
+            finalPlayerCharacter.statusEffects = [];
+
+            finalCompanions.forEach(c => {
+                c.currentHitPoints = c.maxHitPoints;
+                c.stamina = c.maxStamina;
+                c.heroicPoints = c.maxHeroicPoints;
+                c.statusEffects = [];
+            });
+
             const restartPayload: Partial<GameData> = {
                 playerCharacter: finalPlayerCharacter,
                 playerInventory: gameData.playerInventory,

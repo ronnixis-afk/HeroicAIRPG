@@ -41,6 +41,9 @@ export interface CharacterSnapshot {
     background: string;
     personality?: string;
     isShip?: boolean;
+    maxHitPoints: number;
+    maxStamina: number;
+    maxHeroicPoints: number;
 }
 
 export const createSnapshot = (character: PlayerCharacter | Companion): CharacterSnapshot => {
@@ -56,7 +59,10 @@ export const createSnapshot = (character: PlayerCharacter | Companion): Characte
         appearance: character.appearance,
         background: character.background,
         personality: (character as Companion).personality || '',
-        isShip: character.isShip
+        isShip: character.isShip,
+        maxHitPoints: character.maxHitPoints,
+        maxStamina: character.maxStamina,
+        maxHeroicPoints: character.maxHeroicPoints
     };
 };
 
