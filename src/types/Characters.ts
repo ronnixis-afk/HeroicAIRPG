@@ -29,6 +29,7 @@ export interface LibraryTrait extends Omit<Ability, 'id'> {
 }
 
 export interface CharacterSnapshot {
+    id: string;
     name: string;
     gender: string;
     race: string;
@@ -44,6 +45,7 @@ export interface CharacterSnapshot {
 
 export const createSnapshot = (character: PlayerCharacter | Companion): CharacterSnapshot => {
     return {
+        id: character.id,
         name: character.name,
         gender: character.gender,
         race: character.race,
@@ -146,6 +148,14 @@ export class PlayerCharacter {
 
     constructor(data: Partial<PlayerCharacter>) {
         Object.assign(this, data);
+        
+        // SYSTEMIC ID FIX: Ensure all characters have a unique, stable ID for UI anchors.
+        // We favor data.id if provided (from snapshots/state), else we generate a unique one.
+        if (!this.id) {
+            // Note: Use constructor check to determine if this is the base Player or a Companion subclass
+            const isBasePlayer = this.constructor.name === 'PlayerCharacter';
+            this.id = isBasePlayer ? 'player' : `comp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
         this.age = Number(data.age) || 25;
         this.race = data.race || 'Unknown';
         this.level = Number(data.level) || 1;
