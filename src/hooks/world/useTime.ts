@@ -86,28 +86,36 @@ export const useTime = (
         let newGmNotes: string | undefined = undefined;
 
         if (roll.outcome === 'Encounter' && matrix) {
-            const request: DiceRollRequest = {
-                rollerName: gameData.playerCharacter.name,
+            const skillToUse = 'Survival';
+            const partyMembers = [gameData.playerCharacter, ...gameData.companions.filter(c => c.isInParty && !c.isShip)];
+            const dc = 12 + Math.floor(gameData.playerCharacter.level / 2);
+
+            const requests: DiceRollRequest[] = partyMembers.map(member => ({
+                rollerName: member.name,
                 rollType: 'Skill Check',
-                checkName: 'Perception',
-                dc: 12 + Math.floor(gameData.playerCharacter.level / 2)
-            };
-            const res = window.processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
-            const skillRoll = res.rolls[0];
-            preRolledRolls.push(skillRoll);
+                checkName: skillToUse,
+                dc
+            }));
+
+            const res = window.processDiceRollsCache?.(requests) || { rolls: [], summary: "" };
+            const skillRoll = res.rolls[0]; // Primary result for legacy narration context if needed
+            preRolledRolls.push(...res.rolls);
             preRolledSummary = res.summary;
 
-            if (skillRoll.outcome === 'Fail' || skillRoll.outcome === 'Critical Fail') {
-                const verifier = await verifyCombatRelevance('Perception', 'Campsite', "Resting in the wilds.", gameData.worldSummary || "");
+            // Determine overall success based on group check outcome (ANY SUCCESS policy in diceRolls.ts)
+            const isGroupSuccess = res.rolls.some(r => r.outcome?.includes('Success'));
+
+            if (!isGroupSuccess) {
+                const verifier = await verifyCombatRelevance(skillToUse, 'Campsite', "Resting in the wilds.", gameData.worldSummary || "");
                 if (verifier.shouldTriggerCombat) {
                     isHostileIntent = true;
                     newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "");
                     generativeCombatInstruction = getUnifiedProceduralPrompt(matrix, false);
                 } else {
-                    generativeCombatInstruction = getSkillFailurePrompt('Perception', verifier.reason);
+                    generativeCombatInstruction = getSkillFailurePrompt(skillToUse, verifier.reason);
                 }
             } else {
-                generativeCombatInstruction = getSkillSuccessPrompt('Perception', matrix);
+                generativeCombatInstruction = getSkillSuccessPrompt(skillToUse, matrix);
             }
         } else {
             generativeCombatInstruction = getClearPlotPrompt();
@@ -150,28 +158,36 @@ export const useTime = (
         let newGmNotes: string | undefined = undefined;
 
         if (roll.outcome === 'Encounter' && matrix) {
-            const request: DiceRollRequest = {
-                rollerName: gameData.playerCharacter.name,
+            const skillToUse = 'Survival';
+            const partyMembers = [gameData.playerCharacter, ...gameData.companions.filter(c => c.isInParty && !c.isShip)];
+            const dc = 12 + Math.floor(gameData.playerCharacter.level / 2);
+
+            const requests: DiceRollRequest[] = partyMembers.map(member => ({
+                rollerName: member.name,
                 rollType: 'Skill Check',
-                checkName: 'Perception',
-                dc: 12 + Math.floor(gameData.playerCharacter.level / 2)
-            };
-            const res = window.processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
-            const skillRoll = res.rolls[0];
-            preRolledRolls.push(skillRoll);
+                checkName: skillToUse,
+                dc
+            }));
+
+            const res = window.processDiceRollsCache?.(requests) || { rolls: [], summary: "" };
+            const skillRoll = res.rolls[0]; // Primary result for legacy narration context if needed
+            preRolledRolls.push(...res.rolls);
             preRolledSummary = res.summary;
 
-            if (skillRoll.outcome === 'Fail' || skillRoll.outcome === 'Critical Fail') {
-                const verifier = await verifyCombatRelevance('Perception', 'Wait Area', "Waiting in the area.", gameData.worldSummary || "");
+            // Determine overall success based on group check outcome (ANY SUCCESS policy in diceRolls.ts)
+            const isGroupSuccess = res.rolls.some(r => r.outcome?.includes('Success'));
+
+            if (!isGroupSuccess) {
+                const verifier = await verifyCombatRelevance(skillToUse, 'Wait Area', "Waiting in the area.", gameData.worldSummary || "");
                 if (verifier.shouldTriggerCombat) {
                     isHostileIntent = true;
                     newGmNotes = await expandEncounterPlot(matrix, gameData.worldSummary || "");
                     generativeCombatInstruction = getUnifiedProceduralPrompt(matrix, false);
                 } else {
-                    generativeCombatInstruction = getSkillFailurePrompt('Perception', verifier.reason);
+                    generativeCombatInstruction = getSkillFailurePrompt(skillToUse, verifier.reason);
                 }
             } else {
-                generativeCombatInstruction = getSkillSuccessPrompt('Perception', matrix);
+                generativeCombatInstruction = getSkillSuccessPrompt(skillToUse, matrix);
             }
         } else {
             generativeCombatInstruction = getClearPlotPrompt();

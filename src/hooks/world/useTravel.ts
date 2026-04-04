@@ -215,19 +215,26 @@ export const useTravel = (
             let newGmNotes: string | undefined = undefined;
 
             if (roll.outcome === 'Encounter' && matrix) {
-                const skillToUse = travelMethod ? 'Stealth' : 'Perception';
-                const request: DiceRollRequest = {
-                    rollerName: gameData.playerCharacter.name,
+                const skillToUse = 'Survival';
+                const partyMembers = [gameData.playerCharacter, ...gameData.companions.filter(c => c.isInParty && !c.isShip)];
+                const dc = 12 + Math.floor(gameData.playerCharacter.level / 2);
+
+                const requests: DiceRollRequest[] = partyMembers.map(member => ({
+                    rollerName: member.name,
                     rollType: 'Skill Check',
                     checkName: skillToUse,
-                    dc: 12 + Math.floor(gameData.playerCharacter.level / 2)
-                };
-                const res = window.processDiceRollsCache?.([request]) || { rolls: [], summary: "" };
-                const skillRoll = res.rolls[0];
-                preRolledRolls.push(skillRoll);
+                    dc
+                }));
+
+                const res = window.processDiceRollsCache?.(requests) || { rolls: [], summary: "" };
+                const skillRoll = res.rolls[0]; // Primary result for legacy narration context if needed
+                preRolledRolls.push(...res.rolls);
                 preRolledSummary = res.summary;
 
-                if (skillRoll.outcome === 'Fail' || skillRoll.outcome === 'Critical Fail') {
+                // Determine overall success based on group check outcome (ANY SUCCESS policy in diceRolls.ts)
+                const isGroupSuccess = res.rolls.some(r => r.outcome?.includes('Success'));
+
+                if (!isGroupSuccess) {
                     const verifier = await verifyCombatRelevance(skillToUse, locationName, "Arriving at a location.", gameData.worldSummary || "");
                     if (verifier.shouldTriggerCombat) {
                         isHostileIntent = true;
