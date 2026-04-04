@@ -4,7 +4,7 @@ import { getXPForLevel, getNextLevelXP } from '../../utils/mechanics';
 import { getGoodEvilLabel, getLawChaosLabel, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '../../utils/npcUtils';
 import { Icon } from '../Icon';
 import { Button } from '../Button';
-import { InputField, SelectField, TextareaField } from './FormFields';
+import { InputField, SelectField, TextareaField, WrappingInputField } from './FormFields';
 
 interface CharacterHeaderProps {
     character: PlayerCharacter | Companion;
@@ -144,8 +144,8 @@ export const CharacterHeader: React.FC<CharacterHeaderProps> = ({
             )}
 
             {/* Identity Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-                <InputField label="Name" value={character.name} onChange={(e) => onChange(['name'], e.target.value)} />
+            <div className="grid grid-cols-2 gap-4 mb-4 items-start">
+                <WrappingInputField label="Name" value={character.name} onChange={(e) => onChange(['name'], e.target.value)} />
                 <InputField label="Class" value={character.profession} onChange={(e) => onChange(['profession'], e.target.value)} />
                 <SelectField label="Gender" value={character.gender} onChange={(e) => onChange(['gender'], e.target.value)} options={['Male', 'Female', 'Non-binary', 'Unspecified']} />
                 <SelectField

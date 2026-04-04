@@ -49,7 +49,7 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
     const isDead = currentHp <= 0;
     const isLowHp = !isDead && hpRatio <= 0.25;
 
-    const displayName = name.length > 9 ? name.slice(0, 8) + '..' : name;
+
 
     const ratios: number[] = [];
     const colors: string[] = [];
@@ -151,20 +151,27 @@ export const CharacterTab: React.FC<CharacterTabProps> = ({
                 {!isPlayer && onToggleParty && !isShrunk && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onToggleParty(); }}
-                        className={`absolute -top-1 -right-1 w-6 h-6 rounded-lg flex items-center justify-center border-2 shadow-md transition-all duration-200 z-30 ${
+                        className={`absolute -top-3 left-1/2 -translate-x-1/2 h-7 rounded-full flex items-center justify-center border-2 shadow-xl transition-all duration-300 z-30 px-4 text-[10px] font-bold whitespace-nowrap ${
                             isInParty 
-                                ? 'bg-brand-accent border-brand-accent text-black scale-100' 
-                                : 'bg-brand-surface border-brand-primary text-brand-text-muted hover:text-brand-text scale-90 hover:scale-100'
+                                ? 'bg-brand-accent border-brand-accent text-black' 
+                                : 'bg-brand-primary border-brand-accent/50 text-white hover:bg-brand-accent hover:text-black hover:scale-105'
                         }`}
-                        title={isInParty ? "Remove from party" : "Add to party"}
+                        title={isInParty ? "Remove From Party" : "Add to Party"}
                     >
-                        {isInParty ? <Icon name="check" className="w-3 h-3" /> : <Icon name="plus" className="w-3 h-3" />}
+                        {isInParty ? (
+                            <span>In Party</span>
+                        ) : (
+                            <div className="flex items-center gap-1.5">
+                                <Icon name="plus" className="w-3 h-3 stroke-[3]" />
+                                <span>Add</span>
+                            </div>
+                        )}
                     </button>
                 )}
             </div>
             
-            <span className={`font-bold truncate w-full text-center transition-all duration-300 ${isShrunk ? 'text-body-micro opacity-80' : 'text-body-sm opacity-100'} ${isActive ? 'text-brand-text' : 'text-brand-text-muted'}`}>
-                {displayName}
+            <span className={`font-bold transition-all duration-300 w-full text-center whitespace-normal leading-tight ${isShrunk ? 'text-body-micro opacity-80' : 'text-body-sm opacity-100'} ${isActive ? 'text-brand-text' : 'text-brand-text-muted'}`}>
+                {name}
             </span>
         </div>
     );

@@ -11,7 +11,7 @@ interface InventoryTabProps {
 
 export const InventoryTab: React.FC<InventoryTabProps> = ({ name, initials, imageUrl, isActive, onClick, isShrunk = false }) => {
     // Custom truncation: use '..' if the name is too long to fit comfortably
-    const displayName = name.length > 9 ? name.slice(0, 8) + '..' : name;
+
 
     return (
         <div className={`flex flex-col items-center group flex-shrink-0 transition-all duration-300 w-20 ${isShrunk ? 'gap-0.5' : 'gap-2'}`}>
@@ -31,8 +31,8 @@ export const InventoryTab: React.FC<InventoryTabProps> = ({ name, initials, imag
                 </div>
             </button>
             
-            <span className={`font-bold transition-all duration-300 truncate w-full text-center ${isShrunk ? 'text-[8px] opacity-80' : 'text-body-sm opacity-100'} ${isActive ? 'text-brand-text' : 'text-brand-text-muted'}`}>
-                {displayName}
+            <span className={`font-bold transition-all duration-300 w-full text-center whitespace-normal leading-tight ${isShrunk ? 'text-[8px] opacity-80' : 'text-body-sm opacity-100'} ${isActive ? 'text-brand-text' : 'text-brand-text-muted'}`}>
+                {name}
             </span>
         </div>
     );

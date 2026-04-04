@@ -25,6 +25,27 @@ export const InputField: React.FC<InputFieldProps> = ({ label, value, onChange, 
     </div>
 );
 
+interface WrappingInputFieldProps {
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    placeholder?: string;
+    className?: string;
+}
+
+export const WrappingInputField: React.FC<WrappingInputFieldProps> = ({ label, value, onChange, placeholder, className }) => (
+    <div className={className}>
+        <label htmlFor={label} className="block text-body-sm font-bold text-brand-text-muted mb-1.5 ml-1">{label}</label>
+        <AutoResizingTextarea
+            id={label}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className="w-full bg-brand-primary border border-brand-surface rounded-xl px-4 text-brand-text placeholder-brand-text-muted/40 transition-all shadow-inner focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent min-h-[44px] py-3 text-sm leading-tight"
+        />
+    </div>
+);
+
 interface SelectFieldProps {
     label: string;
     value: string;

@@ -155,7 +155,7 @@ const CharacterView: React.FC = () => {
                         <div className="flex flex-col gap-4 w-full max-w-xl mb-12">
                             {/* Main Character Slot */}
                             <div 
-                                className={`relative h-28 rounded-2xl border-2 flex items-center p-4 gap-6 transition-all cursor-pointer 
+                                className={`relative rounded-2xl border-2 flex items-center p-4 gap-6 transition-all cursor-pointer 
                                     ${hasPlayer ? 'border-brand-primary bg-brand-surface shadow-lg' : 'border-brand-primary/40 border-dashed bg-brand-primary/5 hover:border-brand-accent hover:bg-brand-primary/10'}`}
                                 onClick={() => !hasPlayer && handleAddHero('player')}
                             >
@@ -175,7 +175,7 @@ const CharacterView: React.FC = () => {
                                         </div>
                                         <div className="flex-1 text-left">
                                             <div className="text-sm font-bold text-brand-accent mb-1">Main Hero</div>
-                                            <div className="text-xl font-bold text-brand-text truncate">{playerCharacter.name}</div>
+                                            <div className="text-xl font-bold text-brand-text leading-tight">{playerCharacter.name}</div>
                                         </div>
                                         <div className="flex items-center gap-1 group">
                                             <button 
@@ -214,7 +214,7 @@ const CharacterView: React.FC = () => {
                                     return (
                                         <div 
                                             key={companion.id} 
-                                            className="relative h-28 rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex items-center p-4 gap-6 transition-all shadow-md"
+                                            className="relative rounded-2xl border-2 border-brand-primary/60 bg-brand-surface flex items-center p-4 gap-6 transition-all shadow-md"
                                         >
                                             <div 
                                                 className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-brand-primary/30 cursor-pointer hover:border-brand-accent transition-colors"
@@ -230,7 +230,7 @@ const CharacterView: React.FC = () => {
                                             </div>
                                             <div className="flex-1 text-left">
                                                 <div className="text-sm font-bold text-brand-accent/70 mb-1">{companion.profession || 'Companion'}</div>
-                                                <div className="text-xl font-bold text-brand-text truncate">{companion.name}</div>
+                                                <div className="text-xl font-bold text-brand-text leading-tight">{companion.name}</div>
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <button 
@@ -254,7 +254,7 @@ const CharacterView: React.FC = () => {
                                     return (
                                         <div 
                                             key={`empty-${index}`}
-                                            className="relative h-28 rounded-2xl border-2 border-brand-primary/40 border-dashed bg-brand-primary/5 flex items-center p-4 gap-6 transition-all cursor-pointer hover:border-brand-accent hover:bg-brand-primary/10"
+                                            className="relative rounded-2xl border-2 border-brand-primary/40 border-dashed bg-brand-primary/5 flex items-center p-4 gap-6 transition-all cursor-pointer hover:border-brand-accent hover:bg-brand-primary/10"
                                             onClick={() => handleAddHero('companion')}
                                         >
                                             <div className="w-20 h-20 rounded-xl border-2 border-dashed border-brand-primary/30 flex items-center justify-center bg-brand-primary/10 shrink-0">
@@ -297,7 +297,7 @@ const CharacterView: React.FC = () => {
                     />
 
                     <div className={`sticky top-0 z-40 transition-all duration-300 -mx-2 px-2 bg-brand-bg/95 backdrop-blur-sm ${isScrolled ? 'py-1 shadow-lg border-b border-brand-primary/20' : 'py-2'}`}>
-                        <div className={`flex flex-nowrap items-center transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-1 pb-1 gap-4 justify-around`}>
+                        <div className={`flex flex-nowrap items-start transition-all duration-300 overflow-x-auto no-scrollbar px-4 pt-6 pb-1 gap-4 justify-around`}>
                             <CharacterTab
                                 name={playerCharacter.name}
                                 initials={getInitials(playerCharacter.name)}
