@@ -313,7 +313,8 @@ export const useExtractionStep = (
         }
 
         // 6. Recruitment Logic (Narrator signaled)
-        if (aiResponse.npc_resolution?.some(r => r.isFollowing && !gameData.companions?.some(c => c.name === r.name)) && npcActions) {
+        // STRICT GUARD: Never auto-recruit during combat. Allies in combat are handled by the combat tracker.
+        if (!gameData.combatState?.isActive && aiResponse.npc_resolution?.some(r => r.isFollowing && !gameData.companions?.some(c => c.name === r.name)) && npcActions) {
             aiResponse.npc_resolution.forEach(res => {
                 if (res.isFollowing) {
                     const npc = gameData.npcs?.find(n => n.name === res.name);

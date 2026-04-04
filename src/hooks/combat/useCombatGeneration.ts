@@ -51,6 +51,12 @@ export const useCombatGeneration = (
         const nameCount: Record<string, number> = {};
         const stagedResults: { actor: CombatActor, npc: any }[] = [];
 
+        // STRICT NAME PROTECTION: Pre-calculate names to avoid
+        const protectedNames = new Set([
+            (gameData?.playerCharacter.name || '').toLowerCase().trim(),
+            ...(gameData?.companions || []).map(c => (c.name || '').toLowerCase().trim())
+        ]);
+
         suggestions.forEach(suggestion => {
             let resolvedId = suggestion.id || (suggestion.name?.toLowerCase().includes('npc-') ? suggestion.name : null);
             let finalName = suggestion.name || '';
@@ -58,9 +64,13 @@ export const useCombatGeneration = (
             // 1. DEDUPLICATION: Attempt to find by Name if ID is missing
             if (!resolvedId && finalName) {
                 const standardizedTarget = finalName.toLowerCase().trim();
-                const registryMatch = gameData?.npcs.find(n => n.name.toLowerCase().trim() === standardizedTarget);
-                if (registryMatch) {
-                    resolvedId = registryMatch.id;
+                
+                // FINAL GUARD: Never treat a player or companion name as a generic NPC ID
+                if (!protectedNames.has(standardizedTarget)) {
+                    const registryMatch = gameData?.npcs.find(n => n.name.toLowerCase().trim() === standardizedTarget);
+                    if (registryMatch) {
+                        resolvedId = registryMatch.id;
+                    }
                 }
             }
 
@@ -94,8 +104,8 @@ export const useCombatGeneration = (
 
             const params = getDifficultyParams(suggestion.difficulty || 'Normal', playerLevel);
 
-            const lowerName = finalName.toLowerCase();
-            if (lowerName.includes('replace') || lowerName.includes('unknown') || lowerName.includes('[') || lowerName.trim() === '') {
+            const lowerName = (finalName || '').toLowerCase().trim();
+            if (lowerName.includes('replace') || lowerName.includes('unknown') || lowerName.includes('[') || lowerName === '') {
                 finalName = '';
             }
 
@@ -109,6 +119,11 @@ export const useCombatGeneration = (
             }
 
             if (finalName) {
+                // NAME PROTECTION: If AI tries to name an enemy after the player or a companion, append a suffix
+                if (protectedNames.has(finalName.toLowerCase().trim()) && !resolvedId) {
+                    finalName = `${finalName} (Mirror)`;
+                }
+
                 if (nameCount[finalName]) {
                     nameCount[finalName]++;
                     finalName = `${finalName} ${nameCount[finalName]}`;
@@ -149,8 +164,13 @@ export const useCombatGeneration = (
 
             if (suggestion.description) actor.description = suggestion.description;
 
-            // Only create a new NPC entry if this wasn't matched to an existing one
-            const npc = actor.alignment === 'enemy' && !actor.id.startsWith('npc-') ? combatActorToNPC(actor, currentLocale) : null;
+            // --- ALLY TRACKING: Register all combatants (except player/current companions) in the NPC ledger ---
+            // This ensures allies are tracked in Social Ledger as NPCs and not orphaned.
+            const isActuallyPlayer = actor.id === gameData?.playerCharacter?.id;
+            const isActuallyCompanion = gameData?.companions?.some(c => c.id === actor.id);
+            const npc = (!actor.id.startsWith('npc-') && !isActuallyPlayer && !isActuallyCompanion) 
+                ? combatActorToNPC(actor, currentLocale) 
+                : null;
 
             if (!suppressDispatch) {
                 dispatch({ type: 'ADD_COMBAT_ENEMY', payload: actor });
@@ -275,12 +295,28 @@ export const useCombatGeneration = (
                     worldSummary
                 );
 
+                const protectedNames = new Set([
+                    (gameData.playerCharacter.name || '').toLowerCase().trim(),
+                    ...(gameData.companions || []).map(c => (c.name || '').toLowerCase().trim())
+                ]);
+
                 allHostilesForSkinning.forEach((actor, index) => {
                     const skinData = enrichedData[index.toString()];
                     if (skinData) {
-                        // 1. Update basic fields
-                        if (skinData.name && skinData.name !== "Unique Name") actor.name = skinData.name;
-                        if (skinData.description && skinData.description !== "Short description") actor.description = skinData.description;
+                        // 1. Update basic fields (With Strict Name Protection)
+                        if (skinData.name && skinData.name !== "Unique Name") {
+                            const normalizedNewName = skinData.name.toLowerCase().trim();
+                            // If the AI tried to use a protected name, and it's not a pre-existing NPC, block it or suffix it.
+                            if (protectedNames.has(normalizedNewName) && !actor.id.startsWith('npc-')) {
+                                actor.name = `${skinData.name} (Mirror)`;
+                            } else {
+                                actor.name = skinData.name;
+                            }
+                        }
+                        
+                        if (skinData.description && skinData.description !== "Short description") {
+                            actor.description = skinData.description;
+                        }
                         
                         if (skinData.affinity && skinData.affinity !== "AffinityName" && (gameData.affinities || DEFAULT_AFFINITIES)[skinData.affinity]) {
                             actor.affinity = skinData.affinity;
