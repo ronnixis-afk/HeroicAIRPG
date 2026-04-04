@@ -18,7 +18,7 @@ export const useSystemSettings = (
     gameData: GameData | null,
     dispatch: React.Dispatch<GameAction>
 ) => {
-    const { setIsLoading } = useUI();
+    const { setIsLoading, setActiveView } = useUI();
 
     const updateGmSettings = useCallback(async (settings: string) => { 
         dispatch({ type: 'UPDATE_GM_SETTINGS', payload: settings }); 
@@ -94,7 +94,8 @@ export const useSystemSettings = (
 
     const resetWorld = useCallback(() => {
         dispatch({ type: 'RESET_WORLD' });
-    }, [dispatch]);
+        setActiveView('character');
+    }, [dispatch, setActiveView]);
 
     const restartAdventure = useCallback(() => {
         dispatch({ type: 'RESTART_ADVENTURE' });
