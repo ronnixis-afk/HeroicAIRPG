@@ -43,7 +43,7 @@ export const generateEmbedding = async (text: string): Promise<number[] | undefi
 
         return embedding;
     } catch (e) {
-        console.error("Failed to generate embedding array:", e);
+        console.warn("Failed to generate embedding array (expected during rate limits):", e instanceof Error ? e.message : e);
         return undefined; // Fail silently so the game doesn't crash, we can backfill later
     }
 };

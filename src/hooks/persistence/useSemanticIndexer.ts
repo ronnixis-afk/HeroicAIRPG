@@ -173,7 +173,7 @@ export const useSemanticIndexer = (
                 }
 
             } catch (err) {
-                console.error("Background indexing process naturally terminated or failed:", err);
+                console.warn("Background indexing process naturally terminated or failed:", err instanceof Error ? err.message : err);
             } finally {
                 // We don't reset isIndexing to false right away because we only want to run this once per session
                 // The indexer will run again on the next full page reload.
