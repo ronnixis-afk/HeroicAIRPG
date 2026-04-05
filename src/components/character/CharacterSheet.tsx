@@ -23,6 +23,7 @@ import { CombatStats } from './CombatStats';
 import { AbilityScores } from './AbilityScores';
 import { SkillsList } from './SkillsList';
 import { FeaturesList } from './FeaturesList';
+import { ImageCropModal } from '../modals/ImageCropModal';
 
 const calculateProficiencyBonus = (level: number) => Math.ceil(1 + level / 4);
 
@@ -64,6 +65,8 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
     const [isGeneratingImage, setIsGeneratingImage] = useState(false);
     const [generationError, setGenerationError] = useState('');
     const [imageCooldown, setImageCooldown] = useState(0);
+    const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+    const [imageToCrop, setImageToCrop] = useState('');
 
     const setting = useMemo(() => gameData?.mapSettings?.style || 'fantasy', [gameData?.mapSettings]);
 
@@ -258,11 +261,16 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                handleNestedChange(['imageUrl'], reader.result as string);
-                handleNestedChange(['appearance'], 'As Image');
+                setImageToCrop(reader.result as string);
+                setIsCropModalOpen(true);
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleCropComplete = (croppedImage: string) => {
+        handleNestedChange(['imageUrl'], croppedImage);
+        handleNestedChange(['appearance'], 'As Image');
     };
 
     const handleRegenerateImage = async () => {
@@ -565,6 +573,13 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
             </div>
 
             {generationError && <p className="text-brand-danger text-center text-body-sm mt-4 font-bold">{generationError}</p>}
+
+            <ImageCropModal
+                isOpen={isCropModalOpen}
+                image={imageToCrop}
+                onClose={() => setIsCropModalOpen(false)}
+                onCropComplete={handleCropComplete}
+            />
         </div>
     );
 };
