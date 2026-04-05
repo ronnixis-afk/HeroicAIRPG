@@ -171,7 +171,7 @@ const ChatView: React.FC = () => {
             const lastMsg = processedMessages[processedMessages.length - 1];
             // GUARD: Only trigger if the message is from AI and we aren't already playing it
             if (lastMsg && lastMsg.sender === 'ai' && lastMsg.content && playingMessageId !== lastMsg.id) {
-                speak(lastMsg.content, lastMsg.id);
+                speak(lastMsg.content, lastMsg.id, lastMsg.dialogues);
             }
         }
     }, [processedMessages.length, isHandsFree, isVoiceActive, speak, playingMessageId]);

@@ -71,7 +71,7 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
         setIsSpeaking(false);
     }, []);
 
-    const speak = useCallback(async (text: string, id: string) => {
+    const speak = useCallback(async (text: string, id: string, dialogues?: any[]) => {
         if (!text) return;
 
         // Toggle logic: If clicking/triggering the currently playing message, stop it.
@@ -86,6 +86,21 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
 
         setPlayingMessageId(id);
         setIsSpeaking(true);
+
+        const getFullText = () => {
+            if (!dialogues || dialogues.length === 0) return text;
+            
+            const dialogueText = dialogues.map(d => `${d.actorName}: ${d.content}`).join('\n\n');
+            const paragraphs = text.split('\n\n').filter(p => p.trim().length > 0);
+            
+            if (paragraphs.length >= 2) {
+                // Return Paragraph 1, then dialogues, then the rest.
+                return `${paragraphs[0]}\n\n${dialogueText}\n\n${paragraphs.slice(1).join('\n\n')}`;
+            }
+            return `${text}\n\n${dialogueText}`;
+        };
+
+        const fullNarrativeText = getFullText();
 
         const playNativeTTS = (fallbackText: string) => {
             // Strip markdown for local TTS as well
@@ -126,7 +141,7 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                 }
 
                 // Strip basic markdown so the AI doesn't read asterisks aloud
-                const cleanText = text.replace(/[*_#`~\[\]]/g, '').trim();
+                const cleanText = fullNarrativeText.replace(/[*_#`~\[\]]/g, '').trim();
                 const base64Audio = await generateSpeech(cleanText, voiceName, tone);
 
                 if (base64Audio && ctx) {
@@ -153,14 +168,14 @@ export const useAudioPlayback = (useAiTts: boolean, voiceName: string, tone: str
                     nextStartTimeRef.current = startTime + audioBuffer.duration;
                 } else {
                     console.warn("AI TTS returned no audio, falling back to native TTS...");
-                    playNativeTTS(text);
+                    playNativeTTS(fullNarrativeText);
                 }
             } catch (err) {
                 console.error("AI TTS playback failed, falling back to native TTS:", err);
-                playNativeTTS(text);
+                playNativeTTS(fullNarrativeText);
             }
         } else {
-            playNativeTTS(text);
+            playNativeTTS(fullNarrativeText);
         }
     }, [playingMessageId, stopAllSpeech, useAiTts, voiceName, tone]);
 

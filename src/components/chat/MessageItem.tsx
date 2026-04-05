@@ -135,7 +135,7 @@ const FormattedMessage: React.FC<{ text: string; dialogues?: any[]; visibleLines
 
 interface MessageItemProps {
     msg: ChatMessage;
-    onSpeak: (text: string, id: string) => void;
+    onSpeak: (text: string, id: string, dialogues?: any[]) => void;
     onClearChat: () => void;
     isPlaying: boolean;
     showAlignmentOptions?: boolean;
@@ -231,7 +231,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                     <div className="flex justify-between items-center w-full pt-4 pb-1 animate-fade-in">
                                         <div className="flex gap-2">
                                             <button
-                                                onClick={() => onSpeak(msg.content || '', msg.id)}
+                                                onClick={() => onSpeak(msg.content || '', msg.id, msg.dialogues)}
                                                 className={`btn-secondary btn-sm rounded-full gap-2 ${isPlaying ? 'bg-brand-accent/10 border-brand-accent text-brand-accent animate-pulse' : 'text-brand-text-muted hover:text-brand-text'}`}
                                                 title={isPlaying ? "Stop" : "Read aloud"}
                                             >
