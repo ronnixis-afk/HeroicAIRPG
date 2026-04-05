@@ -4,7 +4,7 @@ import { DiceRoll, DiceRollRequest, CombatActor } from '../types/World';
 import { PlayerCharacter, Companion } from '../types/Characters';
 import { StatusEffect, AbilityEffect, RollMode } from '../types/Core';
 import { findActorAndInventory, lookupAbilityOrItemEffect } from './resolution/ActorLookup';
-import { checkStatusBasedRollMode, canBeTargeted } from './resolution/StatusRules';
+import { checkStatusBasedRollMode, canBeTargeted, checkEquipmentAdvantage } from './resolution/StatusRules';
 
 // Import Handlers
 import { resolveAttack } from './resolution/handlers/AttackHandler';
@@ -229,6 +229,15 @@ export const calculateDiceRolls = (gameData: GameData, requests: DiceRollRequest
                 const statusCheck = checkStatusBasedRollMode(rollerData.actor, targetData?.actor, request.rollType, type);
                 autoMode = statusCheck.mode;
                 autoReason = statusCheck.reason;
+
+                // NEW: Equipment Advantage Check
+                if (autoMode === 'normal' && rollerData.inventory) {
+                    const equipAdv = checkEquipmentAdvantage(rollerData.actor as any, rollerData.inventory, request.checkName, request.rollType);
+                    if (equipAdv) {
+                        autoMode = equipAdv.mode;
+                        autoReason = equipAdv.reason;
+                    }
+                }
             }
             const finalMode = resolveRollMode(request.mode || 'normal', autoMode);
 

@@ -2,8 +2,9 @@
 
 import { Item, Buff, ABILITY_SCORES, SKILL_NAMES, DAMAGE_TYPES, AbilityScoreName, SkillName, DamageType, SkillConfiguration, BuffDuration, ActiveBuff, AbilityEffect } from '../types';
 import { formatAbilityEffect } from '../services/ItemGeneratorService';
+import { toTitleCase } from './npcUtils';
 
-export type ModifierCategory = 'enhancement' | 'ability' | 'skill' | 'combat' | 'defense' | 'save' | 'resist' | 'exdam' | 'temp_hp';
+export type ModifierCategory = 'enhancement' | 'ability' | 'skill' | 'combat' | 'defense' | 'save' | 'resist' | 'exdam' | 'temp_hp' | 'advantage';
 
 export interface ModifierDefinition {
     id: ModifierCategory;
@@ -276,6 +277,27 @@ export const MODIFIER_REGISTRY: Record<ModifierCategory, ModifierDefinition> = {
                 .map((b, i) => ({ id: `mod-thp-${i}`, value: String(b.bonus), subOption: '', duration: b.duration || 'Passive' }));
         },
         aiInstruction: `"Temp HP +X" -> Append to 'buffs' object: { "type": "temp_hp", "bonus": X }.`
+    },
+    advantage: {
+        id: 'advantage',
+        label: 'Advantage',
+        syntax: 'Advantage: [Skill]',
+        colorClass: 'text-yellow-400 border-yellow-400',
+        description: 'Always roll with advantage on specific skill checks.',
+        hasSubOption: true,
+        subOptionType: 'skill',
+        subOptions: SKILL_NAMES,
+        apply: (item, val, sub, duration) => {
+            if (!sub) return;
+            if (!item.buffs) item.buffs = [];
+            item.buffs.push({ type: 'advantage', bonus: 0, skillName: sub as SkillName, duration: duration || 'Passive' });
+        },
+        extract: (item) => {
+            return (item.buffs || [])
+                .filter(b => b.type === 'advantage')
+                .map((b, i) => ({ id: `mod-adv-${i}`, value: 'Adv', subOption: b.skillName || 'Stealth', duration: b.duration || 'Passive' }));
+        },
+        aiInstruction: `"Advantage: [Skill Name]" -> Append to 'buffs' object: { "type": "advantage", "bonus": 0, "skillName": "Stealth|Perception|etc" }.`
     }
 };
 
@@ -378,6 +400,10 @@ export const getBuffTag = (buff: Buff, config?: SkillConfiguration): { label: st
             label = `Heroic Capacity ${formatVal(buff.bonus)}`;
             category = 'ability'; // Use purple color for heroic buffs
             break;
+        case 'advantage':
+            label = `Advantage: ${toTitleCase(buff.skillName || (buff.abilityName ? cap(buff.abilityName) : 'Check'))}`;
+            category = 'advantage';
+            break;
         default:
             label = 'Modifier';
     }
@@ -450,6 +476,10 @@ export const parseModifierString = (str: string): ParsedModifier | null => {
     }
     else if (str.startsWith('Temp HP') || str.startsWith('Shield')) {
         return { type: 'temp_hp', value: str.split('+')[1], subOption: '' };
+    }
+    else if (str.startsWith('Advantage')) {
+        const parts = str.split(':');
+        return { type: 'advantage', value: 'Adv', subOption: parts[1]?.trim() || 'Stealth' };
     }
     
     return null;

@@ -1,7 +1,7 @@
 
 // utils/resolution/StatusRules.ts
 
-import { CombatActor, PlayerCharacter, Companion, RollMode, UNTARGETABLE_NAMES, NPC } from '../../types';
+import { CombatActor, PlayerCharacter, Companion, RollMode, UNTARGETABLE_NAMES, NPC, Inventory, resolveCanonicalSkillName } from '../../types';
 
 interface StatusCheckResult {
     mode: RollMode;
@@ -27,6 +27,43 @@ export const canBeTargeted = (actor: CombatActor | PlayerCharacter | Companion |
     );
 
     return !hasUntargetableStatus && !hasUntargetableBuff;
+};
+
+/**
+ * Checks if the actor has any equipped items that grant advantage on the current roll.
+ */
+export const checkEquipmentAdvantage = (
+    actor: PlayerCharacter | Companion,
+    inventory: Inventory,
+    checkName: string,
+    rollType: string
+): StatusCheckResult | null => {
+    if (!inventory?.equipped) return null;
+
+    // Scan for buffs of type 'advantage'
+    const advantageBuffs = inventory.equipped.flatMap(item => 
+        (item.buffs || []).filter(b => b.type === 'advantage')
+    );
+
+    if (advantageBuffs.length === 0) return null;
+
+    const canonicalSkill = resolveCanonicalSkillName(checkName);
+
+    // Look for a buff that matches the skill name or attribute
+    const matchingBuff = advantageBuffs.find(buff => {
+        if (rollType === 'Skill Check' && buff.skillName === canonicalSkill) return true;
+        if (rollType === 'Ability Check' && buff.abilityName?.toLowerCase() === checkName.toLowerCase()) return true;
+        return false;
+    });
+
+    if (matchingBuff) {
+        return { 
+            mode: 'advantage', 
+            reason: matchingBuff.name ? `Equipped: ${matchingBuff.name}` : `Equipped Advantage (${checkName})` 
+        };
+    }
+
+    return null;
 };
 
 export const checkStatusBasedRollMode = (

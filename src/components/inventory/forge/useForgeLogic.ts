@@ -7,6 +7,7 @@ import { Item, AbilityEffect, AbilityUsage, FORGE_GROUPS, WeaponStats, ArmorStat
 import { generateForgeDetails, calculateItemPrice, forgeRandomItem, buildMechanicalSummary, isModifierCategoryAllowedForSlot, generateMechanicalEffect, inferTagsFromStats } from '../../../services/ItemGeneratorService';
 import { MODIFIER_REGISTRY, ModifierCategory, applyModifierToItem, getTempHpLabel } from '../../../utils/itemModifiers';
 import { ForgeModifier } from './ForgeModifiers';
+import { toTitleCase } from '../../../utils/npcUtils';
 
 export const useForgeLogic = () => {
     const { gameData, takeAllLoot } = useContext(GameDataContext);
@@ -84,6 +85,7 @@ export const useForgeLogic = () => {
         if (category === 'resist') setModValue('Resist');
         else if (category === 'exdam') setModValue('1d6');
         else if (category === 'temp_hp') setModValue('5');
+        else if (category === 'advantage') setModValue('Adv');
         else setModValue('1');
         setModDuration('Passive');
     };
@@ -126,6 +128,7 @@ export const useForgeLogic = () => {
         else if (modCategory === 'resist') tag = `${modValue === 'Immu' ? 'Immunity' : 'Resist'} ${modSubOption}`;
         else if (modCategory === 'exdam') tag = `ExDam ${modSubOption} ${modValue}`;
         else if (modCategory === 'temp_hp') tag = `${thpLabel} ${formatVal(modValue)}`;
+        else if (modCategory === 'advantage') tag = `Advantage: ${toTitleCase(modSubOption)}`;
 
         if (def.hasSubOption && !modSubOption) { setValidationError('Please select a specific option.'); return; }
         if (tag && modValue) {
@@ -186,6 +189,7 @@ export const useForgeLogic = () => {
                     else if (def.id === 'resist') tag = `${ex.value === 'Immu' ? 'Immunity' : 'Resist'} ${ex.subOption}`;
                     else if (def.id === 'exdam') tag = `ExDam ${ex.subOption} ${ex.value}`;
                     else if (def.id === 'temp_hp') tag = `${thpLabel} ${formatV(ex.value)}`;
+                    else if (def.id === 'advantage') tag = `Advantage: ${toTitleCase(ex.subOption)}`;
                     if (tag) {
                         extractedModifiers.push({ id: `mod-rand-${Date.now()}-${def.id}-${idx}`, type: def.id, subOption: ex.subOption, value: ex.value, tag: tag, duration: ex.duration || 'Passive' });
                     }

@@ -119,27 +119,27 @@ export const isModifierCategoryAllowedForSlot = (category: string, slot?: BodySl
     const s = slot.replace(/\s\d+$/, '').toLowerCase();
 
     switch (s) {
-        case 'head': return ['ability', 'skill'].includes(category);
-        case 'eyes': return ['ability', 'skill'].includes(category);
-        case 'neck': return ['ability', 'save', 'resist', 'skill', 'temp_hp'].includes(category);
-        case 'shoulders': return ['ability', 'skill', 'resist'].includes(category);
+        case 'head': return ['ability', 'skill', 'advantage'].includes(category);
+        case 'eyes': return ['ability', 'skill', 'advantage'].includes(category);
+        case 'neck': return ['ability', 'save', 'resist', 'skill', 'temp_hp', 'advantage'].includes(category);
+        case 'shoulders': return ['ability', 'skill', 'resist', 'advantage'].includes(category);
         case 'body':
-        case 'vest': return ['ability', 'ac', 'save', 'temp_hp'].includes(category);
-        case 'gloves': return ['ability', 'skill'].includes(category);
-        case 'bracers': return ['ability', 'combat'].includes(category);
-        case 'waist': return ['ability', 'skill', 'save', 'temp_hp'].includes(category);
+        case 'vest': return ['ability', 'ac', 'save', 'temp_hp', 'advantage'].includes(category);
+        case 'gloves': return ['ability', 'skill', 'advantage'].includes(category);
+        case 'bracers': return ['ability', 'combat', 'advantage'].includes(category);
+        case 'waist': return ['ability', 'skill', 'save', 'temp_hp', 'advantage'].includes(category);
         case 'legs':
-        case 'feet': return ['ability', 'skill'].includes(category);
-        case 'ring': return ['ability', 'save', 'resist', 'immunity', 'temp_hp'].includes(category);
-        case 'accessory': return ['skill', 'exdam', 'temp_hp'].includes(category);
-        default: return true;
+        case 'feet': return ['ability', 'skill', 'advantage'].includes(category);
+        case 'ring': return ['ability', 'save', 'resist', 'immunity', 'temp_hp', 'advantage'].includes(category);
+        case 'accessory': return ['skill', 'exdam', 'temp_hp', 'advantage'].includes(category);
+        default: return ['ability', 'skill', 'save', 'resist', 'ac', 'combat', 'exdam', 'temp_hp'].includes(category); 
     }
 };
 
 export const isSubOptionAllowedForSlot = (category: string, sub: string, slot?: BodySlot): boolean => {
     if (!slot) return true;
 
-    if (category === 'temp_hp') return true;
+    if (category === 'temp_hp' || category === 'advantage') return true;
 
     const s = slot.replace(/\s\d+$/, '').toLowerCase();
     const subLower = sub.toLowerCase();
@@ -391,7 +391,7 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
         if (!isWepOrArmor && !isConsumable && s.startsWith("Enhancement")) return false;
         if (isConsumable && s.startsWith("Enhancement")) return false; 
 
-        if (typeHint === 'weapon') return s.startsWith("Ability") || s.startsWith("Combat") || s.startsWith("ExDam");
+        if (typeHint === 'weapon') return (s.startsWith("Ability") || s.startsWith("Combat") || s.startsWith("ExDam")) && s !== "Advantage";
         if (typeHint === 'armor') return !s.startsWith("Combat") && !s.startsWith("ExDam");
 
         if (typeHint === 'other' && slotHint) {
@@ -404,6 +404,7 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
             else if (s.startsWith('Immunity')) cat = 'immunity';
             else if (s.startsWith('ExDam')) cat = 'exdam';
             else if (s.startsWith('Temp HP')) cat = 'temp_hp';
+            else if (s === 'Advantage') cat = 'advantage';
             else if (s === 'Mechanical Effect') return true;
             return isModifierCategoryAllowedForSlot(cat as any, slotHint);
         }
@@ -455,6 +456,13 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
             } else if (rawStat.startsWith("Temp HP")) {
                 if (!isSubOptionAllowedForSlot('temp_hp', '', slotHint)) continue;
                 finalStat = rawStat;
+            } else if (rawStat === "Advantage") {
+                const availableSkills = SKILL_NAMES.filter(s => {
+                    const def = SKILL_DEFINITIONS[s];
+                    return (def.usedIn === 'All' || def.usedIn.includes(skillConfig)) && isSubOptionAllowedForSlot('advantage', s, slotHint);
+                });
+                if (availableSkills.length === 0) continue;
+                finalStat = `Advantage: ${availableSkills[Math.floor(Math.random() * availableSkills.length)]}`;
             }
             modifiers.add(finalStat);
         }
@@ -782,7 +790,7 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     **MECHANICAL SCHEMAS**:
     1. 'weaponStats': { "ability": "strength|dexterity", "enhancementBonus": number, "damages": [{ "dice": "1d8", "type": "Slashing" }], "critRange": number }
     2. 'armorStats': { "baseAC": number, "armorType": "light|medium|heavy|shield", "plusAC": number, "strengthRequirement": number }
-    3. 'buffs': Array of { "type": "ac|attack|damage|save|skill|ability|resistance|immunity|temp_hp|exdam", "bonus": number, "skillName": "String", "abilityName": "String", "damageType": "String", "duration": "Passive|Active" }
+    3. 'buffs': Array of { "type": "ac|attack|damage|save|skill|ability|resistance|immunity|temp_hp|exdam|advantage", "bonus": number, "skillName": "String", "abilityName": "String", "damageType": "String", "duration": "Passive|Active" }. NOTE: 'advantage' type is ONLY allowed for Armor, Accessories, and Wondrous items. NEVER for weapons.
     4. 'effect': { "type": "Damage|Status|Heal", "targetType": "Single|Multiple", "dc": number, "saveAbility": "dexterity|constitution|wisdom|etc", "damageDice": "string", "damageType": "string", "status": "string", "healDice": "string" }
     5. 'usage': { "type": "charges|per_short_rest|per_long_rest", "maxUses": number, "currentUses": number }
 

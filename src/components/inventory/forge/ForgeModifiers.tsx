@@ -106,6 +106,10 @@ export const ForgeModifiers: React.FC<ForgeModifiersProps> = ({
             />
         );
         
+        if (modCategory === 'advantage') return (
+            <div className="input-md w-full bg-brand-primary/30 border-brand-surface/30 flex items-center justify-center text-brand-text-muted text-body-sm font-bold italic">Always</div>
+        );
+        
         const numVal = parseInt(modValue) || 0;
         let min = 1, max = 5;
         if (modCategory === 'ability') max = 8;

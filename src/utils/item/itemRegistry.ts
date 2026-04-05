@@ -23,10 +23,10 @@ export const RARITY_DISTRIBUTIONS: Record<string, Record<string, number>> = {
 export const RARITY_TIERS: Record<string, { desc: string, stats: string[] }> = {
     'Common': { desc: "0 Modifiers. Base item only.", stats: [] },
     'Uncommon': { desc: "1 Modifier. Minor enhancements.", stats: ["Enhancement +1", "Skill +2", "Ability +2", "Combat +1", "AC +1", "Save (Specific) +2", "Save (All) +1", "ExDam 1d6", "Mechanical Effect", "Temp HP +5"] },
-    'Rare': { desc: "1-2 Modifiers. Potent magical properties.", stats: ["Enhancement +2", "Skill +4", "Ability +4", "Combat +2", "AC +2", "Save (Specific) +4", "Save (All) +2", "ExDam 1d8", "Resist", "Mechanical Effect", "Temp HP +10"] },
-    'Very Rare': { desc: "2-3 Modifiers. High magic properties.", stats: ["Enhancement +3", "Skill +6", "Ability +6", "Combat +3", "AC +3", "Save (Specific) +6", "Save (All) +3", "ExDam 2d6", "Resist", "Mechanical Effect", "Temp HP +15"] },
-    'Legendary': { desc: "3-4 Modifiers. Legendary power.", stats: ["Enhancement +4", "Skill +8", "Ability +8", "Combat +4", "AC +4", "Save (Specific) +8", "Save (All) +4", "ExDam 2d8", "Resist", "Immunity", "Mechanical Effect", "Temp HP +20"] },
-    'Artifact': { desc: "4-5 Modifiers. Mythic power.", stats: ["Enhancement +5", "Skill +10", "Ability +10", "Combat +5", "AC +5", "Save (Specific) +10", "Save (All) +5", "ExDam 3d6", "Resist", "Immunity", "Mechanical Effect", "Temp HP +25"] },
+    'Rare': { desc: "1-2 Modifiers. Potent magical properties.", stats: ["Enhancement +2", "Skill +4", "Ability +4", "Combat +2", "AC +2", "Save (Specific) +4", "Save (All) +2", "ExDam 1d8", "Resist", "Mechanical Effect", "Temp HP +10", "Advantage"] },
+    'Very Rare': { desc: "2-3 Modifiers. High magic properties.", stats: ["Enhancement +3", "Skill +6", "Ability +6", "Combat +3", "AC +3", "Save (Specific) +6", "Save (All) +3", "ExDam 2d6", "Resist", "Mechanical Effect", "Temp HP +15", "Advantage"] },
+    'Legendary': { desc: "3-4 Modifiers. Legendary power.", stats: ["Enhancement +4", "Skill +8", "Ability +8", "Combat +4", "AC +4", "Save (Specific) +8", "Save (All) +4", "ExDam 2d8", "Resist", "Immunity", "Mechanical Effect", "Temp HP +20", "Advantage"] },
+    'Artifact': { desc: "4-5 Modifiers. Mythic power.", stats: ["Enhancement +5", "Skill +10", "Ability +10", "Combat +5", "AC +5", "Save (Specific) +10", "Save (All) +5", "ExDam 3d6", "Resist", "Immunity", "Mechanical Effect", "Temp HP +25", "Advantage"] },
 };
 
 export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
