@@ -122,7 +122,14 @@ export const draftCompanionFromPrompt = async (
 export const generateRecruitSkins = async (
     gameData: GameData,
     seeds: { race: string, gender: string, traits: string[] }[]
-): Promise<{ name: string, description: string, personality: string, moralAlignment: { goodEvil: number, lawChaos: number } }[]> => {
+): Promise<{ 
+    name: string, 
+    description: string, 
+    personality: string, 
+    moralAlignment: { goodEvil: number, lawChaos: number },
+    abilityScores: Record<AbilityScoreName, { score: number }>,
+    savingThrows: AbilityScoreName[]
+}[]> => {
     const worldContext = getWorldContext(gameData);
 
 
@@ -143,7 +150,9 @@ export const generateRecruitSkins = async (
     5. Use Title Case for names and Sentence Case for descriptions.
     6. NO ALL CAPS allowed for any text.
     7. moralAlignment: For EACH recruit, pick appropriate numerical values for goodEvil and lawChaos from the [ALIGNMENT SCALES] (-100 to 100).
-    8. Return exactly 6 results in a JSON array.
+    8. abilityScores: Use a "Standard Array" logic (16, 14, 14, 12, 10, 8) distributed to fit the recruit's race and traits.
+    9. savingThrows: Pick exactly 2 Saving Throw proficiencies from [strength, dexterity, constitution, intelligence, wisdom, charisma].
+    10. Return exactly 6 results in a JSON array.
 
     [Mandatory Json Structure]
     [
@@ -151,7 +160,12 @@ export const generateRecruitSkins = async (
         "name": "string", 
         "description": "string", 
         "personality": "string",
-        "moralAlignment": { "goodEvil": number, "lawChaos": number }
+        "moralAlignment": { "goodEvil": number, "lawChaos": number },
+        "abilityScores": {
+          "strength": { "score": number }, "dexterity": { "score": number }, "constitution": { "score": number },
+          "intelligence": { "score": number }, "wisdom": { "score": number }, "charisma": { "score": number }
+        },
+        "savingThrows": ["ability_name", "ability_name"]
       },
       ...
     ]
@@ -183,12 +197,17 @@ export const generateRecruitSkins = async (
         throw new Error("Invalid or empty AI response structure");
     } catch (e) {
         console.error("Recruit skinning failed", e);
-        // Robust fallback: Return basic names derived from seeds
+        // Robust fallback: Return basic names derived from seeds with neutral stats
         return seeds.map(s => ({
             name: `${s.race} Adventurer`,
             description: "A mysterious traveler seeking purpose in the uncharted lands.",
             personality: "Quiet, observant, and reliable.",
-            moralAlignment: { goodEvil: 0, lawChaos: 0 }
+            moralAlignment: { goodEvil: 0, lawChaos: 0 },
+            abilityScores: {
+                strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 },
+                intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 }
+            },
+            savingThrows: ['constitution', 'wisdom'] as AbilityScoreName[]
         }));
 
     }

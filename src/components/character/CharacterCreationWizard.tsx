@@ -330,7 +330,9 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 generalTraits: recruit.genSeeds.map((t: any) => t.name), 
                 combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
                 guaranteedSkills: traitSkillsList,
-                racialTrait
+                racialTrait,
+                abilityScores: recruit.abilityScores,
+                savingThrows: recruit.savingThrows
             };
             
             const allAbilities: Ability[] = [
@@ -343,8 +345,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) }; return acc; }, {} as any);
             
-            const defaultScores = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { score: 10 } }), {} as any);
-            const defaultSaves = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
+            const abilityScores = recruit.abilityScores || ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { score: 10 } }), {} as any);
+            const savingThrows = recruit.savingThrows 
+                ? ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: recruit.savingThrows.includes(s) } }), {} as any)
+                : ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
 
             const baseCharData = { 
                 id: `comp-${Date.now()}`, 
@@ -356,8 +360,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 background: "[Pending Background]", 
                 personality: recruit.personality, 
                 keywords: [], 
-                abilityScores: defaultScores, 
-                savingThrows: defaultSaves, 
+                abilityScores: abilityScores, 
+                savingThrows: savingThrows, 
                 skills: fullSkills, 
                 abilities: allAbilities, 
                 level: playerLevel, 

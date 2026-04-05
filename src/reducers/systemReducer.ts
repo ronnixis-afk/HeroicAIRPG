@@ -3,6 +3,7 @@
 import { GameData, GameAction, Item, LoreEntry, MapZone, Inventory, NPC } from '../types';
 import { PlayerCharacter, Companion } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
+import { getStartingInventory } from '../utils/startingGearUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
 import { getPOITheme, isLocaleMatch } from '../utils/mapUtils';
@@ -346,15 +347,18 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 ? (state.startingPartySnapshot!.companions || []).map(c => new Companion(c as Partial<Companion>))
                 : [];
 
+            const style = state.mapSettings?.style || 'fantasy';
+            const playerInventory = getStartingInventory(style, playerFromSnapshot.level);
+
             const newCompanionInventories: Record<string, Inventory> = {};
             companionsFromSnapshot.forEach(c => {
-                newCompanionInventories[c.id] = { equipped: [], carried: [], storage: [], assets: [] };
+                newCompanionInventories[c.id] = getStartingInventory(style, c.level);
             });
 
             return {
                 ...state,
                 playerCharacter: playerFromSnapshot,
-                playerInventory: { equipped: [], carried: [], storage: [], assets: [] },
+                playerInventory: playerInventory,
                 companions: companionsFromSnapshot,
                 companionInventories: newCompanionInventories,
                 story: [],
