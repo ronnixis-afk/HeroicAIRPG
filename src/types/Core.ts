@@ -117,7 +117,7 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         ability: 'intelligence',
         usedIn: ['Sci-Fi'],
         description: 'Hacking, encryption breaking, and AI logic.',
-        keywords: ['hack', 'code', 'decrypt', 'program', 'computer', 'terminal', 'slice', 'override']
+        keywords: ['hack', 'hacking', 'code', 'decrypt', 'program', 'computer', 'terminal', 'slice', 'override']
     },
     'Deception': {
         ability: 'charisma',
@@ -129,7 +129,7 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         ability: 'dexterity',
         usedIn: ['Modern'],
         description: 'Operating wheeled land vehicles like cars or bikes.',
-        keywords: ['drive', 'steer', 'accelerate', 'brake', 'drift', 'park', 'car', 'bike']
+        keywords: ['drive', 'driving', 'steer', 'accelerate', 'brake', 'drift', 'park', 'car', 'bike']
     },
     'Engineering': {
         ability: 'intelligence',
@@ -177,7 +177,7 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         ability: 'wisdom',
         usedIn: 'All',
         description: 'Stabilizing the dying or diagnosing illness.',
-        keywords: ['heal', 'treat', 'surgery', 'first aid', 'diagnose', 'stabilize', 'doctor']
+        keywords: ['heal', 'treat', 'surgery', 'first aid', 'diagnose', 'stabilize', 'doctor', 'bio-tech', 'biotech']
     },
     'Nature': {
         ability: 'intelligence',
@@ -267,7 +267,7 @@ export const SKILL_DEFINITIONS: Record<string, SkillDefinition> = {
         ability: 'intelligence',
         usedIn: ['Sci-Fi'],
         description: 'Knowledge of alien customs, biology, and language.',
-        keywords: ['alien', 'species', 'biology', 'custom', 'language', 'xeno', 'translate']
+        keywords: ['alien', 'species', 'biology', 'xenobiology', 'custom', 'language', 'xeno', 'translate']
     }
 };
 
@@ -593,38 +593,7 @@ export const getItemRarityBorder = (rarity: string | undefined): string => {
     }
 };
 
-const SKILL_ADAPTATIONS: Partial<Record<SkillName, { modern?: string; 'sci-fi'?: string; historical?: string }>> = {
-    'Arcana': { modern: 'Technology', 'sci-fi': 'Hacking', historical: 'Occult' },
-    'Animal Handling': { modern: 'Drive', 'sci-fi': 'Piloting', historical: 'Ride' },
-    'Nature': { modern: 'Science', 'sci-fi': 'Xenobiology', historical: 'Nature' },
-    'Religion': { modern: 'Humanities', 'sci-fi': 'Xenology', historical: 'Theology' },
-    'History': { modern: 'History', 'sci-fi': 'Galactic Lore', historical: 'History' },
-    'Survival': { modern: 'Streetwise', 'sci-fi': 'Survival', historical: 'Survival' },
-    'Medicine': { modern: 'Medicine', 'sci-fi': 'Bio-Tech', historical: 'Medicine' },
-};
 
-export const getSkillMap = (setting: string): Record<SkillName, string> => {
-    const skillMap = {} as Record<SkillName, string>;
-    const styleKey = setting.toLowerCase();
-
-    for (const skill of SKILL_NAMES) {
-        const adaptation = SKILL_ADAPTATIONS[skill];
-        if (adaptation) {
-            if (styleKey === 'modern' && adaptation.modern) {
-                skillMap[skill] = adaptation.modern;
-            } else if ((styleKey === 'sci-fi' || styleKey === 'futuristic') && adaptation['sci-fi']) {
-                skillMap[skill] = adaptation['sci-fi'];
-            } else if (styleKey === 'historical' && adaptation.historical) {
-                skillMap[skill] = adaptation.historical;
-            } else {
-                skillMap[skill] = skill;
-            }
-        } else {
-            skillMap[skill] = skill;
-        }
-    }
-    return skillMap;
-};
 
 const futuristicKeywords = ['quantum', 'galactic', 'xeno', 'cyber', 'space', 'laser', 'starship', 'futuristic'];
 const modernKeywords = ['technology', 'computer', 'gun', 'corporation', 'city', 'modern', 'internet', 'biology'];
@@ -651,14 +620,7 @@ export const resolveCanonicalSkillName = (input: string): SkillName | null => {
     const canonicalMatch = SKILL_NAMES.find(s => s.toLowerCase() === normalizedInput);
     if (canonicalMatch) return canonicalMatch;
 
-    // 2. Check Adaptations (cross-genre mapping)
-    for (const [key, adaptations] of Object.entries(SKILL_ADAPTATIONS)) {
-        if (adaptations && Object.values(adaptations).some(val => val?.toLowerCase() === normalizedInput)) {
-            return key as SkillName;
-        }
-    }
-
-    // 3. Search via Keywords in Definitions
+    // 2. Search via Keywords in Definitions
     for (const [skillName, def] of Object.entries(SKILL_DEFINITIONS)) {
         // If the input exactly matches a keyword
         if (def.keywords.some(k => k.toLowerCase() === normalizedInput)) {

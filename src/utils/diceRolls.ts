@@ -12,6 +12,17 @@ import { resolveSave } from './resolution/handlers/SaveHandler';
 import { resolveHealing } from './resolution/handlers/HealHandler';
 import { resolveSkillCheck } from './resolution/handlers/SkillHandler';
 
+export const formatDC = (dc?: number | string): string => {
+    if (!dc) return '';
+    const num = Number(dc);
+    if (isNaN(num)) return `DC ${dc}`;
+    if (num <= 10) return `DC ${num} (Easy)`;
+    if (num <= 15) return `DC ${num} (Medium)`;
+    if (num <= 20) return `DC ${num} (Hard)`;
+    if (num <= 25) return `DC ${num} (Heroic)`;
+    return `DC ${num} (Impossible)`;
+};
+
 export interface GroupCheckResult {
     checkName: string;
     rollType: string;

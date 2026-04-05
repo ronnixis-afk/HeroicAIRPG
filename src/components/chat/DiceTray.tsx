@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { DiceRoll } from '../../types';
 import { Icon } from '../Icon';
 import Modal from '../Modal';
+import { formatDC } from '../../utils/diceRolls';
 
 const DiceRollRow: React.FC<{ roll: DiceRoll }> = ({ roll }) => {
     const isDamage = roll.rollType === 'Damage Roll';
@@ -115,7 +116,12 @@ const getGroupHeader = (roll: DiceRoll) => {
 
     if (roll.rollType === 'Ability Check') {
         let header = `${roller} ${roll.checkName}`;
-        if (roll.dc) header += ` vs DC ${roll.dc}`;
+        if (roll.dc) header += ` vs ${formatDC(roll.dc)}`;
+        return header;
+    }
+    if (roll.rollType === 'Skill Check') {
+        let header = `${roller} ${roll.checkName}`;
+        if (roll.dc) header += ` vs ${formatDC(roll.dc)}`;
         return header;
     }
     if (roll.rollType === 'Encounter Check') {
@@ -123,7 +129,7 @@ const getGroupHeader = (roll: DiceRoll) => {
     }
     if (roll.rollType === 'Saving Throw') {
         let header = `${roller} ${roll.checkName} Save`;
-        if (roll.dc) header += ` vs DC ${roll.dc}`;
+        if (roll.dc) header += ` vs ${formatDC(roll.dc)}`;
         return header;
     }
 
@@ -133,7 +139,7 @@ const getGroupHeader = (roll: DiceRoll) => {
 
     let header = `${roller} ${cleanName} vs ${target}`;
     if (roll.rollType === 'Attack Roll' && roll.dc) header += ` AC ${roll.dc}`;
-    else if (roll.dc && !isNaN(Number(roll.dc))) header += ` DC ${roll.dc}`;
+    else if (roll.dc && !isNaN(Number(roll.dc))) header += ` ${formatDC(roll.dc)}`;
 
     return header;
 };
