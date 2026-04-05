@@ -258,7 +258,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({ msg, onSpeak, onClearC
                                     <span className="w-1 h-5 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                                     <span className="w-1 h-3 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                                 </div>
-                                <span className="text-[10px] uppercase tracking-widest font-bold">Narrating...</span>
+                                <span className="text-[10px] tracking-widest font-bold">Narrating...</span>
                             </div>
                         )}
                     </div>

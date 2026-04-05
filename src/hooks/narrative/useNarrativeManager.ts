@@ -159,7 +159,7 @@ export const useNarrativeManager = (
             );
 
             // Inject the explicitly generated GM Notes from the resolution step
-            if (resolution.newGmNotes) {
+            if (resolution.newGmNotes !== undefined) {
                 aiResponse.updates = aiResponse.updates || {};
                 aiResponse.updates.gmNotes = resolution.newGmNotes;
             }

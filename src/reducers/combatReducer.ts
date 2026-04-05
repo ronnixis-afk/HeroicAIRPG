@@ -342,7 +342,7 @@ export const combatReducer = (state: GameData, action: GameAction): GameData => 
             return state;
 
         case 'CLEAR_SCENE':
-            return { ...state, combatState: { isActive: false, enemies: [], round: 0, turnOrder: [], currentTurnIndex: 0 } };
+            return { ...state, gmNotes: "", combatState: { isActive: false, enemies: [], round: 0, turnOrder: [], currentTurnIndex: 0 } };
 
         case 'UPDATE_TEMPLATE':
             return { ...state, templates: { ...state.templates, [action.payload.key]: action.payload.template } };

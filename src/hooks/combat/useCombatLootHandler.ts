@@ -167,6 +167,10 @@ export const useCombatLootHandler = (
 
                     dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
                     
+                    if (res.newGmNotes) {
+                        dispatch({ type: 'UPDATE_GM_NOTES', payload: res.newGmNotes });
+                    }
+                    
                     dispatch({ 
                         type: 'ADD_STORY_LOG', 
                         payload: { 

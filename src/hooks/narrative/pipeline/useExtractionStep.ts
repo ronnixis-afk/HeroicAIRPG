@@ -270,7 +270,7 @@ export const useExtractionStep = (
             }
         }
 
-        // NPC Memories: If we have turning summary, consider it as a broad memory for nearby NPCs
+        // 4.5 NPC Memories: If we have turning summary, consider it as a broad memory for nearby NPCs
         if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
             const resolvedLocale = finalUpdates.currentLocale || gameData.currentLocale || "";
             gameData.npcs?.forEach(n => {
@@ -281,17 +281,6 @@ export const useExtractionStep = (
                     dispatch({ type: 'UPDATE_NPC', payload: { ...n, memories: updatedMemories } });
                 }
             });
-        }
-
-        // 4.5 POI Memory: Record event at current location
-        // Note: For now, we skip automated POI memory without the Housekeeper, 
-        // as the Narrator doesn't natively return structured memories yet.
-        // We could extract the summary as a memory.
-        if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
-            const poiId = gameData.current_site_id || '';
-            if (poiId) {
-                finalUpdates.poiMemories = [{ poiId, memory: aiResponse.turn_summary }];
-            }
         }
 
         // 5. Resolve Auditor Result Metadata
@@ -325,15 +314,22 @@ export const useExtractionStep = (
             });
         }
 
-        // 7. Story Log Creation
-        if (!gameData.combatState?.isActive && !aiResponse.combat_detected) {
+        // 7. Story Log & POI Memory Creation (Unified Narrative Record)
+        if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
+            // A. Chronicle (Story Log) entry: Permanent history for the Librarian agent
             finalUpdates.storyUpdates = [{
                 id: `log-${Date.now()}`,
                 content: aiNarrative,
-                summary: aiResponse.turn_summary || "Interaction deed.",
+                summary: aiResponse.turn_summary,
                 isNew: true,
                 originatingMessageId: aiMessageId
             }];
+
+            // B. POI (Location) Memory entry: Concise memory for the Zone Details Panel
+            const poiId = gameData.current_site_id || gameData.current_site_name || gameData.currentLocale || '';
+            if (poiId) {
+                finalUpdates.poiMemories = [{ poiId, memory: aiResponse.turn_summary }];
+            }
         }
 
         dispatch({ type: 'AI_UPDATE', payload: finalUpdates });

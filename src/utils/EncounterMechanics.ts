@@ -77,12 +77,13 @@ export const getUnifiedProceduralPrompt = (matrix: EncounterMatrixResult, isNewD
 
     const gmNotesInstruction = `
 [SYSTEM_OVERRIDE: GM NOTES]:
-You MUST update 'updates.gmNotes' (Current Encounter Plot) with exactly THREE concise sentences:
+You MUST update 'updates.gmNotes' (Current Encounter Plot) with exactly THREE concise sentences using Title Case for any specific entities:
 1. (ENCOUNTER TYPE): Define the nature of the encounter.
 2. (ENTITY TYPE): Define the physical nature of this entity/hazard.
 3. (CONDITION/TWIST): Define the hidden complication.
 
 **STRICT RULE**: NEVER use the bracketed system summary "${matrix.summary}" as the content for gmNotes. You MUST write full, descriptive sentences.
+**NARRATION RULE**: In your 'narration' field, describe these events UNVEILING naturally. Do NOT repeat these three sentences word-for-word in the story.
 *JSON Schema: "gmNotes": "Sentence 1. Sentence 2. Sentence 3."*
 `;
 

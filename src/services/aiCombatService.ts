@@ -266,11 +266,15 @@ export const generateCombatConclusion = async (names: string[], loot: any[], con
     2. ALIGNMENT ACTIONS (MANDATORY): You MUST provide EXACTLY 4 logical next steps. One for each alignment: 'Good', 'Evil', 'Lawful', and 'Chaotic'. 
     - These must be distinct, high-impact choices that reflect the character's moral standing after victory.
     - DO NOT skip any alignment. DO NOT provide fewer than 4.
+    3. POST-COMBAT HOOK (MANDATORY): You MUST provide exactly TWO concise sentences for 'newGmNotes'.
+    - These sentences must answer: "What else is interesting in this POI and why shouldn't the party leave just yet?"
+    - Use Title Case for any specific entities or objects.
 
     Return JSON: { 
       "narrative": "string (plain text prose)", 
       "location": "string", 
       "turnSummary": "string (STRICT MAX 10 WORDS concise but detailed memory for the log)",
+      "newGmNotes": "string (STRICT MAX 2 CONCISE SENTENCES explaining what else is interesting in this POI and why the party shouldn't leave just yet)",
       "alignmentOptions": [
           { "label": "string (Max 5 words, Title Case)", "alignment": "Good" },
           { "label": "string (Max 5 words, Title Case)", "alignment": "Evil" },

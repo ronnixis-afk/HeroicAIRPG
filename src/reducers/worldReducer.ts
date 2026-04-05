@@ -12,7 +12,12 @@ export const worldReducer = (state: GameData, action: GameAction): GameData => {
         }
 
         case 'MOVE_PLAYER_ON_MAP':
-            return { ...state, playerCoordinates: action.payload };
+            const hasMoved = state.playerCoordinates !== action.payload;
+            return { 
+                ...state, 
+                playerCoordinates: action.payload,
+                gmNotes: hasMoved ? "" : state.gmNotes 
+            };
 
         case 'UPDATE_MAP_SETTINGS':
             return { ...state, mapSettings: action.payload };

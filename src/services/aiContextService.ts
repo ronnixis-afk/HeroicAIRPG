@@ -133,8 +133,8 @@ export const getRelevantMemories = (searchText: string, memories: NPCMemory[] = 
     const composite = [...resonant, ...recent].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
     return composite.map(m => {
-        const relativeTime = currentTime ? ` (${getRelativeTimeString(currentTime, m.timestamp)})` : "";
-        return `[${m.timestamp}${relativeTime}]: ${m.content}`;
+        const relativeTime = currentTime ? getRelativeTimeString(currentTime, m.timestamp) : "some time ago";
+        return `${relativeTime}, ${m.content}`;
     }).join('; ');
 };
 
@@ -276,7 +276,7 @@ Every 'narration' field MUST be exactly TWO paragraphs (paragraph1 and paragraph
 - **items_to_generate**: If you narrate the player finding or acquiring new items, list their names here (e.g. ["Rusted Key", "Ancient Coin"]). The system will procedurally generate their stats and skins.
 - **player_alignment_shift**: Analyze the player's action and determine if it was Good, Evil, Lawful, Chaotic, or Neutral.
 - **time_passed_minutes**: Estimate the logical amount of time passed for the narrated action (e.g., 5 for a quick chat, 60 for a long trek).
-- **turn_summary**: Provide a 10-word summary of the turn for the permanent story log.
+- **turn_summary**: Provide a 10-word summary of the turn for the permanent story log and location memory. Focus on the most significant narrative event that occurred.
 - **is_aboard**: Explicitly set to TRUE if the party has boarded or is inside a vessel.
 - **combat_detected**: Set to TRUE if an attack actually happens in this turn (player attacks or is attacked). FALSE otherwise. This is the ONLY trigger for combat initiation.
 - **npc_resolution**: 
@@ -326,9 +326,9 @@ ${partyShip && gameData.isAboard ? `[STEALTH DOCTRINE]: Since the party is aboar
 
 **SPATIAL AWARENESS RULE**: If you narrate the player entering a specific building, shop, or room, you MUST update 'location_update.site_name' in your JSON.
 
-### TACTICAL ENCOUNTER BRIEF (GM NOTES)
+[TACTICAL ENCOUNTER BRIEF (GM NOTES)]
 ${gameData.gmNotes ? `[MANDATORY PLOT ANCHOR]: ${gameData.gmNotes}
-(INSTRUCTION: You MUST respect and weave these three tactical sentences into your narration if an encounter is active or starting.)` : "No active encounter brief."}
+(INSTRUCTION: You MUST respect and weave these three tactical sentences into your narration if an encounter is active or starting. Do NOT repeat them verbatim; they are internal anchors for your storytelling consistency.)` : "No active encounter brief."}
 `;
 
     const heroicDirective = isHeroic ? `
@@ -378,7 +378,7 @@ The user has expended a HEROIC POINT.
             poiMemoryContext = `\n[LOCATION HISTORY (${currentPoi.title})]:\n` +
                 recentPoiMemories.map(m => {
                     const relativeTime = getRelativeTimeString(gameData.currentTime, m.timestamp);
-                    return `- [${m.timestamp} (${relativeTime})]: ${m.content}`;
+                    return `- ${relativeTime}, ${m.content}`;
                 }).join('\n');
         }
 
@@ -398,7 +398,7 @@ ${poiMemoryContext}
         const recentMemory = recentStoryLogs
             .map(log => {
                 const relativeTime = getRelativeTimeString(gameData.currentTime, log.timestamp);
-                return `- [${log.timestamp} (${relativeTime})]: ${log.summary || log.content}`;
+                return `- ${relativeTime}: ${log.summary || log.content}`;
             })
             .join('\n');
 
@@ -421,7 +421,7 @@ ${poiMemoryContext}
                 const sortedLogs = semanticLogs.map(r => r.item).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
                 historicalEchoes = `[HISTORICAL ECHOES]:\n` + sortedLogs.map(log => {
                     const relativeTime = getRelativeTimeString(gameData.currentTime, log.timestamp);
-                    return `- [${log.timestamp} (${relativeTime}) - Archived Memory]: ${log.summary || log.content}`;
+                    return `- ${relativeTime} (Archived Memory): ${log.summary || log.content}`;
                 }).join('\n') + `\n`;
             }
         }
@@ -512,6 +512,9 @@ If you see a block labeled [SYSTEM_OVERRIDE] in the user prompt or dice truth, y
 6. QUEST PROGRESSION: If the player advances an existing active quest (especially the one marked as isTracked), you MUST update it in 'updates.objectives'. Provide the new 'nextStep' (Current Lead) and a short 'progressUpdate' string summarizing the advancement.
 7. QUEST STATUS: If the player completes or fails an existing quest, include it in 'updates.objectives' and set 'status' to 'completed' or 'failed', along with a final 'progressUpdate'.
 8. VESSEL EXIT/BOARD: If the player explicitly enters or leaves a vessel (Ship/Vehicle), you MUST explicitly signal this transition in the narration and updates.
+9. UNIVERSAL ARRIVAL HOOK: Whenever a scene transition occurs without immediate combat (e.g. arrival at a POI, traveling between locations), you MUST provide exactly TWO concise sentences in 'updates.gmNotes'. 
+   - CONTENT: These sentences must describe what else is interesting in this POI and why the party shouldn't leave just yet.
+   - STYLE: Use Title Case for any specific entities or objects mentioned.
 `;
 
     let builtContext = `${narratorPersona}\n${tier1Mandatory}\n${heroicDirective}\n${tier2Resonance}\n${tier3Recency}\n${tier4Social}\n${coreDirectives}`;

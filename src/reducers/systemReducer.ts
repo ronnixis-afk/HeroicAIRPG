@@ -842,12 +842,13 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 updates.poiMemories.forEach(memData => {
                     if (!memData || !memData.poiId || !memData.memory) return;
 
-                    // Resolve POI: Try by id first, then by matching current locale name
+                    // Resolve POI: Try by id first, then by matching title directly, then by matching current locale name
                     let poiIdx = newState.knowledge!.findIndex(k =>
-                        k.id === memData.poiId && k.tags?.includes('location')
+                        (k.id === memData.poiId || k.title.toLowerCase().trim() === memData.poiId.toLowerCase().trim()) && 
+                        k.tags?.includes('location')
                     );
                     if (poiIdx === -1) {
-                        // Fallback: match by title against current locale
+                        // Fallback: match by title against current locale/site name in the state
                         const currentSiteName = newState.current_site_name || newState.currentLocale || '';
                         if (currentSiteName) {
                             poiIdx = newState.knowledge!.findIndex(k =>

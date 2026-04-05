@@ -323,9 +323,9 @@ const GmNotesView: React.FC = () => {
                     {/* CONNECTED NPCS SECTION */}
                     {(gameData?.grandDesign || isWeaving) && (
                         <div className="animate-fade-in border-t border-brand-primary/20 pt-6">
-                            <h5 className="text-brand-accent text-center mb-6 flex items-center justify-center gap-2">
+                                <h5 className="text-brand-accent text-center mb-6 flex items-center justify-center gap-2">
                                 <Icon name="users" className="w-4 h-4" />
-                                Connected Npcs
+                                Connected NPCs
                             </h5>
                             
                             {connectedNpcs.length > 0 ? (
