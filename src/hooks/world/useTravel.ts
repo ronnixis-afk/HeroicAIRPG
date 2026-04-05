@@ -203,11 +203,11 @@ export const useTravel = (
                 }
             }
 
-            // 1.5 Final Locale Resolution: 
-            // Simplified: Always land in the zone's "Open Area" (landing site) first.
-            // Players can then move to specific POIs from there.
+            // 1.5 Final Locale Resolution:
+            // Prefer the matching POI if one exists, otherwise default to the zone's "Open Area".
             const openAreaTitle = `Open Area of ${zone?.name}`;
-            localeEntry = currentPois.find(p => p.title === openAreaTitle) || 
+            localeEntry = currentPois.find(p => p.title === locationName) ||
+                          currentPois.find(p => p.title === openAreaTitle) || 
                           currentPois.find(p => (p.title || "").toLowerCase().includes('open area')) || 
                           null;
 
@@ -217,7 +217,9 @@ export const useTravel = (
 
             // 2. Resolve Mechanics (Truth)
             const rawHostility = zone ? parseHostility(zone.hostility) : 0;
-            const discoveryBonus = isDiscovery ? 75 : 0;
+            // +75 Discovery Bonus only applies to the first visit of a zone OR an unvisited POI.
+            // If the specific target location is already visited, the bonus is suppressed.
+            const discoveryBonus = (isDiscovery && !localeEntry?.visited) ? 75 : 0;
             const { roll, matrix } = generateEncounterRoll(`Arrival at ${locationName}`, rawHostility + discoveryBonus);
 
             let isHostileIntent = false;
