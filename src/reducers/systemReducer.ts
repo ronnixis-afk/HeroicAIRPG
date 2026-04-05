@@ -5,7 +5,7 @@ import { PlayerCharacter, Companion } from '../types';
 import { consolidateCurrencyToPlayer } from '../utils/inventoryUtils';
 import { getNewDndCharacter } from '../services/mockSheetsService';
 import { parseGameTime } from '../utils/timeUtils';
-import { getPOITheme } from '../utils/mapUtils';
+import { getPOITheme, isLocaleMatch } from '../utils/mapUtils';
 import { LANGUAGE_TECHNIQUES, HUMAN_LANGUAGE_TECHNIQUE } from '../constants/languageTechniques';
 
 const BOARDING_SHIP_MESSAGES = {
@@ -853,7 +853,9 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                         if (currentSiteName) {
                             poiIdx = newState.knowledge!.findIndex(k =>
                                 k.tags?.includes('location') &&
-                                k.title.toLowerCase().trim() === currentSiteName.toLowerCase().trim()
+                                (k.title.toLowerCase().trim() === currentSiteName.toLowerCase().trim() ||
+                                 isLocaleMatch(k.title, currentSiteName) ||
+                                 isLocaleMatch(k.title, memData.poiId))
                             );
                         }
                     }
