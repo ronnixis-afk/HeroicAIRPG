@@ -21,11 +21,13 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                         onClick={() => onSelect('recruitment')}
                         className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
-                        <div className="w-14 h-14 rounded-full bg-brand-accent flex items-center justify-center mr-6 shadow-lg shadow-brand-accent/20 group-hover:scale-110 transition-transform flex-shrink-0">
-                            <Icon name="users" className="w-8 h-8 text-black" />
-                        </div>
+                        <img 
+                            src="/icons/recruit.png" 
+                            className="w-16 h-16 mr-6 group-hover:scale-110 transition-transform flex-shrink-0 object-contain" 
+                            alt="Tavern Icon"
+                        />
                         <div className="text-left">
-                            <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Recruit from Tavern</h4>
+                            <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Recruit From Tavern</h4>
                             <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Choose from pre-generated candidates with quirky backgrounds.</p>
                         </div>
                     </button>
@@ -34,9 +36,11 @@ export const WizardMethodSelection: React.FC<WizardMethodSelectionProps> = ({ on
                         onClick={() => onSelect('manual')}
                         className="group relative flex flex-row items-center p-6 bg-brand-primary/10 border-2 border-brand-primary rounded-3xl transition-all hover:border-brand-accent hover:bg-brand-accent/5"
                     >
-                        <div className="w-14 h-14 rounded-full bg-brand-primary flex items-center justify-center mr-6 shadow-lg group-hover:scale-110 transition-transform flex-shrink-0">
-                            <Icon name="hammer" className="w-8 h-8 text-brand-text" />
-                        </div>
+                        <img 
+                            src="/icons/heroes.png" 
+                            className="w-16 h-16 mr-6 group-hover:scale-110 transition-transform flex-shrink-0 object-contain" 
+                            alt="Heroes Icon"
+                        />
                         <div className="text-left">
                             <h4 className="text-lg font-bold text-brand-text group-hover:text-brand-accent">Forge Custom Hero</h4>
                             <p className="text-[10px] text-brand-text-muted mt-1 leading-relaxed">Manually select every trait for a specific ally.</p>
