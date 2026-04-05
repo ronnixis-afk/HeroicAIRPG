@@ -354,52 +354,31 @@ const POIListItem: React.FC<{
                                     {fixCasing(entry.content)}
                                 </p>
                                 
-                                 {/* POI Memories Section */}
-                                {isExpanded && sortedPoiMemories.length > 0 && (
-                                    <div className="mt-4 space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <label className="text-[10px] font-bold text-brand-text-muted opacity-60">
-                                                Location Chronicle
-                                            </label>
-                                            <span className="text-[9px] font-bold text-brand-accent px-2 py-0.5 rounded-full bg-brand-accent/5 border border-brand-accent/20">
-                                                {sortedPoiMemories.length} {sortedPoiMemories.length === 1 ? 'event' : 'events'}
-                                            </span>
-                                        </div>
-
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setIsMemoriesOpen(true);
-                                            }}
-                                            className="w-full py-2.5 rounded-xl border border-dashed border-brand-primary/40 bg-brand-primary/5 hover:bg-brand-primary/10 transition-all flex items-center justify-center gap-2 text-[11px] font-bold text-brand-text-muted hover:text-brand-text"
-                                        >
-                                            <Icon name="history" className="w-3.5 h-3.5 text-brand-accent" />
-                                            View Memories
-                                        </button>
-
-                                        <Modal 
-                                            isOpen={isMemoriesOpen} 
-                                            onClose={() => setIsMemoriesOpen(false)} 
-                                            title={toTitleCase(`${entry.title} - Location Chronicle`)}
-                                            maxWidth="lg"
-                                        >
-                                            <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
-                                                {sortedPoiMemories.map((m, i) => (
-                                                    <div key={i} className="p-5 flex flex-col gap-2 group/mem hover:bg-brand-primary/20 transition-colors">
-                                                        <div className="text-[10px] font-mono font-bold text-brand-accent/60">
-                                                            {m.timestamp}
-                                                        </div>
-                                                        <div className="w-full">
-                                                            <p className="text-body-base text-brand-text leading-relaxed italic">
-                                                                "{m.content}"
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </Modal>
-                                    </div>
-                                )}
+                                 <Modal 
+                                     isOpen={isMemoriesOpen} 
+                                     onClose={() => setIsMemoriesOpen(false)} 
+                                     title={toTitleCase(`${entry.title} - Location Chronicle`)}
+                                     maxWidth="lg"
+                                 >
+                                     <div className="bg-brand-primary/10 rounded-2xl border border-brand-surface overflow-hidden divide-y divide-brand-surface/30">
+                                         {sortedPoiMemories.length > 0 ? sortedPoiMemories.map((m, i) => (
+                                             <div key={i} className="p-5 flex flex-col gap-2 group/mem hover:bg-brand-primary/20 transition-colors">
+                                                 <div className="text-[10px] font-mono font-bold text-brand-accent/60">
+                                                     {m.timestamp}
+                                                 </div>
+                                                 <div className="w-full">
+                                                     <p className="text-body-base text-brand-text leading-relaxed italic">
+                                                         "{m.content}"
+                                                     </p>
+                                                 </div>
+                                             </div>
+                                         )) : (
+                                             <div className="p-10 text-center text-brand-text-muted opacity-60 italic text-sm">
+                                                 The chronicles of this place are yet to be written.
+                                             </div>
+                                         )}
+                                     </div>
+                                 </Modal>
 
                                 {/* Connected NPCs Section */}
                                 {isExpanded && connectedNpcs.length > 0 && (
@@ -455,11 +434,11 @@ const POIListItem: React.FC<{
                 <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                     <div className="flex gap-2 p-3 pt-0 mt-1 flex-shrink-0 bg-brand-surface/20">
                         <button
-                            onClick={handleStartEdit}
+                            onClick={(e) => { e.stopPropagation(); setIsMemoriesOpen(true); }}
                             className="btn-secondary h-10 flex-1 text-[12px] rounded-xl gap-2 font-bold"
                         >
-                            <Icon name="edit" className="w-4 h-4" />
-                            {toTitleCase('Edit')}
+                            <Icon name="history" className="w-4 h-4" />
+                            {toTitleCase('Memory')}
                         </button>
                         {isZoneVisited && (
                             isPlayerHere ? (

@@ -285,7 +285,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
                     </button>
                 </div>
                 <button
-                    onClick={props.onSubmit}
+                    onClick={() => props.onSubmit()}
                     disabled={!props.value.trim() || props.isLocked}
                     className={`btn-primary w-11 h-11 rounded-full p-0 flex-shrink-0 disabled:opacity-40 transition-all duration-300 ${isHeroicModeActive ? 'shadow-[0_0_15px_rgba(62,207,142,0.4)] scale-105' : ''}`}
                 >

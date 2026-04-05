@@ -294,7 +294,7 @@ const GameInterface: React.FC = () => {
 
   const handleSubmitChat = async (overrideContent?: string) => {
     if (isSubmittingRef.current) return;
-    const content = (overrideContent ?? chatInput).trim();
+    const content = (typeof overrideContent === 'string' ? overrideContent : chatInput).trim();
     if (!content || !gameData) return;
 
     isSubmittingRef.current = true;

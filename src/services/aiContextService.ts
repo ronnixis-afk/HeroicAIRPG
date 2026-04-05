@@ -342,10 +342,30 @@ The user has expended a HEROIC POINT.
     let tier2Resonance = "";
     if (requiredKeys.includes('world_lore') || requiredKeys.includes('location_details')) {
         const resonantLore = getRelevantLore(lastMessage.content, [...(gameData.world || []), ...(gameData.knowledge || [])], queryEmbedding);
-        const localPOIs = (gameData.knowledge ?? [])
-            .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'))
-            .map(k => `- ${k.title}: ${k.content}`)
-            .join('\n');
+        
+        // --- REFINED POI GATHERING ---
+        const currentZonePOIs = (gameData.knowledge ?? [])
+            .filter(k => k.coordinates === gameData.playerCoordinates && k.tags?.includes('location'));
+
+        const currentZone = (gameData.mapZones ?? []).find(z => z.coordinates === gameData.playerCoordinates);
+        
+        // Identify the "Population Center" (Major Hub or Settlement Hub)
+        const populationCenter = currentZonePOIs.find(poi => {
+            const level = currentZone?.populationLevel || 'Barren';
+            const isSettlement = ['Settlement', 'Town', 'City', 'Capital'].includes(level);
+            return isSettlement && (
+                poi.title.toLowerCase().includes(currentZone?.name.toLowerCase() || "") || 
+                (poi.tags || []).includes('settlement') || 
+                (poi.tags || []).includes('city')
+            );
+        });
+
+        const otherPOIs = currentZonePOIs.filter(p => p.id !== populationCenter?.id);
+
+        const poiListContext = [
+            populationCenter ? `[POPULATION CENTER]: ${populationCenter.title}` : null,
+            ...otherPOIs.map(p => `- ${p.title}: ${p.content.slice(0, 150)}...`)
+        ].filter(Boolean).join('\n');
 
         // POI Memory Context: Include recent memories from the current location
         let poiMemoryContext = "";
@@ -365,9 +385,10 @@ The user has expended a HEROIC POINT.
         tier2Resonance = `
 ### TIER 2: WORLD RESONANCE
 ${resonantLore || "No relevant historical lore detected."}
-[LOCAL POINTS OF INTEREST]:
-${localPOIs || "No specific local landmarks."}
+[AVAILABLE POINTS OF INTEREST IN THE AREA]:
+${poiListContext || "No specific local landmarks."}
 ${poiMemoryContext}
+[NARRATIVE CONSTRAINT]: Use ONLY the points of interest listed above for all quests, side-plots, or narrative destinations within this vicinity. Do NOT invent new physical locations if these are available. If no POIs are listed, you may generate new ones as needed.
 `;
     }
 
