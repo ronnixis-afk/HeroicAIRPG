@@ -33,7 +33,7 @@ export interface GameDataContextType {
   updateItem: (item: Item, ownerId: string) => Promise<void>;
   setMessages: (updater: (prevMessages: ChatMessage[]) => ChatMessage[]) => void;
   submitUserMessage: (message: ChatMessage, isHeroic?: boolean, skipAdd?: boolean) => Promise<string>;
-  submitAutomatedEvent: (intentText: string, mechanics: any, systemInstruction?: string) => Promise<string>;
+  submitAutomatedEvent: (intentText: string, mechanics: any, systemInstruction?: string, forcedLocale?: string, forcedSiteId?: string) => Promise<string>;
   processUserInitiatedCombat: (userContent: string) => Promise<void>;
   processUserInitiatedTravel: (userContent: string) => Promise<void>;
   applyAiUpdates: (updates: AIUpdatePayload, aiMessage?: ChatMessage) => Promise<void>;

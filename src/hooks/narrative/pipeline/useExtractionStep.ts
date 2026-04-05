@@ -326,7 +326,7 @@ export const useExtractionStep = (
             }];
 
             // B. POI (Location) Memory entry: Concise memory for the Zone Details Panel
-            const poiId = gameData.current_site_id || gameData.current_site_name || gameData.currentLocale || '';
+            const poiId = forcedSiteId || forcedLocale || finalUpdates.location_update?.site_id || finalUpdates.location_update?.site_name || finalUpdates.currentLocale || gameData.current_site_id || gameData.current_site_name || gameData.currentLocale || '';
             if (poiId) {
                 finalUpdates.poiMemories = [{ poiId, memory: aiResponse.turn_summary }];
             }

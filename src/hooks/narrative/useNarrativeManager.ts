@@ -277,11 +277,13 @@ export const useNarrativeManager = (
     const submitAutomatedEvent = useCallback(async (
         intentText: string,
         mechanics: { diceRolls: any[], mechanicsSummary: string, combatInstruction: string, isHostileIntent: boolean, newGmNotes?: string, targetCoordinates?: string },
-        systemInstruction?: string
+        systemInstruction?: string,
+        forcedLocale?: string,
+        forcedSiteId?: string
     ) => {
         if (!gameData) return "";
         const msg: ChatMessage = { id: `auto-${Date.now()}`, sender: 'user', mode: 'CHAR', content: intentText };
-        return await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true, targetCoordinates: mechanics.targetCoordinates });
+        return await executePipeline({ userMessage: msg, mechanicsOverride: mechanics, systemInstruction, bypassLock: true, targetCoordinates: mechanics.targetCoordinates, forcedLocale, forcedSiteId });
     }, [gameData, executePipeline]);
 
     const summarizeDayLog = useCallback(async (day: string, dayEntries: StoryLog[], previousDayEntries: StoryLog[]) => {
