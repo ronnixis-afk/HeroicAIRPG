@@ -86,8 +86,16 @@ export const useWorldSelectors = (gameData: GameData | null) => {
         return suggestions;
     }, [gameData]);
 
+    const isPopulationCenter = useCallback((): boolean => {
+        if (!gameData) return false;
+        const currentZone = gameData.mapZones?.find(z => z.coordinates === gameData.playerCoordinates);
+        if (!currentZone) return false;
+        return ['Settlement', 'Town', 'City', 'Capital'].includes(currentZone.populationLevel || '');
+    }, [gameData]);
+
     return {
         getCurrentZoneHostility,
+        isPopulationCenter,
         getCombatSlots
     };
-};
+};

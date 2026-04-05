@@ -15,7 +15,7 @@ export const useTime = (
     setIsAiGenerating: (isGenerating: boolean) => void,
     submitAutomatedEvent?: any
 ) => {
-    const { getCurrentZoneHostility, getCombatSlots } = useWorldSelectors(gameData);
+    const { getCurrentZoneHostility, isPopulationCenter, getCombatSlots } = useWorldSelectors(gameData);
 
     const initiateRest = useCallback(async (type: 'short' | 'long') => {
         if (!gameData || !submitAutomatedEvent) return;
@@ -27,7 +27,10 @@ export const useTime = (
         const newDate = addDuration(date, duration);
         const newTime = formatGameTime(newDate);
         
-        const hostility = getCurrentZoneHostility();
+        let hostility = getCurrentZoneHostility();
+        if (isPopulationCenter()) {
+            hostility -= 50; // Population Center Safety
+        }
         const { roll, matrix } = generateEncounterRoll(`${type === 'short' ? 'Short' : 'Long'} Rest`, hostility);
 
         // Apply mechanical recovery
@@ -147,7 +150,10 @@ export const useTime = (
         const newDate = addDuration(date, hours);
         const newTime = formatGameTime(newDate);
         
-        const hostility = getCurrentZoneHostility();
+        let hostility = getCurrentZoneHostility();
+        if (isPopulationCenter()) {
+            hostility -= 50; // Population Center Safety
+        }
         const { roll, matrix } = generateEncounterRoll(`Wait (${hours}h)`, hostility);
         
         setIsAiGenerating(true);
