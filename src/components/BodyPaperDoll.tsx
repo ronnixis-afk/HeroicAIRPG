@@ -54,8 +54,9 @@ const SlotBox: React.FC<{
     selectionMode?: boolean,
     label: string,
     isCompatible?: boolean,
-    isLocked?: boolean
-}> = ({ slot, item, onClick, onItemClick, selectionMode, label, isCompatible = true, isLocked = false }) => {
+    isLocked?: boolean,
+    className?: string
+}> = ({ slot, item, onClick, onItemClick, selectionMode, label, isCompatible = true, isLocked = false, className = '' }) => {
     
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -94,7 +95,7 @@ const SlotBox: React.FC<{
             className={`
                 relative flex flex-col justify-center items-center p-2 rounded-lg
                 transition-all duration-200 aspect-square text-center focus:outline-none focus:ring-2 focus:ring-brand-accent/50
-                ${baseStyle} ${selectionStyle} ${lockedStyle}
+                w-full ${baseStyle} ${selectionStyle} ${lockedStyle} ${className}
             `}
             style={bgStyle}
             aria-label={item ? `${label}: ${item.name}` : `Empty ${label} slot`}
@@ -148,7 +149,7 @@ export const BodyPaperDoll: React.FC<BodyPaperDollProps> = ({
         return getSlotSynonym(slot, tags);
     };
 
-    const renderSlot = (slotName: string) => {
+    const renderSlot = (slotName: string, className?: string) => {
         const slot = slotName as BodySlot;
         const item = getItemInSlot(slot);
         const label = getSlotLabel(slot);
@@ -166,6 +167,7 @@ export const BodyPaperDoll: React.FC<BodyPaperDollProps> = ({
                 selectionMode={selectionMode}
                 isCompatible={isCompatible}
                 isLocked={isLocked}
+                className={className}
             />
         );
     };
@@ -187,9 +189,7 @@ export const BodyPaperDoll: React.FC<BodyPaperDollProps> = ({
             {renderSlot('Accessory 1')}
             {renderSlot('Legs')}
             {renderSlot('Accessory 2')}
-            <div className="col-start-2">
-                {renderSlot('Feet')}
-            </div>
+            {renderSlot('Feet', 'col-start-2')}
         </div>
     );
 };

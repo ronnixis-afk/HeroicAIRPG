@@ -346,12 +346,17 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                 ? (state.startingPartySnapshot!.companions || []).map(c => new Companion(c as Partial<Companion>))
                 : [];
 
+            const newCompanionInventories: Record<string, Inventory> = {};
+            companionsFromSnapshot.forEach(c => {
+                newCompanionInventories[c.id] = { equipped: [], carried: [], storage: [], assets: [] };
+            });
+
             return {
                 ...state,
                 playerCharacter: playerFromSnapshot,
                 playerInventory: { equipped: [], carried: [], storage: [], assets: [] },
                 companions: companionsFromSnapshot,
-                companionInventories: {},
+                companionInventories: newCompanionInventories,
                 story: [],
                 gallery: [],
                 messages: [{ id: `sys-reset-${Date.now()}`, sender: 'system', content: 'A new adventure begins in this world.', type: 'neutral' }],
