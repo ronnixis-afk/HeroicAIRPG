@@ -48,13 +48,12 @@ export const WizardStepMethod: React.FC<WizardStepMethodProps> = ({
 
     const getCombatSkill = (traitName: string) => {
         const trait = libraryTraits.find(t => t.name === traitName);
-        if (trait?.effect) {
-            const e = trait.effect;
-            if (e.type === 'Damage') return `${e.damageDice} ${e.damageType || ''} Strike`;
-            if (e.type === 'Heal') return `${e.healDice || ''} Restore`;
-            if (e.type === 'Status') return `${e.status} Influence`;
-        }
-        return traitName;
+        const name = trait ? trait.name : traitName;
+        // Ensure "Multi" instead of "Multiple" and apply Title Case
+        return name.replace('Multiple', 'Multi')
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
     };
 
     return (
