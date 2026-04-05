@@ -78,12 +78,12 @@ const Header: React.FC<HeaderProps> = ({ currentTime, currentLocale, currentSubL
 
   return (
     <header className="h-[54px] bg-brand-bg flex-shrink-0 flex items-center justify-between px-4 border-b border-brand-primary/10">
-      <button onClick={onTimeClick} className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity group text-left">
-        <span className="text-brand-accent text-[6px] mb-0.5 animate-pulse">●</span>
-        <span className="text-body-sm text-brand-text-muted font-bold group-hover:text-brand-text transition-colors">{formattedHeaderString}</span>
+      <button onClick={onTimeClick} className="flex flex-1 min-w-0 items-center gap-2 pr-4 hover:opacity-80 transition-opacity group text-left">
+        <span className="flex-shrink-0 text-brand-accent text-[6px] mb-0.5 animate-pulse">●</span>
+        <span className="text-body-sm text-brand-text-muted font-bold group-hover:text-brand-text transition-colors truncate">{formattedHeaderString}</span>
       </button>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-shrink-0 items-center gap-3">
         <button onClick={onMenuClick} className="btn-icon p-1 text-brand-text-muted hover:text-brand-accent transition-colors relative">
           <Icon name="menu" className="w-[30px] h-[30px]" />
           {badgeCount !== undefined && badgeCount > 0 && (

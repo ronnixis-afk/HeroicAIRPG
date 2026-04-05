@@ -479,7 +479,7 @@ export const useTravel = (
                     current_site_name: locationName,
                     current_site_id: matchedPoi?.id || "",
                     currentSubLocation: "", // Clear sub-location on inter-zone travel
-                    currentLocale: (usedShip && travelMethod && /ship|boat|sail|vessel|scout|fly|airship/i.test(travelMethod)) ? usedShip.name : locationName
+                    currentLocale: locationName
                 }
             });
             const dispatchZoneUpdate = (zone: MapZone) => dispatch({ type: 'UPDATE_MAP_ZONE', payload: zone });
@@ -528,12 +528,6 @@ export const useTravel = (
             const isCardinal = directions.includes(destination.toLowerCase());
             let finalTargetLocale: string | undefined = isCardinal ? undefined : destination;
 
-            if (isShipTravel && shipCompanion) {
-                // Pre-boarding is already dispatched for the modal/narrative sync if needed, 
-                // but we'll include it in our Final Truth update below as well.
-                finalTargetLocale = shipCompanion.name;
-            }
-
             // --- THE ULTIMATE SYSTEM TRUTH: IMMEDIATE SYNC ---
             // Update all location and traveler metadata immediately before the AI response.
             const targetZone = gameData.mapZones?.find(z => z.coordinates === targetCoordinates);
@@ -549,7 +543,7 @@ export const useTravel = (
             const arrivalSiteName = matchedLandmark ? matchedLandmark.title : `Open Area of ${zoneTitle}`;
             
             // FORCE SYSTEM TRUTH: Location name is the POI if matched, otherwise 'Open Area'.
-            const systemSiteTruth = (isShipTravel && shipCompanion) ? shipCompanion.name : arrivalSiteName;
+            const systemSiteTruth = arrivalSiteName;
 
             dispatch({
                 type: 'AI_UPDATE',
