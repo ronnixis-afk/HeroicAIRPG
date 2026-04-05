@@ -1,7 +1,7 @@
 
 import { getAi } from './aiClient';
 import { AI_MODELS } from '../config/aiConfig';
-import { ChatMessage, PlayerCharacter, Companion, CombatActor, ImageGenerationStyle, GameData } from '../types';
+import { ChatMessage, PlayerCharacter, Companion, CombatActor, ImageGenerationStyle, GameData, calculateCombatStats } from '../types';
 
 // Helper to extract base64 and mimeType from data URI
 const parseBase64 = (dataUri: string | undefined): { data: string, mimeType: string } | null => {
@@ -121,10 +121,33 @@ export const generateSceneVisuals = async (
     const parts: any[] = [];
     let imageIndex = 1;
 
+    // Helper for weapon/stance info
+    const getWieldingDesc = (char: PlayerCharacter | Companion, inventory: any) => {
+        if (!inventory) return "";
+        try {
+            const stats = calculateCombatStats(char, inventory);
+            const mainHand = inventory.equipped.find((i: any) => i.equippedSlot === 'Main Hand');
+            const offHand = inventory.equipped.find((i: any) => i.equippedSlot === 'Off Hand');
+
+            let stance = "";
+            if (stats.isFlurryActive) stance = "Unarmed combatant";
+            else if (stats.isDualWielding) stance = "Dual wielding";
+            else if (stats.isTwoHanding) stance = "Using a two-handed weapon";
+            else if (stats.isDueling) stance = "Dueling stance";
+            else if (!mainHand && !offHand) stance = "Unarmed";
+
+            const weapons = [mainHand?.name, offHand?.name].filter(Boolean).join(' and ');
+            return `${stance}${weapons ? ` (${weapons})` : ''}`;
+        } catch (e) {
+            return "";
+        }
+    };
+
     // Player Reference
     const playerImg = parseBase64(player.imageUrl);
     if (playerImg) {
-        prompt += `\n[Ref Image ${imageIndex}: ${player.name}]. Dynamic action pose.`;
+        const playerWielding = getWieldingDesc(player, gameData.playerInventory);
+        prompt += `\n[Ref Image ${imageIndex}: ${player.name}]. ${playerWielding ? `${playerWielding}. ` : ''}Dynamic action pose.`;
         parts.push({ inlineData: { mimeType: playerImg.mimeType, data: playerImg.data } });
         imageIndex++;
     }
@@ -134,7 +157,8 @@ export const generateSceneVisuals = async (
     for (const c of activeCompanions) {
         const compImg = parseBase64(c.imageUrl);
         if (compImg) {
-            prompt += `\n[Ref Image ${imageIndex}: Ally ${c.name}].`;
+            const compWielding = getWieldingDesc(c, gameData.companionInventories?.[c.id]);
+            prompt += `\n[Ref Image ${imageIndex}: Ally ${c.name}]. ${compWielding ? `${compWielding}. ` : ''}`;
             parts.push({ inlineData: { mimeType: compImg.mimeType, data: compImg.data } });
             imageIndex++;
         }
