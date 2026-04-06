@@ -150,7 +150,7 @@ export const useCharacterActions = (
                 assets: []
             };
 
-            let scenario = null;
+            let scenario: any = null;
             const coords = '0-0';
 
             if (!isCompanion && !deferGameStart) {
@@ -161,10 +161,11 @@ export const useCharacterActions = (
                 const hookIndex = getFairSystemRandom(1, hooks.length, `starting_hook_${setting.toLowerCase()}`, 4);
                 const selectedHook = hooks[hookIndex - 1];
 
+                const startTimestamp = Date.now();
                 scenario = await generateStartingScenario(character, gameData, selectedHook);
 
                 const startingZone: MapZone = {
-                    id: `zone-start-${Date.now()}`,
+                    id: `zone-start-${startTimestamp}`,
                     coordinates: coords,
                     name: scenario.startingZone.name,
                     description: scenario.startingZone.description,
@@ -185,15 +186,18 @@ export const useCharacterActions = (
                     const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
                     if (k.isPopulationCenter) tags.push('population-center');
                     knowledgeUpdates.push({
-                        id: `know-start-${Date.now()}-${i}`,
+                        id: `know-start-${startTimestamp}-${i}`,
                         title: k.title,
                         content: k.content,
                         coordinates: coords,
-                        visited: k.isBackgroundRelated === true,
+                        visited: k.isBackgroundRelated === true || k.title === scenario.selectedStartPoi.title,
                         tags: tags,
                         isNew: true
                     } as LoreEntry);
                 });
+
+                // Store selected starting point info for the transition block
+                scenario.finalStartId = `know-start-${startTimestamp}-${scenario.selectedStartPoiIndex}`;
             }
 
             setCreationProgress({ isActive: true, step: "Synthesizing final reality...", progress: 85 });
@@ -239,37 +243,36 @@ export const useCharacterActions = (
                     currentLocale: scenario.startingZone.name
                 };
 
-                const openAreaTitle = scenario.startingZone.knowledge[0]?.title || scenario.startingZone.name;
-                const openAreaId = `know-start-${Date.now()}-0`;
-
-                // Extract NPCs directly from the scenario response (no Auditor AI call needed)
-                const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
-                    id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-                    name: n.name,
-                    description: n.description,
-                    race: n.race,
-                    gender: n.gender,
-                    relationship: 0,
-                    status: 'Alive',
-                    isNew: true,
-                    currentPOI: openAreaTitle,
-                    site_id: openAreaId
-                } as NPC));
+                const startPoiId = scenario.finalStartId;
+                const startPoiTitle = scenario.selectedStartPoi.title;
 
                 const restartPayload: Partial<GameData> = {
                     playerCharacter: character as PlayerCharacter,
                     playerInventory: processedInventory,
-                    story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: scenario.startingZone.name, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
+                    story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: startPoiTitle, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
                     messages: [
                         { id: `sys-restart-${Date.now()}`, sender: 'system', content: `Journey synchronized. Initial wealth: ${startingFunds.quantity} ${startingFunds.name}.`, type: 'neutral' },
-                        { id: `ai-intro-${Date.now()}`, sender: 'ai', content: scenario.introNarrative, location: scenario.startingZone.name, alignmentOptions: Array.isArray(scenario.alignmentOptions) ? scenario.alignmentOptions : undefined }
+                        { id: `ai-intro-${Date.now()}`, sender: 'ai', content: scenario.introNarrative, location: startPoiTitle, alignmentOptions: Array.isArray(scenario.alignmentOptions) ? scenario.alignmentOptions : undefined }
                     ],
                     objectives: [{ id: `obj-start-${Date.now()}`, title: scenario.startingObjective.title, content: scenario.startingObjective.content, status: 'active', isTracked: true, isNew: true, tags: ['quest', 'main'], updates: [] }],
                     knowledge: knowledgeUpdates,
                     mapZones: mapZonesUpdate,
                     playerCoordinates: coords,
-                    currentLocale: scenario.startingZone.name,
-                    npcs: introNpcs,
+                    currentLocale: startPoiTitle,
+                    current_site_id: startPoiId,
+                    current_site_name: startPoiTitle,
+                    npcs: (scenario.intro_npcs || []).map((n: any) => ({
+                        id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                        name: n.name,
+                        description: n.description,
+                        race: n.race,
+                        gender: n.gender,
+                        relationship: 0,
+                        status: 'Alive',
+                        isNew: true,
+                        currentPOI: startPoiTitle,
+                        site_id: startPoiId
+                    } as NPC)),
                     gmNotes: `Origin: ${scenario.introSummary}`
                 };
 
@@ -376,6 +379,7 @@ export const useCharacterActions = (
                 
             const selectedHook = hooks[finalHookIndex - 1];
 
+            const startTimestamp = Date.now();
             setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
             const scenario = await generateStartingScenario(finalPlayerCharacter, gameData, selectedHook, finalCompanions);
 
@@ -384,7 +388,7 @@ export const useCharacterActions = (
             const coords = '0-0';
 
             const startingZone: MapZone = {
-                id: `zone-start-${Date.now()}`,
+                id: `zone-start-${startTimestamp}`,
                 coordinates: coords,
                 name: scenario.startingZone.name,
                 description: scenario.startingZone.description,
@@ -408,11 +412,11 @@ export const useCharacterActions = (
                 const tags = k.isBackgroundRelated ? ['location', 'background'] : ['location'];
                 if (k.isPopulationCenter) tags.push('population-center');
                 knowledgeUpdates.push({
-                    id: `know-start-${Date.now()}-${i}`,
+                    id: `know-start-${startTimestamp}-${i}`,
                     title: k.title,
                     content: k.content,
                     coordinates: coords,
-                    visited: k.isBackgroundRelated === true,
+                    visited: k.isBackgroundRelated === true || k.title === scenario.selectedStartPoi.title,
                     tags: tags,
                     isNew: true
                 } as LoreEntry);
@@ -420,8 +424,8 @@ export const useCharacterActions = (
 
             setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 60 });
 
-            const openAreaTitle = scenario.startingZone.knowledge[0]?.title || scenario.startingZone.name;
-            const openAreaId = `know-start-${Date.now()}-0`;
+            const startPoiId = `know-start-${startTimestamp}-${scenario.selectedStartPoiIndex}`;
+            const startPoiTitle = scenario.selectedStartPoi.title;
 
             // Extract NPCs directly from the scenario response (no Auditor AI call needed)
             const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
@@ -433,8 +437,8 @@ export const useCharacterActions = (
                 relationship: 0,
                 status: 'Alive',
                 isNew: true,
-                currentPOI: openAreaTitle,
-                site_id: openAreaId
+                currentPOI: startPoiTitle,
+                site_id: startPoiId
             } as NPC));
 
             const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
@@ -458,16 +462,18 @@ export const useCharacterActions = (
                 playerInventory: gameData.playerInventory,
                 companions: finalCompanions,
                 companionInventories: gameData.companionInventories || {},
-                story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: scenario.startingZone.name, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
+                story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: startPoiTitle, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
                 messages: [
                     { id: `sys-restart-${Date.now()}`, sender: 'system', content: `Journey synchronized. Party assembled. Initial wealth: ${startingFundsQty} ${startingFundsName}.`, type: 'neutral' },
-                    { id: `ai-intro-${Date.now()}`, sender: 'ai', content: scenario.introNarrative, location: scenario.startingZone.name, alignmentOptions: Array.isArray(scenario.alignmentOptions) ? scenario.alignmentOptions : undefined }
+                    { id: `ai-intro-${Date.now()}`, sender: 'ai', content: scenario.introNarrative, location: startPoiTitle, alignmentOptions: Array.isArray(scenario.alignmentOptions) ? scenario.alignmentOptions : undefined }
                 ],
                 objectives: [{ id: `obj-start-${Date.now()}`, title: scenario.startingObjective.title, content: scenario.startingObjective.content, status: 'active', isTracked: true, isNew: true, tags: ['quest', 'main'], updates: [] }],
                 knowledge: knowledgeUpdates,
                 mapZones: mapZonesUpdate,
                 playerCoordinates: coords,
-                currentLocale: scenario.startingZone.name,
+                currentLocale: startPoiTitle,
+                current_site_id: startPoiId,
+                current_site_name: startPoiTitle,
                 npcs: [...(gameData.npcs || []), ...introNpcs],
                 gmNotes: `Origin: ${scenario.introSummary}`,
                 startingPartySnapshot: {

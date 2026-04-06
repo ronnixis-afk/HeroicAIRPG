@@ -2,7 +2,7 @@
 
 import { getAi, cleanJson } from './aiClient';
 import { AI_MODELS, THINKING_BUDGETS } from '../config/aiConfig';
-import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS, AbilityScoreName } from '../types';
+import { GameData, PlayerCharacter, Companion, Ability, SKILL_NAMES, SKILL_DEFINITIONS, AbilityScoreName, LoreEntry } from '../types';
 import { STORY_HOOKS } from '../constants/storyHooks';
 import { POI_MATRIX } from '../constants';
 import { getPOITheme } from '../utils/mapUtils';
@@ -15,9 +15,19 @@ import { ALIGNMENT_SYSTEM_PROMPT, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '.
 const getWorldContext = (gameData: GameData) => {
     const summary = gameData.worldSummary || "A mysterious world.";
     const setting = gameData.skillConfiguration || 'Fantasy';
-    const history = (gameData.world || []).slice(0, 10).map(l => `[${l.title}]: ${l.content}`).join('\n');
+    
+    // IDENTITY PROTECTION: Filter out session-specific memories or chronicle logs from historical context.
+    // This prevents the AI from picking up names of characters from previous sessions or current world events.
+    const loreFilter = (l: LoreEntry) => {
+        const forbiddenTags = ['chronicle', 'memory', 'npc', 'event', 'personal'];
+        return !l.tags?.some((tag: string) => forbiddenTags.includes(tag.toLowerCase()));
+    };
+
+    const generalLore = (gameData.world || []).filter(loreFilter);
+    const history = generalLore.slice(0, 10).map(l => `[${l.title}]: ${l.content}`).join('\n');
     const factions = (gameData.world || []).filter(l => l.tags?.includes('faction')).map(f => `- ${f.title}: ${f.content}`).join('\n');
     const races = (gameData.world || []).filter(l => l.tags?.includes('race')).map(r => `- ${r.title} (Naming Style: ${r.languageConfig || 'English'})`).join('\n');
+    
     const mapConfig = gameData.mapSettings ? `[Map Scale]: Each ${gameData.mapSettings.zoneLabel} on the grid represents ${gameData.mapSettings.gridDistance} ${gameData.mapSettings.gridUnit}.` : "";
     const tone = `[Narration Tone]: ${gameData.narrationTone || 'Standard'}. ${gameData.isMature ? '(Mature Content Allowed)' : ''}`;
     const alignment = ALIGNMENT_SYSTEM_PROMPT;
@@ -440,21 +450,135 @@ export const generatePersonalDiscoveries = async (character: any, gameData: Game
 };
 
 
-export const generateStartingScenario = async (character: any, gameData: GameData, selectedHook: string, companions: Companion[] = []) => {
+/**
+ * Generates the starting zone and its points of interest.
+ */
+const generateStartingPois = async (
+    character: any,
+    gameData: GameData,
+    popLevel: string,
+    rolledThemes: any[]
+): Promise<{ name: string, description: string, hostility: number, knowledge: any[] }> => {
+    const ai = getAi();
     const worldContext = getWorldContext(gameData);
+    
+    const prompt = `You are a World-Building Architect. Create the starting safe haven zone for ${character.name}.
+    
+[WORLD CONTEXT]
+${worldContext}
 
-    // Starting location bypass: Always begin in a Town for a balanced early-game experience
-    const popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Town';
-    const features: string[] = ['Tavern', 'Market'];
+[CHARACTER PROFILE]
+Name: ${character.name}
+Race: ${character.race}
+Profession: ${character.profession}
 
+[INSTRUCTIONS]
+1. startingZone: Create a safe haven or starting area with unique points of interest. Ensure these descriptions remain focused on location and legend, and do NOT attribute them to another hero name from history.
+   - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}.
+   - You MUST generate exactly 4 'knowledge' entries (POIs).
+     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the Town scale). This is a UNIQUE SETTLEMENT.
+     - Entries 2-4: Surrounding Landmarks based on these rolled themes:
+       1. ${rolledThemes[0].themeStr}
+       2. ${rolledThemes[1].themeStr}
+       3. ${rolledThemes[2].themeStr}
+     - One of these entries (2-4) MUST also be thematically tied to ${character.name}'s past, origin, or background as a ${character.race} ${character.profession} — set "isBackgroundRelated": true on that entry.
+   - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
+   - **IDENTITY_LOCK**: The main character of this story is **${character.name}**. Do NOT invent any other protagonist names or aliases.
+   
+Return JSON: { "name": "string", "description": "string", "hostility": number, "knowledge": [{ "title": "string", "content": "string", "isBackgroundRelated": boolean, "isPopulationCenter": boolean }] }`;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite-preview',
+        contents: prompt,
+        config: { responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 512 } }
+    });
+    
+    const data = JSON.parse(cleanJson(response.text || '{}'));
+    
+    // Safety: ensure the first entry is marked as population center if the AI missed the flag
+    if (data.knowledge && data.knowledge.length > 0) {
+        data.knowledge[0].isPopulationCenter = true;
+    }
+    
+    return data;
+};
+
+/**
+ * Crafts the 3-paragraph starting narrative based on the pre-generated POIs.
+ */
+const generateStartingNarrative = async (
+    character: any,
+    gameData: GameData,
+    selectedHook: string,
+    companions: Companion[],
+    startingZone: any,
+    startPoi: any
+): Promise<any> => {
+    const ai = getAi();
+    const worldContext = getWorldContext(gameData);
     const companionContext = companions.length > 0
         ? `\n[COMPANION PROFILES]\n${companions.map(c => `Name: ${c.name}, Race: ${c.race}, Level: ${c.level}, Profession: ${c.profession}, Background: ${c.background}`).join('\n')}`
         : '';
 
+    const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
+
+[WORLD CONTEXT]
+${worldContext}
+    
+[CHARACTER PROFILE]
+Name: ${character.name}
+Race: ${character.race}
+Profession: ${character.profession}
+Background: ${character.background}
+${companionContext}
+
+[STARTING LOCATION]
+Zone: ${startingZone.name} (${startingZone.description})
+Point of Interest (Current Arrival): ${startPoi.title} - ${startPoi.content}
+
+[MANDATORY STORY HOOK]
+You MUST base the catalyst of this adventure on the following scenario:
+"${selectedHook}"
+
+[INSTRUCTIONS]
+1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
+   - narrativeLens: A colourful blend of ${character.name}'s background based on their race (${character.race}) and traits (${character.background}). Use evocative, sensory language.
+   - narrativePath: Explain ${character.name}'s reason to survive and why they chose their life as a ${character.profession}. ${companions.length > 0 ? "IMPORTANT: Since one or more companions are accompanying the main character, you MUST weave the companions stories and their relationship with the main character into this narrative." : ""}
+   - narrativeCatalyst: Immersive implementation of the Hook provided above, set at the location: ${startPoi.title}. This should be the longest part.
+2. introSummary: A 2-sentence tactical plot brief.
+3. startingObjective: A primary quest to guide the player immediately.
+4. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label (1 Good, 1 Evil, 1 Lawful, 1 Chaotic).
+5. intro_npcs: Generate 1-2 NPCs present at ${startPoi.title}.
+
+[IDENTITY_LOCK]
+- The protagonist's name is **${character.name}**. You MUST refer to them only as 'You' or '${character.name}'.
+- NEVER invent new names, aliases, or titles for the protagonist.
+- NEVER confuse ${character.name} with NPCs from the World History.
+- If the World History mentions a "Hero" or "Legend", do NOT assume this is ${character.name} unless the [CHARACTER PROFILE] explicitly says so.
+- Generated NPCs (intro_npcs) MUST have names distinct from ${character.name} and companions.
+ 
+Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "alignmentOptions": [{ "label", "alignment" }], "intro_npcs": [{ "name": "Full Name", "description": "1-2 sentence physical description", "race": "From established races", "gender": "Male|Female|Non-binary" }] }`;
+
+    const response = await ai.models.generateContent({
+        model: AI_MODELS.DEFAULT,
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.SCENARIO }
+        }
+    });
+
+    return JSON.parse(cleanJson(response.text || '{}'));
+};
+
+export const generateStartingScenario = async (character: any, gameData: GameData, selectedHook: string, companions: Companion[] = []) => {
+    // Starting location bypass: Always begin in a Town for a balanced early-game experience
+    const popLevel: 'Barren' | 'Settlement' | 'Town' | 'City' | 'Capital' = 'Town';
+    const features: string[] = ['Tavern', 'Market'];
+
     const currentTheme = getPOITheme(gameData.worldSummary || "");
-
-
     const matrix = POI_MATRIX[currentTheme] || POI_MATRIX.fantasy;
+    
     // Roll 3 themes: all non-pop-center POIs get a system-rolled base type
     const rolledThemes = [1, 2, 3].map(() => {
         const r1 = Math.floor(Math.random() * 10);
@@ -466,59 +590,21 @@ export const generateStartingScenario = async (character: any, gameData: GameDat
         };
     });
 
-    const prompt = `You are a Master Storyteller. Synthesize an immersive opening for ${character.name}'s path.
-
-[WORLD CONTEXT]
-${worldContext}
-    
-[CHARACTER PROFILE]
-Name: ${character.name}
-Level: ${character.level}
-Race: ${character.race}
-Profession: ${character.profession}
-Background: ${character.background}
-${companionContext}
-
-[MANDATORY STORY HOOK]
-You MUST base the catalyst of this adventure on the following scenario:
-"${selectedHook}"
-
-[SYSTEM DIRECTIVE: POI THEMES]
-You MUST generate the starting zone's POIs following these specific rolled themes. Each theme should be the core concept of one POI. You are merely the descriptive engine; the core identity is determined by these system rolls.
-1. Theme: ${rolledThemes[0].themeStr}
-2. Theme: ${rolledThemes[1].themeStr}
-3. Theme: ${rolledThemes[2].themeStr}
-
-[INSTRUCTIONS]
-1. Weave a three-part narrative introduction. You MUST address the player directly in the second-person point of view (e.g. "You walk", "Your past"):
-   - narrativeLens: A colourful blend of ${character.name}'s background based on their race (${character.race}) and traits (${character.background}). Use evocative, sensory language.
-   - narrativePath: Explain ${character.name}'s reason to survive and why they chose their life as a ${character.profession}. ${companions.length > 0 ? "IMPORTANT: Since one or more companions are accompanying the main character, you MUST weave the companions stories and their relationship with the main character into this narrative." : ""}
-   - narrativeCatalyst: Immersive implementation of the specific Hook provided above. This should be the longest part.
-2. introSummary: A 2-sentence tactical plot brief.
-3. startingObjective: A primary quest to guide the player immediately.
-4. startingZone: Create a safe haven or starting area with unique points of interest.
-   - Population Scale: ${popLevel}. This zone has a population density equivalent to a ${popLevel}. Consider this scale when generating the description.
-   - You MUST generate exactly 4 'knowledge' entries (POIs).
-     - Entry 1: [MANDATORY] Thematic Population Center landmark (matching the Town scale). This is a UNIQUE SETTLEMENT and does NOT use a system-rolled theme.
-     - Entries 2-4: The 3 surrounding POIs. Each MUST correspond to its numbered theme provided above (Themes 1, 2, and 3). One of these entries MUST also be thematically tied to ${character.name}'s past, origin, or background as a ${character.race} ${character.profession} — set "isBackgroundRelated": true on that entry.
-   - **UNIQUENESS RULE**: The 'title' of each entry in 'knowledge' MUST NOT be the same as 'startingZone.name'.
-5. alignmentOptions: Add exactly 4 logical suggestions for the next action based on the intro narrative. Each button represents an alignment action. Max 5 words per label.
-   - You MUST include exactly one 'Good', one 'Evil', one 'Lawful', and one 'Chaotic' option.
- 
-Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSummary", "startingObjective": { "title", "content" }, "startingZone": { "name", "description", "hostility", "knowledge": [{ "title", "content", "isBackgroundRelated" }] }, "alignmentOptions": [{ "label", "alignment" }], "intro_npcs": [{ "name": "Full Name", "description": "1-2 sentence physical description", "race": "From established races", "gender": "Male|Female|Non-binary" }] }`;
-
     try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: AI_MODELS.DEFAULT,
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.SCENARIO }
-            }
-        });
+        // STEP 1: Generate POIs first
+        const poiData = await generateStartingPois(character, gameData, popLevel, rolledThemes);
+        
+        // STEP 2: Assign the party to the Population Center (with fallback to Open Area)
+        // Note: generateStartingPois guarantees Entry 0 is the population center
+        const startPoi = poiData.knowledge.find(k => k.isPopulationCenter) || poiData.knowledge[0];
+        
+        // STEP 3: Craft the 3-paragraph starting narrative
+        const narrativeData = await generateStartingNarrative(character, gameData, selectedHook, companions, poiData, startPoi);
 
-        const data = JSON.parse(cleanJson(response.text || '{}'));
+        const data = {
+            ...narrativeData,
+            startingZone: poiData
+        };
 
         // Deterministic assembly of the 3 paragraphs to satisfy the 3-paragraph requirement 100% of the time.
         if (data.narrativeLens && data.narrativePath && data.narrativeCatalyst) {
@@ -526,16 +612,13 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
             delete data.narrativeLens;
             delete data.narrativePath;
             delete data.narrativeCatalyst;
-        } else if (data.introNarrative && !data.introNarrative.includes('\n\n')) {
-            // Fallback for unexpected model output format
-            console.warn("AI failed to provide structured narrative parts; falling back to unstructured narrative.");
         }
 
         if (data.startingZone) {
             const systemOpenArea = {
                 title: "Open Area",
                 content: `Open area of ${data.startingZone.name}. ${data.startingZone.description || "The beginning of your journey."}`,
-                isBackgroundRelated: true
+                isBackgroundRelated: false
             };
             
             // Filter out any AI-generated "Open Area"
@@ -550,13 +633,15 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
                 return { ...p, isBackgroundRelated: !!p.isBackgroundRelated };
             });
 
-            if (poisWithTypes.length > 0) {
-                 poisWithTypes[0].isPopulationCenter = true;
-            }
-
+            // Ensure we keep the starting information
             data.startingZone.knowledge = [systemOpenArea, ...poisWithTypes];
             data.startingZone.populationLevel = popLevel;
             data.startingZone.zoneFeatures = features;
+            
+            // Identify the actual starting entries for use in state synchronization
+            const finalStartPoi = data.startingZone.knowledge.find((k: any) => k.title === startPoi.title) || data.startingZone.knowledge[0];
+            data.selectedStartPoi = finalStartPoi;
+            data.selectedStartPoiIndex = data.startingZone.knowledge.indexOf(finalStartPoi);
         }
 
         return data;
@@ -577,9 +662,12 @@ Return JSON: { "narrativeLens", "narrativePath", "narrativeCatalyst", "introSumm
                 populationLevel: popLevel,
                 zoneFeatures: features,
                 knowledge: [
-                    { title: "The Local Inn", content: "A place to gather rumors and rest.", isBackgroundRelated: false }
+                    { title: "Open Area", content: "The arrival point of the journey.", isBackgroundRelated: false },
+                    { title: "Local Population Center", content: "A place to gather rumors and rest.", isBackgroundRelated: false, isPopulationCenter: true }
                 ]
-            }
+            },
+            selectedStartPoi: { title: "Local Population Center", content: "A place to gather rumors and rest.", isBackgroundRelated: false, isPopulationCenter: true },
+            selectedStartPoiIndex: 1
         };
     }
 };
