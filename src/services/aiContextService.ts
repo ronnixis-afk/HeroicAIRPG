@@ -479,10 +479,12 @@ The following NPCs are in your immediate vicinity or are active party members.
 
 **FOLLOW STATUS RULE (CRITICAL)**:
 For each NPC in the resolution block, you MUST determine if they are currently traveling with the player.
-1. If they are actively accompanying the party to new locations, set \`isFollowing: true\`.
+1. TEMPORARY ACCOMPANIMENT: If they are actively accompanying the party to new locations within a POI, set \`isFollowing: true\`. 
+   - [IMPORTANT]: Marking an NPC as \`isFollowing\` does NOT add them to the permanent party (companions). It only indicates they are physically moving with the party for the immediate scene.
 2. REGISTRY LIMIT: Registry NPCs (non-companions) can ONLY follow the party within their current Point of Interest (locale changes). If the party travels to a new Zone or POI, registry NPCs will stop following and stay behind.
-3. If they are staying behind, parting ways, or guarding a specific location, set \`isFollowing: false\`.
-4. If their [STATUS: Dead], they CANNOT follow. You MUST set \`isFollowing: false\`.
+3. AD-HOC RECRUITMENT: You are FORBIDDEN from automatically adding NPCs to the player's permanent party. Recruitment is a manual user-led process.
+4. If they are staying behind, parting ways, or guarding a specific location, set \`isFollowing: false\`.
+5. If their [STATUS: Dead], they CANNOT follow. You MUST set \`isFollowing: false\`.
 
 **MEMORY RULE**: Use the provided [MEMORIES] to inform NPC reactions. These are a composite of recent interactions and specific past events relevant to the current situation.
 
