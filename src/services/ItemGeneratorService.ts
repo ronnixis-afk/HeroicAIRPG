@@ -773,7 +773,8 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     Initial Tags: ${(item.tags || []).join(', ') || 'None'}
     
     **WORLD LORE CONTEXT (THEMATIC SKINNING)**:
-    ${gameData.worldSummary || 'Standard Fantasy Setting'}
+    [Game Setting]: ${gameData.skillConfiguration || 'Fantasy'}
+    ${gameData.worldSummary || 'The world setting above dominates the theme.'}
 
     **CONTEXT**:
     Player Level: ${level}

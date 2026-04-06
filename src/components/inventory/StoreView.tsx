@@ -53,9 +53,9 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
 
         <div className="flex-grow min-w-0 mr-4 pl-2">
             <div className="flex items-center gap-2 mb-1">
-                <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
+                <span className={`text-body-base font-bold leading-tight ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
             </div>
-            <p className="text-body-sm text-brand-text-muted line-clamp-1 italic mb-2">{item.description}</p>
+            <p className="text-body-sm text-brand-text-muted italic leading-tight mb-2">{item.description}</p>
 
             {/* Mechanical Detail Section */}
             <div className="flex flex-wrap gap-1.5">
@@ -117,7 +117,7 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
 
             <div className="flex-grow min-w-0 mr-4 pl-2">
                 <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-body-base font-bold truncate ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
+                    <span className={`text-body-base font-bold leading-tight ${getItemRarityColor(item.rarity)}`}>{item.name}</span>
                     {item.quantity && item.quantity > 1 && <span className="text-body-sm font-bold text-brand-text-muted">x{item.quantity}</span>}
                     {item._sourceList && item._sourceList !== 'Carried' && (
                         <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30">
@@ -125,7 +125,7 @@ const SellItemCard: React.FC<{ item: Item & { _sourceList?: string }, onSell: (i
                         </span>
                     )}
                 </div>
-                <p className="text-body-sm text-brand-text-muted line-clamp-1 italic">{item.description}</p>
+                <p className="text-body-sm text-brand-text-muted leading-tight italic">{item.description}</p>
             </div>
 
             <button

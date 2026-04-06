@@ -74,8 +74,8 @@ export const InventoryGridItem: React.FC<InventoryGridItemProps> = ({
             )}
 
             {/* Label */}
-            <div className="w-full px-1 overflow-hidden pointer-events-none text-center relative z-10">
-                <p className={`text-body-tiny font-bold leading-tight line-clamp-3 overflow-hidden text-ellipsis transition-opacity ${rarityColorClass}`}>
+            <div className="w-full px-1 pointer-events-none text-center relative z-10">
+                <p className={`text-body-tiny font-bold leading-tight transition-opacity ${rarityColorClass}`}>
                     {item.name}
                 </p>
             </div>

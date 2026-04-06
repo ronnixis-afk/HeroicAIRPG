@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 import Modal from '../Modal';
 import { type NPC, type CombatActorSize, type ArchetypeName, ARCHETYPE_NAMES, type NPCMemory } from '../../types';
@@ -90,7 +89,7 @@ const NPCViewContent: React.FC<{
     return (
         <div className="space-y-8 animate-fade-in pb-4">
             <div className="space-y-1">
-                <h3 className="text-brand-text mb-0 truncate">{toTitleCase(npc.name)}</h3>
+                <h3 className="text-brand-text mb-0 leading-tight">{toTitleCase(npc.name)}</h3>
                 <div className="flex items-center gap-2">
                     <span className="text-[10px] font-mono font-bold text-brand-accent/60 bg-brand-accent/5 px-2 py-0.5 rounded border border-brand-accent/10">
                         NPC ID: {npc.id.replace('npc-', '')}

@@ -177,7 +177,7 @@ const CombatStatusDisplay: React.FC = () => {
                                             className="flex-grow px-3 py-1 overflow-hidden text-left hover:bg-brand-bg/40 rounded-lg transition-all group/row border border-transparent hover:border-brand-accent/20"
                                         >
                                             <div className="flex items-center gap-2">
-                                                <div className={`font-bold text-body-base truncate ${getActorNameColor(actor)} group-hover/row:text-brand-accent transition-colors`}>{actor.name}</div>
+                                                <div className={`font-bold text-body-base leading-tight ${getActorNameColor(actor)} group-hover/row:text-brand-accent transition-colors`}>{actor.name}</div>
                                                 <Icon name="character" className="w-3 h-3 text-brand-accent opacity-0 group-hover/row:opacity-100 transition-all -translate-x-1 group-hover/row:translate-x-0" />
                                                 {(actor as any).rank === 'boss' && <span className="text-[10px] bg-brand-danger/20 text-brand-danger px-1.5 py-0.5 rounded-lg font-bold border border-brand-danger/20">Boss</span>}
                                             </div>
@@ -208,7 +208,7 @@ const CombatStatusDisplay: React.FC = () => {
                                     ) : (
                                         <div className="flex-grow px-3 py-1 overflow-hidden">
                                             <div className="flex items-center gap-2">
-                                                <div className={`font-bold text-body-base truncate ${getActorNameColor(actor)}`}>{actor.name}</div>
+                                                <div className={`font-bold text-body-base leading-tight ${getActorNameColor(actor)}`}>{actor.name}</div>
                                                 {(actor as any).rank === 'boss' && <span className="text-[10px] bg-brand-danger/20 text-brand-danger px-1.5 py-0.5 rounded-lg font-bold border border-brand-danger/20">Boss</span>}
                                             </div>
                                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm text-brand-text-muted mt-1">

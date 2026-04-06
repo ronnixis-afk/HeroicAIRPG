@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NPC } from '../../types';
 import { Icon } from '../Icon';
@@ -35,7 +34,7 @@ const NPCCard: React.FC<NPCCardProps> = ({ npc, onDelete, onClick }) => {
             {/* Text Content */}
             <div className="flex-grow flex flex-col justify-center min-w-0 h-full py-3 relative z-10">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h5 className={`mb-0 truncate transition-colors ${isDead ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
+                    <h5 className={`mb-0 leading-tight transition-colors ${isDead ? 'text-brand-text-muted' : 'text-brand-text group-hover:text-brand-accent'}`}>
                         {toTitleCase(npc.name)}
                     </h5>
 

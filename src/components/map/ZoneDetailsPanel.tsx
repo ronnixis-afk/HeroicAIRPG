@@ -271,10 +271,10 @@ const POIListItem: React.FC<{
                                     />
                                     <label 
                                         htmlFor={`poi-image-upload-${entry.id}`}
-                                        className="flex-1 bg-brand-primary h-9 px-4 rounded-xl border border-brand-surface flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors overflow-hidden"
+                                        className="flex-1 bg-brand-primary h-9 px-4 rounded-xl border border-brand-surface flex items-center gap-2 cursor-pointer hover:border-brand-accent transition-colors"
                                     >
                                         <Icon name="upload" className="w-3 h-3 text-brand-accent" />
-                                        <span className="text-[11px] text-brand-text-muted truncate">
+                                        <span className="text-[11px] text-brand-text-muted">
                                             {editImage.startsWith('data:image') ? 'Custom Image Loaded' : 'Click to Upload Image'}
                                         </span>
                                     </label>
@@ -344,7 +344,7 @@ const POIListItem: React.FC<{
                                             t !== 'population-center' && 
                                             !possibleLevels.includes(t.toLowerCase())
                                         ).map(tag => (
-                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30 whitespace-nowrap">
+                                            <span key={tag} className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2.5 py-1 rounded-lg border border-brand-text-muted/30">
                                                 {toTitleCase(tag.replace(/-/g, ' '))}
                                             </span>
                                         ));
@@ -415,7 +415,7 @@ const POIListItem: React.FC<{
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className="text-[9px] font-bold text-brand-text-muted truncate max-w-[50px] group-hover/avatar:text-brand-accent transition-colors">
+                                                    <span className="text-[9px] font-bold text-brand-text-muted max-w-[50px] group-hover/avatar:text-brand-accent transition-colors leading-tight text-center">
                                                         {npc.name.split(' ')[0]}
                                                     </span>
                                                 </div>
@@ -641,7 +641,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                 />
                                             </div>
                                         )}
-                                        <h3 className="mb-2 truncate">{toTitleCase(name || 'Uncharted Territory')}</h3>
+                                        <h3 className="mb-2 leading-tight">{toTitleCase(name || 'Uncharted Territory')}</h3>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <span className="text-[10px] font-mono font-bold text-brand-accent bg-brand-accent/10 px-2.5 py-1 rounded-lg border border-brand-accent/20">
                                                 {coordinates}
@@ -650,7 +650,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                 {toTitleCase(hInfo.label)}
                                             </span>
                                             {keywords.map((kw, i) => (
-                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getPropertyColor(kw)} whitespace-nowrap`}>
+                                                <span key={i} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${getPropertyColor(kw)}`}>
                                                     {toTitleCase(kw.split(':')[0].trim())}
                                                 </span>
                                             ))}

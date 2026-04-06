@@ -14,13 +14,14 @@ import { ALIGNMENT_SYSTEM_PROMPT, GOOD_EVIL_ALIASES, LAW_CHAOS_ALIASES } from '.
  */
 const getWorldContext = (gameData: GameData) => {
     const summary = gameData.worldSummary || "A mysterious world.";
+    const setting = gameData.skillConfiguration || 'Fantasy';
     const history = (gameData.world || []).slice(0, 10).map(l => `[${l.title}]: ${l.content}`).join('\n');
     const factions = (gameData.world || []).filter(l => l.tags?.includes('faction')).map(f => `- ${f.title}: ${f.content}`).join('\n');
     const races = (gameData.world || []).filter(l => l.tags?.includes('race')).map(r => `- ${r.title} (Naming Style: ${r.languageConfig || 'English'})`).join('\n');
     const mapConfig = gameData.mapSettings ? `[Map Scale]: Each ${gameData.mapSettings.zoneLabel} on the grid represents ${gameData.mapSettings.gridDistance} ${gameData.mapSettings.gridUnit}.` : "";
     const tone = `[Narration Tone]: ${gameData.narrationTone || 'Standard'}. ${gameData.isMature ? '(Mature Content Allowed)' : ''}`;
     const alignment = ALIGNMENT_SYSTEM_PROMPT;
-    return `[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[Established Races & Naming Styles]\n${races}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}\n\n${alignment}`;
+    return `[Game Setting]\n${setting}\n\n[World Summary]\n${summary}\n\n[World History]\n${history}\n\n[Major Factions]\n${factions}\n\n[Established Races & Naming Styles]\n${races}\n\n[World Map]\n${mapConfig}\n\n[Tone]\n${tone}\n\n${alignment}`;
 };
 
 

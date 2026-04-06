@@ -139,7 +139,7 @@ const HeaderMenuPanel: React.FC<HeaderMenuPanelProps> = ({
           <div className="px-6 py-4 border-b border-brand-primary/10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <Icon name="heroicAction" className="w-[1.2rem] h-[1.2rem] text-brand-accent shrink-0 drop-shadow-[0_0_8px_rgba(62,207,142,0.3)]" />
-              <h3 className="text-brand-text line-clamp-1 overflow-hidden m-0 text-xl font-bold font-merriweather">
+              <h3 className="text-brand-text m-0 text-xl font-bold font-merriweather leading-tight">
                 {formattedWorldName}
               </h3>
             </div>

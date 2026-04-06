@@ -87,7 +87,7 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
                                 {formatModifier(totalBonus)}
                             </span>
                              <div className="flex flex-col min-w-0 flex-grow">
-                                 <span className="text-body-sm font-semibold truncate group-hover:text-brand-text transition-colors">{skill}</span>
+                                 <span className="text-body-sm font-semibold leading-tight group-hover:text-brand-text transition-colors">{skill}</span>
                              </div>
                              <span className="text-body-sm font-bold text-brand-text-muted ml-3 opacity-40 capitalize">{ability.slice(0, 3)}</span>
                          </div>

@@ -483,7 +483,7 @@ const ChatView: React.FC = () => {
                 >
                     <div className="bg-brand-accent/90 backdrop-blur-md text-black px-4 py-2 rounded-full shadow-2xl border border-white/20 flex items-center gap-2 hover:scale-105 transition-transform active:scale-95 group">
                         <Icon name="sparkles" className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                        <span className="text-xs font-bold whitespace-nowrap">Your Party Has Unspent Trait Points</span>
+                        <span className="text-xs font-bold leading-tight text-center">Your Party Has Unspent Trait Points</span>
                     </div>
                 </div>
             )}

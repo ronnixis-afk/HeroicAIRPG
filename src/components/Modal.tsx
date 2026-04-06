@@ -53,7 +53,7 @@ const Modal: React.FC<ModalProps> = ({
         {/* Fixed Header */}
         {!hideHeader && (
           <div className="flex justify-between items-center p-6 pb-2 flex-shrink-0 relative z-10">
-            <h3 id="modal-title" className="text-brand-text truncate pr-4 mb-0">
+            <h3 id="modal-title" className="text-brand-text pr-10 mb-0 leading-tight">
               {title}
             </h3>
             <div className="flex items-center gap-2">

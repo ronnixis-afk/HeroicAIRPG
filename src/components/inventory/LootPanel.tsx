@@ -8,11 +8,11 @@ import { toTitleCase } from '../../utils/npcUtils';
 
 const LootItemDisplay: React.FC<{ item: Item }> = ({ item }) => (
     <div className="bg-brand-primary/20 p-4 rounded-2xl flex justify-between items-center border border-brand-surface shadow-inner group hover:bg-brand-primary/40 transition-all">
-        <div className="flex flex-col gap-1 overflow-hidden pr-3">
+        <div className="flex flex-col gap-1 pr-3">
             <div className="flex items-center gap-2">
-                <p className="text-body-base font-bold text-brand-text truncate">{toTitleCase(item.getDisplayName())}</p>
+                <p className="text-body-base font-bold text-brand-text leading-tight">{toTitleCase(item.getDisplayName())}</p>
             </div>
-            <p className="text-body-sm text-brand-text-muted italic line-clamp-1 opacity-70 group-hover:opacity-100 transition-opacity whitespace-normal">
+            <p className="text-body-sm text-brand-text-muted italic opacity-70 group-hover:opacity-100 transition-opacity whitespace-normal leading-tight">
                 {item.description}
             </p>
         </div>

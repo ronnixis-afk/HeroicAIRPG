@@ -304,6 +304,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
     });
 
     const input = `Generate specific POIs for the zone "${zone.name}" (${zone.description}).
+    [Game Setting]: ${currentTheme}
     World: ${worldSummary}
     ${hostilityDesc}
     ${keywordsDesc}
@@ -380,6 +381,7 @@ export const generatePoisForZone = async (zone: MapZone, worldSummary: string, m
 export const generatePoiDetail = async (localeName: string, zoneName: string, zoneDesc: string, worldSummary: string): Promise<string> => {
     const ai = getAi();
     const input = `Describe the specific locale "${localeName}" inside the zone "${zoneName}" (${zoneDesc}).
+    [Game Setting]: ${getPOITheme(worldSummary)}
     World context: ${worldSummary}
     [STRICT CONSTRAINTS]
     - Write an atmospheric description (MAX 30 WORDS).`;
@@ -424,6 +426,7 @@ export const generateZoneDetails = async (
 
     const ai = getAi();
     const input = `Generate details for a new map zone at coordinates ${coords}.
+    [Game Setting]: ${currentTheme}
     Name hint: ${nameHint}
     World context: ${worldSummary || ''}
     Additional context: ${additionalContext || ''}

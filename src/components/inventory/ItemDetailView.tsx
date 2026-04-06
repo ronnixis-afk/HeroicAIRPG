@@ -598,7 +598,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                             )}
                                                         </div>
                                                         <div className="flex flex-col min-w-0">
-                                                            <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">Self ({toTitleCase(gameData?.playerCharacter.name)})</span>
+                                                            <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight">Self ({toTitleCase(gameData?.playerCharacter.name)})</span>
                                                         </div>
                                                     </button>
 
@@ -617,7 +617,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                                 )}
                                                             </div>
                                                             <div className="flex flex-col min-w-0">
-                                                                <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(companion.name)}</span>
+                                                                <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight">{toTitleCase(companion.name)}</span>
                                                                 <span className="text-[10px] text-brand-text-muted font-medium capitalize">
                                                                     {companion.relationship >= 50 ? 'Loyal' : (companion.relationship >= 10 ? 'Friendly' : 'Companion')}
                                                                 </span>
@@ -641,7 +641,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                                     )}
                                                                 </div>
                                                                 <div className="flex flex-col min-w-0">
-                                                                    <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">{toTitleCase(npc.name)}</span>
+                                                                    <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight">{toTitleCase(npc.name)}</span>
                                                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg w-fit mt-0.5 ${npc.alignment === 'enemy' ? 'text-red-400 bg-red-400/10' : (npc.alignment === 'ally' ? 'text-emerald-400 bg-emerald-400/10' : 'text-yellow-400 bg-yellow-400/10')}`}>
                                                                         {toTitleCase(npc.alignment || 'Neutral')}
                                                                     </span>
@@ -690,7 +690,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
-                                                        <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">To {gameData.playerCharacter.name}</span>
+                                                        <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight">To {gameData.playerCharacter.name}</span>
                                                         <span className="text-[10px] text-brand-text-muted font-medium">Lead Character</span>
                                                     </div>
                                                 </button>
@@ -707,7 +707,7 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                                         )}
                                                     </div>
                                                     <div className="flex flex-col min-w-0">
-                                                        <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate">To {companion.name}</span>
+                                                        <span className="text-body-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight">To {companion.name}</span>
                                                         <span className="text-[10px] text-brand-text-muted font-medium capitalize">
                                                             {companion.isShip ? 'Vessel' : (companion.isMount ? 'Mount' : 'Companion')}
                                                         </span>

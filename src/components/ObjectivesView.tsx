@@ -230,7 +230,7 @@ const ObjectivesView: React.FC = () => {
                     ? 'w-2.5 h-2.5 bg-brand-accent shadow-[0_0_8px_rgba(62,207,142,0.5)]' 
                     : 'w-1.5 h-1.5 bg-brand-text'
             }`} />
-            <h5 className={`text-body-lg font-bold truncate mb-0 ${entry.status === 'completed' ? 'line-through opacity-40' : ''}`}>
+            <h5 className={`text-body-lg font-bold leading-tight mb-0 ${entry.status === 'completed' ? 'line-through opacity-40' : ''}`}>
                 {entry.title}
             </h5>
             {entry.isNew && <NewTag />}

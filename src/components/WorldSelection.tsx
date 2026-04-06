@@ -907,7 +907,7 @@ const WorldSelection: React.FC<WorldSelectionProps> = ({ onWorldSelected }) => {
                                 </div>
 
                                 <div className="mt-auto p-4 z-10 w-full flex flex-col relative pointer-events-none">
-                                    <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors truncate mb-1 shadow-black drop-shadow-md"> {realm.name}</h5>
+                                    <h5 className="text-sm font-bold text-brand-text group-hover:text-brand-accent transition-colors leading-tight mb-1 shadow-black drop-shadow-md"> {realm.name}</h5>
                                     
                                     <div className="flex flex-col mb-3 shadow-black drop-shadow-md">
                                         <p className="text-[9px] text-brand-accent/70 font-bold inter mb-0.5">

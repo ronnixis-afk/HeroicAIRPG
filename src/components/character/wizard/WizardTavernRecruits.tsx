@@ -60,7 +60,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="min-w-0 flex-1">
-                                        <h4 className="text-base font-bold text-brand-text group-hover:text-brand-accent truncate">{recruit.name}</h4>
+                                        <h4 className="text-base font-bold text-brand-text group-hover:text-brand-accent leading-tight">{recruit.name}</h4>
                                         <p className="text-[10px] font-bold text-brand-text-muted opacity-60 capitalize">{recruit.gender} {recruit.race}</p>
                                     </div>
                                     <div className="bg-brand-accent/10 border border-brand-accent/20 px-2 py-0.5 rounded-lg text-[10px] font-bold text-brand-accent">Ally</div>

@@ -66,7 +66,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
             <div className="flex justify-between items-start mb-2 relative z-10">
                 <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center flex-wrap gap-2">
-                        <h5 className={`text-body-lg font-bold truncate leading-tight transition-colors mb-0 ${isRefining ? 'text-brand-text-muted bg-brand-primary/30 animate-pulse rounded px-2 h-5 w-3/4' : 'text-brand-text group-hover:text-brand-accent'}`}>
+                        <h5 className={`text-body-lg font-bold leading-tight transition-colors mb-0 ${isRefining ? 'text-brand-text-muted bg-brand-primary/30 animate-pulse rounded px-2 h-5 w-3/4' : 'text-brand-text group-hover:text-brand-accent'}`}>
                             {isRefining ? '' : (ability.name || 'Unnamed Ability')}
                         </h5>
                         {ability.isLevelUpTrait && !isRefining && (
