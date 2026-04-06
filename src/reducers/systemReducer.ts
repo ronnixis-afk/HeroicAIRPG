@@ -822,7 +822,7 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                                     timestamp: newState.currentTime || new Date().toISOString(),
                                     embedding: memData.embedding // Inject the vector created by the Background Indexer!
                                 }
-                            ]
+                            ].slice(-20) // Cap at 20 entries per NPC
                         };
                     }
                 });

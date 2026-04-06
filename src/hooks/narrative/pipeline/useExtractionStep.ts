@@ -273,14 +273,18 @@ export const useExtractionStep = (
         // 4.5 NPC Memories: If we have turning summary, consider it as a broad memory for nearby NPCs
         if (!gameData.combatState?.isActive && aiResponse.turn_summary) {
             const resolvedLocale = finalUpdates.currentLocale || gameData.currentLocale || "";
+            const npcMemoryUpdates: { npcId: string, memory: string }[] = [];
+            
             gameData.npcs?.forEach(n => {
                 const isAtLocale = isLocaleMatch(n.currentPOI || "", resolvedLocale);
                 if (isAtLocale && n.status !== 'Dead') {
-                    const newMemory: NPCMemory = { timestamp: gameData.currentTime, content: aiResponse.turn_summary! };
-                    const updatedMemories = [...(n.memories || []), newMemory].slice(-20);
-                    dispatch({ type: 'UPDATE_NPC', payload: { ...n, memories: updatedMemories } });
+                    npcMemoryUpdates.push({ npcId: n.id, memory: aiResponse.turn_summary! });
                 }
             });
+
+            if (npcMemoryUpdates.length > 0) {
+                finalUpdates.npcMemories = npcMemoryUpdates;
+            }
         }
 
         // 5. Resolve Auditor Result Metadata
@@ -326,7 +330,17 @@ export const useExtractionStep = (
             }];
 
             // B. POI (Location) Memory entry: Concise memory for the Zone Details Panel
-            const poiId = forcedSiteId || forcedLocale || finalUpdates.location_update?.site_id || finalUpdates.location_update?.site_name || finalUpdates.currentLocale || gameData.current_site_id || gameData.current_site_name || gameData.currentLocale || '';
+            // RESOLUTION ORDER: Forced POI -> Narrative POI -> Physical Anchor -> Current State Locale
+            const poiId = forcedSiteId || 
+                          forcedLocale || 
+                          finalUpdates.location_update?.site_id || 
+                          finalUpdates.location_update?.site_name || 
+                          finalUpdates.currentLocale || 
+                          gameData.current_site_id || 
+                          gameData.current_site_name || 
+                          gameData.currentLocale || 
+                          '';
+            
             if (poiId) {
                 finalUpdates.poiMemories = [{ poiId, memory: aiResponse.turn_summary }];
             }
