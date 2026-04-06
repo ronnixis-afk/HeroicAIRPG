@@ -47,6 +47,18 @@ export const getEnemyXP = (cr: number): number => {
     return cr * 500; 
 };
 
+/**
+ * Calculates a relative weight for an actor to determine its importance to the encounter balance.
+ */
+export const getCombatWeight = (cr: number, rank: string): number => {
+    const r = rank.toLowerCase().trim();
+    let multiplier = 1;
+    if (r === 'elite') multiplier = 2;
+    if (r === 'boss' || r === 'tough') multiplier = 4;
+    return Math.max(0.5, cr) * multiplier;
+};
+
+
 export type DifficultyPreset = 'Weak' | 'Normal' | 'Elite' | 'Boss';
 
 export const DEFAULT_SIZE_MODIFIERS = BASE_SIZE_MODIFIERS;

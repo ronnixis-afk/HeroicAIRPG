@@ -3,10 +3,10 @@
 import React, { useCallback } from 'react';
 import { GameData, GameAction, CombatActorSize, ActorSuggestion, ChatMessage, CombatActor, ActorAlignment } from '../../types';
 import { useUI, CombatTriggerSource } from '../../context/UIContext';
-import { generateEnemyFromTemplate, DEFAULT_TEMPLATES, DEFAULT_SIZE_MODIFIERS, DEFAULT_ARCHETYPE_DEFINITIONS, getDifficultyParams, DEFAULT_AFFINITIES, recalculateCombatActorStats } from '../../utils/mechanics';
+import { generateEnemyFromTemplate, DEFAULT_TEMPLATES, DEFAULT_SIZE_MODIFIERS, DEFAULT_ARCHETYPE_DEFINITIONS, getDifficultyParams, DEFAULT_AFFINITIES, recalculateCombatActorStats, getCombatWeight } from '../../utils/mechanics';
 import { generateCombatStartNarrative, generateCombatEncounterSuggestions, resolveCombatAlignments, reassessCombatEnemies } from '../../services/geminiService';
 import { enrichCombatantDetails } from '../../services/aiCombatService';
-import { combatActorToNPC } from '../../utils/npcUtils';
+import { combatActorToNPC, isNameSimilar } from '../../utils/npcUtils';
 
 type UIActions = ReturnType<typeof useUI>;
 
@@ -52,21 +52,44 @@ export const useCombatGeneration = (
         const stagedResults: { actor: CombatActor, npc: any }[] = [];
 
         // STRICT NAME PROTECTION: Pre-calculate names to avoid
-        const protectedNames = new Set([
+        const protectedNamesList = [
             (gameData?.playerCharacter.name || '').toLowerCase().trim(),
             ...(gameData?.companions || []).map(c => (c.name || '').toLowerCase().trim())
-        ]);
+        ];
+        const protectedNamesSet = new Set(protectedNamesList);
+
+        // ENCOUNTER BALANCE - Pre-calculate total weights to determine 'criticality'
+        const totalWeight = suggestions.reduce((sum, s) => {
+            const params = getDifficultyParams(s.difficulty || 'Normal', playerLevel);
+            return sum + getCombatWeight(params.cr, params.rank);
+        }, 0);
 
         suggestions.forEach(suggestion => {
             let resolvedId = suggestion.id || (suggestion.name?.toLowerCase().includes('npc-') ? suggestion.name : null);
             let finalName = suggestion.name || '';
+
+            // --- SYSTEM MANAGED DETECTION: Name Protection ---
+            if (finalName && isNameSimilar(finalName, protectedNamesList)) {
+                const paramsForWeight = getDifficultyParams(suggestion.difficulty || 'Normal', playerLevel);
+                const weight = getCombatWeight(paramsForWeight.cr, paramsForWeight.rank);
+                
+                // If it's the ONLY enemy or it carries more than 30% of the encounter weight, REPLACE it
+                const isCritical = weight >= totalWeight * 0.3 || suggestions.length === 1;
+                
+                if (isCritical) {
+                    finalName = `${suggestion.template || 'Generic'} ${suggestion.difficulty || 'Elite'}`;
+                } else {
+                    // Otherwise, DELETE/DROP it immediately by skipping this loop iteration
+                    return;
+                }
+            }
 
             // 1. DEDUPLICATION: Attempt to find by Name if ID is missing
             if (!resolvedId && finalName) {
                 const standardizedTarget = finalName.toLowerCase().trim();
                 
                 // FINAL GUARD: Never treat a player or companion name as a generic NPC ID
-                if (!protectedNames.has(standardizedTarget)) {
+                if (!protectedNamesSet.has(standardizedTarget)) {
                     const registryMatch = gameData?.npcs.find(n => n.name.toLowerCase().trim() === standardizedTarget);
                     if (registryMatch) {
                         resolvedId = registryMatch.id;
@@ -120,7 +143,7 @@ export const useCombatGeneration = (
 
             if (finalName) {
                 // NAME PROTECTION: If AI tries to name an enemy after the player or a companion, append a suffix
-                if (protectedNames.has(finalName.toLowerCase().trim()) && !resolvedId) {
+                if (protectedNamesSet.has(finalName.toLowerCase().trim()) && !resolvedId) {
                     finalName = `${finalName} (Mirror)`;
                 }
 
@@ -295,10 +318,11 @@ export const useCombatGeneration = (
                     worldSummary
                 );
 
-                const protectedNames = new Set([
+                const protectedNamesList = [
                     (gameData.playerCharacter.name || '').toLowerCase().trim(),
                     ...(gameData.companions || []).map(c => (c.name || '').toLowerCase().trim())
-                ]);
+                ];
+                const protectedNamesSet = new Set(protectedNamesList);
 
                 allHostilesForSkinning.forEach((actor, index) => {
                     const skinData = enrichedData[index.toString()];
@@ -306,8 +330,8 @@ export const useCombatGeneration = (
                         // 1. Update basic fields (With Strict Name Protection)
                         if (skinData.name && skinData.name !== "Unique Name") {
                             const normalizedNewName = skinData.name.toLowerCase().trim();
-                            // If the AI tried to use a protected name, and it's not a pre-existing NPC, block it or suffix it.
-                            if (protectedNames.has(normalizedNewName) && !actor.id.startsWith('npc-')) {
+                            // If the AI tried to use a protected name (exact or similar), and it's not a pre-existing NPC, block it or suffix it.
+                            if (isNameSimilar(normalizedNewName, protectedNamesList) && !actor.id.startsWith('npc-')) {
                                 actor.name = `${skinData.name} (Mirror)`;
                             } else {
                                 actor.name = skinData.name;

@@ -327,3 +327,54 @@ export const calculateAlignmentRelationshipShift = (
 
     return 0;
 };
+
+/**
+ * Calculates the Levenshtein distance between two strings using an optimized storage array.
+ */
+export const getLevenshteinDistance = (s: string, t: string): number => {
+    if (!s.length) return t.length;
+    if (!t.length) return s.length;
+    const arr = Array.from({ length: t.length + 1 }, () => [] as number[]);
+    for (let i = 0; i <= t.length; i++) {
+        arr[i][0] = i;
+    }
+    for (let j = 0; j <= s.length; j++) {
+        arr[0][j] = j;
+    }
+    for (let i = 1; i <= t.length; i++) {
+        for (let j = 1; j <= s.length; j++) {
+            arr[i][j] =
+                t.charAt(i - 1) === s.charAt(j - 1)
+                    ? arr[i - 1][j - 1]
+                    : Math.min(arr[i - 1][j - 1] + 1, arr[i][j - 1] + 1, arr[i - 1][j] + 1);
+        }
+    }
+    return arr[t.length][s.length];
+};
+
+/**
+ * Checks if a name is too similar to any protected names.
+ * Threshold is distance/length ratio or fixed distance.
+ */
+export const isNameSimilar = (name: string, protectedNames: string[], threshold: number = 2): boolean => {
+    const n = name.toLowerCase().trim();
+    if (!n) return false;
+
+    for (const protectedName of protectedNames) {
+        const p = protectedName.toLowerCase().trim();
+        if (!p) continue;
+
+        // Exact match
+        if (n === p) return true;
+
+        // Distance match
+        const distance = getLevenshteinDistance(n, p);
+        if (distance <= threshold) return true;
+
+        // Substring match for short names
+        if (n.length > 3 && p.length > 3) {
+            if (n.includes(p) || p.includes(n)) return true;
+        }
+    }
+    return false;
+};
