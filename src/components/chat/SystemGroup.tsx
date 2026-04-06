@@ -5,19 +5,45 @@ import { EntityLinker } from './EntityLinker';
 
 const SystemMessage: React.FC<{ text: string }> = ({ text }) => {
     if (!text || typeof text !== 'string') return null;
+    
+    const lowerText = text.toLowerCase();
+    const isReaction = /(reaction|relationship)s?:/i.test(lowerText) || /\([+-]\d+\)/.test(text);
+    const isInventory = 
+        lowerText.includes('inventory') || 
+        lowerText.includes('loot') || 
+        lowerText.includes('acquired') ||
+        lowerText.includes('received') ||
+        lowerText.includes('lost') ||
+        lowerText.includes('removed') ||
+        lowerText.includes('dropped') ||
+        lowerText.includes('moved') ||
+        lowerText.includes('bought') ||
+        lowerText.includes('sold') ||
+        lowerText.includes('transferred') ||
+        lowerText.includes('used') ||
+        (lowerText.includes('item') && (lowerText.includes('added') || lowerText.includes('equipped')));
+    
     const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
     return (
-        <span className="whitespace-pre-wrap">
-            {parts.map((part, i) => {
-                if (!part) return null;
-                if (part.startsWith('**') && part.endsWith('**')) {
-                    return <span key={i} className="font-bold"><EntityLinker text={part.slice(2, -2)} /></span>;
-                }
-                if (part.startsWith('*') && part.endsWith('*')) {
-                    return <span key={i} className="italic"><EntityLinker text={part.slice(1, -1)} /></span>;
-                }
-                return <EntityLinker key={i} text={part} />;
-            })}
+        <span className="inline-flex items-center gap-1.5 whitespace-pre-wrap">
+            {isReaction && (
+                <img src="/icons/people.png" alt="" className="w-3.5 h-3.5 object-contain opacity-70 flex-shrink-0 inline-block mb-0.5" />
+            )}
+            {isInventory && (
+                <img src="/icons/backpack.png" alt="" className="w-3.5 h-3.5 object-contain opacity-70 flex-shrink-0 inline-block mb-0.5" />
+            )}
+            <span>
+                {parts.map((part, i) => {
+                    if (!part) return null;
+                    if (part.startsWith('**') && part.endsWith('**')) {
+                        return <span key={i} className="font-bold"><EntityLinker text={part.slice(2, -2)} /></span>;
+                    }
+                    if (part.startsWith('*') && part.endsWith('*')) {
+                        return <span key={i} className="italic"><EntityLinker text={part.slice(1, -1)} /></span>;
+                    }
+                    return <EntityLinker key={i} text={part} />;
+                })}
+            </span>
         </span>
     );
 };

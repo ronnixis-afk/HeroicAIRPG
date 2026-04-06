@@ -44,6 +44,15 @@ export interface CharacterSnapshot {
     maxHitPoints: number;
     maxStamina: number;
     maxHeroicPoints: number;
+    skills: Record<SkillName, { proficient: boolean }>;
+    savingThrows: Record<AbilityScoreName, { proficient: boolean }>;
+    proficiencyBonus: number;
+    age: number;
+    alignment: { lawChaos: number; goodEvil: number };
+    keywords: string[];
+    resistances: string[];
+    immunities: string[];
+    vulnerabilities: string[];
 }
 
 export const createSnapshot = (character: PlayerCharacter | Companion): CharacterSnapshot => {
@@ -62,7 +71,16 @@ export const createSnapshot = (character: PlayerCharacter | Companion): Characte
         isShip: character.isShip,
         maxHitPoints: character.maxHitPoints,
         maxStamina: character.maxStamina,
-        maxHeroicPoints: character.maxHeroicPoints
+        maxHeroicPoints: character.maxHeroicPoints,
+        skills: JSON.parse(JSON.stringify(character.skills || {})),
+        savingThrows: JSON.parse(JSON.stringify(character.savingThrows || {})),
+        proficiencyBonus: character.proficiencyBonus,
+        age: character.age,
+        alignment: JSON.parse(JSON.stringify(character.alignment || { lawChaos: 0, goodEvil: 0 })),
+        keywords: [...(character.keywords || [])],
+        resistances: [...(character.resistances || [])],
+        immunities: [...(character.immunities || [])],
+        vulnerabilities: [...(character.vulnerabilities || [])]
     };
 };
 

@@ -55,15 +55,21 @@ export const SystemToastManager: React.FC = () => {
         const lowerContent = content.toLowerCase();
 
         // 1. Relationship Updates
-        // Format: "**Reactions**: NPC (+Y), NPC2 (-Z)"
-        if (lowerContent.includes('reactions:')) {
-            const reactionText = content.replace(/\*\*Reactions\*\*:\s*/i, '').replace(/Reactions:\s*/i, '');
-            // Multi-reaction support
+        // Format: "**Reactions**: NPC (+Y), NPC2 (-Z)" or "Garrick liked that (+1)"
+        const hasReactionKeyword = /(reaction|relationship)s?:/i.test(lowerContent);
+        const hasSentimentShift = /\([+-]\d+\)/.test(content);
+        
+        if (hasReactionKeyword || hasSentimentShift) {
+            // Clean up prefix: "**Reactions**: ", "Reaction: ", etc.
+            const reactionText = content.replace(/\*\*?Reactions?\*\*?:\s*/i, '').replace(/Reactions?:\s*/i, '');
+            
+            // Multi-reaction support (comma separated)
             const reactions = reactionText.split(',');
             reactions.forEach(r => {
                 const trimmed = r.trim();
                 if (trimmed) addToast('Relationship Updates', trimmed, 'relationship');
             });
+            
             // Don't return yet if there's other info, though usually these are separate
             if (!lowerContent.includes('alignment')) return;
         }
@@ -86,11 +92,21 @@ export const SystemToastManager: React.FC = () => {
             return;
         }
 
-        // 4. Inventory & Loot (Specific keyword check to avoid false positives for "item")
+        // 4. Inventory & Loot
         const isInventory = 
             lowerContent.includes('inventory') || 
             lowerContent.includes('loot') || 
-            (lowerContent.includes('item') && (lowerContent.includes('added') || lowerContent.includes('removed') || lowerContent.includes('equipped')));
+            lowerContent.includes('acquired') ||
+            lowerContent.includes('received') ||
+            lowerContent.includes('lost') ||
+            lowerContent.includes('removed') ||
+            lowerContent.includes('dropped') ||
+            lowerContent.includes('moved') ||
+            lowerContent.includes('bought') ||
+            lowerContent.includes('sold') ||
+            lowerContent.includes('transferred') ||
+            lowerContent.includes('used') ||
+            (lowerContent.includes('item') && (lowerContent.includes('added') || lowerContent.includes('equipped')));
         
         if (isInventory) {
             addToast('Inventory Updates', content, 'inventory');
