@@ -685,7 +685,7 @@ const ZoneDetailsPanel: React.FC<ZoneDetailsPanelProps> = ({ isOpen, onClose, co
                                                     }}
                                                     isExpanded={expandedPoiId === entry.id}
                                                     onToggleExpand={() => setExpandedPoiId(expandedPoiId === entry.id ? null : entry.id)}
-                                                    isPlayerHere={isPlayerHere && currentLocale === entry.title}
+                                                    isPlayerHere={isPlayerHere && isLocaleMatch(currentLocale || '', entry.title)}
                                                     isInSameZone={isPlayerHere}
                                                     isZoneVisited={zone?.visited}
                                                     zone={zone || undefined}

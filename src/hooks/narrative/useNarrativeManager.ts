@@ -212,7 +212,9 @@ export const useNarrativeManager = (
                 aiMessage.id,
                 aiResponse,
                 !!userMessage.explicitAlignment,
-                targetCoordinates || mechanicsOverride?.targetCoordinates
+                targetCoordinates || mechanicsOverride?.targetCoordinates,
+                forcedLocale,
+                forcedSiteId
             ).then(extraction => {
                 if (isOoc) return; // Auditor doesn't need to force combat/extraction updates for OOC chatter
 

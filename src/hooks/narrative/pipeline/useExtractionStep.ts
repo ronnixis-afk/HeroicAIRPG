@@ -318,15 +318,15 @@ export const useExtractionStep = (
             }];
 
             // B. POI (Location) Memory entry: Concise memory for the Zone Details Panel
-            // RESOLUTION ORDER: Forced POI -> Narrative POI -> Physical Anchor -> Current State Locale
-            const poiId = forcedSiteId || 
-                          forcedLocale || 
-                          finalUpdates.location_update?.site_id || 
+            // RESOLUTION ORDER: Human-readable names first (match knowledge titles), machine IDs as fallback
+            const poiId = forcedLocale || 
                           finalUpdates.location_update?.site_name || 
                           finalUpdates.currentLocale || 
-                          gameData.current_site_id || 
                           gameData.current_site_name || 
                           gameData.currentLocale || 
+                          forcedSiteId || 
+                          finalUpdates.location_update?.site_id || 
+                          gameData.current_site_id || 
                           '';
             
             if (poiId) {
