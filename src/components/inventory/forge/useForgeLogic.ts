@@ -4,7 +4,7 @@
 import { useState, useContext, useEffect, useMemo } from 'react';
 import { GameDataContext } from '../../../context/GameDataContext';
 import { Item, AbilityEffect, AbilityUsage, FORGE_GROUPS, WeaponStats, ArmorStats, BodySlot, SkillConfiguration, BuffDuration } from '../../../types';
-import { generateForgeDetails, calculateItemPrice, forgeRandomItem, buildMechanicalSummary, isModifierCategoryAllowedForSlot, generateMechanicalEffect, inferTagsFromStats } from '../../../services/ItemGeneratorService';
+import { generateForgeDetails, calculateItemPrice, forgeRandomItem, buildMechanicalSummary, isModifierCategoryAllowedForSlot, generateMechanicalEffect, inferTagsFromStats, isRangedItem } from '../../../services/ItemGeneratorService';
 import { MODIFIER_REGISTRY, ModifierCategory, applyModifierToItem, getTempHpLabel } from '../../../utils/itemModifiers';
 import { ForgeModifier } from './ForgeModifiers';
 import { toTitleCase } from '../../../utils/npcUtils';
@@ -248,7 +248,15 @@ export const useForgeLogic = () => {
 
         let weaponStats: WeaponStats | undefined;
         let armorStats: ArmorStats | undefined;
-        if (baseGroup === 'Weapons') weaponStats = { enhancementBonus: 0, ability: 'strength', damages: [{ dice: baseDamageDice, type: baseDamageType }], critRange: 20 };
+        if (baseGroup === 'Weapons') {
+            const isRanged = isRangedItem({ name, tags });
+            weaponStats = { 
+                enhancementBonus: 0, 
+                ability: isRanged ? 'dexterity' : 'strength', 
+                damages: [{ dice: baseDamageDice, type: baseDamageType }], 
+                critRange: 20 
+            };
+        }
         if (baseGroup === 'Protection') armorStats = { baseAC: baseAC, armorType: armorType, plusAC: 0, strengthRequirement: 0 };
         
         let usage: AbilityUsage | undefined;

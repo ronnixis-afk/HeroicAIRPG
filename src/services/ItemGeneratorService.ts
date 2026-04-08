@@ -59,12 +59,12 @@ export const inferTagsFromStats = (itemData: any): string[] => {
     return Array.from(tags);
 };
 
-const RANGED_KEYWORDS = ['bow', 'crossbow', 'sling', 'bolt', 'arrow', 'cannon', 'laser', 'battery', 'dart', 'arbalest'];
+const RANGED_KEYWORDS = ['bow', 'crossbow', 'sling', 'bolt', 'arrow', 'cannon', 'laser', 'battery', 'dart', 'arbalest', 'rifle', 'pistol', 'blaster', 'railgun', 'carbine', 'plasma', 'launcher', 'ordnance', 'sniper', 'revolver', 'handgun', 'shotgun'];
 
 export const isRangedItem = (item: any): boolean => {
     const name = (item.name || '').toLowerCase();
     const hasRangedKeyword = RANGED_KEYWORDS.some(k => name.includes(k));
-    const hasRangedTag = item.tags?.some((t: string) => t.toLowerCase().includes('ranged'));
+    const hasRangedTag = item.tags?.some((t: string) => t.toLowerCase().includes('ranged')) ?? false;
     return hasRangedKeyword || hasRangedTag;
 };
 
@@ -624,7 +624,8 @@ export const forgeRandomItem = (
     const isActiveUtility = isUtility && finalRarity !== 'Common';
 
     const hasAnyExistingEffect = baseHasEffect || hasRolledStatBuff || baseHasBuffs;
-    const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect) || (isActiveUtility && !hasAnyExistingEffect);
+    const isEffectDriven = isConsumable || isThrowable || isActiveUtility;
+    const shouldGenerateDynamicEffect = canHaveActiveEffect || isEffectDriven;
 
     if (shouldGenerateDynamicEffect) {
         let forcedType = baseItemData.effect?.type as 'Heal' | 'Status' | 'Damage' | undefined;
@@ -668,6 +669,10 @@ export const forgeRandomItem = (
         usage: usage || (baseItemData.usage ? JSON.parse(JSON.stringify(baseItemData.usage)) : undefined),
         bodySlotTag: slotHint || baseItemData.bodySlotTag
     });
+
+    if (item.weaponStats && isRangedItem(item)) {
+        item.weaponStats.ability = 'dexterity';
+    }
 
     rolledStatBuffs.forEach(modStr => {
         const parsed = parseModifierString(modStr);
@@ -804,6 +809,9 @@ export const enrichItemDetails = async (item: Item, gameData: GameData): Promise
     **STRICT POLICY - ENHANCEMENT SCALE (ONLY IF BUFFED)**:
     - Uncommon (+1), Rare (+2), Very Rare (+3), Legendary (+4), Artifact (+5).
 
+    **WEAPON SCALING RULE**:
+    - **RANGED WEAPONS** MUST ALWAYS use "dexterity" for their "ability" field. NEVER use strength for bows, firearms, lasers, or any ranged combat implements.
+
     **MECHANICAL SCHEMAS**:
     1. 'weaponStats': { "ability": "strength|dexterity", "enhancementBonus": number, "damages": [{ "dice": "1d8", "type": "Slashing" }], "critRange": number }
     2. 'armorStats': { "baseAC": number, "armorType": "light|medium|heavy|shield", "plusAC": number, "strengthRequirement": number }
@@ -866,7 +874,7 @@ export const identifyItems = async (items: Item[], gameData: GameData): Promise<
     You MUST ensure the Name and Description of each item are logical representations of its Mechanical Truth.
     1. RANGE: 'Ranged' items named Bow, Blaster, etc.
     2. WEIGHT: 'Heavy Weight' is massive (Cannon, Greatsword). 'Light Weight' is compact (Dagger).
-    3. SCALING: 'Dexterity' -> precision. 'Strength' -> brute force.
+    3. SCALING: 'Dexterity' -> precision. 'Strength' -> brute force. All RANGED weapons (Bows, Rifles, etc.) MUST use Dexterity.
     4. ENHANCEMENTS: If '+1' or powerful passives, use 'Superior', 'Masterwork'.
     
     Return JSON array: [{ "id": "string", "name": "string", "description": "string", "details": "string", "rarity": "string", "tags": ["string"], "keywords": ["string"] }]`;
