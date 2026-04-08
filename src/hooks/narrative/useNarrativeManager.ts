@@ -56,6 +56,9 @@ export const useNarrativeManager = (
             const owner = batch.ownerId === 'player' ? 'You' : (gameData.companions.find(c => c.id === batch.ownerId)?.name || 'Companion');
             const action = batch.action || 'add';
             const isRemoval = action === 'remove';
+            
+            // [PROTECTION SYNC]: Skip notifications for removals from protected lists
+            if (isRemoval && (batch.list === 'equipped' || batch.list === 'storage')) return;
             batch.items.forEach(item => {
                 if (!item) return;
                 dispatch({

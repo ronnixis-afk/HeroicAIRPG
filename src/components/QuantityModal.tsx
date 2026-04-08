@@ -155,28 +155,24 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       {/* Compare Section */}
 
       <div className="flex flex-col gap-[10px]">
-      <div className="bg-white/5 p-2 rounded-2xl border border-white/5 shadow-inner flex flex-col items-center">
-        <label className="text-[9px] font-bold text-brand-text-muted mb-1 opacity-60 text-center">Select Quantity</label>
-        <div className="flex items-center justify-center gap-6">
+      <div className="bg-white/5 h-12 px-2 rounded-2xl border border-white/5 shadow-inner flex items-center justify-center gap-4">
           <button
             onClick={() => setQuantity(q => Math.max(1, q - 1))}
             disabled={quantity <= 1 || isLoading}
-            className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+            className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
           >
-            <Icon name="minus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
+            <Icon name="minus" className="w-4 h-4 text-brand-text group-hover:text-brand-accent transition-colors" />
           </button>
-          <div className="flex flex-col items-center min-w-[70px]">
-            <h2 className="text-brand-text text-3xl font-heading font-bold tabular-nums mb-0">{quantity}</h2>
-            <span className="text-[10px] font-bold text-brand-text-muted opacity-40">Units</span>
+          <div className="flex flex-col items-center min-w-[50px]">
+            <h2 className="text-brand-text text-xl font-heading font-bold tabular-nums mb-0">{quantity}</h2>
           </div>
           <button
             onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
             disabled={quantity >= maxQuantity || isLoading}
-            className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+            className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
           >
-            <Icon name="plus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
+            <Icon name="plus" className="w-4 h-4 text-brand-text group-hover:text-brand-accent transition-colors" />
           </button>
-        </div>
       </div>
 
         <div className="flex gap-4">

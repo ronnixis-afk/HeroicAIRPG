@@ -641,6 +641,13 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                     const listName = batch.list || 'carried';
                     const ownerId = batch.ownerId || 'player';
                     const action = batch.action || 'add';
+
+                    // [PROTECTION]: Narrative AI is forbidden from removing/dropping equipped or stored items.
+                    if (action === 'remove' && (listName === 'equipped' || listName === 'storage')) {
+                        console.warn(`[AI PROTECTION]: Narrator attempted to remove items from protected list '${listName}'. Target: ${ownerId}. Blocked.`);
+                        return;
+                    }
+
                     let targetList: Item[] | undefined;
 
                     if (ownerId === 'player') {

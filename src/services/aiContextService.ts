@@ -277,6 +277,7 @@ Every 'narration' field MUST be exactly TWO paragraphs (paragraph1 and paragraph
 
 **Phase 4 — State Command & Extraction (Metadata):**
 - **items_to_generate**: If you narrate the player finding or acquiring new items, list their names here (e.g. ["Rusted Key", "Ancient Coin"]). The system will procedurally generate their stats and skins.
+- **inventory_updates (Removal Constraint)**: You are FORBIDDEN from removing or dropping items that are currently EQUIPPED or in STORAGE. Only items in the 'carried' list (Inventory) can be narratively removed or lost based on the story.
 - **player_alignment_shift**: Analyze the player's action and determine if it was Good, Evil, Lawful, Chaotic, or Neutral.
 - **time_passed_minutes**: Estimate the logical amount of time passed for the narrated action (e.g., 5 for a quick chat, 60 for a long trek).
 - **turn_summary**: Provide a 10-word summary of the turn for the permanent story log and location memory. Focus on the most significant narrative event that occurred.

@@ -116,12 +116,32 @@ export const SystemToastManager: React.FC = () => {
         // 5. Action Rolls (Specific labels based on roll type)
         if (msg.rolls && msg.rolls.length > 0) {
             const firstRoll = msg.rolls[0];
+
+            if (firstRoll.rollType === 'Encounter Check') {
+                const hasEncounter = firstRoll.outcome?.toLowerCase().includes('encounter') && firstRoll.outcome !== 'No Encounter';
+                const encounterPhrases = [
+                    "You came across something...",
+                    "Something or someone blocks the path.",
+                    "An unexpected encounter lies ahead."
+                ];
+                const peacefulPhrases = [
+                    "Your travel was relatively peaceful.",
+                    "The path ahead is clear.",
+                    "No immediate threats detected."
+                ];
+                
+                const phrases = hasEncounter ? encounterPhrases : peacefulPhrases;
+                const immersiveMessage = phrases[Math.floor(Math.random() * phrases.length)];
+                
+                addToast('Encounter Check', immersiveMessage, 'roll');
+                return;
+            }
+
             let rollTitle = 'Action Check';
             if (firstRoll.rollType === 'Skill Check') rollTitle = 'Skill Check';
             else if (firstRoll.rollType === 'Saving Throw') rollTitle = 'Saving Throw';
             else if (firstRoll.rollType === 'Attack Roll') rollTitle = 'Attack Roll';
             else if (firstRoll.rollType === 'Damage Roll') rollTitle = 'Damage Roll';
-            else if (firstRoll.rollType === 'Encounter Check') rollTitle = 'Encounter Check';
             else if (firstRoll.rollType === 'Healing Roll') rollTitle = 'Healing Roll';
 
             addToast(rollTitle, content, 'roll');
@@ -222,10 +242,10 @@ export const SystemToastManager: React.FC = () => {
             setQueue(prev => prev.slice(1));
             setToasts(prev => [...prev, nextToast]);
 
-            // Auto-dismiss after 10s
+            // Auto-dismiss after 5s
             setTimeout(() => {
                 setToasts(prev => prev.filter(t => t.id !== nextToast.id));
-            }, 10000);
+            }, 5000);
 
             // Wait 500ms before allowing the next toast to be processed
             await new Promise(resolve => setTimeout(resolve, 500));
