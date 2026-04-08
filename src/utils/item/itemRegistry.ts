@@ -21,12 +21,12 @@ export const RARITY_DISTRIBUTIONS: Record<string, Record<string, number>> = {
 };
 
 export const RARITY_TIERS: Record<string, { desc: string, stats: string[] }> = {
-    'Common': { desc: "0 Modifiers. Base item only.", stats: [] },
-    'Uncommon': { desc: "1 Modifier. Minor enhancements.", stats: ["Enhancement +1", "Skill +2", "Ability +2", "Combat +1", "AC +1", "Save (Specific) +2", "Save (All) +1", "ExDam 1d6", "Mechanical Effect", "Temp HP +5"] },
-    'Rare': { desc: "1-2 Modifiers. Potent magical properties.", stats: ["Enhancement +2", "Skill +4", "Ability +4", "Combat +2", "AC +2", "Save (Specific) +4", "Save (All) +2", "ExDam 1d8", "Resist", "Mechanical Effect", "Temp HP +10", "Advantage"] },
-    'Very Rare': { desc: "2-3 Modifiers. High magic properties.", stats: ["Enhancement +3", "Skill +6", "Ability +6", "Combat +3", "AC +3", "Save (Specific) +6", "Save (All) +3", "ExDam 2d6", "Resist", "Mechanical Effect", "Temp HP +15", "Advantage"] },
-    'Legendary': { desc: "3-4 Modifiers. Legendary power.", stats: ["Enhancement +4", "Skill +8", "Ability +8", "Combat +4", "AC +4", "Save (Specific) +8", "Save (All) +4", "ExDam 2d8", "Resist", "Immunity", "Mechanical Effect", "Temp HP +20", "Advantage"] },
-    'Artifact': { desc: "4-5 Modifiers. Mythic power.", stats: ["Enhancement +5", "Skill +10", "Ability +10", "Combat +5", "AC +5", "Save (Specific) +10", "Save (All) +5", "ExDam 3d6", "Resist", "Immunity", "Mechanical Effect", "Temp HP +25", "Advantage"] },
+    'Common': { desc: "0 Modifiers.", stats: [] },
+    'Uncommon': { desc: "1 Modifier.", stats: ["Enhancement +1", "Skill +2", "Ability +2", "Combat +1", "AC +1", "Save (Specific) +2", "Save (All) +1", "ExDam 1d6", "Mechanical Effect", "Temp HP +5"] },
+    'Rare': { desc: "2 Modifiers.", stats: ["Enhancement +2", "Skill +4", "Ability +4", "Combat +2", "AC +2", "Save (Specific) +4", "Save (All) +2", "ExDam 1d8", "Resist", "Mechanical Effect", "Temp HP +10", "Advantage"] },
+    'Very Rare': { desc: "3 Modifiers.", stats: ["Enhancement +3", "Skill +6", "Ability +6", "Combat +3", "AC +3", "Save (Specific) +6", "Save (All) +3", "ExDam 2d6", "Resist", "Mechanical Effect", "Temp HP +15", "Advantage"] },
+    'Legendary': { desc: "4 Modifiers.", stats: ["Enhancement +4", "Skill +8", "Ability +8", "Combat +4", "AC +4", "Save (Specific) +8", "Save (All) +4", "ExDam 2d8", "Resist", "Immunity", "Mechanical Effect", "Temp HP +20", "Advantage"] },
+    'Artifact': { desc: "5 Modifiers.", stats: ["Enhancement +5", "Skill +10", "Ability +10", "Combat +5", "AC +5", "Save (Specific) +10", "Save (All) +5", "ExDam 3d6", "Resist", "Immunity", "Mechanical Effect", "Temp HP +25", "Advantage"] },
 };
 
 export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
@@ -150,9 +150,11 @@ export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
         { name: 'Alchemist\'s Fire', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '1d4', damageType: 'Fire', targetType: 'Single' } },
         { name: 'Acid Vial', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '2d6', damageType: 'Acid', targetType: 'Single' } },
         { name: 'Holy Water', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '2d6', damageType: 'Radiant', targetType: 'Single' } },
-        { name: 'Throwing Dagger', tags: ['weapon', 'throwable'], bodySlotTag: 'Main Hand', weaponStats: { ability: 'dexterity', damages: [{ dice: '1d4', type: 'Piercing' }], enhancementBonus: 0, critRange: 20 } },
-        { name: 'Handaxe', tags: ['weapon', 'throwable'], bodySlotTag: 'Main Hand', weaponStats: { ability: 'strength', damages: [{ dice: '1d6', type: 'Slashing' }], enhancementBonus: 0, critRange: 20 } },
-        { name: 'Grenade', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '3d6', damageType: 'Fire', targetType: 'Multiple', dc: 12, saveAbility: 'dexterity', saveEffect: 'half' } },
+        { name: 'Explosive Charge', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '3d6', damageType: 'Fire', targetType: 'Multiple', dc: 12, saveAbility: 'dexterity', saveEffect: 'half' } },
+        { name: 'Flash Powder', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Status', status: 'Blinded', duration: 1, targetType: 'Multiple', dc: 12, saveAbility: 'dexterity', saveEffect: 'negate' } },
+        { name: 'Smoke Grenade', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Status', status: 'Hidden', duration: 2, targetType: 'Multiple' } },
+        { name: 'Gas Canister', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Status', status: 'Poisoned', duration: 3, targetType: 'Multiple', dc: 12, saveAbility: 'constitution', saveEffect: 'negate' } },
+        { name: 'Incendiary Flask', tags: ['ammunition', 'throwable'], bodySlotTag: 'Main Hand', effect: { type: 'Damage', damageDice: '2d6', damageType: 'Fire', targetType: 'Multiple', dc: 12, saveAbility: 'dexterity', saveEffect: 'half' } },
     ],
     quest: [
         { name: 'Mysterious Note', tags: ['quest'], description: 'A piece of parchment with hurried handwriting.' },

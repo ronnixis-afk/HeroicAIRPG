@@ -371,14 +371,26 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
     if (isConsumable) {
         passiveBudget = 1; 
     } else {
+        let totalBudget = 0;
         switch (rarity) {
-            case 'Common': passiveBudget = 0; break;
-            case 'Uncommon': passiveBudget = 1; break;
-            case 'Rare': passiveBudget = 1 + (Math.random() > 0.6 ? 1 : 0); break;
-            case 'Very Rare': passiveBudget = 2; break;
-            case 'Legendary': passiveBudget = 3; break;
-            case 'Artifact': passiveBudget = 3 + d(2); break;
-            default: passiveBudget = 0;
+            case 'Common': totalBudget = 0; break;
+            case 'Uncommon': totalBudget = 1; break;
+            case 'Rare': totalBudget = 2; break;
+            case 'Very Rare': totalBudget = 3; break;
+            case 'Legendary': totalBudget = 4; break;
+            case 'Artifact': totalBudget = 5; break;
+            default: totalBudget = 0;
+        }
+
+        // Weapons and Armor use 1 slot for Enhancement, the rest for passives.
+        // Utilities always use exactly 1 slot (Active Buff or Mechanical Effect).
+        // Gear (Accessories/Wondrous) use all slots for passives.
+        if (isWepOrArmor && rarity !== 'Common') {
+            passiveBudget = Math.max(0, totalBudget - 1);
+        } else if (typeHint === 'utility') {
+            passiveBudget = 1;
+        } else {
+            passiveBudget = totalBudget;
         }
     }
 
@@ -387,6 +399,9 @@ export const generateSystemModifiers = (rarity: string, typeHint: string = 'othe
     const tierData = RARITY_TIERS[rarity] || RARITY_TIERS['Common'];
     const allowedStats = (tierData.stats || []).filter(s => {
         if (isWepOrArmor && (s === "Mechanical Effect" || s.startsWith("Enhancement"))) return false;
+
+        // Gear (Accessories & Wondrous) should not have Mechanical Effects
+        if (typeHint === 'gear' && s === "Mechanical Effect") return false;
 
         if (!isWepOrArmor && !isConsumable && s.startsWith("Enhancement")) return false;
         if (isConsumable && s.startsWith("Enhancement")) return false; 
@@ -576,13 +591,16 @@ export const forgeRandomItem = (
 
     const blueprintTemplateName = baseItemData.name || 'Item';
 
-    const isWeapon = tableKey === 'weapons' || !!baseItemData.weaponStats;
-    const isArmor = tableKey === 'armors' || !!baseItemData.armorStats;
     const isConsumable = tableKey === 'consumables';
     const isThrowable = tableKey === 'throwables';
+    const isWeapon = (tableKey === 'weapons' || !!baseItemData.weaponStats) && !isThrowable;
+    const isArmor = tableKey === 'armors' || !!baseItemData.armorStats;
     const isQuest = tableKey === 'quest' || (baseItemData.tags || []).some((t: string) => t.toLowerCase() === 'quest');
 
-    const typeHint = isQuest ? 'quest' : (isWeapon ? 'weapon' : (isArmor ? 'armor' : (isConsumable ? 'consumable' : (isThrowable ? 'throwable' : 'other'))));
+    const isUtility = (baseItemData.tags || []).some((t: string) => t.toLowerCase() === 'utility') && !isConsumable;
+    const isGear = tableKey === 'accessories' || category === 'Wondrous' || category === 'Accessories';
+    
+    const typeHint = isQuest ? 'quest' : (isWeapon ? 'weapon' : (isArmor ? 'armor' : (isConsumable ? 'consumable' : (isThrowable ? 'throwable' : (isUtility ? 'utility' : (isGear ? 'gear' : 'other'))))));
     const finalRarity = isQuest ? 'Common' : rarity;
 
     const baseHasBuffs = baseItemData.buffs && baseItemData.buffs.length > 0;
@@ -602,10 +620,8 @@ export const forgeRandomItem = (
     let effect: AbilityEffect | undefined;
     let usage: AbilityUsage | undefined;
 
-    const isUtility = (baseItemData.tags || []).some((t: string) => t.toLowerCase() === 'utility') && !isConsumable;
-    
-    // DECISION: Should this utility item be active? (Uncommon+ utilities have high chance to be active)
-    const isActiveUtility = isUtility && finalRarity !== 'Common' && Math.random() > 0.3;
+    // DECISION: Should this utility item be active? (Uncommon+ utilities ALWAYS have 1 active effect now)
+    const isActiveUtility = isUtility && finalRarity !== 'Common';
 
     const hasAnyExistingEffect = baseHasEffect || hasRolledStatBuff || baseHasBuffs;
     const shouldGenerateDynamicEffect = canHaveActiveEffect || (isConsumable && !hasAnyExistingEffect) || (isConsumable && finalRarity !== 'Common' && !hasAnyExistingEffect) || (isActiveUtility && !hasAnyExistingEffect);

@@ -59,13 +59,22 @@ const StoreItemCard: React.FC<{ item: StoreItem, onBuy: (item: StoreItem) => voi
 
             {/* Mechanical Detail Section */}
             <div className="flex flex-wrap gap-1.5">
-                {/* Weapon/Armor Stats */}
+                {/* Weapon Stats (Base Damage) */}
                 {item.weaponStats && (
                     <span className="text-[10px] font-bold text-brand-text-muted bg-brand-primary/40 px-2 py-0.5 rounded-lg border border-brand-text-muted/30">
                         {item.weaponStats.damages[0].dice} {item.weaponStats.damages[0].type}
                         {item.weaponStats.enhancementBonus !== 0 && ` (${item.weaponStats.enhancementBonus >= 0 ? '+' : ''}${item.weaponStats.enhancementBonus})`}
                     </span>
                 )}
+                {/* Weapon Extra Damage Tags */}
+                {item.weaponStats && item.weaponStats.damages.length > 1 && item.weaponStats.damages.slice(1).map((d, idx) => {
+                    const { label, colorClass } = getBuffTag({ type: 'exdam', damageDice: d.dice, damageType: d.type as any, bonus: 0, duration: 'Passive' });
+                    return (
+                        <span key={`exdam-${idx}`} className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border bg-brand-bg/50 ${colorClass}`}>
+                            {label}
+                        </span>
+                    );
+                })}
                 {item.armorStats && (
                     <span className="text-body-sm text-brand-text-muted">
                         AC {(item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0)}

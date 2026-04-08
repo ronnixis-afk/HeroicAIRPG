@@ -42,7 +42,6 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
   const [loadingAction, setLoadingAction] = useState<'confirm' | 'all' | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [recipientId, setRecipientId] = useState<string>('player');
-  const [showCompare, setShowCompare] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +53,6 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       setLoadingAction(null);
       setIsSuccess(false);
       setRecipientId('player');
-      setShowCompare(false);
     }
   }, [isOpen, item, action]);
 
@@ -157,67 +155,29 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
       {/* Compare Section */}
 
       <div className="flex flex-col gap-[10px]">
-        {action === 'Buy' && (
-          <div>
-            {equippedInSlot ? (
-              <div className="space-y-3">
-                <button
-                  onClick={() => setShowCompare(!showCompare)}
-                  className="btn-secondary w-full h-12 font-bold text-xs rounded-2xl flex items-center justify-center gap-2"
-                >
-                  {showCompare ? "Hide Comparison" : "Compare"}
-                </button>
-                
-                {showCompare && (
-                  <div className="p-4 bg-brand-surface border border-white/10 rounded-2xl animate-modal shadow-xl">
-                    <p className="text-[10px] font-bold text-brand-text-muted mb-2 opacity-60">Currently Equipped</p>
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className={`text-sm mb-0 ${getItemRarityColor(equippedInSlot.rarity)}`}>{equippedInSlot.name}</h4>
-                      {equippedInSlot.armorStats && (
-                         <span className="text-[10px] font-bold text-brand-accent">AC {equippedInSlot.armorStats.baseAC + equippedInSlot.armorStats.plusAC}</span>
-                      )}
-                      {equippedInSlot.weaponStats && (
-                         <span className="text-[10px] font-bold text-brand-accent">{equippedInSlot.weaponStats.damages[0].dice} {equippedInSlot.weaponStats.damages[0].type}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-brand-text-muted line-clamp-2 italic leading-relaxed opacity-80 mb-3">{equippedInSlot.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                        {/* Enhancement Pill */}
-                        {getEnhancementPill(equippedInSlot) && (
-                            <span className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${getEnhancementPill(equippedInSlot)!.colorClass}`}>
-                                {getEnhancementPill(equippedInSlot)!.label}
-                            </span>
-                        )}
-
-                        {/* Passive Buffs */}
-                        {equippedInSlot.buffs?.map((buff, idx) => {
-                            const { label, colorClass } = getBuffTag(buff);
-                            return (
-                                <span key={idx} className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${colorClass}`}>
-                                    {label}
-                                </span>
-                            );
-                        })}
-
-                        {/* Active Power Slot */}
-                        {equippedInSlot.effect && (
-                            <span className="text-[9px] font-bold text-purple-400 bg-brand-bg px-2 py-1 rounded-lg border border-purple-400/30 flex items-center gap-1.5 shadow-sm">
-                                <Icon name="sparkles" className="w-2.5 h-2.5" />
-                                {getActivePowerPill(equippedInSlot.effect).label}
-                            </span>
-                        )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-                <div className="text-center p-3 bg-white/5 rounded-xl border border-dashed border-white/10">
-                    <p className="text-[10px] font-bold text-brand-text-muted italic mb-0">No item equipped in this body slot yet</p>
-                </div>
-            )}
+      <div className="bg-white/5 p-2 rounded-2xl border border-white/5 shadow-inner flex flex-col items-center">
+        <label className="text-[9px] font-bold text-brand-text-muted mb-1 opacity-60 text-center">Select Quantity</label>
+        <div className="flex items-center justify-center gap-6">
+          <button
+            onClick={() => setQuantity(q => Math.max(1, q - 1))}
+            disabled={quantity <= 1 || isLoading}
+            className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+          >
+            <Icon name="minus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
+          </button>
+          <div className="flex flex-col items-center min-w-[70px]">
+            <h2 className="text-brand-text text-3xl font-heading font-bold tabular-nums mb-0">{quantity}</h2>
+            <span className="text-[10px] font-bold text-brand-text-muted opacity-40">Units</span>
           </div>
-        )}
+          <button
+            onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
+            disabled={quantity >= maxQuantity || isLoading}
+            className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
+          >
+            <Icon name="plus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
+          </button>
+        </div>
+      </div>
 
         <div className="flex gap-4">
           {action === 'Sell' && maxQuantity > 1 && (
@@ -265,29 +225,34 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
     >
       {/* Character Selector row atop the modal content */}
       {action === 'Buy' && characters && characters.length > 1 && (
-        <div className="absolute top-4 left-6 z-50 flex items-center gap-2">
+        <div className="absolute top-4 left-6 z-50 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
             {characters.map(char => {
-                const charId = char.id || (char instanceof PlayerCharacter ? 'player' : 'unknown');
-                const isSelected = recipientId === charId || (recipientId === 'player' && char instanceof PlayerCharacter);
-                
-                return (
-                    <div key={charId} className="relative group">
-                        <ActorAvatar 
-                            actor={char}
-                            size={32}
-                            showBars={false}
-                            isActive={isSelected}
-                            showGlow={false}
-                            onClick={() => setRecipientId(charId)}
-                            className={`cursor-pointer transition-all ${isSelected ? 'scale-110 opacity-100' : 'opacity-40 scale-100 hover:scale-110'}`}
-                        />
-                    </div>
-                );
+              const charId = char.id || 'player';
+              const isSelected = recipientId === charId;
+              
+              return (
+                <div key={charId} className="relative group">
+                  <ActorAvatar 
+                    actor={char}
+                    size={32}
+                    showBars={false}
+                    isActive={isSelected}
+                    showGlow={false}
+                    onClick={() => setRecipientId(charId)}
+                    className={`cursor-pointer transition-all ${isSelected ? 'scale-110 opacity-100' : 'opacity-20 scale-100 grayscale hover:grayscale-0 hover:opacity-60 hover:scale-105'}`}
+                  />
+                </div>
+              );
             })}
+          </div>
+          <div className="text-[9px] font-bold text-brand-text-muted animate-fade-in pl-1">
+            Buying For {characters.find(c => (c.id || 'player') === recipientId)?.name || 'Character'}
+          </div>
         </div>
       )}
 
-      <div className="space-y-6 pt-5">
+      <div className="space-y-6 pt-17">
         <div>
           <h3 className="text-brand-text leading-tight mb-2">{item.name}</h3>
 
@@ -360,29 +325,56 @@ const QuantityModal: React.FC<QuantityModalProps> = ({ isOpen, onClose, item, ac
         )}
 
         {/* Stepper Controls */}
-        <div className="bg-white/5 p-2 rounded-2xl border border-white/5 shadow-inner flex flex-col items-center">
-          <label className="text-[9px] font-bold text-brand-text-muted mb-1 opacity-60 text-center">Select Quantity</label>
-          <div className="flex items-center justify-center gap-6">
-            <button
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              disabled={quantity <= 1 || isLoading}
-              className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
-            >
-              <Icon name="minus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
-            </button>
-            <div className="flex flex-col items-center min-w-[70px]">
-              <h2 className="text-brand-text text-3xl font-heading font-bold tabular-nums mb-0">{quantity}</h2>
-              <span className="text-[10px] font-bold text-brand-text-muted opacity-40">Units</span>
-            </div>
-            <button
-              onClick={() => setQuantity(q => Math.min(maxQuantity, q + 1))}
-              disabled={quantity >= maxQuantity || isLoading}
-              className="h-11 w-11 flex items-center justify-center rounded-lg bg-white/5 hover:bg-brand-accent/20 transition-all active:scale-95 disabled:opacity-20 border border-white/10 shadow-lg group"
-            >
-              <Icon name="plus" className="w-5 h-5 text-brand-text group-hover:text-brand-accent transition-colors" />
-            </button>
+        {action === 'Buy' && (
+          <div className="animate-fade-in">
+            {equippedInSlot ? (
+              <div className="p-4 bg-brand-surface border border-white/10 rounded-2xl shadow-xl">
+                <p className="text-[10px] font-bold text-brand-text-muted mb-2 opacity-60">Currently Equipped</p>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className={`text-sm mb-0 ${getItemRarityColor(equippedInSlot.rarity)}`}>{equippedInSlot.name}</h4>
+                  {equippedInSlot.armorStats && (
+                    <span className="text-[10px] font-bold text-brand-accent">AC {equippedInSlot.armorStats.baseAC + equippedInSlot.armorStats.plusAC}</span>
+                  )}
+                  {equippedInSlot.weaponStats && (
+                    <span className="text-[10px] font-bold text-brand-accent">{equippedInSlot.weaponStats.damages[0].dice} {equippedInSlot.weaponStats.damages[0].type}</span>
+                  )}
+                </div>
+                <p className="text-xs text-brand-text-muted line-clamp-2 italic leading-relaxed opacity-80 mb-3">{equippedInSlot.description}</p>
+                
+                <div className="flex flex-wrap gap-2">
+                  {/* Enhancement Pill */}
+                  {getEnhancementPill(equippedInSlot) && (
+                    <span className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${getEnhancementPill(equippedInSlot)!.colorClass}`}>
+                      {getEnhancementPill(equippedInSlot)!.label}
+                    </span>
+                  )}
+
+                  {/* Passive Buffs */}
+                  {equippedInSlot.buffs?.map((buff, idx) => {
+                    const { label, colorClass } = getBuffTag(buff);
+                    return (
+                      <span key={idx} className={`text-[9px] font-bold px-2 py-1 rounded-lg border bg-brand-bg shadow-sm ${colorClass}`}>
+                        {label}
+                      </span>
+                    );
+                  })}
+
+                  {/* Active Power Slot */}
+                  {equippedInSlot.effect && (
+                    <span className="text-[9px] font-bold text-purple-400 bg-brand-bg px-2 py-1 rounded-lg border border-purple-400/30 flex items-center gap-1.5 shadow-sm">
+                      <Icon name="sparkles" className="w-2.5 h-2.5" />
+                      {getActivePowerPill(equippedInSlot.effect).label}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center p-3 bg-white/5 rounded-xl border border-dashed border-white/10">
+                <p className="text-[10px] font-bold text-brand-text-muted italic mb-0">No Item Equipped In This Body Slot Yet</p>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </Modal>
   );
