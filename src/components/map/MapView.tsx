@@ -180,27 +180,15 @@ const MapView: React.FC = () => {
                                 <div className="w-full h-2 rounded animate-pulse bg-brand-primary/40"></div>
                             </div>
                         );
-                    } else if (isVisited) {
-                        content = (
-                            <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative">
-                                <span
-                                    className="font-bold text-brand-text leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 pointer-events-none"
-                                    style={{ fontSize: `${fontSize}px` }}
-                                >
-                                    {zoneName}
-                                </span>
-                            </div>
-                        );
                     } else {
-                        // Preloaded but unvisited zones
                         const popLevel = zone.populationLevel;
                         const showPopIcon = popLevel && popLevel !== 'Barren';
                         const popIconName = popLevel ? popLevel.toLowerCase() : 'settlement';
 
                         content = (
-                            <div className="flex flex-col items-center justify-center w-full h-full p-1 text-center relative pointer-events-none">
+                            <div className={`flex flex-col items-center justify-center w-full h-full p-1 text-center relative ${!isVisited ? 'pointer-events-none' : ''}`}>
                                 <span
-                                    className="font-bold text-brand-text-muted opacity-60 leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10"
+                                    className={`font-bold leading-tight line-clamp-2 overflow-hidden text-ellipsis break-words w-full relative z-10 ${isVisited ? 'text-brand-text pointer-events-none' : 'text-brand-text-muted opacity-60'}`}
                                     style={{ fontSize: `${fontSize}px` }}
                                 >
                                     {zoneName}
@@ -209,7 +197,7 @@ const MapView: React.FC = () => {
                                     <img 
                                         src={`/icons/${popIconName}.png`} 
                                         alt={popLevel} 
-                                        className="absolute bottom-0.5 right-0.5 w-4 h-4 object-contain opacity-50 z-10"
+                                        className={`absolute bottom-0.5 right-0.5 w-4 h-4 object-contain z-10 ${isVisited ? 'opacity-80' : 'opacity-50'}`}
                                     />
                                 )}
                             </div>
