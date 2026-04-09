@@ -74,7 +74,7 @@ export const useNarrativeManager = (
         });
     }, [gameData, dispatch]);
 
-    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions, { setIsAuditing, setIsHousekeeping }, npcActions);
+    const { processConsequences } = useExtractionStep(dispatch, notifyInventoryChanges, combatActions, { setIsAuditing, setIsHousekeeping }, npcActions, weaveGrandDesign);
 
     /**
      * UNIFIED PIPELINE RUNNER

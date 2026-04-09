@@ -80,7 +80,7 @@ const defaultGameData: GameData = {
   messages: [],
   gmSettings: "",
   gmNotes: "",
-  grandDesign: "",
+  grandDesign: undefined,
   connectedNpcIds: [], // NEW: Initialize ID list
   plotPoints: [],
   currentTime: 'January 1, 2024, 08:00',
@@ -189,7 +189,7 @@ export const getNewGameData = (): GameData => {
     ],
     gmSettings: "",
     gmNotes: "",
-    grandDesign: "",
+    grandDesign: undefined,
     connectedNpcIds: [],
     plotPoints: [],
     currentTime: 'January 1, 2024, 08:00',

@@ -430,9 +430,31 @@ ${poiMemoryContext}
             }
         }
 
+        // --- GRAND DESIGN (STRUCTURED THREAT ARC) ---
+        let grandDesignContext = "[OVERARCHING ARC (GRAND DESIGN)]: The path is yet to be woven.";
+        const gd = gameData.grandDesign;
+        if (gd && gd.secretConsequence) {
+            const clockHours = Math.floor((gd.threatClockMinutes || 0) / 60);
+            const clockMins = (gd.threatClockMinutes || 0) % 60;
+            const clockDisplay = clockHours > 0 ? `${clockHours}h ${clockMins}m` : `${clockMins}m`;
+            const clockPercent = gd.threatClockOriginal > 0 ? Math.round((gd.threatClockMinutes / gd.threatClockOriginal) * 100) : 100;
+
+            grandDesignContext = `[OVERARCHING ARC — GM PRIVATE INTELLIGENCE (DO NOT REVEAL DIRECTLY)]:
+- SECRET CONSEQUENCE: ${gd.secretConsequence}
+- HIDDEN THREAT: ${gd.hiddenThreat}
+- THREAT DETAILS: ${gd.threatDetails}
+- THREAT CLOCK: ${clockDisplay} remaining (${clockPercent}% of original deadline)
+
+[ALLOWED NARRATIVE HINTS — You MAY weave these organically]:
+- ${gd.indirectSigns}
+
+[THREAT CLOCK DIRECTIVES]:
+${clockPercent > 50 ? '- The threat is distant. Subtle atmospheric hints only. Do NOT escalate.' : ''}${clockPercent <= 50 && clockPercent > 20 ? '- The threat is advancing. Increase the frequency and intensity of indirect signs. NPCs may gossip about strange occurrences.' : ''}${clockPercent <= 20 && clockPercent > 0 ? '- [URGENT]: The threat is IMMINENT. Signs should be unmistakable — scouts spotted, warnings from allies, ominous environmental shifts. Build tension aggressively.' : ''}${gd.threatClockMinutes <= 0 ? `\n[SYSTEM_OVERRIDE — THREAT MATERIALIZATION]:\nThe threat clock has EXPIRED. You MUST narrate the threat arriving and confronting the party THIS TURN.\n- The force described in THREAT DETAILS materializes in the scene.\n- This is NOT optional. The narrative MUST include the threat appearing.\n- Set combat_detected to TRUE if the threat is violent.\n- Populate suggestedActors with appropriate combatants from the threat details.` : ''}`;
+        }
+
         tier3Recency = `
 ### TIER 3: NARRATIVE CONTINUITY
-[OVERARCHING ARC (GRAND DESIGN)]: ${gameData.grandDesign || "The path is yet to be woven."}
+${grandDesignContext}
 ${historicalEchoes}[RECENT DEEDS]:
 ${recentMemory || "The journey has just begun."}
 `;

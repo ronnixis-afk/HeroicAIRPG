@@ -15,6 +15,25 @@ export interface CombatConfiguration {
   autoIncludeNearbyNpcs: boolean;
 }
 
+export interface GrandDesign {
+  /** Sentence 1: The hidden consequence of recent player actions */
+  secretConsequence: string;
+  /** Sentence 2: The current threat the party is not aware about */
+  hiddenThreat: string;
+  /** Sentence 3: Indirect signs of the current threat the narrator may hint at */
+  indirectSigns: string;
+  /** Sentence 4: Specific threat details including what's coming */
+  threatDetails: string;
+  /** System-managed countdown in game-minutes until forced confrontation */
+  threatClockMinutes: number;
+  /** The original deadline set by the AI (for display as 'X of Y remaining') */
+  threatClockOriginal: number;
+  /** Timestamp of the last Grand Design generation */
+  generatedAt: string;
+  /** Counter: number of AI responses since the last Grand Design update */
+  turnsSinceUpdate: number;
+}
+
 export interface GameData {
   playerCharacter: PlayerCharacter;
   companions: Companion[];
@@ -30,8 +49,8 @@ export interface GameData {
   messages: ChatMessage[];
   gmSettings?: string;
   gmNotes?: string;
-  grandDesign?: string;
-  connectedNpcIds?: string[]; // NEW: Links NPCs mentioned in the Grand Design
+  grandDesign?: GrandDesign;
+  connectedNpcIds?: string[]; // Links NPCs mentioned in the Grand Design
   plotPoints?: PlotPoint[];
   worldSummary?: string;
   currentTime: string;
@@ -98,7 +117,7 @@ export interface AIUpdatePayload {
   story?: StoryLog[];
   combatState?: Partial<CombatState>;
   gmNotes?: string;
-  grandDesign?: string;
+  grandDesign?: GrandDesign;
   playerCoordinates?: string;
   currentLocale?: string;
   current_site_id?: string;
@@ -206,7 +225,8 @@ export type GameAction =
   | { type: 'MARK_OBJECTIVE_SEEN'; payload: string }
   | { type: 'TRACK_OBJECTIVE'; payload: string | null }
   | { type: 'UPDATE_GM_NOTES'; payload: string }
-  | { type: 'UPDATE_GRAND_DESIGN'; payload: { design: string, connectedNpcIds: string[] } }
+  | { type: 'UPDATE_GRAND_DESIGN'; payload: { design: GrandDesign, connectedNpcIds: string[] } }
+  | { type: 'TICK_GRAND_DESIGN'; payload: { minutesElapsed: number } }
   | { type: 'UPDATE_WORLD_SUMMARY'; payload: string }
   | { type: 'ADD_PLOT_POINT'; payload: PlotPoint }
   | { type: 'UPDATE_PLOT_POINT'; payload: PlotPoint }

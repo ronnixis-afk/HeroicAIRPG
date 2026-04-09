@@ -75,8 +75,16 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         if (!gameData) return;
         setIsAiGenerating(true);
         try {
-            const design = await generateGrandDesign(gameData);
-            const mentionedNpcIds = detectMentionedNpcs(design, gameData.npcs || [], 2);
+            const result = await generateGrandDesign(gameData);
+            const design = {
+                ...result,
+                threatClockOriginal: result.threatClockMinutes,
+                generatedAt: gameData.currentTime || new Date().toISOString(),
+                turnsSinceUpdate: 0
+            };
+            // Scan all 4 sentences for NPC name mentions
+            const allText = `${design.secretConsequence} ${design.hiddenThreat} ${design.indirectSigns} ${design.threatDetails}`;
+            const mentionedNpcIds = detectMentionedNpcs(allText, gameData.npcs || [], 2);
             dispatch({ type: 'UPDATE_GRAND_DESIGN', payload: { design, connectedNpcIds: mentionedNpcIds } });
         } catch (e) {
             console.error("Grand Design failed", e);

@@ -14,7 +14,8 @@ export const useExtractionStep = (
     notifyInventoryChanges: (updates: any[]) => void,
     combatActions: any,
     uiSetters?: { setIsAuditing: (val: boolean) => void, setIsHousekeeping: (val: boolean) => void },
-    npcActions?: any
+    npcActions?: any,
+    weaveGrandDesign?: () => Promise<void>
 ) => {
     const processConsequences = useCallback(async (
         userContent: string,
@@ -336,8 +337,22 @@ export const useExtractionStep = (
 
         dispatch({ type: 'AI_UPDATE', payload: finalUpdates });
 
+        // --- GRAND DESIGN SYSTEM TICK ---
+        // Deterministically count down the threat clock and auto-trigger regeneration every 10 responses
+        if (!gameData.combatState?.isActive) {
+            const minutesElapsed = aiResponse.time_passed_minutes || 0;
+            dispatch({ type: 'TICK_GRAND_DESIGN', payload: { minutesElapsed } });
+
+            // Auto-trigger: Regenerate the Grand Design every 10 AI responses
+            const currentTurns = (gameData.grandDesign?.turnsSinceUpdate || 0) + 1; // +1 because TICK hasn't resolved yet
+            if (currentTurns >= 10 && weaveGrandDesign) {
+                console.log('[Grand Design] Auto-trigger: 10 responses reached. Regenerating threat arc...');
+                weaveGrandDesign().catch(e => console.error('[Grand Design] Auto-regeneration failed:', e));
+            }
+        }
+
         return { engagementConfirmed: !!aiResponse.combat_detected };
-    }, [dispatch, combatActions, notifyInventoryChanges]);
+    }, [dispatch, combatActions, notifyInventoryChanges, weaveGrandDesign]);
 
 
     return { processConsequences };

@@ -126,6 +126,11 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
     switch (action.type) {
         case 'SET_GAME_DATA': {
             const loadedData = action.payload;
+
+            // Backwards compatibility: Migrate legacy string grandDesign to structured format
+            if (loadedData && typeof loadedData.grandDesign === 'string') {
+                (loadedData as any).grandDesign = undefined; // Clear legacy — will regenerate
+            }
             
             // Backwards compatibility: Assign language config to old races
             if (loadedData && Array.isArray(loadedData.knowledge)) {

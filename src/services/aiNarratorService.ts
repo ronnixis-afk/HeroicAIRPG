@@ -428,17 +428,103 @@ export const refineTranscription = async (transcript: string, history: any[], ga
 };
 
 /**
- * Weaves the high-level "Grand Design" narrative arc.
+ * Weaves the high-level "Grand Design" — a structured, 4-sentence threat arc
+ * that acts as the system's narrative compass. The threat clock attached to this
+ * design is managed deterministically by the system (not the AI).
  */
-export const generateGrandDesign = async (gameData: any): Promise<string> => {
+export const generateGrandDesign = async (gameData: GameData): Promise<{
+    secretConsequence: string;
+    hiddenThreat: string;
+    indirectSigns: string;
+    threatDetails: string;
+    threatClockMinutes: number;
+}> => {
     const ai = getAi();
-    const prompt = `You are the Master Architect. Analyze the world lore, character goals, and recent history to weave an overarching narrative "Grand Design". This brief acts as a compass for long-term consistency.\n\nWORLD LORE: ${gameData.worldSummary}\nPLAYER HISTORY: ${JSON.stringify((gameData.story || []).slice(-10))}\n\nReturn a 2-paragraph strategic brief for the Game Master.`;
+
+    // --- CONTEXT GATHERING ---
+    const storyLogs = gameData.story || [];
+    const recentSummaries = storyLogs.slice(-10).map(l => l.summary || l.content.slice(0, 120)).join('\n- ');
+    const lastTwoFull = storyLogs.slice(-2).map(l => l.content).join('\n\n---\n\n');
+    const activeQuests = (gameData.objectives || []).filter(o => o.status === 'active').map(o => `${o.title}: ${o.content}`).join('\n- ');
+    const playerName = gameData.playerCharacter?.name || 'The Adventurer';
+    const playerLevel = gameData.playerCharacter?.level || 1;
+    const currentLocation = gameData.currentLocale || gameData.current_site_name || 'Unknown';
+
+    const previousDesign = gameData.grandDesign
+        ? `[PREVIOUS GRAND DESIGN]:\n1. Secret Consequence: ${gameData.grandDesign.secretConsequence}\n2. Hidden Threat: ${gameData.grandDesign.hiddenThreat}\n3. Indirect Signs: ${gameData.grandDesign.indirectSigns}\n4. Threat Details: ${gameData.grandDesign.threatDetails}\n[PREVIOUS THREAT CLOCK]: ${gameData.grandDesign.threatClockMinutes} minutes remaining`
+        : '[PREVIOUS GRAND DESIGN]: None — this is the first arc.';
+
+    const prompt = `You are the Master Architect — the unseen hand behind all fate and consequence in this world. Your role is to weave a hidden narrative threat arc that reacts to the party's recent choices.
+
+[WORLD SUMMARY]: ${gameData.worldSummary || 'A dangerous world of adventure.'}
+[GAME SETTING]: ${gameData.skillConfiguration || 'Fantasy'}
+[PLAYER]: ${playerName} (Level ${playerLevel}) at ${currentLocation}
+[ACTIVE QUESTS]:
+- ${activeQuests || 'None active.'}
+
+${previousDesign}
+
+[CHRONICLE — Last 10 Memories]:
+- ${recentSummaries || 'No memories recorded yet.'}
+
+[CHRONICLE — Last 2 Full Logs]:
+${lastTwoFull || 'No detailed logs available.'}
+
+---
+
+**YOUR TASK**: Analyze the party's recent actions, their current situation, and the previous Grand Design (if any). Then generate a NEW 4-sentence threat arc. Each sentence serves a specific narrative function:
+
+1. **secretConsequence**: What hidden consequence has the party's recent actions caused? (e.g., "The party's slaying of the Dragon Priest has drawn the ire of the Draconic Cult.")
+2. **hiddenThreat**: What is the current threat the party does NOT know about? This must NEVER be revealed directly to the player in narration. (e.g., "The Draconic Cult's War Council has declared a blood hunt.")
+3. **indirectSigns**: What subtle, indirect signs will the party experience that hint at this threat? These ARE allowed to appear in narration. (e.g., "Strange claw marks appear on nearby trees, and locals whisper about robed figures seen at dusk.")
+4. **threatDetails**: What specific force or entity is coming, and what will happen when it arrives? (e.g., "A Draconic Cult hunting party of 6 zealots and a Wyrm Rider has been dispatched.")
+
+Also provide **threatClockMinutes**: An integer representing how many in-game minutes until the threat forcibly materializes. This should scale to the severity:
+- Minor/Political threats: 2880-4320 minutes (2-3 days)
+- Moderate hunting parties: 1440-2880 minutes (1-2 days)
+- Imminent danger/assassination: 120-720 minutes (2-12 hours)
+
+**RULES**:
+- The threat MUST be organically connected to the party's recent actions and the world setting.
+- If a previous Grand Design exists, evolve or escalate it — don't repeat the same threat unless it was unresolved.
+- The threat must feel like a natural consequence, not random.
+- Keep each sentence concise (1-2 sentences max).
+- Scale threat severity and type to the player's level (Level ${playerLevel}).`;
+
+    const outputSchema = {
+        type: Type.OBJECT,
+        properties: {
+            secretConsequence: { type: Type.STRING, description: "Sentence 1: Hidden consequence of recent actions." },
+            hiddenThreat: { type: Type.STRING, description: "Sentence 2: Current invisible threat. NEVER reveal to player." },
+            indirectSigns: { type: Type.STRING, description: "Sentence 3: Subtle signs the narrator IS allowed to weave in." },
+            threatDetails: { type: Type.STRING, description: "Sentence 4: Exact threat force and what happens when it arrives." },
+            threatClockMinutes: { type: Type.NUMBER, description: "In-game minutes until forced confrontation (120-4320)." }
+        },
+        required: ["secretConsequence", "hiddenThreat", "indirectSigns", "threatDetails", "threatClockMinutes"]
+    };
+
     const response = await ai.models.generateContent({
         model: AI_MODELS.DEFAULT,
         contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC } }
+        config: {
+            thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC },
+            responseMimeType: "application/json",
+            responseSchema: outputSchema as any
+        }
     });
-    return response.text?.trim() || "";
+
+    const parsed = JSON.parse(cleanJson(response.text || "{}"));
+
+    // Clamp the clock to sane bounds
+    const clampedClock = Math.max(120, Math.min(4320, parsed.threatClockMinutes || 1440));
+
+    return {
+        secretConsequence: parsed.secretConsequence || "The threads of fate shift in response to recent deeds.",
+        hiddenThreat: parsed.hiddenThreat || "An unknown force stirs in the shadows.",
+        indirectSigns: parsed.indirectSigns || "A faint unease settles over the land.",
+        threatDetails: parsed.threatDetails || "Something approaches from beyond the horizon.",
+        threatClockMinutes: clampedClock
+    };
 };
 
 /**

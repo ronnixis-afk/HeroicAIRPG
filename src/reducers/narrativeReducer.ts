@@ -144,6 +144,19 @@ export const narrativeReducer = (state: GameData, action: GameAction): GameData 
                 connectedNpcIds: action.payload.connectedNpcIds 
             };
 
+        case 'TICK_GRAND_DESIGN': {
+            if (!state.grandDesign) return state;
+            const minutesElapsed = action.payload.minutesElapsed || 0;
+            return {
+                ...state,
+                grandDesign: {
+                    ...state.grandDesign,
+                    turnsSinceUpdate: (state.grandDesign.turnsSinceUpdate || 0) + 1,
+                    threatClockMinutes: Math.max(0, (state.grandDesign.threatClockMinutes || 0) - minutesElapsed)
+                }
+            };
+        }
+
         case 'UPDATE_WORLD_SUMMARY':
             return { ...state, worldSummary: action.payload };
 

@@ -170,9 +170,18 @@ const GmNotesView: React.FC = () => {
         }
     };
 
-    const designDisplayValue = isWeaving 
-        ? "The architect is analyzing world lore and recent chronicles to weave your destiny..." 
-        : (gameData?.grandDesign || "The narrative threads are currently being woven. This field will be populated as the AI synthesizes your choices into a grand overarching plot.");
+    const designDisplayValue = useMemo(() => {
+        if (isWeaving) return "The architect is analyzing world lore and recent chronicles to weave your destiny...";
+        const gd = gameData?.grandDesign;
+        if (!gd) return "The narrative threads are currently being woven. This field will be populated as the AI synthesizes your choices into a grand overarching plot.";
+
+        const clockHours = Math.floor((gd.threatClockMinutes || 0) / 60);
+        const clockMins = (gd.threatClockMinutes || 0) % 60;
+        const clockDisplay = clockHours > 0 ? `${clockHours}h ${clockMins}m` : `${clockMins}m`;
+        const clockPercent = gd.threatClockOriginal > 0 ? Math.round((gd.threatClockMinutes / gd.threatClockOriginal) * 100) : 100;
+
+        return `🔮 Secret Consequence\n${gd.secretConsequence}\n\n⚠️ Hidden Threat\n${gd.hiddenThreat}\n\n👁️ Indirect Signs\n${gd.indirectSigns}\n\n⚔️ Threat Details\n${gd.threatDetails}\n\n⏳ Threat Clock: ${clockDisplay} remaining (${clockPercent}%)`;
+    }, [isWeaving, gameData?.grandDesign]);
 
     const connectedNpcs = useMemo(() => {
         if (!gameData?.connectedNpcIds || !gameData.npcs) return [];
