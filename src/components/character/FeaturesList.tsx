@@ -13,6 +13,7 @@ import { CombatLoadout } from './CompanionLoadout';
 import { TRAIT_LIBRARY, LibraryTrait } from '../../utils/traitLibrary';
 import { POWER_LIBRARY } from '../../utils/powerLibrary';
 import { skinAbilityFlavor } from '../../services/aiCharacterService';
+import { WizardEffectSelectorModal } from './wizard/WizardEffectSelectorModal';
 
 interface AbilityCardProps {
     ability: Ability;
@@ -170,6 +171,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [librarySource, setLibrarySource] = useState<'trait' | 'power'>('trait');
     const [libraryTab, setLibraryTab] = useState<'general' | 'combat'>('general');
+    const [pendingEffectTrait, setPendingEffectTrait] = useState<{ trait: LibraryTrait, isPower: boolean } | null>(null);
 
     // Phase 2: Calculate Trait Point Metrics
     const metrics = useMemo(() => {
@@ -215,6 +217,15 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
     const addTraitFromLibrary = async (trait: LibraryTrait) => {
         const isPower = librarySource === 'power';
+        if (trait.effect?.type === 'Damage' || trait.effect?.type === 'Status') {
+            setPendingEffectTrait({ trait, isPower });
+            setIsLibraryOpen(false);
+            return;
+        }
+        await processAndAddTrait(trait, isPower);
+    };
+
+    const processAndAddTrait = async (trait: LibraryTrait, isPower: boolean) => {
         const collectionKey = isPower ? 'powers' : 'abilities';
         const idPrefix = isPower ? 'power' : 'ability';
         
@@ -237,7 +248,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         const newList = [...currentItems, newAbility];
         onChange([collectionKey], newList);
         setIsLibraryOpen(false);
-
 
         if (isCombat) {
             try {
@@ -265,6 +275,18 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 onChange([collectionKey], failedList);
             }
         }
+    };
+    
+    const handleEffectSubtypeSelect = async (value: string) => {
+        if (!pendingEffectTrait) return;
+        const { trait, isPower } = pendingEffectTrait;
+        const updated = { ...trait };
+        if (updated.effect) {
+            if (updated.effect.type === 'Damage') updated.effect.damageType = value;
+            else if (updated.effect.type === 'Status') updated.effect.status = value as any;
+        }
+        setPendingEffectTrait(null);
+        await processAndAddTrait(updated, isPower);
     };
 
     const removeAbility = (index: number) => {
@@ -675,6 +697,15 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     </div>
                 )}
             </Modal>
+
+            {pendingEffectTrait && (
+                <WizardEffectSelectorModal 
+                    isOpen={!!pendingEffectTrait} 
+                    onClose={() => setPendingEffectTrait(null)} 
+                    type={pendingEffectTrait.trait.effect?.type as 'Damage' | 'Status'} 
+                    onSelect={handleEffectSubtypeSelect} 
+                />
+            )}
         </div>
     );
 };

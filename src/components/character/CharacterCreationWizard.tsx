@@ -24,6 +24,7 @@ import { WizardNavigation } from './wizard/WizardNavigation';
 import { WizardStepMethod } from './wizard/WizardStepMethod';
 import { WizardStepAttributes } from './wizard/WizardStepAttributes';
 import { WizardEffectSelectorModal } from './wizard/WizardEffectSelectorModal';
+import { POWER_LIBRARY } from '../../utils/powerLibrary';
 
 interface CharacterCreationWizardProps {
     isOpen: boolean;
@@ -100,7 +101,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         return libraryTraits.filter(t => t.category === 'general');
     }, [libraryTraits, isShip]);
 
-    const combats = useMemo(() => libraryTraits.filter(t => t.category === 'combat'), [libraryTraits]);
+    const combats = useMemo(() => {
+        const combatTraits = libraryTraits.filter(t => t.category === 'combat');
+        return [...combatTraits, ...POWER_LIBRARY];
+    }, [libraryTraits]);
 
     useEffect(() => {
         if (creationProgress.isActive && creationProgress.step) {
@@ -338,8 +342,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const allAbilities: Ability[] = [
                 ...(racialTrait ? [{ ...racialTrait, id: `racial-rec-${Date.now()}` }] : []),
                 ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), 
-                ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` })), 
-                { ...recruit.comSeed, id: `combat-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged." }
+                ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
+            ];
+            
+            const allPowers: Ability[] = [
+                { ...recruit.comSeed, id: `combat-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged.", category: 'combat' }
             ];
 
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
@@ -364,6 +371,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 savingThrows: savingThrows, 
                 skills: fullSkills, 
                 abilities: allAbilities, 
+                powers: allPowers,
                 level: playerLevel, 
                 experiencePoints: getXpForLevel(playerLevel), 
                 alignment: recruit.moralAlignment,
@@ -406,8 +414,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const allAbilities: Ability[] = [
                 ...(racialTrait ? [{ ...racialTrait, id: `racial-${Date.now()}` }] : []),
                 ...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
-                ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })),
-                { ...combatAbility, id: `combat-${Date.now()}`, name: `[Pending] ${combatAbility.name}`, description: "This ability is being forged." }
+                ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
+            ];
+            
+            const allPowers: Ability[] = [
+                { ...combatAbility, id: `combat-${Date.now()}`, name: `[Pending] ${combatAbility.name}`, description: "This ability is being forged.", category: 'combat' }
             ];
             
             // Merge custom skills with guaranteed traits
@@ -432,6 +443,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 savingThrows: savingThrows || defaultSaves, 
                 skills: finalSkills, 
                 abilities: allAbilities, 
+                powers: allPowers,
                 level, 
                 experiencePoints: getXpForLevel(level), 
                 isShip, 

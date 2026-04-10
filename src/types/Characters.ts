@@ -23,7 +23,7 @@ export interface Ability {
 /* Fix: Define LibraryTrait interface used in traitLibrary and creation wizard */
 export interface LibraryTrait extends Omit<Ability, 'id'> {
     requiredConfig?: SkillConfiguration;
-    category: 'general' | 'background' | 'combat' | 'ship_hull' | 'ship_module';
+    category: 'general' | 'background' | 'combat' | 'power' | 'ship_hull' | 'ship_module';
     isShipOnly?: boolean;
     requires?: string[];
     minLevel?: number;
