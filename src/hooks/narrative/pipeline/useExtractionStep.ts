@@ -247,7 +247,7 @@ export const useExtractionStep = (
 
             // Announce the collective narrative alignment shift
             const normAlign = normalizeAlignment(aiResponse.player_alignment_shift);
-            if (normAlign && normAlign !== 'Neutral') {
+            if (normAlign) {
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
