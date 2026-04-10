@@ -40,8 +40,7 @@ export const inferTagsFromStats = (itemData: any): string[] => {
 
     if (itemData.armorStats) {
         if (itemData.armorStats.armorType === 'shield') {
-            tags.add('shield');
-            tags.add('Light Armor');
+            tags.add('Shield');
         } else {
             const type = itemData.armorStats.armorType?.toLowerCase();
             if (type === 'light') tags.add('Light Armor');
@@ -51,9 +50,13 @@ export const inferTagsFromStats = (itemData: any): string[] => {
         }
     }
 
-    const toRemove = ['unidentified', 'weapon', 'armor', 'heavy weapon', 'light weapon', 'medium weapon', 'light armor', 'medium armor', 'heavy armor'];
+    const toRemove = ['unidentified', 'weapon', 'armor', 'heavy weapon', 'light weapon', 'medium weapon', 'light armor', 'medium armor', 'heavy armor', 'shield'];
     toRemove.forEach(r => {
-        tags.delete(r);
+        // Case-insensitive removal
+        const lowerR = r.toLowerCase();
+        Array.from(tags).forEach(t => {
+            if (t.toLowerCase() === lowerR) tags.delete(t);
+        });
     });
 
     return Array.from(tags);
@@ -252,7 +255,11 @@ export const buildMechanicalSummary = (item: Item, baseTemplateName?: string): s
         parts.push(powerDesc);
     } else if (item.armorStats) {
         const total = (item.armorStats.baseAC || 0) + (item.armorStats.plusAC || 0);
-        const weight = tags.includes('light armor') ? 'Light' : (tags.includes('medium armor') ? 'Heavy' : 'Custom');
+        let weight = 'Custom';
+        if (tags.includes('light armor')) weight = 'Light';
+        else if (tags.includes('medium armor')) weight = 'Medium';
+        else if (tags.includes('heavy armor')) weight = 'Heavy';
+        else if (tags.includes('shield')) weight = 'Shield';
 
         let powerDesc = `[Power]: AC ${total} (${weight} defense).`;
         if (item.armorStats.plusAC !== 0) {

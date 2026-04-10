@@ -163,7 +163,7 @@ ${preRolledMechanics}
             player_alignment_shift: { 
                 type: Type.STRING, 
                 enum: ["Good", "Evil", "Lawful", "Chaotic", "Neutral"],
-                description: "The moral weight of the player's last action. Use 'Neutral' if no significant shift occurred."
+                description: "The moral weight of the player's last action. MUST be one of: Good, Evil, Lawful, Chaotic, Neutral. Use 'Neutral' if no significant shift occurred."
             },
             time_passed_minutes: { type: Type.NUMBER, description: "Amount of game time passed during this action (e.g. 5, 15, 60)." },
             turn_summary: { type: Type.STRING, description: "A concise, 10-word summary of the turn's events for the story log." },
@@ -189,7 +189,11 @@ ${preRolledMechanics}
                     type: Type.OBJECT,
                     properties: {
                         label: { type: Type.STRING, description: "Max 5 words. Use Title Case. Must be an action-oriented phrase representing the specified alignment at its most extreme/purest form." },
-                        alignment: { type: Type.STRING, description: "Good | Evil | Lawful | Chaotic" }
+                        alignment: { 
+                            type: Type.STRING, 
+                            enum: ["Good", "Evil", "Lawful", "Chaotic"],
+                            description: "The core moral/ethical alignment this action represents. MUST be exactly one of: Good, Evil, Lawful, Chaotic." 
+                        }
                     },
                     required: ["label", "alignment"]
                 }
@@ -348,7 +352,7 @@ The player has expended a HEROIC POINT this round.
       },
       "npc_resolution": [],
       "alignmentOptions": [
-          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic" }
+          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic (MUST be one of these 4 strings exactly)" }
       ],
       "updates": {
           "gmNotes": "string",

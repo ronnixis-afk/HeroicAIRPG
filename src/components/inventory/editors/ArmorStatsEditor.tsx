@@ -81,6 +81,22 @@ export const ArmorStatsEditor: React.FC<{
                 <SelectField label="Type" value={stats.armorType} onChange={e => onChange(['armorStats', 'armorType'], e.target.value as any)} options={['light', 'medium', 'heavy', 'shield']} />
                 <InputField label="Str Req." type="number" value={String(stats.strengthRequirement)} onChange={e => onChange(['armorStats', 'strengthRequirement'], parseInt(e.target.value) || 0)} />
             </div>
+
+            {!isShield && (
+                <div className="flex items-center gap-3 px-1 py-1">
+                    <input
+                        type="checkbox"
+                        id="stealth-penalty-toggle"
+                        checked={!!stats.stealthPenalty}
+                        onChange={e => onChange(['armorStats', 'stealthPenalty'], e.target.checked)}
+                        className="w-5 h-5 rounded border-brand-primary bg-brand-primary text-brand-accent focus:ring-brand-accent"
+                    />
+                    <label htmlFor="stealth-penalty-toggle" className="text-body-sm font-bold text-brand-text cursor-pointer">
+                        Stealth Penalty (-5)
+                    </label>
+                </div>
+            )}
+            
             {isShield && stats.baseAC > 4 && (
                 <p className="text-[10px] text-amber-500 mt-2 font-bold italic px-1">Shield base AC is capped at 4 by system rules.</p>
             )}

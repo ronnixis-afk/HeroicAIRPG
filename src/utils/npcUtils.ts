@@ -1,6 +1,6 @@
 // utils/npcUtils.ts
 
-import { NPC, Companion, CombatActor, EnemyTemplate } from '../types';
+import { NPC, Companion, CombatActor, EnemyTemplate, AlignmentType } from '../types';
 import { generateEnemyFromTemplate, DEFAULT_TEMPLATES, DEFAULT_SIZE_MODIFIERS, DEFAULT_ARCHETYPE_DEFINITIONS, recalculateCombatActorStats, DEFAULT_AFFINITIES } from './mechanics';
 
 export const getRelationshipLabel = (score: number): { label: string, color: string } => {
@@ -297,31 +297,47 @@ export const getLawChaosLabel = (score: number) => {
     return 'Pure Chaos';
 };
 
+/**
+ * Normalizes a string to a valid AlignmentType.
+ */
+export const normalizeAlignment = (alignment: string | undefined): AlignmentType | null => {
+    if (!alignment) return null;
+    const a = alignment.toLowerCase().trim();
+    if (a.includes('good')) return 'Good';
+    if (a.includes('evil')) return 'Evil';
+    if (a.includes('lawful')) return 'Lawful';
+    if (a.includes('chaotic')) return 'Chaotic';
+    return null;
+};
+
 export const calculateAlignmentRelationshipShift = (
-    actionAlignment: string, // "Good", "Evil", "Lawful", "Chaotic"
+    actionAlignment: string | undefined, // "Good", "Evil", "Lawful", "Chaotic" (normalized internally)
     npcAlignment?: { lawChaos?: number; goodEvil?: number }
 ): number => {
-    if (!npcAlignment) return 0;
+    if (!npcAlignment || !actionAlignment) return 0;
 
-    if (actionAlignment === 'Good' || actionAlignment === 'Evil') {
+    const normAlign = normalizeAlignment(actionAlignment);
+    if (!normAlign) return 0;
+
+    if (normAlign === 'Good' || normAlign === 'Evil') {
         const score = npcAlignment.goodEvil || 0;
         const label = getGoodEvilLabel(score);
         const index = GOOD_EVIL_ALIASES.findIndex(a => a.label === label);
         if (index === -1) return 0;
 
-        const baseShift = actionAlignment === 'Good' ? (4 - index) : (index - 4);
-        if (baseShift === 0) return actionAlignment === 'Good' ? 1 : -1;
+        const baseShift = normAlign === 'Good' ? (4 - index) : (index - 4);
+        if (baseShift === 0) return normAlign === 'Good' ? 1 : -1;
         return baseShift;
     }
 
-    if (actionAlignment === 'Lawful' || actionAlignment === 'Chaotic') {
+    if (normAlign === 'Lawful' || normAlign === 'Chaotic') {
         const score = npcAlignment.lawChaos || 0;
         const label = getLawChaosLabel(score);
         const index = LAW_CHAOS_ALIASES.findIndex(a => a.label === label);
         if (index === -1) return 0;
 
-        const baseShift = actionAlignment === 'Lawful' ? (4 - index) : (index - 4);
-        if (baseShift === 0) return actionAlignment === 'Lawful' ? 1 : -1;
+        const baseShift = normAlign === 'Lawful' ? (4 - index) : (index - 4);
+        if (baseShift === 0) return normAlign === 'Lawful' ? 1 : -1;
         return baseShift;
     }
 

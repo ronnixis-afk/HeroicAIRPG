@@ -12,7 +12,7 @@ import { MessageItem } from './chat/MessageItem';
 import { SystemMessageGroup } from './chat/SystemGroup';
 import { CombatControls } from './chat/CombatControls';
 import { EntityLinker } from './chat/EntityLinker';
-import { calculateAlignmentRelationshipShift } from '../utils/npcUtils';
+import { calculateAlignmentRelationshipShift, normalizeAlignment } from '../utils/npcUtils';
 import { isLocaleMatch } from '../utils/mapUtils';
 import CombatConsensusPanel from './combat/CombatConsensusModal';
 import { EntityLightbox } from './chat/EntityLightbox';
@@ -187,23 +187,24 @@ const ChatView: React.FC = () => {
                     updatedPlayer.alignment = { lawChaos: 0, goodEvil: 0 };
                 }
 
+                const normAlign = normalizeAlignment(alignment);
                 const roll = Math.floor(Math.random() * 4) + 1; // 1d4
                 let axis = '';
                 let change = '';
 
-                if (alignment === 'Good') {
+                if (normAlign === 'Good') {
                     updatedPlayer.alignment.goodEvil += roll;
                     axis = 'Morality';
                     change = `+${roll} Good`;
-                } else if (alignment === 'Evil') {
+                } else if (normAlign === 'Evil') {
                     updatedPlayer.alignment.goodEvil -= roll;
                     axis = 'Morality';
                     change = `-${roll} Evil`;
-                } else if (alignment === 'Lawful') {
+                } else if (normAlign === 'Lawful') {
                     updatedPlayer.alignment.lawChaos += roll;
                     axis = 'Order';
                     change = `+${roll} Lawful`;
-                } else if (alignment === 'Chaotic') {
+                } else if (normAlign === 'Chaotic') {
                     updatedPlayer.alignment.lawChaos -= roll;
                     axis = 'Order';
                     change = `-${roll} Chaotic`;

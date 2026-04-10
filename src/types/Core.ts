@@ -303,7 +303,7 @@ export type DamageType = typeof DAMAGE_TYPES[number];
 
 export const ITEM_TAGS = [
     'Light Weapon', 'Medium Weapon', 'Heavy Weapon', 'Light Armor', 'Medium Armor', 'Heavy Armor',
-    'shield', 'consumable', 'ammunition',
+    'Shield', 'consumable', 'ammunition',
     'currency', 'asset', 'vehicle', 'material', 'note', 'buff', 'mechanical', 'quest',
     'ranged', 'melee'
 ] as const;

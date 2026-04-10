@@ -93,20 +93,20 @@ export const LOOT_TABLES: Record<string, Partial<Item>[]> = {
     ],
     armors: [
         // --- Light Armor (Full Dex) ---
-        { name: 'Light Armor Tier 1', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 11, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
-        { name: 'Light Armor Tier 2', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
-        { name: 'Light Armor Tier 3', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 13, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Quilted Gambeson', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 11, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Leather Armor', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 12, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Studded Leather', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 13, armorType: 'light', plusAC: 0, strengthRequirement: 0 } },
         
         // --- Medium Armor (Half Dex) ---
-        { name: 'Medium Armor Tier 1', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 14, armorType: 'medium', plusAC: 0, strengthRequirement: 0 } },
-        { name: 'Medium Armor Tier 2', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 15, armorType: 'medium', plusAC: 0, strengthRequirement: 0 } },
-        { name: 'Medium Armor Tier 3', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 16, armorType: 'medium', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Hide Armor', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 14, armorType: 'medium', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Chain Shirt', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 15, armorType: 'medium', plusAC: 0, strengthRequirement: 0 } },
+        { name: 'Scale Mail', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 16, armorType: 'medium', plusAC: 0, strengthRequirement: 0, stealthPenalty: true } },
         
         // --- Heavy Armor (No Dex) ---
-        { name: 'Heavy Armor Tier 1', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 17, armorType: 'heavy', plusAC: 0, strengthRequirement: 13 } },
-        { name: 'Heavy Armor Tier 2', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 18, armorType: 'heavy', plusAC: 0, strengthRequirement: 15 } },
-        { name: 'Heavy Armor Tier 3', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 19, armorType: 'heavy', plusAC: 0, strengthRequirement: 15 } },
-        { name: 'Heavy Armor Tier 4', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 20, armorType: 'heavy', plusAC: 0, strengthRequirement: 17 } },
+        { name: 'Ring Mail', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 17, armorType: 'heavy', plusAC: 0, strengthRequirement: 13, stealthPenalty: true } },
+        { name: 'Chain Mail', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 18, armorType: 'heavy', plusAC: 0, strengthRequirement: 15, stealthPenalty: true } },
+        { name: 'Splint Armor', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 19, armorType: 'heavy', plusAC: 0, strengthRequirement: 15, stealthPenalty: true } },
+        { name: 'Plate Armor', tags: ['armor'], bodySlotTag: 'Body', armorStats: { baseAC: 20, armorType: 'heavy', plusAC: 0, strengthRequirement: 17, stealthPenalty: true } },
         
         // --- Shields ---
         { name: 'Basic Shield', tags: ['armor', 'shield'], bodySlotTag: 'Off Hand', armorStats: { baseAC: 2, armorType: 'shield', plusAC: 0, strengthRequirement: 0 } },

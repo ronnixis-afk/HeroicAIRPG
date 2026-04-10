@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { AlignmentOption } from '../../types';
+import { normalizeAlignment } from '../../utils/npcUtils';
 
 interface AlignmentActionTrayProps {
     options: AlignmentOption[];
@@ -44,18 +45,19 @@ export const AlignmentActionTray: React.FC<AlignmentActionTrayProps> = ({ option
                 className="grid grid-rows-2 grid-flow-col gap-2 overflow-x-auto no-scrollbar scroll-smooth px-4 h-[84px] content-start"
             >
                 {options.map((opt, idx) => {
+                    const normAlign = normalizeAlignment(opt.alignment);
                     let iconFile = '';
-                    if (opt.alignment === 'Good') iconFile = '/icons/good-alignment.png';
-                    else if (opt.alignment === 'Evil') iconFile = '/icons/evil-alignment.png';
-                    else if (opt.alignment === 'Lawful') iconFile = '/icons/lawful-alignment.png';
-                    else if (opt.alignment === 'Chaotic') iconFile = '/icons/chaotic-alignment.png';
+                    if (normAlign === 'Good') iconFile = '/icons/good-alignment.png';
+                    else if (normAlign === 'Evil') iconFile = '/icons/evil-alignment.png';
+                    else if (normAlign === 'Lawful') iconFile = '/icons/lawful-alignment.png';
+                    else if (normAlign === 'Chaotic') iconFile = '/icons/chaotic-alignment.png';
 
                     return (
                         <button
                             key={idx}
                             onClick={() => {
                                 const event = new CustomEvent('alignment-action', {
-                                    detail: { label: opt.label, alignment: opt.alignment }
+                                    detail: { label: opt.label, alignment: normAlign || opt.alignment }
                                 });
                                 window.dispatchEvent(event);
                             }}

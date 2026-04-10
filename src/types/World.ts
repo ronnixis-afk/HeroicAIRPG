@@ -209,9 +209,11 @@ export interface UsageStats {
   latencyMs?: number;
 }
 
+export type AlignmentType = 'Good' | 'Evil' | 'Lawful' | 'Chaotic';
+
 export interface AlignmentOption {
   label: string;
-  alignment: 'Good' | 'Evil' | 'Lawful' | 'Chaotic';
+  alignment: AlignmentType;
 }
 
 export interface DialogueLine {

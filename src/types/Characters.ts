@@ -369,7 +369,13 @@ export class PlayerCharacter {
             .filter(b => b.type === 'skill' && b.skillName === canonicalSkill)
             .reduce((sum, b) => sum + b.bonus, 0);
 
-        return modifier + (isProficient ? this.proficiencyBonus : 0) + skillBuff + penalties.check;
+        let armorCheckPenalty = 0;
+        if (canonicalSkill === 'Stealth') {
+            const hasStealthPenaltyArmor = inventory.equipped.some(item => item.armorStats?.stealthPenalty);
+            if (hasStealthPenaltyArmor) armorCheckPenalty = -5;
+        }
+
+        return modifier + (isProficient ? this.proficiencyBonus : 0) + skillBuff + penalties.check + armorCheckPenalty;
     }
 
     getSavingThrowBonus(abilityName: AbilityScoreName, inventory: Inventory): number {

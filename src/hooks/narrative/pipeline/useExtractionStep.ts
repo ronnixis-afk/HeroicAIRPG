@@ -5,7 +5,7 @@ import React, { useCallback } from 'react';
 import { GameData, GameAction, AIUpdatePayload, NPC, StoryLog, InventoryUpdatePayload, NPCMemory, LoreEntry, AIResponse, MapZone } from '../../../types';
 import { resolveLocaleCreation, generateZoneDetails, enrichItemDetails } from '../../../services/geminiService';
 import { forgeSkins } from '../../../services/ItemGeneratorService';
-import { formatRelationshipChange, calculateAlignmentRelationshipShift } from '../../../utils/npcUtils';
+import { formatRelationshipChange, calculateAlignmentRelationshipShift, normalizeAlignment } from '../../../utils/npcUtils';
 import { isLocaleMatch, parseHostility } from '../../../utils/mapUtils';
 import { parseGameTime, addDuration, formatGameTime } from '../../../utils/timeUtils';
 
@@ -246,13 +246,14 @@ export const useExtractionStep = (
             });
 
             // Announce the collective narrative alignment shift
-            if (aiResponse.player_alignment_shift && aiResponse.player_alignment_shift !== 'Neutral') {
+            const normAlign = normalizeAlignment(aiResponse.player_alignment_shift);
+            if (normAlign && normAlign !== 'Neutral') {
                 dispatch({
                     type: 'ADD_MESSAGE',
                     payload: {
                         id: `sys-align-${Date.now()}`,
                         sender: 'system',
-                        content: `**Alignment Shift**: *${aiResponse.player_alignment_shift}*`,
+                        content: `**Alignment Shift**: *${normAlign}*`,
                         type: 'neutral'
                     }
                 });

@@ -480,6 +480,11 @@ export const ItemDetailView: React.FC<ItemDetailViewProps> = ({
                                 propTags.push({ label: abilityLabel, color: 'text-purple-300 border-purple-500/40 bg-purple-900/10' });
                             }
 
+                            // Stealth Penalty
+                            if (item.armorStats?.stealthPenalty) {
+                                propTags.push({ label: 'Stealth Penalty (-5)', color: 'text-orange-400 border-orange-500/40 bg-orange-900/10' });
+                            }
+
                             // Equip body slot
                             if (item.bodySlotTag) {
                                 propTags.push({ label: slotLabel, color: 'text-brand-accent border-brand-accent/30 bg-brand-accent/5' });

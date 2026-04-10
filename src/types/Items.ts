@@ -19,6 +19,7 @@ export interface ArmorStats {
   armorType: 'light' | 'medium' | 'heavy' | 'shield';
   plusAC: number;
   strengthRequirement: number;
+  stealthPenalty?: boolean; // NEW: Applies a penalty to stealth-based checks
 }
 
 export class Item {
