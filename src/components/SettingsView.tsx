@@ -10,7 +10,6 @@ import { NARRATION_VOICES } from '../types';
 import { parseGameTime, formatGameTime } from '../utils/timeUtils';
 import { worldService } from '../services/worldService';
 import { cloudSaveService } from '../services/cloudSaveService';
-import { downloadAsTxt, DOCUMENTATION_FILES } from '../utils/documentation';
 import Modal from './Modal';
 import PageHeader from './PageHeader';
 
@@ -76,33 +75,6 @@ const ToggleSwitch: React.FC<{ label: string, enabled: boolean, onChange: (enabl
     );
 };
 
-const StorageMeter: React.FC<{ used: number; limit: number }> = ({ used, limit }) => {
-    const usedMb = (used / (1024 * 1024)).toFixed(2);
-    const limitMb = (limit / (1024 * 1024)).toFixed(1);
-    const percentage = limit > 0 ? (used / limit) * 100 : 0;
-
-    let barColor = 'bg-brand-accent';
-    if (percentage > 90) {
-        barColor = 'bg-brand-danger';
-    } else if (percentage > 70) {
-        barColor = 'bg-yellow-500';
-    }
-
-    return (
-        <div className="px-1">
-            <div className="flex justify-between items-center text-body-sm text-brand-text-muted mb-2">
-                <span className="font-bold">Storage capacity</span>
-                <span className="font-medium">{usedMb} Mb / {limitMb} Mb</span>
-            </div>
-            <div className="w-full bg-brand-primary rounded-full h-2 overflow-hidden border border-brand-surface shadow-inner">
-                <div
-                    className={`h-full rounded-full transition-all duration-300 ${barColor}`}
-                    style={{ width: `${percentage}%` }}
-                />
-            </div>
-        </div>
-    );
-};
 
 const TabButton: React.FC<{ label: string, isActive: boolean, onClick: () => void }> = ({ label, isActive, onClick }) => (
     <button
@@ -127,7 +99,6 @@ const SettingsView: React.FC = () => {
         updateIsHandsFree,
         updateUseAiTts,
         updateCurrentTime,
-        storageUsage,
         worldId,
         updateMapSettings,
         updateSkillConfiguration,
@@ -143,7 +114,6 @@ const SettingsView: React.FC = () => {
     const [timeInput, setTimeInput] = useState('');
     const [isSavingTime, setIsSavingTime] = useState(false);
     const [saveTimeSuccess, setSaveTimeSuccess] = useState(false);
-    const [isDocModalOpen, setIsDocModalOpen] = useState(false);
 
     // --- Cloud Sync State ---
     const [isSyncingCloud, setIsSyncingCloud] = useState(false);
@@ -244,9 +214,6 @@ const SettingsView: React.FC = () => {
         }
     };
 
-    const handleExportWorld = () => {
-        worldService.exportWorldById(worldId);
-    };
 
     return (
         <div className="p-2 pt-8 max-w-2xl mx-auto pb-24">
@@ -379,19 +346,6 @@ const SettingsView: React.FC = () => {
                                     {cloudMessage}
                                 </div>
                             )}
-
-                            <Button
-                                onClick={handleExportWorld}
-                                variant="secondary"
-                                className="w-full"
-                                icon="download"
-                            >
-                                Export World
-                            </Button>
-                        </div>
-
-                        <div className="pt-6 border-t border-brand-primary/20">
-                            <StorageMeter used={storageUsage.used} limit={storageUsage.limit} />
                         </div>
 
                         <div>
@@ -419,25 +373,6 @@ const SettingsView: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t border-brand-primary/20">
-                            <h4 className="mb-0">Documentation</h4>
-                             <div className="grid grid-cols-2 gap-4">
-                                <Button
-                                    onClick={() => setIsDocModalOpen(true)}
-                                    variant="secondary"
-                                    icon="eye"
-                                >
-                                    View Manual
-                                </Button>
-                                <Button
-                                    onClick={downloadAsTxt}
-                                    variant="secondary"
-                                    icon="download"
-                                >
-                                    Download Txt
-                                </Button>
-                            </div>
-                        </div>
 
                         <div className="border-t border-brand-primary/20 pt-10">
                             <div className="bg-brand-danger/5 border border-brand-danger/20 rounded-3xl p-6 space-y-6">
@@ -459,31 +394,6 @@ const SettingsView: React.FC = () => {
                 )}
             </div>
 
-            <Modal isOpen={isDocModalOpen} onClose={() => setIsDocModalOpen(false)} title="Technical Manual">
-                <div className="space-y-12 py-4 pb-12 custom-scroll max-h-[70vh]">
-                    {DOCUMENTATION_FILES.map((doc, idx) => (
-                        <section key={idx} className="animate-fade-in border-b border-brand-primary/10 pb-10 last:border-0" style={{ animationDelay: `${idx * 50}ms` }}>
-                            <h5 className="text-brand-accent mb-4">
-                                {doc.title}
-                            </h5>
-                            <div className="text-body-base text-brand-text leading-relaxed whitespace-pre-wrap font-medium opacity-90">
-                                {doc.content}
-                            </div>
-                        </section>
-                    ))}
-
-                     <div className="pt-4 flex justify-center">
-                        <Button
-                            onClick={downloadAsTxt}
-                            variant="primary"
-                            icon="download"
-                            className="px-10"
-                        >
-                            Download Technical Manual
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
         </div>
     );
 };
