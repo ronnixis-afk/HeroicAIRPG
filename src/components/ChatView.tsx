@@ -329,9 +329,10 @@ const ChatView: React.FC = () => {
                 return null;
             }
 
-            // If we find an AI message with options, these are the active ones
-            if (msg && msg.sender === 'ai' && msg.alignmentOptions && msg.alignmentOptions.length > 0) {
-                return msg.alignmentOptions;
+            // If we find an AI message, it is the sole source of truth for the latest narrative state.
+            // If it doesn't have options (e.g. OOC mode), we do NOT reach back to previous turns.
+            if (msg && msg.sender === 'ai') {
+                return (msg.alignmentOptions && msg.alignmentOptions.length > 0) ? msg.alignmentOptions : null;
             }
 
             // Skip any other messages (System logs, regular User chat, AI narration without choices)

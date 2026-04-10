@@ -184,7 +184,7 @@ ${preRolledMechanics}
             },
             alignmentOptions: {
                 type: Type.ARRAY,
-                description: "4 logical suggestions for the next action. Each button action MUST strongly represent an absolute moral alignment (Good, Evil, Lawful, Chaotic). Labels must be concise, punchy, and reflect 'maximum commitment' to that alignment.",
+                description: "EXACTLY 4 logical suggestions for the next action. Each button action MUST strongly represent an absolute moral alignment (Good, Evil, Lawful, Chaotic). Labels must be concise, punchy, and reflect 'maximum commitment' to that alignment.",
                 items: {
                     type: Type.OBJECT,
                     properties: {
@@ -310,7 +310,85 @@ The player has expended a HEROIC POINT this round.
 
     const period = getTimePeriod(gameData.currentTime);
 
-    const systemInstruction = `
+    const outputSchema = {
+        type: Type.OBJECT,
+        properties: {
+            narration: {
+                type: Type.OBJECT,
+                properties: {
+                    paragraph1: { type: Type.STRING, description: "Atmospheric sensory summary. NO dialogue." },
+                    paragraph2: { type: Type.STRING, description: "Environmental Hook & Agency (2-3 POIs + status/threat hint)." },
+                    dialogues: {
+                        type: Type.ARRAY,
+                        description: "Structured dialogue lines. Exactly 2-3 sentences per actor.",
+                        items: {
+                            type: Type.OBJECT,
+                            properties: {
+                                actorName: { type: Type.STRING, description: "Name of the character speaking. Title Case." },
+                                content: { type: Type.STRING, description: "The dialogue content. Sentence Case." },
+                                isAlignmentReaction: { type: Type.BOOLEAN }
+                            },
+                            required: ["actorName", "content"]
+                        }
+                    }
+                },
+                required: ["paragraph1", "paragraph2"]
+            },
+            location_update: {
+                type: Type.OBJECT,
+                properties: {
+                    coordinates: { type: Type.STRING },
+                    site_name: { type: Type.STRING },
+                    site_id: { type: Type.STRING }
+                },
+                required: ["coordinates", "site_name", "site_id"]
+            },
+            npc_resolution: { type: Type.ARRAY, items: { type: Type.OBJECT } },
+            alignmentOptions: {
+                type: Type.ARRAY,
+                description: "EXACTLY 4 logical suggestions for the next action. One per alignment (Good, Evil, Lawful, Chaotic).",
+                items: {
+                    type: Type.OBJECT,
+                    properties: {
+                        label: { type: Type.STRING, description: "Max 5 words, Title Case." },
+                        alignment: { type: Type.STRING, enum: ["Good", "Evil", "Lawful", "Chaotic"] }
+                    },
+                    required: ["label", "alignment"]
+                }
+            },
+            updates: {
+                type: Type.OBJECT,
+                properties: {
+                    gmNotes: { type: Type.STRING },
+                    objectives: { type: Type.ARRAY, items: { type: Type.OBJECT } }
+                }
+            }
+        },
+        required: ["narration", "location_update", "alignmentOptions", "updates"]
+    };
+
+    const prompt = `[Scene Context]: ${sceneContext || 'Standard combat arena.'}
+[Player's Intended Action]: "${playerActionFlavor || 'A direct engagement.'}"
+
+### The Dice Truth (Round Summary)
+${batchMechanicsSummary}
+
+[CRITICAL INSTRUCTION - DICE OUTCOME PROTOCOL]:
+- SUCCESS: Progress the situation narratively. The new scene should NOT be similar to the previous scene.
+- FAILURE: The party is STUCK in the same scene as previously and must find another way.
+- CRITICAL SUCCESS: Progress the situation significantly. The new scene must be THREE STEPS ahead of the previous one (skip the intermediate obstacles/build-up).
+- CRITICAL FAILURE: The party regresses from the current situation or alerts hostiles nearby.
+
+**Strict Narrative Invariants**: Make the dice results feel natural but absolute. Do not contradict them.`;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: AI_MODELS.DEFAULT,
+            contents: [{ parts: [{ text: prompt }] }],
+            config: {
+                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC },
+                systemInstruction: `
     You are a legendary TTRPG Storyteller and Action Director. 
     You are resolving a full round of combat in a single, breath-taking epic narration.
     [Style]: High-octane cinematic action. 
@@ -337,53 +415,10 @@ The player has expended a HEROIC POINT this round.
     2. DO NOT use numbers. 
     3. Translate results (Hit, Miss, Defeated) into action descriptions.
     4. The Dice Truth: You are forbidden from changing any mechanical outcome provided.
-    5. ALIGNMENT ACTIONS: Provide 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
-    
-    [Output Schema (Json)]:
-      "narration": {
-          "paragraph1": "Atmospheric sensory summary. NO dialogue.",
-          "paragraph2": "Environmental Hook & Agency (2-3 POIs + status/threat hint).",
-          "dialogues": [
-            { "actorName": "string", "content": "string", "isAlignmentReaction": boolean }
-          ]
-      },
-      "location_update": { 
-          "coordinates": "string", "site_name": "string", "site_id": "string" 
-      },
-      "npc_resolution": [],
-      "alignmentOptions": [
-          { "label": "string (Max 5 words, Title Case)", "alignment": "Good | Evil | Lawful | Chaotic (MUST be one of these 4 strings exactly)" }
-      ],
-      "updates": {
-          "gmNotes": "string",
-          "objectives": []
-      }
-    }
-    `;
-
-    const prompt = `[Scene Context]: ${sceneContext || 'Standard combat arena.'}
-[Player's Intended Action]: "${playerActionFlavor || 'A direct engagement.'}"
-
-### The Dice Truth (Round Summary)
-${batchMechanicsSummary}
-
-[CRITICAL INSTRUCTION - DICE OUTCOME PROTOCOL]:
-- SUCCESS: Progress the situation narratively. The new scene should NOT be similar to the previous scene.
-- FAILURE: The party is STUCK in the same scene as previously and must find another way.
-- CRITICAL SUCCESS: Progress the situation significantly. The new scene must be THREE STEPS ahead of the previous one (skip the intermediate obstacles/build-up).
-- CRITICAL FAILURE: The party regresses from the current situation or alerts hostiles nearby.
-
-**Strict Narrative Invariants**: Make the dice results feel natural but absolute. Do not contradict them.`;
-
-    try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: AI_MODELS.DEFAULT,
-            contents: [{ parts: [{ text: prompt }] }],
-            config: {
-                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC },
-                systemInstruction: systemInstruction,
-                responseMimeType: "application/json"
+    5. ALIGNMENT ACTIONS: Provide EXACTLY 4 logical next steps. Each MUST be an absolute representation of its alignment (Absolute Good, Absolute Evil, Absolute Lawful, Absolute Chaotic). Choose the most iconic and distinct action for each.
+    `,
+                responseMimeType: "application/json",
+                responseSchema: outputSchema as any
             }
         });
         const parsed = JSON.parse(cleanJson(response.text || '{}'));
