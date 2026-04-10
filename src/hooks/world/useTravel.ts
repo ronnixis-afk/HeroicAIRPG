@@ -487,7 +487,10 @@ export const useTravel = (
                 // 4. Execution or Feedback Logic
                 if (targetCoords) {
                     // Check if we are already there
-                    if (targetCoords === gameData.playerCoordinates && isKnownZone) {
+                    const isSameCoords = targetCoords === gameData.playerCoordinates;
+                    const isSameSite = isLocaleMatch(gameData.current_site_name || "", matchedZoneName);
+
+                    if (isSameCoords && isSameSite && isKnownZone) {
                         dispatch({
                             type: 'ADD_MESSAGE',
                             payload: {
