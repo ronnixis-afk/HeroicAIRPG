@@ -43,12 +43,12 @@ export const calculateDamageSequence = (
             const abilityMod = calculateModifier(abilityScore);
 
             // Apply Style: Great Weapon Fighting (2x Mod)
-            const hasGWF = pc.abilities.some(a => a.name === "Great Weapon Style");
+            const hasGWF = (pc.abilities?.some(a => a.name === "Great Weapon Style") || pc.powers?.some(a => a.name === "Great Weapon Style"));
             const isHeavy = sourceItem.tags?.some(t => t.toLowerCase().includes('heavy'));
             const effectiveMod = (isHeavy && hasGWF) ? abilityMod * 2 : abilityMod;
 
             // Apply Style: Dueling (+2 Damage)
-            const hasDueling = pc.abilities.some(a => a.name === "Dueling Style");
+            const hasDueling = (pc.abilities?.some(a => a.name === "Dueling Style") || pc.powers?.some(a => a.name === "Dueling Style"));
             const isDueling = combatStats.isDueling;
             const duelingBonus = (isDueling && hasDueling) ? 2 : 0;
 
@@ -88,7 +88,7 @@ export const calculateDamageSequence = (
     });
 
     // 2. Resolve Sneak Attack
-    const hasSneakAttack = isPC && actor.abilities?.some((a: any) => a.name === "Sneak Attack");
+    const hasSneakAttack = isPC && (actor.abilities?.some((a: any) => a.name === "Sneak Attack") || actor.powers?.some((a: any) => a.name === "Sneak Attack"));
     if (hasSneakAttack && rollMode === 'advantage') {
         const sneakDice = Math.ceil(actor.level / 2);
         sequence.push({
@@ -102,7 +102,8 @@ export const calculateDamageSequence = (
     // 3. Resolve Passive Extra Damage Buffs (e.g. Divine Favor, Elemental Trait)
     const passiveBuffs = [
         ...(inventory?.equipped.flatMap(i => (i.buffs || []).map(b => ({ ...b, source: i.name }))) || []),
-        ...(actor.abilities?.flatMap((a: any) => (a.buffs || []).map((b: any) => ({ ...b, source: a.name }))) || [])
+        ...(actor.abilities?.flatMap((a: any) => (a.buffs || []).map((b: any) => ({ ...b, source: a.name }))) || []),
+        ...(actor.powers?.flatMap((a: any) => (a.buffs || []).map((b: any) => ({ ...b, source: a.name }))) || [])
     ];
 
     passiveBuffs.filter(b => b.type === 'exdam' && b.damageDice).forEach(buff => {

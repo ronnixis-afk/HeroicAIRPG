@@ -11,6 +11,7 @@ import { EffectBuilder } from './editors/EffectBuilder';
 import { getBuffTag } from '../../utils/itemModifiers';
 import { CombatLoadout } from './CompanionLoadout';
 import { TRAIT_LIBRARY, LibraryTrait } from '../../utils/traitLibrary';
+import { POWER_LIBRARY } from '../../utils/powerLibrary';
 import { skinAbilityFlavor } from '../../services/aiCharacterService';
 
 interface AbilityCardProps {
@@ -165,8 +166,9 @@ interface FeaturesListProps {
 }
 
 export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory, onChange, isOpen, onToggle, skillConfig }) => {
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingIndex, setEditingIndex] = useState<{ type: 'ability' | 'power', index: number } | null>(null);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [librarySource, setLibrarySource] = useState<'trait' | 'power'>('trait');
     const [libraryTab, setLibraryTab] = useState<'general' | 'combat'>('general');
 
     // Phase 2: Calculate Trait Point Metrics
@@ -175,11 +177,15 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             return (character as any).getTraitPointMetrics();
         }
         return { total: 0, used: 0, available: 0 };
-    }, [character, character.abilities, character.level]);
+    }, [character, character.abilities, character.powers, character.level]);
 
 
     const handleAbilityChange = (index: number, field: string, value: any) => {
         onChange(['abilities', index, field], value);
+    };
+
+    const handlePowerChange = (index: number, field: string, value: any) => {
+        onChange(['powers', index, field], value);
     };
 
     const addAbility = () => {
@@ -189,20 +195,37 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             description: '',
             usage: { type: 'passive', maxUses: 0, currentUses: 0 }
         };
-        const newAbilities = [...character.abilities, newAbility];
+        const newAbilities = [...(character.abilities || []), newAbility];
         onChange(['abilities'], newAbilities);
-        setEditingIndex(newAbilities.length - 1);
+        setEditingIndex({ type: 'ability', index: newAbilities.length - 1 });
+    };
+
+    const addPower = () => {
+        const newPower: Ability = {
+            id: `power-${Date.now()}`,
+            name: 'New Power',
+            description: '',
+            usage: { type: 'per_short_rest', maxUses: 1, currentUses: 1 },
+            category: 'combat'
+        } as any;
+        const newPowers = [...(character.powers || []), newPower];
+        onChange(['powers'], newPowers);
+        setEditingIndex({ type: 'power', index: newPowers.length - 1 });
     };
 
     const addTraitFromLibrary = async (trait: LibraryTrait) => {
-        const abilityId = `ability-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+        const isPower = librarySource === 'power';
+        const collectionKey = isPower ? 'powers' : 'abilities';
+        const idPrefix = isPower ? 'power' : 'ability';
+        
+        const abilityId = `${idPrefix}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
         const isCombat = trait.category === 'combat';
 
         const newAbility: Ability = {
             ...trait,
             id: abilityId,
             isRefining: isCombat,
-            isLevelUpTrait: true // Phase 2/3: Consume point
+            isLevelUpTrait: !isPower // Only traits cost points unless you decide otherwise
         };
 
         // SYSTEMIC FIX: Ensure the new trait is scaled to the character's level immediately
@@ -210,8 +233,9 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             (character as PlayerCharacter).scaleAbility(newAbility, inventory);
         }
 
-        const newAbilities = [...character.abilities, newAbility];
-        onChange(['abilities'], newAbilities);
+        const currentItems = isPower ? (character.powers || []) : (character.abilities || []);
+        const newList = [...currentItems, newAbility];
+        onChange([collectionKey], newList);
         setIsLibraryOpen(false);
 
 
@@ -219,7 +243,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             try {
                 const { name, description, damageType } = await skinAbilityFlavor(newAbility, character, window.gameDataCache || { worldSummary: '' });
 
-                const updatedAbilities = newAbilities.map(a => {
+                const updatedList = newList.map(a => {
                     if (a.id === abilityId) {
                         const updated: Ability = {
                             ...a,
@@ -234,19 +258,27 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                     }
                     return a;
                 });
-                onChange(['abilities'], updatedAbilities);
+                onChange([collectionKey], updatedList);
             } catch (err) {
                 console.error("Trait personalization failed", err);
-                const failedAbilities = newAbilities.map(a => a.id === abilityId ? { ...a, isRefining: false } : a);
-                onChange(['abilities'], failedAbilities);
+                const failedList = newList.map(a => a.id === abilityId ? { ...a, isRefining: false } : a);
+                onChange([collectionKey], failedList);
             }
         }
     };
 
     const removeAbility = (index: number) => {
-        if (window.confirm("Are you sure you want to delete this ability?")) {
+        if (window.confirm("Are you sure you want to delete this feature?")) {
             const newAbilities = character.abilities.filter((_, i) => i !== index);
             onChange(['abilities'], newAbilities);
+            setEditingIndex(null);
+        }
+    };
+
+    const removePower = (index: number) => {
+        if (window.confirm("Are you sure you want to delete this power?")) {
+            const newPowers = character.powers.filter((_, i) => i !== index);
+            onChange(['powers'], newPowers);
             setEditingIndex(null);
         }
     };
@@ -276,7 +308,11 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             damageDice: '1d6',
             damageType: 'Force'
         };
-        handleAbilityChange(editingIndex, 'effect', defaultEffect);
+        if (editingIndex.type === 'ability') {
+            handleAbilityChange(editingIndex.index, 'effect', defaultEffect);
+        } else {
+            handlePowerChange(editingIndex.index, 'effect', defaultEffect);
+        }
     };
 
     const sortedAbilities = useMemo(() => {
@@ -302,12 +338,17 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         return [...coreAbilities, ...levelUpTraits];
     }, [character.abilities]);
 
+    const sortedPowers = useMemo(() => {
+        return [...(character.powers || [])].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }, [character.powers]);
+
     const filteredLibrary = useMemo(() => {
-        return TRAIT_LIBRARY.filter(trait =>
-            trait.category === libraryTab &&
+        const source = librarySource === 'trait' ? TRAIT_LIBRARY : POWER_LIBRARY;
+        return source.filter(trait =>
+            (librarySource === 'power' || trait.category === libraryTab) &&
             (!trait.requiredConfig || trait.requiredConfig === skillConfig)
         );
-    }, [skillConfig, libraryTab]);
+    }, [skillConfig, libraryTab, librarySource]);
 
     const isStrictlyUnarmed = useMemo(() => {
         return !inventory.equipped.some(item =>
@@ -316,7 +357,11 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
         );
     }, [inventory.equipped]);
 
-    const editingAbility = editingIndex !== null ? character.abilities[editingIndex] : null;
+    const editingAbility = useMemo(() => {
+        if (!editingIndex) return null;
+        if (editingIndex.type === 'ability') return character.abilities[editingIndex.index];
+        return character.powers[editingIndex.index];
+    }, [editingIndex, character.abilities, character.powers]);
 
     return (
         <div className="animate-fade-in pb-12">
@@ -337,116 +382,84 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                 </div>
             </div>
 
-            <div className="flex justify-between items-center mb-6 px-1">
+            <div className="flex justify-between items-center mb-6 px-1 mt-10">
                 <div className="flex flex-col">
-                    <h5 className="text-brand-text mb-0">Class Features & Traits</h5>
-                    {metrics.total > 0 && (
-                        <span className="text-body-sm font-bold text-brand-accent mt-1">
-                            Trait Points: {metrics.used} / {metrics.total}
-                        </span>
-                    )}
+                    <h5 className="text-brand-text mb-0">Powers</h5>
                 </div>
                 <div className="flex gap-3">
                     <button
-                        onClick={() => setIsLibraryOpen(true)}
+                        onClick={() => { setLibrarySource('power'); setIsLibraryOpen(true); }}
                         className="btn-secondary btn-sm rounded-full"
                     >
-                        Library
+                        Power Library
                     </button>
                 </div>
             </div>
 
-            <div className="flex flex-col gap-5 px-1 pb-4">
-                {sortedAbilities.length > 0 && sortedAbilities.map((ability) => {
-                    const originalIndex = character.abilities.findIndex(a => a.id === ability.id);
+            <div className="flex flex-col gap-5 px-1 pb-4 mb-2">
+                {sortedPowers.map((power) => {
+                     const realIdx = (character.powers || []).findIndex(p => p.id === power.id);
+                     let disabledReason = undefined;
+                     const effectType = power.effect?.type;
+                     const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+                     const cost = power.staminaCost !== undefined ? power.staminaCost : implicitCost;
+ 
+                     if (cost > 0 && (character.stamina || 0) < cost) {
+                         disabledReason = "Not enough stamina";
+                     }
 
-                    let disabledReason = undefined;
-                    const effectType = ability.effect?.type;
-                    const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
-                    const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
-
-                    if (ability.name === "Flurry of Blows" && !isStrictlyUnarmed) {
-                        disabledReason = "Must be Unarmed";
-                    } else if (cost > 0 && (character.stamina || 0) < cost) {
-                        disabledReason = "Not enough stamina";
-                    }
-
-                    return (
+                     return (
                         <AbilityCard
-                            key={ability.id}
-                            ability={ability}
-                            onEdit={() => setEditingIndex(originalIndex)}
-                            onDelete={() => removeAbility(originalIndex)}
+                            key={power.id}
+                            ability={power}
+                            onEdit={() => setEditingIndex({ type: 'power', index: realIdx })}
+                            onDelete={() => removePower(realIdx)}
                             standardDC={standardDC}
-                            standardDice={getStandardDiceForEffect(ability.effect)}
+                            standardDice={getStandardDiceForEffect(power.effect)}
                             disabledReason={disabledReason}
                         />
-                    );
-                })}
-
-                {/* Phase 2: Available Trait Slots */}
-                {Array.from({ length: metrics.available }).map((_, i) => {
-                    const earnedAtLevel = (metrics.used + i + 1) * 3;
-                    return (
-                        <button
-                            key={`trait-slot-${i}`}
-                            onClick={() => setIsLibraryOpen(true)}
-                            className="w-full h-28 border-2 border-dashed border-brand-primary/40 rounded-3xl flex items-center justify-center gap-4 text-brand-text-muted hover:border-brand-accent/50 hover:text-brand-accent transition-all group animate-pulse"
-                        >
-                            <div className="w-11 h-11 rounded-full bg-brand-primary/30 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                                <Icon name="plus" className="w-6 h-6" />
-                            </div>
-                            <span className="text-body-sm font-bold">Add Level {earnedAtLevel} Trait</span>
-                        </button>
-                    );
+                     );
                 })}
 
                 <button
-                    onClick={addAbility}
+                    onClick={addPower}
                     className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-colors mt-2"
                 >
                     <Icon name="plus" className="w-3.5 h-3.5" />
-                    <span className="text-body-sm font-bold opacity-60">Custom Feature</span>
+                    <span className="text-body-sm font-bold opacity-60">Custom Power</span>
                 </button>
-
-                {sortedAbilities.length === 0 && metrics.available === 0 && (
-                    <div className="py-24 text-center border-2 border-dashed border-brand-primary/30 rounded-3xl bg-brand-surface/20">
-                        <Icon name="sparkles" className="w-12 h-12 mx-auto mb-4 text-brand-text-muted opacity-30" />
-                        <p className="text-body-base text-brand-text-muted italic">This hero has no unique traits yet.</p>
-                        <div className="flex gap-6 justify-center mt-6">
-                            <button onClick={() => setIsLibraryOpen(true)} className="text-brand-accent font-bold text-xs hover:underline underline-offset-4">Trait library</button>
-                            <button onClick={addAbility} className="text-brand-accent font-bold text-xs hover:underline underline-offset-4">Manual entry</button>
-                        </div>
-                    </div>
-                )}
             </div>
 
 
-            <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title={`Trait Library (${skillConfig || 'Universal'})`}>
+            <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title={librarySource === 'trait' ? `Trait Library (${skillConfig || 'Universal'})` : 'Power Library'}>
                 <div className="flex flex-col h-[75vh]">
-                    <div className="flex justify-center mb-6 bg-brand-primary p-1 rounded-xl w-full flex-shrink-0">
-                        <button
-                            onClick={() => setLibraryTab('general')}
-                            className={`flex-1 btn-sm transition-all ${libraryTab === 'general' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
-                        >
-                            General
-                        </button>
-                        <button
-                            onClick={() => setLibraryTab('combat')}
-                            className={`flex-1 btn-sm transition-all ${libraryTab === 'combat' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
-                        >
-                            Combat
-                        </button>
-                    </div>
+                    {librarySource === 'trait' && (
+                        <div className="flex justify-center mb-6 bg-brand-primary p-1 rounded-xl w-full flex-shrink-0">
+                            <button
+                                onClick={() => setLibraryTab('general')}
+                                className={`flex-1 btn-sm transition-all ${libraryTab === 'general' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
+                            >
+                                General
+                            </button>
+                            <button
+                                onClick={() => setLibraryTab('combat')}
+                                className={`flex-1 btn-sm transition-all ${libraryTab === 'combat' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
+                            >
+                                Combat
+                            </button>
+                        </div>
+                    )}
 
                     <div className="flex-1 overflow-y-auto custom-scroll pr-1">
                         <p className="text-body-sm text-brand-text-muted mb-6 px-1 italic">
-                            {libraryTab === 'general' ? 'Core attributes and setting-specific advantages.' : 'Mechanical advantages for the heat of battle.'}
+                            {librarySource === 'power' 
+                                ? 'Combat tactics including damage, healing, and status abilities.' 
+                                : (libraryTab === 'general' ? 'Core attributes and setting-specific advantages.' : 'Mechanical advantages for the heat of battle.')}
                         </p>
                         <div className="flex flex-col gap-4 pb-8">
                             {filteredLibrary.length > 0 ? filteredLibrary.map((trait, idx) => {
-                                const isOwned = character.abilities.some(a => a.name === trait.name);
-                                const isLockedByPrereq = trait.requires?.some(reqName => !character.abilities.some(a => a.name === reqName));
+                                const isOwned = (librarySource === 'power' ? (character.powers || []) : (character.abilities || [])).some(a => a.name === trait.name);
+                                const isLockedByPrereq = trait.requires?.some((reqName: string) => !character.abilities.some(a => a.name === reqName));
                                 const isLockedByLevel = trait.minLevel !== undefined && (character.level || 1) < trait.minLevel;
                                 const isLocked = isLockedByPrereq || isLockedByLevel;
 
@@ -485,7 +498,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                         )}
 
                                         <div className="flex flex-wrap gap-1.5 mt-2">
-                                            {trait.buffs?.map((buff, i) => {
+                                            {trait.buffs?.map((buff: any, i: number) => {
                                                 const { label, colorClass } = getBuffTag(buff);
                                                 return <span key={i} className={`text-body-sm font-bold border px-2.5 py-0.5 rounded-full ${colorClass}`}>{label}</span>;
                                             })}
@@ -505,7 +518,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
             <Modal
                 isOpen={editingIndex !== null}
                 onClose={() => setEditingIndex(null)}
-                title="Edit Feature"
+                title={editingIndex?.type === 'power' ? 'Edit Power' : 'Edit Feature'}
             >
                 {editingAbility && (
                     <div className="space-y-8 animate-fade-in max-h-[75vh] overflow-y-auto custom-scroll pr-1 pb-4">
@@ -514,9 +527,12 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                             <input
                                 type="text"
                                 value={editingAbility.name}
-                                onChange={(e) => handleAbilityChange(editingIndex!, 'name', e.target.value)}
+                                onChange={(e) => {
+                                    if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'name', e.target.value);
+                                    else handlePowerChange(editingIndex!.index, 'name', e.target.value);
+                                }}
                                 className="w-full input-md font-bold text-base text-brand-text"
-                                placeholder="Feature Name"
+                                placeholder={editingIndex!.type === 'power' ? "Power Name" : "Feature Name"}
                             />
                         </div>
 
@@ -524,7 +540,10 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                             <label className="block text-xs font-bold text-brand-text-muted mb-2 ml-1">Function & Lore</label>
                             <AutoResizingTextarea
                                 value={editingAbility.description}
-                                onChange={(e) => handleAbilityChange(editingIndex!, 'description', e.target.value)}
+                                onChange={(e) => {
+                                    if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'description', e.target.value);
+                                    else handlePowerChange(editingIndex!.index, 'description', e.target.value);
+                                }}
                                 className="w-full input-md text-body-sm min-h-[100px] leading-relaxed"
                                 placeholder="Describe what the ability does..."
                             />
@@ -539,7 +558,8 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                     value={editingAbility.staminaCost !== undefined ? editingAbility.staminaCost : ((editingAbility.effect?.type && ['Heal', 'Damage', 'Status'].includes(editingAbility.effect.type)) ? 1 : 0)}
                                     onChange={(e) => {
                                         const val = parseInt(e.target.value) || 0;
-                                        handleAbilityChange(editingIndex!, 'staminaCost', Math.max(0, val));
+                                        if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'staminaCost', Math.max(0, val));
+                                        else handlePowerChange(editingIndex!.index, 'staminaCost', Math.max(0, val));
                                     }}
                                     className="w-full input-md text-sm font-bold text-center"
                                     min="0"
@@ -550,7 +570,10 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                         <div className="space-y-8 pt-2">
                             <ModifierBuilder
                                 buffs={editingAbility.buffs || []}
-                                onChange={(newBuffs) => handleAbilityChange(editingIndex!, 'buffs', newBuffs)}
+                                onChange={(newBuffs) => {
+                                    if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'buffs', newBuffs);
+                                    else handlePowerChange(editingIndex!.index, 'buffs', newBuffs);
+                                }}
                                 skillConfig={skillConfig}
                             />
 
@@ -560,8 +583,14 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                         effect={editingAbility.effect}
                                         standardDC={standardDC}
                                         standardDice={getStandardDiceForEffect(editingAbility.effect)}
-                                        onChange={(newEffect) => handleAbilityChange(editingIndex!, 'effect', newEffect)}
-                                        onRemove={() => handleAbilityChange(editingIndex!, 'effect', undefined)}
+                                        onChange={(newEffect) => {
+                                            if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'effect', newEffect);
+                                            else handlePowerChange(editingIndex!.index, 'effect', newEffect);
+                                        }}
+                                        onRemove={() => {
+                                            if (editingIndex!.type === 'ability') handleAbilityChange(editingIndex!.index, 'effect', undefined);
+                                            else handlePowerChange(editingIndex!.index, 'effect', undefined);
+                                        }}
                                     />
                                 ) : (
                                     <button
@@ -576,10 +605,13 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
                         <div className="pt-10 border-t border-brand-primary/20 flex justify-between items-center gap-4">
                             <button
-                                onClick={() => removeAbility(editingIndex!)}
+                                onClick={() => {
+                                    if (editingIndex!.type === 'ability') removeAbility(editingIndex!.index);
+                                    else removePower(editingIndex!.index);
+                                }}
                                 className="text-brand-danger hover:opacity-80 text-xs font-bold flex items-center gap-2 px-4 py-2 rounded-xl transition-all"
                             >
-                                <Icon name="trash" className="w-5 h-5" /> Purge Feature
+                                <Icon name="trash" className="w-5 h-5" /> {editingIndex?.type === 'power' ? 'Purge Power' : 'Purge Feature'}
                             </button>
                             <button
                                 onClick={() => setEditingIndex(null)}

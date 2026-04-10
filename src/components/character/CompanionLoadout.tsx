@@ -12,8 +12,9 @@ interface CombatLoadoutProps {
 
 export const CombatLoadout: React.FC<CombatLoadoutProps> = ({ character, onChange }) => {
     const validAbilities = useMemo(() => {
-        return (character.abilities || []).filter(a => a.effect && (a.effect.type === 'Damage' || a.effect.type === 'Heal' || a.effect.type === 'Status'));
-    }, [character.abilities]);
+        const all = [...(character.abilities || []), ...(character.powers || [])];
+        return all.filter(a => a.effect && (a.effect.type === 'Damage' || a.effect.type === 'Heal' || a.effect.type === 'Status'));
+    }, [character.abilities, character.powers]);
 
     const selectClass = "w-full input-md appearance-none text-body-base font-bold transition-all cursor-pointer";
 

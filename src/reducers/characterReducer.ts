@@ -259,7 +259,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             let staminaCost = 0;
 
             const decrementUsage = (abilities: any[]) => {
-                return abilities.map(a => {
+                return (abilities || []).map(a => {
                     if (a.id === abilityId) {
                         const effectType = a.effect?.type;
                         const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
@@ -280,10 +280,10 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
             };
 
             if (ownerId === 'player' || ownerId === state.playerCharacter.id) {
-                const updatedAbilities = decrementUsage(state.playerCharacter.abilities);
                 const pc = new PlayerCharacter({
                     ...state.playerCharacter,
-                    abilities: updatedAbilities,
+                    abilities: decrementUsage(state.playerCharacter.abilities),
+                    powers: decrementUsage(state.playerCharacter.powers),
                     stamina: Math.max(0, (state.playerCharacter.stamina || 0) - staminaCost)
                 });
                 // Re-apply item context
@@ -295,6 +295,7 @@ export const characterReducer = (state: GameData, action: GameAction): GameData 
                         const updated = new Companion({
                             ...c,
                             abilities: decrementUsage(c.abilities),
+                            powers: decrementUsage(c.powers),
                             stamina: Math.max(0, (c.stamina || 0) - staminaCost)
                         });
                         updated.maxHeroicPoints = updated.getMaxHeroicPoints(state.companionInventories[ownerId]);

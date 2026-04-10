@@ -78,8 +78,8 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
     }, [character, inventory]);
 
     // Check for Traits and State for UI Feedback
-    const hasUnarmedStyle = useMemo(() => character.abilities.some(a => a.name === "Unarmed Style"), [character.abilities]);
-    const hasSneakAttack = useMemo(() => character.abilities.some(a => a.name === "Sneak Attack"), [character.abilities]);
+    const hasUnarmedStyle = useMemo(() => character.abilities.some(a => a.name === "Unarmed Style") || character.powers.some(a => a.name === "Unarmed Style"), [character.abilities, character.powers]);
+    const hasSneakAttack = useMemo(() => character.abilities.some(a => a.name === "Sneak Attack") || character.powers.some(a => a.name === "Sneak Attack"), [character.abilities, character.powers]);
     const isUnarmed = useMemo(() => !inventory.equipped.some(item =>
         (item.weaponStats || item.tags?.some(t => t.toLowerCase().includes('weapon')) || item.tags?.includes('heavy weapon')) &&
         (item.equippedSlot === 'Main Hand' || item.equippedSlot === 'Off Hand')
@@ -313,7 +313,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         {isFlurryActive && (
                             <p className="text-body-sm text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20 animate-fade-in">
-                                {character.abilities.some(a => a.name === "Improved Flurry of Blows")
+                                {character.abilities.some(a => a.name === "Improved Flurry of Blows") || character.powers.some(a => a.name === "Improved Flurry of Blows")
                                     ? "Improved Flurry of Blows: Your fists are a rapid blur. You gain 2 additional strikes per round."
                                     : "Flurry Of Blows: Your fists are a rapid blur. You gain 1 additional strike per round."
                                 }
@@ -328,7 +328,7 @@ export const CombatStats: React.FC<CombatStatsProps> = ({
 
                         {isDualWielding && (
                             <p className="text-body-sm text-brand-accent text-left mb-4 font-bold bg-brand-accent/5 p-2 rounded border border-brand-accent/20">
-                                {character.abilities.some(a => a.name === "Improved Two-Weapon Style")
+                                {character.abilities.some(a => a.name === "Improved Two-Weapon Style") || character.powers.some(a => a.name === "Improved Two-Weapon Style")
                                     ? `Improved Two-Weapon Style: You gain 2 extra off-hand attacks per round (total ${numberOfAttacks}).`
                                     : (hasTwoWeaponFighting
                                         ? "Two-Weapon Style: You no longer suffer the -2 penalty to attack rolls when dual wielding."

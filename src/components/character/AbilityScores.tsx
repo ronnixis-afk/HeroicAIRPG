@@ -35,7 +35,10 @@ export const AbilityScores: React.FC<AbilityScoresProps> = ({
     };
 
     const itemBuffs = inventory.equipped.flatMap(i => (i.buffs || []).map(b => ({ ...b, source: i.name })));
-    const abilityBuffs = character.abilities.flatMap(a => (a.buffs || []).map(b => ({ ...b, source: a.name })));
+    const abilityBuffs = [
+        ...character.abilities.flatMap(a => (a.buffs || []).map(b => ({ ...b, source: a.name }))),
+        ...(character as any).powers?.flatMap((a: any) => (a.buffs || []).map((b: any) => ({ ...b, source: a.name }))) || []
+    ];
     const activeBuffs = (character.activeBuffs || []).map(b => ({ ...b, source: 'Active Buff' }));
     const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffs];
     const penalties = getStatPenalties(character.statusEffects || []);

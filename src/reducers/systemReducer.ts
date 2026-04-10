@@ -240,10 +240,18 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                         ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
                         : a
                 );
+                newPlayer.powers = newPlayer.powers.map(a =>
+                    a.usage?.type === 'per_short_rest'
+                        ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
+                        : a
+                );
             }
 
             if (type === 'long') {
                 newPlayer.abilities = newPlayer.abilities.map(a =>
+                    a.usage ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } } : a
+                );
+                newPlayer.powers = newPlayer.powers.map(a =>
                     a.usage ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } } : a
                 );
             }
@@ -311,10 +319,18 @@ export const systemReducer = (state: GameData, action: GameAction): GameData => 
                             ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
                             : a
                     );
+                    updatedComp.powers = updatedComp.powers.map(a =>
+                        a.usage?.type === 'per_short_rest'
+                            ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } }
+                            : a
+                    );
                 }
 
                 if (type === 'long') {
                     updatedComp.abilities = updatedComp.abilities.map(a =>
+                        a.usage ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } } : a
+                    );
+                    updatedComp.powers = updatedComp.powers.map(a =>
                         a.usage ? { ...a, usage: { ...a.usage, currentUses: a.usage.maxUses } } : a
                     );
                     updatedComp.heroicPoints = currentCompMaxHeroic;

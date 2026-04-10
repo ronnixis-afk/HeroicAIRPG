@@ -26,15 +26,18 @@ export const applyDamageModifiers = (
         });
     }
 
-    // 3. Aggregate from Abilities (Passive Features with Buffs)
-    if ('abilities' in target && target.abilities) {
-        target.abilities.forEach(ability => {
-             ability.buffs?.forEach(buff => {
-                if (buff.type === 'resistance' && buff.damageType) resistances.push(buff.damageType);
-                if (buff.type === 'immunity' && buff.damageType) immunities.push(buff.damageType);
-             });
-        });
-    }
+    // 3. Aggregate from Abilities & Powers (Passive Features with Buffs)
+    const allAbilityObjects = [
+        ...(target as any).abilities || [],
+        ...(target as any).powers || []
+    ];
+    
+    allAbilityObjects.forEach((ability: any) => {
+         ability.buffs?.forEach((buff: any) => {
+            if (buff.type === 'resistance' && buff.damageType) resistances.push(buff.damageType);
+            if (buff.type === 'immunity' && buff.damageType) immunities.push(buff.damageType);
+         });
+    });
 
     // Normalize for comparison
     const norm = (s: string) => s.toLowerCase().trim();

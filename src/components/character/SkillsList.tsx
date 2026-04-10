@@ -16,10 +16,13 @@ export const SkillsList: React.FC<SkillsListProps> = ({ character, inventory, on
     // Aggregate buffs with source names for tooltips
     const allBuffs = useMemo(() => {
         const itemBuffs = inventory.equipped.flatMap(i => (i.buffs || []).map(b => ({ ...b, source: i.name })));
-        const abilityBuffs = character.abilities.flatMap(a => (a.buffs || []).map(b => ({ ...b, source: a.name })));
+        const abilityBuffs = [
+            ...character.abilities.flatMap(a => (a.buffs || []).map(b => ({ ...b, source: a.name }))),
+            ...(character as any).powers?.flatMap((a: any) => (a.buffs || []).map((b: any) => ({ ...b, source: a.name }))) || []
+        ];
         const activeBuffs = (character.activeBuffs || []).map(b => ({ ...b, source: 'Active Buff' }));
         return [...itemBuffs, ...abilityBuffs, ...activeBuffs];
-    }, [inventory, character.abilities, character.activeBuffs]);
+    }, [inventory, character.abilities, (character as any).powers, character.activeBuffs]);
 
     const penalties = getStatPenalties(character.statusEffects || []);
 

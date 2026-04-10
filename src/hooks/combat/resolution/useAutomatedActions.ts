@@ -45,9 +45,11 @@ export const useAutomatedActions = (
         if (useSpecialChance) {
             const ability1 = loadout?.primaryAbilityId && loadout.primaryAbilityId !== 'basic_attack'
                 ? (player.abilities.find(a => a.id === loadout.primaryAbilityId && isAvailable(a)) ||
+                    player.powers.find(a => a.id === loadout.primaryAbilityId && isAvailable(a)) ||
                     inv?.equipped.find(i => i.id === loadout.primaryAbilityId && isAvailable(i))) : null;
             const ability2 = loadout?.secondaryAbilityId && loadout.secondaryAbilityId !== 'basic_attack'
                 ? (player.abilities.find(a => a.id === loadout.secondaryAbilityId && isAvailable(a)) ||
+                    player.powers.find(a => a.id === loadout.secondaryAbilityId && isAvailable(a)) ||
                     inv?.equipped.find(i => i.id === loadout.secondaryAbilityId && isAvailable(i))) : null;
 
             const validOptions = [];
@@ -147,11 +149,14 @@ export const useAutomatedActions = (
                 const loadout = automatedChar.combatLoadout;
                 const inv = actorId === gameData.playerCharacter.id ? gameData.playerInventory : gameData.companionInventories[actorId];
 
+                const automatedPowers = (automatedChar as any).powers || [];
                 const ability1 = loadout?.primaryAbilityId && loadout.primaryAbilityId !== 'basic_attack'
                     ? (automatedChar.abilities.find(a => a.id === loadout.primaryAbilityId && isAvailable(a)) ||
+                        automatedPowers.find((a: any) => a.id === loadout.primaryAbilityId && isAvailable(a)) ||
                         inv?.equipped.find(i => i.id === loadout.primaryAbilityId && isAvailable(i))) : null;
                 const ability2 = loadout?.secondaryAbilityId && loadout.secondaryAbilityId !== 'basic_attack'
                     ? (automatedChar.abilities.find(a => a.id === loadout.secondaryAbilityId && isAvailable(a)) ||
+                        automatedPowers.find((a: any) => a.id === loadout.secondaryAbilityId && isAvailable(a)) ||
                         inv?.equipped.find(i => i.id === loadout.secondaryAbilityId && isAvailable(i))) : null;
 
                 if (useSpecialChance && (ability1 || ability2)) {
@@ -164,7 +169,7 @@ export const useAutomatedActions = (
                 }
             } else {
                 // FIXED: Expanded filter to include NPC special abilities by checking for .type property
-                const possibleAbilities = [...((actor as any).specialAbilities || []), ...((actor as any).abilities || [])]
+                const possibleAbilities = [...((actor as any).specialAbilities || []), ...((actor as any).abilities || []), ...((actor as any).powers || [])]
                     .filter((a: any) => (a.effect || a.type || (a.tags && (a.tags.includes('offensive') || a.tags.includes('attack')))) && isAvailable(a));
 
                 if (useSpecialChance && possibleAbilities.length > 0) {

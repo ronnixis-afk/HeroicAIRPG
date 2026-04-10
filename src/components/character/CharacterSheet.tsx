@@ -197,7 +197,10 @@ export const CharacterSheet: React.FC<CharacterSheetProps> = ({ initialData, typ
 
     const { totalResistances, totalImmunities, totalVulnerabilities } = useMemo(() => {
         const itemBuffs = inventoryForStats.equipped.flatMap((i: any) => i.buffs || []);
-        const abilityBuffs = charData.abilities.flatMap((a: any) => a.buffs || []);
+        const abilityBuffs = [
+            ...(charData.abilities?.flatMap((a: any) => a.buffs || []) || []),
+            ...(charData.powers?.flatMap((a: any) => a.buffs || []) || [])
+        ];
         const allBuffs = [...itemBuffs, ...abilityBuffs];
 
         const derivedResistances = allBuffs.filter(b => b.type === 'resistance' && b.damageType).map(b => b.damageType!);

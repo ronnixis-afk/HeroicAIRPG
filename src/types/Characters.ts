@@ -17,6 +17,7 @@ export interface Ability {
     isRefining?: boolean; // Track when AI is skinning the trait
     /* Fix: Added isLevelUpTrait to Ability interface to resolve property missing error in FeaturesList */
     isLevelUpTrait?: boolean;
+    category?: string;
 }
 
 /* Fix: Define LibraryTrait interface used in traitLibrary and creation wizard */
@@ -36,6 +37,7 @@ export interface CharacterSnapshot {
     level: number;
     abilityScores: Record<AbilityScoreName, AbilityScore>;
     abilities: Ability[];
+    powers: Ability[];
     profession: string;
     appearance: string;
     background: string;
@@ -64,6 +66,7 @@ export const createSnapshot = (character: PlayerCharacter | Companion): Characte
         level: character.level,
         abilityScores: JSON.parse(JSON.stringify(character.abilityScores)),
         abilities: (character.abilities || []).filter(a => !a.isLevelUpTrait),
+        powers: (character.powers || []).filter(a => !a.isLevelUpTrait),
         profession: character.profession,
         appearance: character.appearance,
         background: character.background,
@@ -132,6 +135,7 @@ export class PlayerCharacter {
     appearance: string;
     background: string;
     abilities: Ability[];
+    powers: Ability[];
     imageUrl?: string;
     level: number;
     experiencePoints: number;
@@ -198,6 +202,10 @@ export class PlayerCharacter {
             ...a,
             id: a.id || `ability-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
+        this.powers = (data.powers || []).map(a => ({
+            ...a,
+            id: a.id || `power-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }));
 
         // CULPRIT FIX: The constructor now always derives maxHeroicPoints from its abilities/level.
         // This prevents "Value Lock" where stale data.maxHeroicPoints from the state would override new trait effects.
@@ -244,7 +252,8 @@ export class PlayerCharacter {
         let extraBonus = 0;
         const allBuffs: (Buff | ActiveBuff)[] = [
             ...(this.activeBuffs || []),
-            ...this.abilities.flatMap(a => a.buffs || [])
+            ...this.abilities.flatMap(a => a.buffs || []),
+            ...this.powers.flatMap(a => a.buffs || [])
         ];
 
         if (inventory) {
@@ -316,7 +325,10 @@ export class PlayerCharacter {
 
     getBuffedScore(abilityName: AbilityScoreName, inventory: Inventory): number {
         const itemBuffs = inventory.equipped.flatMap(item => item.buffs || []);
-        const abilityBuffs = this.abilities.flatMap(ability => ability.buffs || []);
+        const abilityBuffs = [
+            ...this.abilities.flatMap(ability => ability.buffs || []),
+            ...this.powers.flatMap(ability => ability.buffs || [])
+        ];
         const activeBuffsList = this.activeBuffs || [];
         const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffsList];
 
@@ -341,7 +353,10 @@ export class PlayerCharacter {
     getSkillBonus(skill: string, inventory: Inventory, fallbackAbility?: string): number {
         const penalties = getStatPenalties(this.statusEffects || []);
         const itemBuffs = inventory.equipped.flatMap(item => item.buffs || []);
-        const abilityBuffs = this.abilities.flatMap(ability => ability.buffs || []);
+        const abilityBuffs = [
+            ...this.abilities.flatMap(ability => ability.buffs || []),
+            ...this.powers.flatMap(ability => ability.buffs || [])
+        ];
         const activeBuffsList = this.activeBuffs || [];
         const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffsList];
 
@@ -386,7 +401,10 @@ export class PlayerCharacter {
         }
         const penalties = getStatPenalties(this.statusEffects || []);
         const itemBuffs = inventory.equipped.flatMap(item => item.buffs || []);
-        const abilityBuffs = this.abilities.flatMap(ability => ability.buffs || []);
+        const abilityBuffs = [
+            ...this.abilities.flatMap(ability => ability.buffs || []),
+            ...this.powers.flatMap(ability => ability.buffs || [])
+        ];
         const activeBuffsList = this.activeBuffs || [];
         const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffsList];
 
@@ -406,7 +424,10 @@ export class PlayerCharacter {
 
     getMaxTemporaryHitPoints(inventory: Inventory): number {
         const itemBuffs = inventory.equipped.flatMap(item => item.buffs || []);
-        const abilityBuffs = this.abilities.flatMap(ability => ability.buffs || []);
+        const abilityBuffs = [
+            ...this.abilities.flatMap(ability => ability.buffs || []),
+            ...this.powers.flatMap(ability => ability.buffs || [])
+        ];
         const activeBuffsList = this.activeBuffs || [];
         const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffsList];
 
@@ -420,10 +441,11 @@ export class PlayerCharacter {
     getTraitPointMetrics() {
         const total = Math.floor(this.level / 3);
         const usedTraits = (this.abilities || []).filter(a => a.isLevelUpTrait).length;
+        const usedPowers = (this.powers || []).filter(a => a.isLevelUpTrait).length;
         return {
             total,
-            used: usedTraits,
-            available: Math.max(0, total - usedTraits)
+            used: usedTraits + usedPowers,
+            available: Math.max(0, total - (usedTraits + usedPowers))
         };
     }
 
@@ -455,6 +477,7 @@ export class PlayerCharacter {
      */
     scaleAllAbilities(inventory?: Inventory): void {
         (this.abilities || []).forEach(ability => this.scaleAbility(ability, inventory));
+        (this.powers || []).forEach(ability => this.scaleAbility(ability, inventory));
     }
 }
 
@@ -484,7 +507,10 @@ export class Companion extends PlayerCharacter {
 export function calculateCombatStats(character: PlayerCharacter | Companion, inventory: Inventory): CalculatedCombatStats {
     const itemBuffs = inventory.equipped.flatMap(item => item.buffs || []);
     // FIX: Simplified abilityBuffs extraction to use the buffs array on Ability objects, fixing property missing and type mismatch errors
-    const abilityBuffs = character.abilities.flatMap(ability => ability.buffs || []);
+    const abilityBuffs = [
+        ...character.abilities.flatMap(ability => ability.buffs || []),
+        ...character.powers.flatMap(ability => ability.buffs || [])
+    ];
 
     const activeBuffsList = character.activeBuffs || [];
     const allBuffs = [...itemBuffs, ...abilityBuffs, ...activeBuffsList];
@@ -500,11 +526,11 @@ export function calculateCombatStats(character: PlayerCharacter | Companion, inv
     let isOffHandDamageBuffed = false;
 
     // Combat Styles (Trait Guards)
-    const hasTwoWeaponFighting = character.abilities.some(a => a.name === "Two-Weapon Style");
-    const hasGreatWeaponFighting = character.abilities.some(a => a.name === "Great Weapon Fighting");
-    const hasDuelingStyle = character.abilities.some(a => a.name === "Dueling Style");
-    const hasUnarmedStyle = character.abilities.some(a => a.name === "Unarmed Style");
-    const hasFlurryOfBlows = character.abilities.some(a => a.name === "Flurry of Blows");
+    const hasTwoWeaponFighting = character.abilities.some(a => a.name === "Two-Weapon Style") || character.powers.some(a => a.name === "Two-Weapon Style");
+    const hasGreatWeaponFighting = character.abilities.some(a => a.name === "Great Weapon Fighting") || character.powers.some(a => a.name === "Great Weapon Fighting");
+    const hasDuelingStyle = character.abilities.some(a => a.name === "Dueling Style") || character.powers.some(a => a.name === "Dueling Style");
+    const hasUnarmedStyle = character.abilities.some(a => a.name === "Unarmed Style") || character.powers.some(a => a.name === "Unarmed Style");
+    const hasFlurryOfBlows = character.abilities.some(a => a.name === "Flurry of Blows") || character.powers.some(a => a.name === "Flurry of Blows");
 
     const getBuffedScore = (abilityName: AbilityScoreName): number => {
         if ('getBuffedScore' in character) {
@@ -626,7 +652,7 @@ export function calculateCombatStats(character: PlayerCharacter | Companion, inv
     if (isFlurryActive) {
         mainHandAttacks += 1;
         // Improved Flurry of Blows adds a second attack (total 2)
-        if (character.abilities.some(a => a.name === "Improved Flurry of Blows")) {
+        if (character.abilities.some(a => a.name === "Improved Flurry of Blows") || character.powers.some(a => a.name === "Improved Flurry of Blows")) {
             mainHandAttacks += 1;
         }
     }
@@ -636,7 +662,7 @@ export function calculateCombatStats(character: PlayerCharacter | Companion, inv
         // Two-Weapon Style only removes the -2 penalty, does NOT grant extra off-hand attacks
         
         // Improved Two-Weapon Style grants exactly 1 additional off-hand attack (total 2)
-        if (character.abilities.some(a => a.name === "Improved Two-Weapon Style")) {
+        if (character.abilities.some(a => a.name === "Improved Two-Weapon Style") || character.powers.some(a => a.name === "Improved Two-Weapon Style")) {
             offHandAttacks += 1;
         }
     }

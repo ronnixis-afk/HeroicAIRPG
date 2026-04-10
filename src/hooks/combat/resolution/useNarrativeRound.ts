@@ -189,14 +189,15 @@ export const useNarrativeRound = (
                                 const automatedChar = actor as PlayerCharacter | Companion;
                                 const loadout = automatedChar.combatLoadout;
                                 const charInv = actorId === gameData.playerCharacter.id ? gameData.playerInventory : gameData.companionInventories[actorId];
-                                const ability1 = loadout?.primaryAbilityId && loadout.primaryAbilityId !== 'basic_attack' ? (automatedChar.abilities.find(a => a.id === loadout.primaryAbilityId && isAvailable(a)) || charInv?.equipped.find(i => i.id === loadout.primaryAbilityId && isAvailable(i))) : null;
-                                const ability2 = loadout?.secondaryAbilityId && loadout.secondaryAbilityId !== 'basic_attack' ? (automatedChar.abilities.find(a => a.id === loadout.secondaryAbilityId && isAvailable(a)) || charInv?.equipped.find(i => i.id === loadout.secondaryAbilityId && isAvailable(i))) : null;
+                                const automatedPowers = (automatedChar as any).powers || [];
+                                const ability1 = loadout?.primaryAbilityId && loadout.primaryAbilityId !== 'basic_attack' ? (automatedChar.abilities.find(a => a.id === loadout.primaryAbilityId && isAvailable(a)) || automatedPowers.find((a: any) => a.id === loadout.primaryAbilityId && isAvailable(a)) || charInv?.equipped.find(i => i.id === loadout.primaryAbilityId && isAvailable(i))) : null;
+                                const ability2 = loadout?.secondaryAbilityId && loadout.secondaryAbilityId !== 'basic_attack' ? (automatedChar.abilities.find(a => a.id === loadout.secondaryAbilityId && isAvailable(a)) || automatedPowers.find((a: any) => a.id === loadout.secondaryAbilityId && isAvailable(a)) || charInv?.equipped.find(i => i.id === loadout.secondaryAbilityId && isAvailable(i))) : null;
                                 if (ability1 || ability2) selectedAction = (ability1 && ability2) ? (Math.random() < 0.5 ? ability1 : ability2) : (ability1 || ability2);
                             }
 
                             if (!selectedAction) {
                                 // Expanded filter to include NPC special abilities by checking for .type property
-                                const possibleAbilities = [...((actor as any).specialAbilities || []), ...((actor as any).abilities || [])]
+                                const possibleAbilities = [...((actor as any).specialAbilities || []), ...((actor as any).abilities || []), ...((actor as any).powers || [])]
                                     .filter((a: any) => (a.effect || a.type || (a.tags && (a.tags.includes('offensive') || a.tags.includes('attack')))) && isAvailable(a));
 
                                 if (useSpecialChance && possibleAbilities.length > 0) {

@@ -331,12 +331,23 @@ export const useCharacterActions = (
                     keywords: wovenData.keywords,
                     alignment: wovenData.moralAlignment
                 };
-                const abilities = [...gameData.playerCharacter.abilities];
-                const combatIdx = abilities.findIndex(a => a.id.startsWith('combat-'));
-                if (combatIdx > -1) {
-                    abilities[combatIdx] = { ...wovenData.skinnedAbility, id: abilities[combatIdx].id };
-                    playerUpdates.abilities = abilities;
-                }
+                const baseAbilities = [...gameData.playerCharacter.abilities];
+                let powers = [...(gameData.playerCharacter.powers || [])];
+                
+                // Route all combat-tagged abilities to powers
+                const combatAbilities = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
+                const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
+
+                // Skin the primary combat ability if it exists
+                const finalPowers = combatAbilities.map(a => {
+                    if (a.id === baseAbilities.find(orig => orig.id.startsWith('combat-'))?.id) {
+                        return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
+                    }
+                    return a;
+                });
+
+                playerUpdates.abilities = traitAbilities;
+                playerUpdates.powers = [...powers, ...finalPowers];
                 
                 const tempPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
                 delete tempPlayerCharacter.unwovenDetails;
@@ -362,10 +373,22 @@ export const useCharacterActions = (
                     matchedComp.keywords = wovenData.keywords;
                     matchedComp.alignment = wovenData.moralAlignment;
                     
-                    const combatIdx = matchedComp.abilities.findIndex(a => a.id.startsWith('combat-'));
-                    if (combatIdx > -1) {
-                        matchedComp.abilities[combatIdx] = { ...wovenData.skinnedAbility, id: matchedComp.abilities[combatIdx].id };
-                    }
+                    const baseAbilities = [...matchedComp.abilities];
+                    const combatAbilities = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
+                    const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
+
+                    if (!matchedComp.powers) matchedComp.powers = [];
+
+                    const finalPowers = combatAbilities.map(a => {
+                        // Priority: skin the primary combat blueprint
+                        if (a.id === baseAbilities.find(orig => orig.id.startsWith('combat-'))?.id) {
+                            return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
+                        }
+                        return a;
+                    });
+
+                    matchedComp.powers = [...matchedComp.powers, ...finalPowers];
+                    matchedComp.abilities = traitAbilities;
                     delete matchedComp.unwovenDetails;
                 }
             }

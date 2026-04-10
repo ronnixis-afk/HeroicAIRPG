@@ -96,7 +96,8 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
 
     const abilities = useMemo(() => {
         if (!actor) return [];
-        return (actor.abilities || []).filter(a => {
+        const allAbilities = [...(actor.abilities || []), ...(actor.powers || [])];
+        return allAbilities.filter(a => {
             const hasUsage = a.usage && a.usage.type !== 'passive';
             const hasStaminaCost = (a.staminaCost !== undefined && a.staminaCost > 0) || 
                                    (a.effect && ['Heal', 'Damage', 'Status'].includes(a.effect.type));

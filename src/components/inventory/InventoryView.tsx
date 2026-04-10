@@ -121,7 +121,7 @@ const InventoryView: React.FC = () => {
         return activeCharacter.getCombatStats(activeInventory);
     }, [activeCharacter, activeInventory]);
 
-    const hasUnarmedStyle = useMemo(() => activeCharacter.abilities.some(a => a.name === "Unarmed Style"), [activeCharacter.abilities]);
+    const hasUnarmedStyle = useMemo(() => activeCharacter.abilities.some(a => a.name === "Unarmed Style") || (activeCharacter as any).powers?.some((a: any) => a.name === "Unarmed Style"), [activeCharacter.abilities, (activeCharacter as any).powers]);
     const isUnarmed = useMemo(() => !activeInventory.equipped.some(item =>
         (item.weaponStats || item.tags?.some(t => t.toLowerCase().includes('weapon')) || item.tags?.includes('heavy weapon')) &&
         (item.equippedSlot === 'Main Hand' || item.equippedSlot === 'Off Hand')
