@@ -82,9 +82,11 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = (props) => {
         const currentWord = words[words.length - 1];
 
         if (currentWord.length >= 3) {
-            const filtered = dictionary.filter(entry =>
-                entry.name.toLowerCase().startsWith(currentWord.toLowerCase())
-            ).slice(0, 8); // Limit to 8 suggestions for performance and UI
+            const query = currentWord.toLowerCase();
+            const filtered = dictionary.filter(entry => {
+                const nameLower = entry.name.toLowerCase();
+                return nameLower.split(/\s+/).some(word => word.startsWith(query));
+            }).slice(0, 8); // Limit to 8 suggestions for performance and UI
 
             if (filtered.length > 0) {
                 setMentionState({

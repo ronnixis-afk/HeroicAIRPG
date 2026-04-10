@@ -3,6 +3,7 @@ import { GameDataContext, GameDataContextType } from '../context/GameDataContext
 import { EntityType } from '../context/UIContext';
 import { Companion, CombatActor, PlayerCharacter } from '../types';
 import { canBeTargeted } from '../utils/resolution/StatusRules';
+import { normalizeCoords } from '../utils/mapUtils';
 
 export interface DictionaryEntry {
     name: string;
@@ -101,7 +102,12 @@ export const useEntityDictionary = () => {
         // 6. Lore Entries
         (gameData.world || []).forEach(l => addIfValid(l.title, 'lore', l));
         (gameData.knowledge || []).forEach(k => {
-            if (k.visited) addIfValid(k.title, 'lore', k);
+            // Include knowledge entries if they are visited OR if they are in the current zone
+            const zoneCoords = k.coordinates ? normalizeCoords(k.coordinates) : null;
+            const playerCoords = gameData.playerCoordinates ? normalizeCoords(gameData.playerCoordinates) : null;
+            const isLocal = zoneCoords && playerCoords && zoneCoords === playerCoords;
+            
+            if (k.visited || isLocal) addIfValid(k.title, 'lore', k);
         });
 
         // 7. Objectives
