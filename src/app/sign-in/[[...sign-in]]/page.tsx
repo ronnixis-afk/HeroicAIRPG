@@ -21,7 +21,7 @@ export default function SignInPage() {
                 {/* Header */}
                 <header className="relative z-10 px-6 py-4 text-center lg:text-left flex justify-between items-center">
                     <h3 className="font-merriweather text-brand-text mb-0">
-                        Heroic <span className="text-brand-accent uppercase">AI RPG</span>
+                        Heroic <span className="text-brand-accent">AI RPG</span>
                     </h3>
                     <Link href="/" className="text-brand-accent text-sm font-bold hover:text-brand-accent/80 transition-colors">
                         &larr; Back to Home

@@ -468,7 +468,7 @@ const PlayerAttackModal: React.FC<PlayerAttackModalProps> = ({ isOpen, onClose, 
                                                         )}
 
                                                         <div className="flex items-center gap-2">
-                                                            {rarity && <span className={`text-[9px] font-bold ${rarityColorClass} opacity-80 uppercase tracking-tight`}>{rarity}</span>}
+                                                            {rarity && <span className={`text-[9px] font-bold ${rarityColorClass} opacity-80`}>{rarity}</span>}
                                                             {costDisplay && <span className="text-[9px] font-bold text-brand-accent bg-brand-accent/10 px-2 py-1 rounded-lg border border-brand-accent/20">{costDisplay}</span>}
                                                             {disabledReason && <span className="text-[9px] font-bold text-brand-danger bg-brand-danger/10 px-2 py-1 rounded-lg border border-brand-danger/20">{disabledReason}</span>}
                                                         </div>

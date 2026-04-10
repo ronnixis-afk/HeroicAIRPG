@@ -94,7 +94,7 @@ export const WizardTavernRecruits: React.FC<WizardTavernRecruitsProps> = ({ recr
                                             <div className="flex flex-wrap gap-x-3 gap-y-1.5 bg-brand-primary/5 p-2 rounded-xl border border-brand-primary/10">
                                                 {['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'].map(key => (
                                                     <div key={key} className="flex items-center gap-1.5 min-w-[32px]">
-                                                        <span className="text-[8px] font-black text-brand-text-muted opacity-40 uppercase">{key.substring(0, 3)}</span>
+                                                        <span className="text-[8px] font-bold text-brand-text-muted opacity-40">{key.substring(0, 3).charAt(0).toUpperCase() + key.substring(0, 3).slice(1).toLowerCase()}</span>
                                                         <span className="text-[10px] font-bold text-brand-text">{recruit.abilityScores[key]?.score || 10}</span>
                                                     </div>
                                                 ))}

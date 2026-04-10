@@ -70,7 +70,7 @@ export default function LandingPage() {
                     <div className="flex-1 flex flex-col items-center justify-center px-4 py-20 text-center min-h-[70vh]">
                         <Icon name="heroicAction" className="w-16 h-16 md:w-[6.4rem] md:h-[6.4rem] text-brand-accent mb-8 drop-shadow-[0_0_20px_rgba(62,207,142,0.5)] animate-fade-in" />
                         <h3 className="font-merriweather text-4xl md:text-6xl text-brand-text mb-2 drop-shadow-xl">
-                            Heroic <span className="text-brand-accent uppercase">AI RPG</span>
+                            Heroic <span className="text-brand-accent">AI RPG</span>
                         </h3>
                         <p className="text-lg md:text-2xl text-brand-text-muted font-medium mb-10 drop-shadow-md">
                             Create, Play, Evolve

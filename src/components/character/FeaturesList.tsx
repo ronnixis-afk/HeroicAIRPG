@@ -127,7 +127,7 @@ const AbilityCard: React.FC<AbilityCardProps> = ({ ability, onEdit, onDelete, st
                             <div className="bg-brand-primary/20 p-4 rounded-xl border border-brand-surface flex items-center gap-4">
                                 <Icon name="sparkles" className="w-5 h-5 text-brand-accent/70 shrink-0" />
                                 <div className="text-body-sm font-bold text-brand-text leading-tight">
-                                    <div className="opacity-50 text-[10px] mb-1 capitalize">Action Output</div>
+                                    <div className="opacity-50 text-[10px] mb-1">Action Output</div>
                                     <div className="text-brand-accent text-body-sm">
                                         {formatAbilityEffect(ability.effect)}
                                     </div>
@@ -384,7 +384,59 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
             <div className="flex justify-between items-center mb-6 px-1 mt-10">
                 <div className="flex flex-col">
+                    <h5 className="text-brand-text mb-0">Class Features & Traits</h5>
+                    <p className="text-[10px] text-brand-text-muted mt-0.5 font-bold opacity-60">
+                        Used Points: {metrics.used} / {metrics.total}
+                    </p>
+                </div>
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => { setLibrarySource('trait'); setIsLibraryOpen(true); }}
+                        className="btn-secondary btn-sm rounded-full"
+                    >
+                        Trait Library
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-5 px-1 pb-4 mb-2">
+                {sortedAbilities.map((ability) => {
+                    const realIdx = character.abilities.findIndex(a => a.id === ability.id);
+                    let disabledReason = undefined;
+                    const effectType = ability.effect?.type;
+                    const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+                    const cost = ability.staminaCost !== undefined ? ability.staminaCost : implicitCost;
+
+                    if (cost > 0 && (character.stamina || 0) < cost) {
+                        disabledReason = "Not enough stamina";
+                    }
+
+                    return (
+                        <AbilityCard
+                            key={ability.id}
+                            ability={ability}
+                            onEdit={() => setEditingIndex({ type: 'ability', index: realIdx })}
+                            onDelete={() => removeAbility(realIdx)}
+                            standardDC={standardDC}
+                            standardDice={getStandardDiceForEffect(ability.effect)}
+                            disabledReason={disabledReason}
+                        />
+                    );
+                })}
+
+                <button
+                    onClick={addAbility}
+                    className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-all mt-2"
+                >
+                    <Icon name="plus" className="w-3.5 h-3.5" />
+                    <span className="text-body-sm font-bold opacity-60">Custom Feature</span>
+                </button>
+            </div>
+
+            <div className="flex justify-between items-center mb-6 px-1 mt-12 pt-8 border-t border-brand-primary/10">
+                <div className="flex flex-col">
                     <h5 className="text-brand-text mb-0">Powers</h5>
+                    <p className="text-[10px] text-brand-text-muted mt-0.5 font-bold opacity-60">Combat & Action Techniques</p>
                 </div>
                 <div className="flex gap-3">
                     <button
@@ -398,17 +450,17 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
             <div className="flex flex-col gap-5 px-1 pb-4 mb-2">
                 {sortedPowers.map((power) => {
-                     const realIdx = (character.powers || []).findIndex(p => p.id === power.id);
-                     let disabledReason = undefined;
-                     const effectType = power.effect?.type;
-                     const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
-                     const cost = power.staminaCost !== undefined ? power.staminaCost : implicitCost;
- 
-                     if (cost > 0 && (character.stamina || 0) < cost) {
-                         disabledReason = "Not enough stamina";
-                     }
+                    const realIdx = (character.powers || []).findIndex(p => p.id === power.id);
+                    let disabledReason = undefined;
+                    const effectType = power.effect?.type;
+                    const implicitCost = (effectType && ['Heal', 'Damage', 'Status'].includes(effectType)) ? 1 : 0;
+                    const cost = power.staminaCost !== undefined ? power.staminaCost : implicitCost;
 
-                     return (
+                    if (cost > 0 && (character.stamina || 0) < cost) {
+                        disabledReason = "Not enough stamina";
+                    }
+
+                    return (
                         <AbilityCard
                             key={power.id}
                             ability={power}
@@ -418,12 +470,12 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                             standardDice={getStandardDiceForEffect(power.effect)}
                             disabledReason={disabledReason}
                         />
-                     );
+                    );
                 })}
 
                 <button
                     onClick={addPower}
-                    className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-colors mt-2"
+                    className="w-full py-4 border border-dashed border-brand-primary/20 rounded-2xl flex items-center justify-center gap-2 text-brand-text-muted hover:text-brand-accent transition-all mt-2"
                 >
                     <Icon name="plus" className="w-3.5 h-3.5" />
                     <span className="text-body-sm font-bold opacity-60">Custom Power</span>
