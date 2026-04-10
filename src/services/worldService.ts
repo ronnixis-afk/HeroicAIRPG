@@ -216,7 +216,7 @@ const hydrateWorldData = (savedGameData: any): GameData => {
 
     // 6. System Defaults & Site Tracking
     if (typeof mergedData.gmNotes !== 'string') mergedData.gmNotes = "";
-    if (typeof mergedData.grandDesign !== 'string') mergedData.grandDesign = "";
+    if (typeof mergedData.grandDesign === 'string') mergedData.grandDesign = undefined; // Legacy migration: clear old string format
     if (!mergedData.narrationVoice) mergedData.narrationVoice = "Classic Narrator (Male)";
     if (!mergedData.templates) mergedData.templates = DEFAULT_TEMPLATES;
     if (!mergedData.sizeModifiers) mergedData.sizeModifiers = DEFAULT_SIZE_MODIFIERS;

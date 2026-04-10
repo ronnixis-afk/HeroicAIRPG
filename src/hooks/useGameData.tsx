@@ -131,11 +131,10 @@ export const useGameData = (worldId: string, ui: ReturnType<typeof useUI>) => {
         try {
             dispatch({ type: 'UPDATE_OBJECTIVE', payload: { ...objective, status: 'completed' } });
             dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-obj-comp-${Date.now()}`, sender: 'system', content: `Objective completed: ${objective.title}`, type: 'positive' } });
-            weaveGrandDesign();
         } finally {
             setIsLoading(false);
         }
-    }, [gameData, dispatch, setIsLoading, weaveGrandDesign]);
+    }, [gameData, dispatch, setIsLoading]);
 
     const updateStoryLog = useCallback(async (log: StoryLog) => {
         dispatch({ type: 'UPDATE_STORY_LOG', payload: log });

@@ -106,6 +106,7 @@ const baseReducer = (state: GameData | null, action: GameAction): GameData | nul
 
         case 'UPDATE_GM_NOTES':
         case 'UPDATE_GRAND_DESIGN':
+        case 'TICK_GRAND_DESIGN':
         case 'UPDATE_WORLD_SUMMARY':
             return narrativeReducer(state, action);
 

@@ -327,7 +327,6 @@ export const useNarrativeManager = (
             if (checkResult.completed) {
                 dispatch({ type: 'UPDATE_OBJECTIVE', payload: { ...objective, status: 'completed' } });
                 dispatch({ type: 'ADD_MESSAGE', payload: { id: `sys-obj-auto-${Date.now()}`, sender: 'system', content: `Objective completed: ${objective.title}`, type: 'positive' } });
-                if (weaveGrandDesign) weaveGrandDesign();
             } else {
                 const action = await generateObjectiveFollowUpAction(objective, gameData.messages.slice(-3));
                 if (action) setChatInput(action);
