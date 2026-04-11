@@ -58,7 +58,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     const [race, setRace] = useState('');
     const [backgroundTraits, setBackgroundTraits] = useState<LibraryTrait[]>([]);
     const [generalTraits, setGeneralTraits] = useState<LibraryTrait[]>([]);
-    const [combatAbility, setCombatAbility] = useState<LibraryTrait | null>(null);
+    const [powerBlueprint, setPowerBlueprint] = useState<LibraryTrait | null>(null);
     const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
     const [isShip, setIsShip] = useState(false);
     const [customBackground, setCustomBackground] = useState('');
@@ -126,7 +126,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 setRace(unwoven.race || '');
                 setBackgroundTraits(libraryTraits.filter(t => unwoven.backgroundTraits.includes(t.name)));
                 setGeneralTraits(libraryTraits.filter(t => unwoven.generalTraits.includes(t.name)));
-                setCombatAbility(libraryTraits.find(t => t.name === unwoven.combatAbility?.name) || null);
+                setPowerBlueprint(libraryTraits.find(t => t.name === unwoven.powerBlueprint?.name) || null);
                 setCustomBackground(unwoven.customBackground || '');
                 setAbilityScores(existingChar.abilityScores);
                 setSavingThrows(existingChar.savingThrows ? Object.entries(existingChar.savingThrows).filter(([_, v]: any) => v.proficient).map(([k]) => k as AbilityScoreName) : null);
@@ -155,7 +155,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 setRace('');
                 setBackgroundTraits([]);
                 setGeneralTraits([]);
-                setCombatAbility(null);
+                setPowerBlueprint(null);
                 setSelectedTemplateId(null);
                 setLevel(playerLevel);
                 setIsWeaving(false);
@@ -213,7 +213,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         if (isShip) {
             if (step === 1) return true;
             if (step === 2) return backgroundTraits.length > 0 && backgroundTraits.length <= 3;
-            if (step === 3) return combatAbility !== null;
+            if (step === 3) return powerBlueprint !== null;
             if (step === 4) return name.trim().length > 0;
             return true;
         }
@@ -222,11 +222,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         if (step === 2) return true;
         if (step === 3) return backgroundTraits.length === 2;
         if (step === 4) return generalTraits.length === 2;
-        if (step === 5) return combatAbility !== null;
+        if (step === 5) return powerBlueprint !== null;
         if (step === 6) return true; // Attributes
         if (step === 7) return name.trim().length > 0;
         return true;
-    }, [step, race, backgroundTraits, generalTraits, combatAbility, name, isShip]);
+    }, [step, race, backgroundTraits, generalTraits, powerBlueprint, name, isShip]);
 
     const handleSelectTemplate = (template: CharacterTemplate) => {
         setSelectedTemplateId(template.id);
@@ -235,7 +235,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         const com = libraryTraits.find(t => t.name === template.combatTraitName) || combats[0];
         setBackgroundTraits(bg);
         setGeneralTraits(gen);
-        setCombatAbility(com);
+        setPowerBlueprint(com);
         setShowEffectSelector(false); // Reset selector on template load
 
         // Prefill background context with all template traits
@@ -251,7 +251,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         setSelectedTemplateId(null);
         setBackgroundTraits([]);
         setGeneralTraits([]);
-        setCombatAbility(null);
+        setPowerBlueprint(null);
         setCustomBackground('');
         setAbilityScores({
             strength: { score: 8 }, dexterity: { score: 8 }, constitution: { score: 8 },
@@ -332,7 +332,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 race: recruit.race, 
                 backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), 
                 generalTraits: recruit.genSeeds.map((t: any) => t.name), 
-                combatAbility: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
+                powerBlueprint: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
                 guaranteedSkills: traitSkillsList,
                 racialTrait,
                 abilityScores: recruit.abilityScores,
@@ -388,7 +388,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     };
 
     const handleConfirmManual = async () => {
-        if (!gameData || !combatAbility) return;
+        if (!gameData || !powerBlueprint) return;
         setIsWeaving(true);
         const loadingMsg = isShip ? "Assembling Vessel..." : (isCompanion ? "Welcoming Your Companion..." : "Forging Your Destiny...");
         setWeavingMessage(loadingMsg);
@@ -403,7 +403,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 race: isShip ? 'Vessel' : race,
                 backgroundTraits: backgroundTraits.map(t => t.name),
                 generalTraits: generalTraits.map(t => t.name),
-                combatAbility: { ...combatAbility, id: 'blueprint' } as Ability,
+                powerBlueprint: { ...powerBlueprint, id: 'blueprint' } as Ability,
                 customBackground: customBackground,
                 abilityScores: abilityScores,
                 savingThrows: savingThrows || undefined,
@@ -418,7 +418,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             ];
             
             const allPowers: Ability[] = [
-                { ...combatAbility, id: `combat-${Date.now()}`, name: `[Pending] ${combatAbility.name}`, description: "This ability is being forged.", category: 'combat' }
+                { ...powerBlueprint, id: `combat-${Date.now()}`, name: `[Pending] ${powerBlueprint.name}`, description: "This ability is being forged.", category: 'combat' }
             ];
             
             // Merge custom skills with guaranteed traits
@@ -469,7 +469,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     };
 
     const handleCombatAbilitySelect = (trait: LibraryTrait) => {
-        setCombatAbility(trait);
+        setPowerBlueprint(trait);
         if (trait.effect?.type === 'Damage' || trait.effect?.type === 'Status') {
             setEffectSelectorType(trait.effect.type as 'Damage' | 'Status');
             setShowEffectSelector(true);
@@ -477,8 +477,8 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
     };
 
     const handleEffectSubtypeSelect = (value: string) => {
-        if (!combatAbility) return;
-        const updatedAbility = { ...combatAbility };
+        if (!powerBlueprint) return;
+        const updatedAbility = { ...powerBlueprint };
         if (!updatedAbility.effect) updatedAbility.effect = { type: 'Damage' }; // Fallback
 
         if (effectSelectorType === 'Damage') {
@@ -486,7 +486,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
         } else {
             updatedAbility.effect.status = value as any;
         }
-        setCombatAbility(updatedAbility);
+        setPowerBlueprint(updatedAbility);
     };
 
     const renderWeaving = () => (
@@ -605,7 +605,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                     />
                                                 )}
                                                 {step === 2 && <WizardStepTraits title="Systems & Modules" subtitle="Select up to 3 characteristic hull and module components." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 3)} limit={3} />}
-                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
+                                                {step === 3 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={powerBlueprint} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 4 && (
                                                     <WizardStepIdentity
                                                         isCompanion={isCompanion}
@@ -636,7 +636,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                                                 )}
                                                 {step === 3 && <WizardStepTraits title={isCompanion ? "What is their story?" : "What was your past like?"} subtitle="Select two background markers that defined them." traits={backgrounds} selectedTraits={backgroundTraits} onToggle={(t) => toggleTrait(t, backgroundTraits, setBackgroundTraits, 2)} limit={2} level={level} />}
                                                 {step === 4 && <WizardStepTraits title={isCompanion ? "What makes them tick?" : "What defines your spirit?"} subtitle="Choose two essential qualities or traits." traits={generals} selectedTraits={generalTraits} onToggle={(t) => toggleTrait(t, generalTraits, setGeneralTraits, 2)} limit={2} possessedTraitNames={backgroundTraits.map(t => t.name)} level={level} />}
-                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={combatAbility} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
+                                                {step === 5 && <WizardStepSpecialty isCompanion={isCompanion} options={combats} selected={powerBlueprint} onSelect={handleCombatAbilitySelect} onEditEffect={() => setShowEffectSelector(true)} possessedTraitNames={allSelectedTraitNames} level={level} />}
                                                 {step === 6 && (
                                                     <WizardStepAttributes
                                                         abilityScores={abilityScores || {}}

@@ -48,7 +48,7 @@ export const draftCompanionFromPrompt = async (
     race: string,
     backgroundTraitNames: string[],
     generalTraitNames: string[],
-    combatAbilityName: string,
+    powerBlueprintName: string,
     level: number,
     personality: string,
     moralAlignment: { lawChaos: number, goodEvil: number }
@@ -90,7 +90,7 @@ export const draftCompanionFromPrompt = async (
         "race": "string",
         "backgroundTraitNames": ["Trait 1", "Trait 2"],
         "generalTraitNames": ["Trait 1", "Trait 2"],
-        "combatAbilityName": "Trait Name",
+        "powerBlueprintName": "Trait Name",
         "level": number,
         "personality": "string",
         "moralAlignment": { "goodEvil": number, "lawChaos": number }
@@ -114,7 +114,7 @@ export const draftCompanionFromPrompt = async (
             race: data.race || "Human",
             backgroundTraitNames: Array.isArray(data.backgroundTraitNames) ? data.backgroundTraitNames : [],
             generalTraitNames: Array.isArray(data.generalTraitNames) ? data.generalTraitNames : [],
-            combatAbilityName: data.combatAbilityName || (availableTraits.length > 0 ? availableTraits[0].name : ""),
+            powerBlueprintName: data.powerBlueprintName || (availableTraits.length > 0 ? availableTraits[0].name : ""),
             level: Number(data.level) || 1,
             personality: data.personality || "A mysterious traveler.",
             moralAlignment: data.moralAlignment || { goodEvil: 0, lawChaos: 0 }
@@ -226,7 +226,7 @@ export const generateRecruitSkins = async (
 
 /**
  * Weaves a cohesive hero background and appearance based on wizard selections.
- * Generates full mechanical stats (Ability Scores, Skills, Saves) and skins the chosen combat ability.
+ * Generates full mechanical stats (Ability Scores, Skills, Saves) and skins the chosen power.
  */
 export const weaveHero = async (
     gameData: GameData,
@@ -236,7 +236,7 @@ export const weaveHero = async (
         race: string,
         backgroundTraits: string[],
         generalTraits: string[],
-        combatAbility: Ability,
+        powerBlueprint: Ability,
         customBackground?: string,
         abilityScores?: any,
         savingThrows?: AbilityScoreName[],
@@ -285,7 +285,7 @@ export const weaveHero = async (
     ${selections.racialTrait ? `Racial Trait: ${selections.racialTrait.name} (${selections.racialTrait.description})` : ''}
     Background Seeds: ${selections.backgroundTraits.join(', ')}
     General Qualities: ${selections.generalTraits.join(', ')}
-    Chosen Combat Blueprint: ${selections.combatAbility.name} - ${selections.combatAbility.description}
+    Chosen Power Blueprint: ${selections.powerBlueprint.name} - ${selections.powerBlueprint.description}
     ${selections.customBackground ? `Custom Background Context: "${selections.customBackground}"` : ''}
 
     [Instructions]
@@ -305,10 +305,10 @@ export const weaveHero = async (
        - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].`}
     8. savingThrows: ${selections.savingThrows ? `Use these EXACT saving throw proficiencies: ${selections.savingThrows.join(', ')}` : "Choose exactly 2 Saving Throw proficiencies."}
 
-    9. skinnedAbility: Transform the Combat Blueprint into a unique thematic signature power for ${selections.name}. 
+    9. skinnedAbility: Transform the Power Blueprint into a unique thematic signature power for ${selections.name}. 
        - Rename it evocatively.
        - Rewrite the description to match the flavor.
-       - IMPORTANT MECHANICAL RULE: If the Chosen Combat Blueprint already has a specific "damageType" (e.g. ${selections.combatAbility.effect?.damageType || 'not specified'}) or "status" (e.g. ${selections.combatAbility.effect?.status || 'not specified'}), you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
+       - IMPORTANT MECHANICAL RULE: If the Chosen Power Blueprint already has a specific "damageType" (e.g. ${selections.powerBlueprint.effect?.damageType || 'not specified'}) or "status" (e.g. ${selections.powerBlueprint.effect?.status || 'not specified'}), you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
     10. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos from the [ALIGNMENT SCALES] that match this character's background and personality.
     11. NO ALL CAPS.
 
@@ -369,8 +369,9 @@ ${selections.abilityScores ? '' : `        "skills": {
             savingThrows: selections.savingThrows ? convertSavesToMap(selections.savingThrows) : (result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } }),
             skills: result.skills || {},
             skinnedAbility: {
-                ...selections.combatAbility,
-                ...(result.skinnedAbility || {})
+                ...selections.powerBlueprint,
+                name: result.skinnedAbility?.name || selections.powerBlueprint.name,
+                description: result.skinnedAbility?.description || selections.powerBlueprint.description,
             },
             moralAlignment: result.moralAlignment || { goodEvil: 0, lawChaos: 0 }
         };
@@ -386,7 +387,7 @@ ${selections.abilityScores ? '' : `        "skills": {
             abilityScores: { strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
             savingThrows: { strength: { proficient: true }, constitution: { proficient: true }, dexterity: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
             skills: {},
-            skinnedAbility: selections.combatAbility,
+            skinnedAbility: selections.powerBlueprint,
             moralAlignment: { goodEvil: 0, lawChaos: 0 }
         };
 
@@ -679,7 +680,7 @@ export const skinAbilityFlavor = async (
 ): Promise<{ name: string, description: string, damageType?: string }> => {
     const worldContext = getWorldContext(gameData);
     const charSummary = `Name: ${character.name}, Profession: ${character.profession}, Background: ${character.background}`;
-    const prompt = `Skin a generic combat ability to fit a character's theme.
+    const prompt = `Skin a generic power to fit a character's theme.
     [Character Profile]
     ${charSummary}
     [Generic Ability]

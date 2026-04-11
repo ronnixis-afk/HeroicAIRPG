@@ -207,8 +207,8 @@ export class PlayerCharacter {
             id: a.id || `power-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
 
-        this.abilities = incomingAbilities.filter(a => a.category !== 'combat' && !a.id.startsWith('combat-') && !a.id.startsWith('power-'));
-        const migratedPowers = incomingAbilities.filter(a => a.category === 'combat' || a.id.startsWith('combat-') || a.id.startsWith('power-'));
+        this.abilities = incomingAbilities.filter(a => a.category !== 'power' && a.category !== 'combat' && !a.id.startsWith('combat-') && !a.id.startsWith('power-'));
+        const migratedPowers = incomingAbilities.filter(a => a.category === 'power' || a.category === 'combat' || a.id.startsWith('combat-') || a.id.startsWith('power-'));
         
         this.powers = [...incomingPowers, ...migratedPowers];
 
@@ -869,3 +869,4 @@ export function calculateCombatStats(character: PlayerCharacter | Companion, inv
         isOffHandDamageBuffed
     };
 }
+
