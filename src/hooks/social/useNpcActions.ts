@@ -228,7 +228,7 @@ export const useNpcActions = (
 
                 const bgTraits = TRAIT_LIBRARY.filter(t => template.backgroundTraitNames.includes(t.name));
                 const genTraits = TRAIT_LIBRARY.filter(t => template.generalTraitNames.includes(t.name));
-                const combatTrait = TRAIT_LIBRARY.find(t => t.name === template.combatTraitName) || TRAIT_LIBRARY.find(t => t.category === 'combat')!;
+                const powerBlueprintSource = TRAIT_LIBRARY.find(t => t.name === template.combatTraitName) || TRAIT_LIBRARY.find(t => t.category === 'power')!;
 
                 const woven = await weaveHero(gameData, {
                     name: npc.name,
@@ -236,13 +236,16 @@ export const useNpcActions = (
                     race: npc.race || 'Human',
                     backgroundTraits: template.backgroundTraitNames,
                     generalTraits: template.generalTraitNames,
-                    combatAbility: { ...combatTrait, id: 'blueprint' } as Ability
+                    powerBlueprint: { ...powerBlueprintSource, id: 'blueprint' } as Ability
                 }, true);
 
                 const allAbilities: Ability[] = [
                     ...bgTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
-                    ...genTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` })),
-                    { ...combatTrait, ...woven.skinnedAbility, id: `combat-${Date.now()}` }
+                    ...genTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
+                ];
+
+                const allPowers: Ability[] = [
+                    { ...powerBlueprintSource, ...woven.skinnedAbility, id: `power-${Date.now()}`, category: 'power' }
                 ];
 
                 // Automatic Skill Proficiency from Traits
@@ -266,6 +269,7 @@ export const useNpcActions = (
                     savingThrows: woven.savingThrows,
                     skills: fullSkills,
                     abilities: allAbilities,
+                    powers: allPowers,
                     level: gameData.playerCharacter.level,
                     experiencePoints: getXPForLevel(gameData.playerCharacter.level),
                     relationship: npc.relationship,
