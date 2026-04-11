@@ -170,7 +170,6 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     const [editingIndex, setEditingIndex] = useState<{ type: 'ability' | 'power', index: number } | null>(null);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [librarySource, setLibrarySource] = useState<'trait' | 'power'>('trait');
-    const [libraryTab, setLibraryTab] = useState<'general' | 'combat'>('general');
     const [pendingEffectTrait, setPendingEffectTrait] = useState<{ trait: LibraryTrait, isPower: boolean } | null>(null);
 
     // Phase 2: Calculate Trait Point Metrics
@@ -367,10 +366,10 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
     const filteredLibrary = useMemo(() => {
         const source = librarySource === 'trait' ? TRAIT_LIBRARY : POWER_LIBRARY;
         return source.filter(trait =>
-            (librarySource === 'power' || trait.category === libraryTab) &&
+            (librarySource === 'power' || trait.category === 'general') &&
             (!trait.requiredConfig || trait.requiredConfig === skillConfig)
         );
-    }, [skillConfig, libraryTab, librarySource]);
+    }, [skillConfig, librarySource]);
 
     const isStrictlyUnarmed = useMemo(() => {
         return !inventory.equipped.some(item =>
@@ -507,28 +506,13 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
 
             <Modal isOpen={isLibraryOpen} onClose={() => setIsLibraryOpen(false)} title={librarySource === 'trait' ? `Trait Library (${skillConfig || 'Universal'})` : 'Power Library'}>
                 <div className="flex flex-col h-[75vh]">
-                    {librarySource === 'trait' && (
-                        <div className="flex justify-center mb-6 bg-brand-primary p-1 rounded-xl w-full flex-shrink-0">
-                            <button
-                                onClick={() => setLibraryTab('general')}
-                                className={`flex-1 btn-sm transition-all ${libraryTab === 'general' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
-                            >
-                                General
-                            </button>
-                            <button
-                                onClick={() => setLibraryTab('combat')}
-                                className={`flex-1 btn-sm transition-all ${libraryTab === 'combat' ? 'bg-brand-surface text-brand-accent shadow-sm' : 'text-brand-text-muted hover:text-brand-text'}`}
-                            >
-                                Combat
-                            </button>
-                        </div>
-                    )}
+
 
                     <div className="flex-1 overflow-y-auto custom-scroll pr-1">
                         <p className="text-body-sm text-brand-text-muted mb-6 px-1 italic">
                             {librarySource === 'power' 
                                 ? 'Combat tactics including damage, healing, and status abilities.' 
-                                : (libraryTab === 'general' ? 'Core attributes and setting-specific advantages.' : 'Mechanical advantages for the heat of battle.')}
+                                : 'Core attributes and setting-specific advantages.'}
                         </p>
                         <div className="flex flex-col gap-4 pb-8">
                             {filteredLibrary.length > 0 ? filteredLibrary.map((trait, idx) => {
@@ -581,7 +565,7 @@ export const FeaturesList: React.FC<FeaturesListProps> = ({ character, inventory
                                 );
                             }) : (
                                 <div className="py-16 text-center text-brand-text-muted opacity-40 italic text-body-sm">
-                                    No {libraryTab} traits available for this setting.
+                                    No {librarySource === 'power' ? 'powers' : 'traits'} available for this setting.
                                 </div>
                             )}
                         </div>

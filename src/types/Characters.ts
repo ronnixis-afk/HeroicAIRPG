@@ -198,14 +198,19 @@ export class PlayerCharacter {
 
         this.statusEffects = data.statusEffects || [];
         this.activeBuffs = data.activeBuffs || [];
-        this.abilities = (data.abilities || []).map(a => ({
+        const incomingAbilities = (data.abilities || []).map(a => ({
             ...a,
             id: a.id || `ability-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
-        this.powers = (data.powers || []).map(a => ({
+        const incomingPowers = (data.powers || []).map(a => ({
             ...a,
             id: a.id || `power-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
+
+        this.abilities = incomingAbilities.filter(a => a.category !== 'combat' && !a.id.startsWith('combat-') && !a.id.startsWith('power-'));
+        const migratedPowers = incomingAbilities.filter(a => a.category === 'combat' || a.id.startsWith('combat-') || a.id.startsWith('power-'));
+        
+        this.powers = [...incomingPowers, ...migratedPowers];
 
         // CULPRIT FIX: The constructor now always derives maxHeroicPoints from its abilities/level.
         // This prevents "Value Lock" where stale data.maxHeroicPoints from the state would override new trait effects.

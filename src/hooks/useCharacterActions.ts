@@ -332,22 +332,24 @@ export const useCharacterActions = (
                     alignment: wovenData.moralAlignment
                 };
                 const baseAbilities = [...gameData.playerCharacter.abilities];
-                let powers = [...(gameData.playerCharacter.powers || [])];
+                let basePowers = [...(gameData.playerCharacter.powers || [])];
                 
-                // Route all combat-tagged abilities to powers
-                const combatAbilities = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
+                // Route all combat-tagged abilities out of abilities
+                const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
                 const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
+                
+                const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
 
                 // Skin the primary combat ability if it exists
-                const finalPowers = combatAbilities.map(a => {
-                    if (a.id === baseAbilities.find(orig => orig.id.startsWith('combat-'))?.id) {
+                const finalPowers = allCombatPowers.map(a => {
+                    if (a.id === allCombatPowers.find(orig => orig.id.startsWith('combat-'))?.id) {
                         return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
                     }
                     return a;
                 });
 
                 playerUpdates.abilities = traitAbilities;
-                playerUpdates.powers = [...powers, ...finalPowers];
+                playerUpdates.powers = finalPowers;
                 
                 const tempPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
                 delete tempPlayerCharacter.unwovenDetails;
@@ -374,20 +376,22 @@ export const useCharacterActions = (
                     matchedComp.alignment = wovenData.moralAlignment;
                     
                     const baseAbilities = [...matchedComp.abilities];
-                    const combatAbilities = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
+                    let basePowers = [...(matchedComp.powers || [])];
+
+                    const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
                     const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
 
-                    if (!matchedComp.powers) matchedComp.powers = [];
+                    const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
 
-                    const finalPowers = combatAbilities.map(a => {
+                    const finalPowers = allCombatPowers.map(a => {
                         // Priority: skin the primary combat blueprint
-                        if (a.id === baseAbilities.find(orig => orig.id.startsWith('combat-'))?.id) {
+                        if (a.id === allCombatPowers.find(orig => orig.id.startsWith('combat-'))?.id) {
                             return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
                         }
                         return a;
                     });
 
-                    matchedComp.powers = [...matchedComp.powers, ...finalPowers];
+                    matchedComp.powers = finalPowers;
                     matchedComp.abilities = traitAbilities;
                     delete matchedComp.unwovenDetails;
                 }
