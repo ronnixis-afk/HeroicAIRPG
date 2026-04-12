@@ -8,7 +8,7 @@ import {
     skinItemsForCharacter,
     preloadAdjacentZones
 } from '../services/geminiService';
-import { weaveHero } from '../services/aiCharacterService';
+import { weaveHero, weaveBio, skinAbilities } from '../services/aiCharacterService';
 import { getXPForLevel, getObjectiveCompleteXP, getDiscoveryXP, getHalfwayXP, calculateCharacterMaxHp } from '../utils/mechanics';
 import { useUI } from '../context/UIContext';
 import { ABILITY_SCORES, type AbilityScoreName, type SkillName } from '../types';
@@ -150,29 +150,38 @@ export const useCharacterActions = (
                         ...(character.powers || [])
                     ];
 
-                    const wovenData = await weaveHero(gameData as any, {
+                    const wovenBio = await weaveBio(gameData as any, {
                         ...character.unwovenDetails,
-                        powerBlueprints: pendingPowers
                     }, isCompanion);
 
-                    character.profession = wovenData.profession;
-                    character.appearance = wovenData.appearance;
-                    character.background = wovenData.background;
-                    character.keywords = wovenData.keywords;
+                    character.name = wovenBio.name || character.name;
+                    character.profession = wovenBio.profession;
+                    character.appearance = wovenBio.appearance;
+                    character.background = wovenBio.background;
+                    character.keywords = wovenBio.keywords;
                     
                     // Safely handle personality (mostly for companions)
-                    const pDetails = character.unwovenDetails.personality || wovenData.personality || '';
+                    const pDetails = character.unwovenDetails.personality || wovenBio.personality || '';
                     if (pDetails) {
                         character.personality = pDetails;
                     }
 
-                    character.alignment = wovenData.moralAlignment;
-                    character.abilityScores = wovenData.abilityScores;
-                    character.savingThrows = wovenData.savingThrows;
+                    character.alignment = wovenBio.moralAlignment;
+                    character.abilityScores = wovenBio.abilityScores;
+                    character.savingThrows = wovenBio.savingThrows;
+
+                    // --- NEW STEP: UNLOCKING POWERS ---
+                    setCreationProgress({ isActive: true, step: "Unlocking Powers...", progress: 68 });
+                    const skinnedAbilities = await skinAbilities(gameData as any, {
+                        name: character.name,
+                        race: character.race,
+                        profession: character.profession,
+                        background: character.background
+                    }, pendingPowers);
 
                     const otherAbilities = character.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
                     character.abilities = otherAbilities;
-                    character.powers = wovenData.skinnedAbilities;
+                    character.powers = skinnedAbilities;
 
                     setCreationProgress({ isActive: true, step: "Personalizing equipment...", progress: 70 });
                     skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
@@ -374,23 +383,32 @@ export const useCharacterActions = (
                     ...(finalPlayerCharacter.powers || [])
                 ];
 
-                const wovenData = await weaveHero(gameData as any, {
+                const wovenBio = await weaveBio(gameData as any, {
                     ...finalPlayerCharacter.unwovenDetails,
-                    powerBlueprints: pendingPowers
                 }, false);
 
-                finalPlayerCharacter.profession = wovenData.profession;
-                finalPlayerCharacter.appearance = wovenData.appearance;
-                finalPlayerCharacter.background = wovenData.background;
-                finalPlayerCharacter.keywords = wovenData.keywords;
-                finalPlayerCharacter.alignment = wovenData.moralAlignment;
-                finalPlayerCharacter.abilityScores = wovenData.abilityScores;
-                finalPlayerCharacter.savingThrows = wovenData.savingThrows;
+                finalPlayerCharacter.name = wovenBio.name || finalPlayerCharacter.name;
+                finalPlayerCharacter.profession = wovenBio.profession;
+                finalPlayerCharacter.appearance = wovenBio.appearance;
+                finalPlayerCharacter.background = wovenBio.background;
+                finalPlayerCharacter.keywords = wovenBio.keywords;
+                finalPlayerCharacter.alignment = wovenBio.moralAlignment;
+                finalPlayerCharacter.abilityScores = wovenBio.abilityScores;
+                finalPlayerCharacter.savingThrows = wovenBio.savingThrows;
+                
+                // --- NEW STEP: UNLOCKING POWERS ---
+                setCreationProgress({ isActive: true, step: "Unlocking Powers...", progress: 12 });
+                const skinnedAbilities = await skinAbilities(gameData as any, {
+                    name: finalPlayerCharacter.name,
+                    race: finalPlayerCharacter.race,
+                    profession: finalPlayerCharacter.profession,
+                    background: finalPlayerCharacter.background
+                }, pendingPowers);
                 
                 // Merge Skinned Powers
                 const otherAbilities = finalPlayerCharacter.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
                 finalPlayerCharacter.abilities = otherAbilities;
-                finalPlayerCharacter.powers = wovenData.skinnedAbilities;
+                finalPlayerCharacter.powers = skinnedAbilities;
 
                 // Skin Inventory
                 setCreationProgress({ isActive: true, step: "Theming starting gear...", progress: 15 });
@@ -424,23 +442,32 @@ export const useCharacterActions = (
                         ...(comp.powers || [])
                     ];
 
-                    const wovenData = await weaveHero(gameData as any, {
+                    const wovenBio = await weaveBio(gameData as any, {
                         ...comp.unwovenDetails,
-                        powerBlueprints: pendingPowers
                     }, true);
                     
-                    comp.profession = wovenData.profession;
-                    comp.appearance = wovenData.appearance;
-                    comp.background = wovenData.background;
-                    comp.personality = comp.unwovenDetails.personality || wovenData.personality || comp.personality;
-                    comp.keywords = wovenData.keywords;
-                    comp.alignment = wovenData.moralAlignment;
-                    comp.abilityScores = wovenData.abilityScores;
-                    comp.savingThrows = wovenData.savingThrows;
+                    comp.name = wovenBio.name || comp.name;
+                    comp.profession = wovenBio.profession;
+                    comp.appearance = wovenBio.appearance;
+                    comp.background = wovenBio.background;
+                    comp.personality = comp.unwovenDetails.personality || wovenBio.personality || comp.personality;
+                    comp.keywords = wovenBio.keywords;
+                    comp.alignment = wovenBio.moralAlignment;
+                    comp.abilityScores = wovenBio.abilityScores;
+                    comp.savingThrows = wovenBio.savingThrows;
+
+                    // --- NEW STEP: UNLOCKING POWERS ---
+                    setCreationProgress({ isActive: true, step: "Unlocking Powers...", progress: 25 });
+                    const skinnedAbilities = await skinAbilities(gameData as any, {
+                        name: comp.name,
+                        race: comp.race,
+                        profession: comp.profession,
+                        background: comp.background
+                    }, pendingPowers);
 
                     const otherAbilities = comp.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
                     comp.abilities = otherAbilities;
-                    comp.powers = wovenData.skinnedAbilities;
+                    comp.powers = skinnedAbilities;
 
                     // Skin Companion Inventory
                     const compInv = finalCompanionInventories[comp.id] || { equipped: [], carried: [], storage: [], assets: [] };

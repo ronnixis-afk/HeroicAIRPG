@@ -225,8 +225,205 @@ export const generateRecruitSkins = async (
 };
 
 /**
- * Weaves a cohesive hero background and appearance based on wizard selections.
- * Generates full mechanical stats (Ability Scores, Skills, Saves) and skins the chosen power.
+ * PHASE 1: WEAVE BIOGRAPHY
+ * Generates the character's narrative identity and mechanical foundation.
+ */
+export const weaveBio = async (
+    gameData: GameData,
+    selections: {
+        name: string,
+        gender: string,
+        race: string,
+        backgroundTraits: string[],
+        generalTraits: string[],
+        customBackground?: string,
+        abilityScores?: any,
+        savingThrows?: AbilityScoreName[],
+        guaranteedSkills?: string[],
+        racialTrait?: Ability,
+        personality?: string
+    },
+    isCompanion: boolean = false
+): Promise<{
+    name: string,
+    profession: string,
+    appearance: string,
+    background: string,
+    personality: string,
+    keywords: string[],
+    abilityScores: any,
+    savingThrows: any,
+    skills: any,
+    moralAlignment: { lawChaos: number, goodEvil: number }
+}> => {
+    const worldContext = getWorldContext(gameData);
+    const config = gameData.skillConfiguration || 'Fantasy';
+    const availableSkillsList = SKILL_NAMES.filter(s => {
+        const def = SKILL_DEFINITIONS[s];
+        return def.usedIn === 'All' || def.usedIn.includes(config);
+    });
+
+    const contextTerm = isCompanion ? "companion" : "player character";
+    const prompt = `
+    You are a Master Storyteller and RPG Architect. Weave a cohesive character profile (biography and stats) for a new ${contextTerm}.
+    
+    [World Lore]
+    ${worldContext}
+
+    [User Selections]
+    Name: ${selections.name}
+    Gender: ${selections.gender}
+    Race: ${selections.race}
+    ${selections.racialTrait ? `Racial Trait: ${selections.racialTrait.name} (${selections.racialTrait.description})` : ''}
+    Background Seeds: ${selections.backgroundTraits.join(', ')}
+    General Qualities: ${selections.generalTraits.join(', ')}
+    ${selections.customBackground ? `Custom Background Context: "${selections.customBackground}"` : ''}
+    ${selections.personality ? `Existing Personality: "${selections.personality}"` : ''}
+
+    [Instructions]
+    1. name: Generate a FULL NAME (First + Last/Family Name) reflecting race/gender and World Lore styles.
+    2. profession: Define a specific class or profession (Title Case).
+    3. appearance: Physical description (Max 40 words).
+    4. background: Synthesize a history incorporating traits and context (Max 100 words).
+    5. personality: Quirky habits or traits (Max 15 words). ${selections.personality ? 'Refine the existing personality seeds.' : ''}
+    6. keywords: 4-6 thematic keywords.
+    7. abilityScores: ${selections.abilityScores ? '[OMIT]' : 'Distribute (16, 14, 14, 12, 10, 8) to fit the profession.'}
+    8. skills: ${selections.abilityScores ? '[OMIT]' : `Allocate proficiency to at least 4 skills from: [${availableSkillsList.join(', ')}].
+       ${selections.guaranteedSkills && selections.guaranteedSkills.length > 0 ? `- Must include: [${selections.guaranteedSkills.join(', ')}].` : ''}`}
+    9. savingThrows: ${selections.savingThrows ? `Use: ${selections.savingThrows.join(', ')}` : "Pick exactly 2 saving throw proficiencies."}
+    10. moralAlignment: Numerical values (-100 to 100).
+
+    [Mandatory Json Structure]
+    {
+        "name": "string",
+        "profession": "string",
+        "appearance": "string",
+        "background": "string",
+        "personality": "string",
+        "keywords": ["string"],
+        ${selections.abilityScores ? '' : `"abilityScores": { "strength": { "score": number }, ... },`}
+        "savingThrows": { "strength": { "proficient": boolean }, ... },
+        ${selections.abilityScores ? '' : `"skills": { "${availableSkillsList[0]}": { "proficient": boolean }, ... },`}
+        "moralAlignment": { "goodEvil": number, "lawChaos": number }
+    }
+    `;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: AI_MODELS.DEFAULT,
+            contents: prompt,
+            config: { thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
+        });
+
+        const result = JSON.parse(cleanJson(response.text || "{}"));
+        const convertSavesToMap = (saves: AbilityScoreName[]) => ({
+            strength: { proficient: saves.includes('strength') },
+            dexterity: { proficient: saves.includes('dexterity') },
+            constitution: { proficient: saves.includes('constitution') },
+            intelligence: { proficient: saves.includes('intelligence') },
+            wisdom: { proficient: saves.includes('wisdom') },
+            charisma: { proficient: saves.includes('charisma') }
+        });
+
+        return {
+            name: result.name || selections.name,
+            profession: result.profession || "Adventurer",
+            appearance: result.appearance || "A determined explorer.",
+            background: result.background || "A traveler with a mysterious past.",
+            personality: result.personality || "Quiet, determined.",
+            keywords: Array.isArray(result.keywords) ? result.keywords : ["brave", "adventurer"],
+            abilityScores: selections.abilityScores || result.abilityScores || { strength: { score: 10 }, dexterity: { score: 10 }, constitution: { score: 10 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
+            savingThrows: selections.savingThrows ? convertSavesToMap(selections.savingThrows) : (result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } }),
+            skills: result.skills || {},
+            moralAlignment: result.moralAlignment || { goodEvil: 0, lawChaos: 0 }
+        };
+    } catch (e) {
+        console.error("Bio weaving failed", e);
+        return {
+            name: selections.name,
+            profession: "Adventurer",
+            appearance: "A determined explorer.",
+            background: "A traveler with a mysterious past.",
+            personality: "Quiet, observant.",
+            keywords: ["brave", "adventurer"],
+            abilityScores: { strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
+            savingThrows: { strength: { proficient: true }, constitution: { proficient: true }, dexterity: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
+            skills: {},
+            moralAlignment: { goodEvil: 0, lawChaos: 0 }
+        };
+    }
+};
+
+
+/**
+ * PHASE 2: SKIN ABILITIES
+ * Dedicates AI bandwidth specifically to the thematic renaming and descriptions of powers.
+ */
+export const skinAbilities = async (
+    gameData: GameData,
+    bioContext: { profession: string, background: string, race: string, name: string },
+    powerBlueprints: Ability[]
+): Promise<Ability[]> => {
+    if (powerBlueprints.length === 0) return [];
+    
+    const worldContext = getWorldContext(gameData);
+    const prompt = `
+    You are an RPG Content Designer. Your task is to THEMATICALLY SKIN combat abilities (Powers) for a character.
+    
+    [World Lore]
+    ${worldContext}
+
+    [Character Bio]
+    Name: ${bioContext.name}
+    Race: ${bioContext.race}
+    Profession: ${bioContext.profession}
+    History: ${bioContext.background}
+
+    [Powers to Skin]
+    ${powerBlueprints.map(p => `- ID: ${p.id} | Generic Name: ${p.name.replace('[Pending] ', '')} | Base Description: ${p.description}`).join('\n    ')}
+
+    [Instructions]
+    1. Transformation: Transform each generic blueprint into a unique, thematic signature power that fits BOTH the World Lore and the Character Bio.
+    2. Name: Provide an evocative, non-generic name (Title Case).
+    3. Description: Write a flavor-rich description (Max 25 words).
+    4. MECHANICAL INTEGRITY (CRITICAL): You MUST return the EXACT same "id" for each power as provided in the input list.
+    5. MECHANICAL INTEGRITY (CRITICAL): If the Base Description mentions specific mechanical values (dice, damage types, status effects), you MUST preserve these exactly in your new description.
+
+    [Mandatory Json Structure]
+    [
+        { "id": "string", "name": "string", "description": "string" },
+        ...
+    ]
+    `;
+
+    try {
+        const ai = getAi();
+        const response = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-preview',
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+        });
+
+        const skinned = JSON.parse(cleanJson(response.text || "[]"));
+        return powerBlueprints.map(blueprint => {
+            const skin = Array.isArray(skinned) ? skinned.find((s: any) => s.id === blueprint.id) : null;
+            return {
+                ...blueprint,
+                name: skin?.name || blueprint.name.replace('[Pending] ', ''),
+                description: skin?.description || blueprint.description
+            };
+        });
+    } catch (e) {
+        console.error("Ability skinning failed", e);
+        return powerBlueprints.map(p => ({ ...p, name: p.name.replace('[Pending] ', '') }));
+    }
+};
+
+
+/**
+ * Main wrapper for character weaving.
+ * Backward compatibility: Calls Phase 1 then Phase 2.
  */
 export const weaveHero = async (
     gameData: GameData,
@@ -241,11 +438,12 @@ export const weaveHero = async (
         abilityScores?: any,
         savingThrows?: AbilityScoreName[],
         guaranteedSkills?: string[],
-        racialTrait?: Ability
+        racialTrait?: Ability,
+        personality?: string
     },
-
     isCompanion: boolean = false
 ): Promise<{
+    name: string,
     profession: string,
     appearance: string,
     background: string,
@@ -257,148 +455,23 @@ export const weaveHero = async (
     skinnedAbilities: Ability[],
     moralAlignment: { lawChaos: number, goodEvil: number }
 }> => {
-    const worldContext = getWorldContext(gameData);
-
-    const config = gameData.skillConfiguration || 'Fantasy';
-
-    // Performance Update: Always prioritize gemini-3.1-flash-lite for companion recruitment to ensure snappy UI.
-
-
-    const availableSkillsList = SKILL_NAMES.filter(s => {
-        const def = SKILL_DEFINITIONS[s];
-        return def.usedIn === 'All' || def.usedIn.includes(config);
-    });
-
-    const contextTerm = isCompanion ? "companion" : "player character";
-    const possessiveTerm = isCompanion ? "their" : "your";
-
-    const prompt = `
-    You are a Master Storyteller and RPG Architect. Weave a cohesive character profile for a new ${contextTerm}.
+    // Phase 1: Bio & Stats
+    const bio = await weaveBio(gameData, selections, isCompanion);
     
-    [World Lore]
-    ${worldContext}
+    // Phase 2: Powers
+    const skinnedAbilities = await skinAbilities(gameData, {
+        name: selections.name,
+        race: selections.race,
+        profession: bio.profession,
+        background: bio.background
+    }, selections.powerBlueprints);
 
-    [User Selections]
-    Name: ${selections.name}
-    Gender: ${selections.gender}
-    Race: ${selections.race}
-    ${selections.racialTrait ? `Racial Trait: ${selections.racialTrait.name} (${selections.racialTrait.description})` : ''}
-    Background Seeds: ${selections.backgroundTraits.join(', ')}
-    General Qualities: ${selections.generalTraits.join(', ')}
-    Chosen Power Blueprints:
-    ${selections.powerBlueprints.map(p => `- ${p.id}: ${p.name} (${p.description})`).join('\n    ')}
-    ${selections.customBackground ? `Custom Background Context: "${selections.customBackground}"` : ''}
-
-    [Instructions]
-    1. Name Consistency: You MUST generate a FULL NAME (First Name + Last Name or Family Name/Surname) that reflects the character's race, gender, and the [Established Races & Naming Styles] provided in World Lore. If a partial name was provided (e.g. "${selections.name}"), expand it into a full name that matches their gender.
-    2. profession: Deduce a fitting class or profession name (Title Case).
-    2. appearance: Describe ${possessiveTerm} unique physical appearance. Max 40 words.
-    3. background: Synthesize a cohesive history explaining ${possessiveTerm} traits and origins. 
-       ${selections.customBackground ? 'IMPORTANT: Incorporate the provided Custom Background Context into this narrative.' : ''} 
-       Max 100 words.
-    4. personality: Provide a list of QUIRKY, memorable habits or traits (MAX 15 WORDS TOTAL). 
-    5. keywords: Provide 4-6 thematic keywords.
-    ${selections.abilityScores ? '6. abilityScores: [OMIT THIS FIELD]' : '6. abilityScores: Use a "Standard Array" logic (16, 14, 14, 12, 10, 8) distributed to fit the profession.'}
-
-    ${selections.abilityScores ? '7. skills: [OMIT THIS FIELD]' : `7. skills: You MUST allocate proficiency to at least 4 skills.
-       ${selections.guaranteedSkills && selections.guaranteedSkills.length > 0 ? `- IMPORTANT: These skills are provided by the character's traits and MUST be marked as proficient: [${selections.guaranteedSkills.join(', ')}].` : ''}
-       - Any skills mentioned in the "Background Seeds", "General Qualities", or "Custom Background Context" MUST also be marked as proficient.
-       - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].`}
-    8. savingThrows: ${selections.savingThrows ? `Use these EXACT saving throw proficiencies: ${selections.savingThrows.join(', ')}` : "Choose exactly 2 Saving Throw proficiencies."}
-
-    9. skinnedAbilities: Transform EACH provided Power Blueprint into a unique thematic signature power for ${selections.name}. 
-       - Rename them evocatively.
-       - Rewrite descriptions to match the flavor.
-       - IMPORTANT MECHANICAL RULE: For EACH power, if the Blueprint already has a specific "damageType" or "status", you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
-    10. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos from the [ALIGNMENT SCALES] that match this character's background and personality.
-    11. NO ALL CAPS.
-
-    [Mandatory Json Structure]
-    {
-        "profession": "string",
-        "appearance": "string",
-        "background": "string",
-        "personality": "string",
-        "keywords": ["string"],
-${selections.abilityScores ? '' : `        "abilityScores": {
-            "strength": { "score": number }, "dexterity": { "score": number }, "constitution": { "score": number },
-            "intelligence": { "score": number }, "wisdom": { "score": number }, "charisma": { "score": number }
-        },`}
-        "savingThrows": {
-            "strength": { "proficient": boolean }, "dexterity": { "proficient": boolean }, "constitution": { "proficient": boolean },
-            "intelligence": { "proficient": boolean }, "wisdom": { "proficient": boolean }, "charisma": { "proficient": boolean }
-        },
-${selections.abilityScores ? '' : `        "skills": {
-            ${availableSkillsList.map(s => `"${s}": { "proficient": boolean }`).join(',\n            ')}
-        },`}
-        "skinnedAbilities": [
-            { "id": "string", "name": "string", "description": "string" }
-        ],
-        "moralAlignment": { "goodEvil": number, "lawChaos": number }
-    }
-    `;
-
-
-    try {
-        const ai = getAi();
-        const response = await ai.models.generateContent({
-            model: AI_MODELS.DEFAULT,
-            contents: prompt,
-            config: {
-                thinkingConfig: { thinkingBudget: THINKING_BUDGETS.LOGIC }, responseMimeType: "application/json" }
-        });
-
-        const result = JSON.parse(cleanJson(response.text || "{}"));
-        
-        const convertSavesToMap = (saves: AbilityScoreName[]) => ({
-            strength: { proficient: saves.includes('strength') },
-            dexterity: { proficient: saves.includes('dexterity') },
-            constitution: { proficient: saves.includes('constitution') },
-            intelligence: { proficient: saves.includes('intelligence') },
-            wisdom: { proficient: saves.includes('wisdom') },
-            charisma: { proficient: saves.includes('charisma') }
-        });
-
-        // Map skinned abilities back to their original mechanical structure
-        const skinnedAbilities = selections.powerBlueprints.map(blueprint => {
-            const skin = (result.skinnedAbilities || []).find((s: any) => s.id === blueprint.id);
-            return {
-                ...blueprint,
-                name: skin?.name || blueprint.name.replace('[Pending] ', ''),
-                description: skin?.description || blueprint.description
-            };
-        });
-
-        return {
-            profession: result.profession || "Adventurer",
-            appearance: result.appearance || "A determined explorer.",
-            background: result.background || "A traveler with a mysterious past.",
-            personality: result.personality || "Quiet, determined.",
-            keywords: Array.isArray(result.keywords) ? result.keywords : ["brave", "adventurer"],
-            abilityScores: selections.abilityScores || result.abilityScores || { strength: { score: 10 }, dexterity: { score: 10 }, constitution: { score: 10 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
-            savingThrows: selections.savingThrows ? convertSavesToMap(selections.savingThrows) : (result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } }),
-            skills: result.skills || {},
-            skinnedAbilities,
-            moralAlignment: result.moralAlignment || { goodEvil: 0, lawChaos: 0 }
-        };
-
-    } catch (e) {
-        console.error("Hero weaving failed", e);
-        return {
-            profession: "Adventurer",
-            appearance: "A determined explorer.",
-            background: "A traveler with a mysterious past.",
-            personality: "Quiet, observant.",
-            keywords: ["brave", "adventurer"],
-            abilityScores: { strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
-            savingThrows: { strength: { proficient: true }, constitution: { proficient: true }, dexterity: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
-            skills: {},
-            skinnedAbilities: selections.powerBlueprints.map(p => ({ ...p, name: p.name.replace('[Pending] ', '') })),
-            moralAlignment: { goodEvil: 0, lawChaos: 0 }
-        };
-
-    }
+    return {
+        ...bio,
+        skinnedAbilities
+    };
 };
+
 
 export const generateCharacterDetails = async (world: any[], prompt: string, character: any) => {
     const input = `Create or refine a full Player Character sheet based on: "${prompt}".
