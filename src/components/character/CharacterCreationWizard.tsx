@@ -346,7 +346,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             ];
             
             const allPowers: Ability[] = [
-                { ...recruit.comSeed, id: `combat-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged.", category: 'combat' }
+                { ...recruit.comSeed, id: `power-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged.", category: 'power' }
             ];
 
             const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
@@ -418,7 +418,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             ];
             
             const allPowers: Ability[] = [
-                { ...powerBlueprint, id: `combat-${Date.now()}`, name: `[Pending] ${powerBlueprint.name}`, description: "This ability is being forged.", category: 'combat' }
+                { ...powerBlueprint, id: `power-${Date.now()}`, name: `[Pending] ${powerBlueprint.name}`, description: "This ability is being forged.", category: 'power' }
             ];
             
             // Merge custom skills with guaranteed traits
