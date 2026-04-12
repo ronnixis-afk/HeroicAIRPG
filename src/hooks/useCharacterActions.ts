@@ -159,7 +159,13 @@ export const useCharacterActions = (
                     character.appearance = wovenData.appearance;
                     character.background = wovenData.background;
                     character.keywords = wovenData.keywords;
-                    character.personality = character.unwovenDetails.personality || wovenData.personality || character.personality;
+                    
+                    // Safely handle personality (mostly for companions)
+                    const pDetails = character.unwovenDetails.personality || wovenData.personality || '';
+                    if (pDetails) {
+                        character.personality = pDetails;
+                    }
+
                     character.alignment = wovenData.moralAlignment;
                     character.abilityScores = wovenData.abilityScores;
                     character.savingThrows = wovenData.savingThrows;

@@ -70,7 +70,7 @@ export const createSnapshot = (character: PlayerCharacter | Companion): Characte
         profession: character.profession,
         appearance: character.appearance,
         background: character.background,
-        personality: (character as Companion).personality || '',
+        personality: character.personality,
         isShip: character.isShip,
         maxHitPoints: character.maxHitPoints,
         maxStamina: character.maxStamina,
@@ -173,6 +173,7 @@ export class PlayerCharacter {
         primaryAbilityId?: string;
         secondaryAbilityId?: string;
     };
+    personality?: string;
 
     constructor(data: Partial<PlayerCharacter>) {
         Object.assign(this, data);
