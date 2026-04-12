@@ -236,7 +236,7 @@ export const weaveHero = async (
         race: string,
         backgroundTraits: string[],
         generalTraits: string[],
-        powerBlueprint: Ability,
+        powerBlueprints: Ability[],
         customBackground?: string,
         abilityScores?: any,
         savingThrows?: AbilityScoreName[],
@@ -254,7 +254,7 @@ export const weaveHero = async (
     abilityScores: any,
     savingThrows: any,
     skills: any,
-    skinnedAbility: Ability,
+    skinnedAbilities: Ability[],
     moralAlignment: { lawChaos: number, goodEvil: number }
 }> => {
     const worldContext = getWorldContext(gameData);
@@ -285,7 +285,8 @@ export const weaveHero = async (
     ${selections.racialTrait ? `Racial Trait: ${selections.racialTrait.name} (${selections.racialTrait.description})` : ''}
     Background Seeds: ${selections.backgroundTraits.join(', ')}
     General Qualities: ${selections.generalTraits.join(', ')}
-    Chosen Power Blueprint: ${selections.powerBlueprint.name} - ${selections.powerBlueprint.description}
+    Chosen Power Blueprints:
+    ${selections.powerBlueprints.map(p => `- ${p.id}: ${p.name} (${p.description})`).join('\n    ')}
     ${selections.customBackground ? `Custom Background Context: "${selections.customBackground}"` : ''}
 
     [Instructions]
@@ -305,10 +306,10 @@ export const weaveHero = async (
        - Skills MUST be chosen from this list ONLY: [${availableSkillsList.join(', ')}].`}
     8. savingThrows: ${selections.savingThrows ? `Use these EXACT saving throw proficiencies: ${selections.savingThrows.join(', ')}` : "Choose exactly 2 Saving Throw proficiencies."}
 
-    9. skinnedAbility: Transform the Power Blueprint into a unique thematic signature power for ${selections.name}. 
-       - Rename it evocatively.
-       - Rewrite the description to match the flavor.
-       - IMPORTANT MECHANICAL RULE: If the Chosen Power Blueprint already has a specific "damageType" (e.g. ${selections.powerBlueprint.effect?.damageType || 'not specified'}) or "status" (e.g. ${selections.powerBlueprint.effect?.status || 'not specified'}), you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
+    9. skinnedAbilities: Transform EACH provided Power Blueprint into a unique thematic signature power for ${selections.name}. 
+       - Rename them evocatively.
+       - Rewrite descriptions to match the flavor.
+       - IMPORTANT MECHANICAL RULE: For EACH power, if the Blueprint already has a specific "damageType" or "status", you MUST PRESERVE these exact mechanical values in your output. Do NOT randomize or change them.
     10. moralAlignment: Pick numerical values (-100 to 100) for goodEvil and lawChaos from the [ALIGNMENT SCALES] that match this character's background and personality.
     11. NO ALL CAPS.
 
@@ -330,10 +331,9 @@ ${selections.abilityScores ? '' : `        "abilityScores": {
 ${selections.abilityScores ? '' : `        "skills": {
             ${availableSkillsList.map(s => `"${s}": { "proficient": boolean }`).join(',\n            ')}
         },`}
-        "skinnedAbility": {
-            "name": "string",
-            "description": "string"
-        },
+        "skinnedAbilities": [
+            { "id": "string", "name": "string", "description": "string" }
+        ],
         "moralAlignment": { "goodEvil": number, "lawChaos": number }
     }
     `;
@@ -359,6 +359,16 @@ ${selections.abilityScores ? '' : `        "skills": {
             charisma: { proficient: saves.includes('charisma') }
         });
 
+        // Map skinned abilities back to their original mechanical structure
+        const skinnedAbilities = selections.powerBlueprints.map(blueprint => {
+            const skin = (result.skinnedAbilities || []).find((s: any) => s.id === blueprint.id);
+            return {
+                ...blueprint,
+                name: skin?.name || blueprint.name.replace('[Pending] ', ''),
+                description: skin?.description || blueprint.description
+            };
+        });
+
         return {
             profession: result.profession || "Adventurer",
             appearance: result.appearance || "A determined explorer.",
@@ -368,11 +378,7 @@ ${selections.abilityScores ? '' : `        "skills": {
             abilityScores: selections.abilityScores || result.abilityScores || { strength: { score: 10 }, dexterity: { score: 10 }, constitution: { score: 10 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
             savingThrows: selections.savingThrows ? convertSavesToMap(selections.savingThrows) : (result.savingThrows || { strength: { proficient: false }, dexterity: { proficient: false }, constitution: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } }),
             skills: result.skills || {},
-            skinnedAbility: {
-                ...selections.powerBlueprint,
-                name: result.skinnedAbility?.name || selections.powerBlueprint.name,
-                description: result.skinnedAbility?.description || selections.powerBlueprint.description,
-            },
+            skinnedAbilities,
             moralAlignment: result.moralAlignment || { goodEvil: 0, lawChaos: 0 }
         };
 
@@ -387,7 +393,7 @@ ${selections.abilityScores ? '' : `        "skills": {
             abilityScores: { strength: { score: 12 }, dexterity: { score: 12 }, constitution: { score: 12 }, intelligence: { score: 10 }, wisdom: { score: 10 }, charisma: { score: 10 } },
             savingThrows: { strength: { proficient: true }, constitution: { proficient: true }, dexterity: { proficient: false }, intelligence: { proficient: false }, wisdom: { proficient: false }, charisma: { proficient: false } },
             skills: {},
-            skinnedAbility: selections.powerBlueprint,
+            skinnedAbilities: selections.powerBlueprints.map(p => ({ ...p, name: p.name.replace('[Pending] ', '') })),
             moralAlignment: { goodEvil: 0, lawChaos: 0 }
         };
 

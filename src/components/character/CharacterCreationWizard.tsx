@@ -325,65 +325,70 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const raceObj = availableRaces.find(r => r.name === recruit.race);
             const racialTrait = raceObj?.racialTrait;
 
-            const traitSkillsList = [...recruit.bgSeeds, ...recruit.genSeeds].flatMap((t: any) => t.buffs || []).filter((b: any) => b.type === 'skill').map((b: any) => b.skillName).filter((s: any): s is string => !!s);
-            const unwovenDetails = { 
-                name: recruit.name, 
-                gender: recruit.gender, 
-                race: recruit.race, 
-                backgroundTraits: recruit.bgSeeds.map((t: any) => t.name), 
-                generalTraits: recruit.genSeeds.map((t: any) => t.name), 
-                powerBlueprint: { ...recruit.comSeed, id: 'blueprint' } as Ability, 
-                guaranteedSkills: traitSkillsList,
-                racialTrait,
-                abilityScores: recruit.abilityScores,
-                savingThrows: recruit.savingThrows
-            };
-            
-            const allAbilities: Ability[] = [
-                ...(racialTrait ? [{ ...racialTrait, id: `racial-rec-${Date.now()}` }] : []),
-                ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })), 
-                ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
-            ];
-            
+            const abilityScores = recruit.abilityScores || ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { score: 10 } }), {} as any);
+            const savingThrows = recruit.savingThrows
+                ? ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: recruit.savingThrows.includes(s) } }), {} as any)
+                : ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
+
+            const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
+            const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) }; return acc; }, {} as any);
+
             const allPowers: Ability[] = [
                 { ...recruit.comSeed, id: `power-${Date.now()}`, name: `[Pending] ${recruit.comSeed.name}`, description: "This ability is being forged.", category: 'power' }
             ];
 
-            const traitSkills = new Set([...recruit.bgSeeds, ...recruit.genSeeds].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
-            const fullSkills = SKILL_NAMES.reduce((acc, skill) => { acc[skill] = { proficient: traitSkills.has(skill) }; return acc; }, {} as any);
-            
-            const abilityScores = recruit.abilityScores || ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { score: 10 } }), {} as any);
-            const savingThrows = recruit.savingThrows 
-                ? ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: recruit.savingThrows.includes(s) } }), {} as any)
-                : ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
+            const traitSkillsList = [...recruit.bgSeeds, ...recruit.genSeeds].flatMap((t: any) => t.buffs || []).filter((b: any) => b.type === 'skill').map((b: any) => b.skillName).filter((s: any): s is string => !!s);
 
-            const baseCharData = { 
-                id: `comp-${Date.now()}`, 
-                name: recruit.name, 
-                gender: recruit.gender, 
-                race: recruit.race, 
-                profession: "[Pending Profession]", 
-                appearance: "[Pending Appearance]", 
-                background: "[Pending Background]", 
-                personality: recruit.personality, 
-                keywords: [], 
-                abilityScores: abilityScores, 
-                savingThrows: savingThrows, 
-                skills: fullSkills, 
-                abilities: allAbilities, 
-                powers: allPowers,
-                level: playerLevel, 
-                experiencePoints: getXpForLevel(playerLevel), 
-                alignment: recruit.moralAlignment,
-                unwovenDetails 
+            const allAbilities: Ability[] = [
+                ...(racialTrait ? [{ ...racialTrait, id: `racial-rec-${Date.now()}` }] : []),
+                ...recruit.bgSeeds.map((t: any, i: number) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
+                ...recruit.genSeeds.map((t: any, i: number) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
+            ];
+
+            const unwovenDetails = {
+                name: recruit.name,
+                gender: recruit.gender,
+                race: recruit.race,
+                backgroundTraits: recruit.bgSeeds.map((t: any) => t.name),
+                generalTraits: recruit.genSeeds.map((t: any) => t.name),
+                powerBlueprints: allPowers,
+                personality: recruit.personality,
+                abilityScores: abilityScores,
+                savingThrows: recruit.savingThrows,
+                guaranteedSkills: traitSkillsList,
+                racialTrait
             };
+
+
+            const baseCharData = {
+                id: `comp-${Date.now()}`,
+                name: recruit.name,
+                gender: recruit.gender,
+                race: recruit.race,
+                profession: "[Pending Profession]",
+                appearance: "[Pending Appearance]",
+                background: "[Pending Background]",
+                personality: recruit.personality,
+                keywords: [],
+                abilityScores: abilityScores,
+                savingThrows: savingThrows,
+                skills: fullSkills,
+                abilities: allAbilities,
+                powers: allPowers,
+                level: playerLevel,
+                experiencePoints: getXpForLevel(playerLevel),
+                alignment: recruit.moralAlignment,
+                unwovenDetails
+            };
+
             await integrateCharacter(new Companion(baseCharData), true, isPreGame);
 
+
             onClose();
-        } catch (e) { 
-            console.error("Recruit selection failed", e); 
-            setIsWeaving(false); 
-            setCreationProgress({ isActive: false, step: '', progress: 0 }); 
+        } catch (e) {
+            console.error("Recruit selection failed", e);
+            setIsWeaving(false);
+            setCreationProgress({ isActive: false, step: '', progress: 0 });
         }
     };
 
@@ -397,13 +402,17 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
             const selectedRaceObj = availableRaces.find(r => r.name === race);
             const racialTrait = selectedRaceObj?.racialTrait;
 
+            const allPowers: Ability[] = [
+                { ...powerBlueprint, id: `power-${Date.now()}`, name: `[Pending] ${powerBlueprint.name}`, description: "This ability is being forged.", category: 'power' }
+            ];
+
             const unwovenDetails = {
                 name,
                 gender: isShip ? 'Unspecified' : gender,
                 race: isShip ? 'Vessel' : race,
                 backgroundTraits: backgroundTraits.map(t => t.name),
                 generalTraits: generalTraits.map(t => t.name),
-                powerBlueprint: { ...powerBlueprint, id: 'blueprint' } as Ability,
+                powerBlueprints: allPowers,
                 customBackground: customBackground,
                 abilityScores: abilityScores,
                 savingThrows: savingThrows || undefined,
@@ -416,11 +425,7 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                 ...backgroundTraits.map((t, i) => ({ ...t, id: `bg-${i}-${Date.now()}` })),
                 ...generalTraits.map((t, i) => ({ ...t, id: `gen-${i}-${Date.now()}` }))
             ];
-            
-            const allPowers: Ability[] = [
-                { ...powerBlueprint, id: `power-${Date.now()}`, name: `[Pending] ${powerBlueprint.name}`, description: "This ability is being forged.", category: 'power' }
-            ];
-            
+
             // Merge custom skills with guaranteed traits
             const traitSkills = new Set([...backgroundTraits, ...generalTraits].flatMap(t => t.buffs || []).filter(b => b.type === 'skill').map(b => b.skillName));
             // Use custom skills if defined
@@ -429,25 +434,25 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
             const defaultSaves = ABILITY_SCORES.reduce((acc, s) => ({ ...acc, [s]: { proficient: false } }), {} as any);
 
-            const baseCharData = { 
-                id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`), 
-                name, 
-                gender: isShip ? 'Unspecified' : gender, 
-                race: isShip ? 'Vessel' : race, 
-                profession: "[Pending Profession]", 
-                appearance: "[Pending Appearance]", 
-                background: "[Pending Background]", 
-                personality: isShip ? '' : "[Pending Personality]", 
-                keywords: [], 
-                abilityScores: abilityScores, 
-                savingThrows: savingThrows || defaultSaves, 
-                skills: finalSkills, 
-                abilities: allAbilities, 
+            const baseCharData = {
+                id: existingId || (type === 'player' ? 'player' : `comp-${Date.now()}`),
+                name,
+                gender: isShip ? 'Unspecified' : gender,
+                race: isShip ? 'Vessel' : race,
+                profession: "[Pending Profession]",
+                appearance: "[Pending Appearance]",
+                background: "[Pending Background]",
+                personality: isShip ? '' : "[Pending Personality]",
+                keywords: [],
+                abilityScores: abilityScores,
+                savingThrows: savingThrows || defaultSaves,
+                skills: finalSkills,
+                abilities: allAbilities,
                 powers: allPowers,
-                level, 
-                experiencePoints: getXpForLevel(level), 
-                isShip, 
-                isSentient: !isShip, 
+                level,
+                experiencePoints: getXpForLevel(level),
+                isShip,
+                isSentient: !isShip,
                 alignment: { goodEvil: 0, lawChaos: 0 },
                 unwovenDetails
             };
@@ -455,10 +460,10 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
 
             await integrateCharacter(finalChar, isCompanion, isPreGame);
             onClose();
-        } catch (e) { 
-            console.error("Hero creation failed", e); 
-            setIsWeaving(false); 
-            setCreationProgress({ isActive: false, step: '', progress: 0 }); 
+        } catch (e) {
+            console.error("Hero creation failed", e);
+            setIsWeaving(false);
+            setCreationProgress({ isActive: false, step: '', progress: 0 });
         }
     };
 
@@ -499,21 +504,21 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                     {creationProgress.errorString ? creationProgress.step : weavingMessage}
                 </h3>
                 <p className="text-xs text-brand-text-muted italic leading-relaxed">
-                    {creationProgress.errorString 
-                        ? creationProgress.errorString 
+                    {creationProgress.errorString
+                        ? creationProgress.errorString
                         : (isShip ? "Technical schematics are being finalized..." : (isCompanion ? "The architect is drafting your new ally..." : "The architect is weaving your legend into the world..."))}
                 </p>
-                
+
                 {creationProgress.errorString ? (
                     <div className="flex flex-col gap-3 mt-8 w-full animate-fade-in">
-                        <button 
+                        <button
                             onClick={() => creationProgress.onRetry?.()}
                             className="btn-md btn-primary w-full flex items-center justify-center gap-2 shadow-lg shadow-brand-accent/5"
                         >
                             <Icon name="dice" className="w-4 h-4" />
                             <span>Retry Integration</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => {
                                 setIsWeaving(false);
                                 setCreationProgress({ isActive: false, step: '', progress: 0 });
@@ -708,11 +713,11 @@ export const CharacterCreationWizard: React.FC<CharacterCreationWizardProps> = (
                     </>
                 )}
                 {showEffectSelector && (
-                    <WizardEffectSelectorModal 
-                        isOpen={showEffectSelector} 
-                        onClose={() => setShowEffectSelector(false)} 
-                        type={effectSelectorType} 
-                        onSelect={handleEffectSubtypeSelect} 
+                    <WizardEffectSelectorModal
+                        isOpen={showEffectSelector}
+                        onClose={() => setShowEffectSelector(false)}
+                        type={effectSelectorType}
+                        onSelect={handleEffectSubtypeSelect}
                     />
                 )}
             </div>

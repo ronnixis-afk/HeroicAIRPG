@@ -236,7 +236,7 @@ export const useNpcActions = (
                     race: npc.race || 'Human',
                     backgroundTraits: template.backgroundTraitNames,
                     generalTraits: template.generalTraitNames,
-                    powerBlueprint: { ...powerBlueprintSource, id: 'blueprint' } as Ability
+                    powerBlueprints: [{ ...powerBlueprintSource, id: 'blueprint' } as Ability]
                 }, true);
 
                 const allAbilities: Ability[] = [
@@ -245,7 +245,7 @@ export const useNpcActions = (
                 ];
 
                 const allPowers: Ability[] = [
-                    { ...powerBlueprintSource, ...woven.skinnedAbility, id: `power-${Date.now()}`, category: 'power' }
+                    { ...powerBlueprintSource, ...woven.skinnedAbilities[0], id: `power-${Date.now()}`, category: 'power' }
                 ];
 
                 // Automatic Skill Proficiency from Traits

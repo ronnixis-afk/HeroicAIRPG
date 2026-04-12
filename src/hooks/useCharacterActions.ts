@@ -139,8 +139,43 @@ export const useCharacterActions = (
             const startingFunds = baselineInventory.carried.find((i: Item) => i.tags?.includes('currency'))!;
 
             let skinnedEquipment = blueprints;
-            if (!deferGameStart && !character.unwovenDetails) {
-                skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
+
+            // --- Robust Skinning Logic ---
+            if (!deferGameStart) {
+                if (character.unwovenDetails) {
+                    setCreationProgress({ isActive: true, step: "Weaving character theme...", progress: 65 });
+                    
+                    const pendingPowers = [
+                        ...character.abilities.filter(a => a.id.startsWith('power-') || a.category === 'power'),
+                        ...(character.powers || [])
+                    ];
+
+                    const wovenData = await weaveHero(gameData as any, {
+                        ...character.unwovenDetails,
+                        powerBlueprints: pendingPowers
+                    }, isCompanion);
+
+                    character.profession = wovenData.profession;
+                    character.appearance = wovenData.appearance;
+                    character.background = wovenData.background;
+                    character.keywords = wovenData.keywords;
+                    character.personality = character.unwovenDetails.personality || wovenData.personality || character.personality;
+                    character.alignment = wovenData.moralAlignment;
+                    character.abilityScores = wovenData.abilityScores;
+                    character.savingThrows = wovenData.savingThrows;
+
+                    const otherAbilities = character.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
+                    character.abilities = otherAbilities;
+                    character.powers = wovenData.skinnedAbilities;
+
+                    setCreationProgress({ isActive: true, step: "Personalizing equipment...", progress: 70 });
+                    skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
+                    
+                    delete character.unwovenDetails;
+                } else {
+                    // Legacy/Blueprint-only skinning
+                    skinnedEquipment = await skinItemsForCharacter(blueprints, character, gameData.worldSummary || '');
+                }
             }
 
             const processedInventory: Inventory = {
@@ -319,83 +354,111 @@ export const useCharacterActions = (
         
         setCreationProgress({ isActive: true, step: "Finalizing Party Data...", progress: 5 });
         try {
-            // First pass: Weave any pending characters
-            let playerUpdates: Partial<PlayerCharacter> = {};
-            if (gameData.playerCharacter.unwovenDetails) {
-                setCreationProgress({ isActive: true, step: "Forging Main Hero backstory...", progress: 10 });
-                const wovenData = await weaveHero(gameData as any, gameData.playerCharacter.unwovenDetails, false);
-                playerUpdates = {
-                    profession: wovenData.profession,
-                    appearance: wovenData.appearance,
-                    background: wovenData.background,
-                    keywords: wovenData.keywords,
-                    alignment: wovenData.moralAlignment
-                };
-                const baseAbilities = [...gameData.playerCharacter.abilities];
-                let basePowers = [...(gameData.playerCharacter.powers || [])];
-                
-                // Route all combat-tagged abilities out of abilities
-                const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('power-') || a.category === 'power');
-                const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
-                
-                const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
-
-                // Skin the primary combat ability if it exists
-                const finalPowers = allCombatPowers.map(a => {
-                    if (a.id === allCombatPowers.find(orig => orig.id.startsWith('power-'))?.id) {
-                        return { ...wovenData.skinnedAbility, id: a.id, category: 'power' };
-                    }
-                    return a;
-                });
-
-                playerUpdates.abilities = traitAbilities;
-                playerUpdates.powers = finalPowers;
-                
-                const tempPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
-                delete tempPlayerCharacter.unwovenDetails;
-                delete gameData.playerCharacter.unwovenDetails;
-            }
-            const finalPlayerCharacter = Object.assign(new PlayerCharacter(gameData.playerCharacter), playerUpdates);
-
-            const pendingCompanions = gameData.companions?.filter(c => c.unwovenDetails) || [];
-            const finalCompanions = [...(gameData.companions || [])];
+            // --- STEP 1: CHARACTER WEAVING (BIO & POWERS) ---
             
-            for (let i = 0; i < pendingCompanions.length; i++) {
-                const comp = pendingCompanions[i];
-                setCreationProgress({ isActive: true, step: `Enrolling ${comp.name}...`, progress: 10 + Math.floor((i + 1) * 10 / Math.max(1, pendingCompanions.length)) });
-                const wovenData = await weaveHero(gameData as any, comp.unwovenDetails, true);
+            // Handle Main Hero
+            let finalPlayerCharacter = new PlayerCharacter(gameData.playerCharacter);
+            let finalPlayerInventory = { ...gameData.playerInventory } as Inventory;
+
+            if (finalPlayerCharacter.unwovenDetails) {
+                setCreationProgress({ isActive: true, step: "Forging Main Hero backstory...", progress: 10 });
                 
-                const compIdx = finalCompanions.findIndex(c => c.id === comp.id);
-                if (compIdx > -1) {
-                    const matchedComp = finalCompanions[compIdx];
-                    matchedComp.profession = wovenData.profession;
-                    matchedComp.appearance = wovenData.appearance;
-                    matchedComp.background = wovenData.background;
-                    matchedComp.personality = comp.unwovenDetails.personality || wovenData.personality || matchedComp.personality;
-                    matchedComp.keywords = wovenData.keywords;
-                    matchedComp.alignment = wovenData.moralAlignment;
+                const pendingPowers = [
+                    ...finalPlayerCharacter.abilities.filter(a => a.id.startsWith('power-') || a.category === 'power'),
+                    ...(finalPlayerCharacter.powers || [])
+                ];
+
+                const wovenData = await weaveHero(gameData as any, {
+                    ...finalPlayerCharacter.unwovenDetails,
+                    powerBlueprints: pendingPowers
+                }, false);
+
+                finalPlayerCharacter.profession = wovenData.profession;
+                finalPlayerCharacter.appearance = wovenData.appearance;
+                finalPlayerCharacter.background = wovenData.background;
+                finalPlayerCharacter.keywords = wovenData.keywords;
+                finalPlayerCharacter.alignment = wovenData.moralAlignment;
+                finalPlayerCharacter.abilityScores = wovenData.abilityScores;
+                finalPlayerCharacter.savingThrows = wovenData.savingThrows;
+                
+                // Merge Skinned Powers
+                const otherAbilities = finalPlayerCharacter.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
+                finalPlayerCharacter.abilities = otherAbilities;
+                finalPlayerCharacter.powers = wovenData.skinnedAbilities;
+
+                // Skin Inventory
+                setCreationProgress({ isActive: true, step: "Theming starting gear...", progress: 15 });
+                const blueprints = [
+                    ...finalPlayerInventory.equipped,
+                    ...finalPlayerInventory.carried.filter(i => !i.tags?.includes('currency'))
+                ];
+                const currency = finalPlayerInventory.carried.find(i => i.tags?.includes('currency'));
+                
+                const skinnedItems = await skinItemsForCharacter(blueprints, finalPlayerCharacter, gameData.worldSummary || '');
+                finalPlayerInventory.equipped = skinnedItems.filter(i => i.equippedSlot);
+                finalPlayerInventory.carried = [
+                    ...(currency ? [currency] : []),
+                    ...skinnedItems.filter(i => !i.equippedSlot)
+                ];
+
+                delete finalPlayerCharacter.unwovenDetails;
+            }
+
+            // Handle Companions
+            const finalCompanions = (gameData.companions || []).map(c => new Companion(c));
+            const finalCompanionInventories = { ...(gameData.companionInventories || {}) };
+
+            for (let i = 0; i < finalCompanions.length; i++) {
+                const comp = finalCompanions[i];
+                if (comp.unwovenDetails) {
+                    setCreationProgress({ isActive: true, step: `Enrolling ${comp.name}...`, progress: 20 + Math.floor((i + 1) * 10 / Math.max(1, finalCompanions.length)) });
                     
-                    const baseAbilities = [...matchedComp.abilities];
-                    let basePowers = [...(matchedComp.powers || [])];
+                    const pendingPowers = [
+                        ...comp.abilities.filter(a => a.id.startsWith('power-') || a.category === 'power'),
+                        ...(comp.powers || [])
+                    ];
 
-                    const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('power-') || a.category === 'power');
-                    const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
+                    const wovenData = await weaveHero(gameData as any, {
+                        ...comp.unwovenDetails,
+                        powerBlueprints: pendingPowers
+                    }, true);
+                    
+                    comp.profession = wovenData.profession;
+                    comp.appearance = wovenData.appearance;
+                    comp.background = wovenData.background;
+                    comp.personality = comp.unwovenDetails.personality || wovenData.personality || comp.personality;
+                    comp.keywords = wovenData.keywords;
+                    comp.alignment = wovenData.moralAlignment;
+                    comp.abilityScores = wovenData.abilityScores;
+                    comp.savingThrows = wovenData.savingThrows;
 
-                    const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
+                    const otherAbilities = comp.abilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
+                    comp.abilities = otherAbilities;
+                    comp.powers = wovenData.skinnedAbilities;
 
-                    const finalPowers = allCombatPowers.map(a => {
-                        // Priority: skin the primary combat blueprint
-                        if (a.id === allCombatPowers.find(orig => orig.id.startsWith('power-'))?.id) {
-                            return { ...wovenData.skinnedAbility, id: a.id, category: 'power' };
-                        }
-                        return a;
-                    });
+                    // Skin Companion Inventory
+                    const compInv = finalCompanionInventories[comp.id] || { equipped: [], carried: [], storage: [], assets: [] };
+                    const blueprints = [
+                        ...compInv.equipped,
+                        ...compInv.carried.filter(i => !i.tags?.includes('currency'))
+                    ];
+                    const currency = compInv.carried.find(i => i.tags?.includes('currency'));
 
-                    matchedComp.powers = finalPowers;
-                    matchedComp.abilities = traitAbilities;
-                    delete matchedComp.unwovenDetails;
+                    const skinnedItems = await skinItemsForCharacter(blueprints, comp, gameData.worldSummary || '');
+                    finalCompanionInventories[comp.id] = {
+                        ...compInv,
+                        equipped: skinnedItems.filter(i => i.equippedSlot),
+                        carried: [
+                            ...(currency ? [currency] : []),
+                            ...skinnedItems.filter(i => !i.equippedSlot)
+                        ]
+                    };
+
+                    delete comp.unwovenDetails;
                 }
             }
+
+            // --- STEP 2: SCENARIO GENERATION ---
 
             const setting = (gameData.skillConfiguration as SettingType) || 'Fantasy';
             const hooks = STORY_HOOKS[setting] || STORY_HOOKS.Fantasy;
@@ -407,11 +470,9 @@ export const useCharacterActions = (
             const selectedHook = hooks[finalHookIndex - 1];
 
             const startTimestamp = Date.now();
-            setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 20 });
+            setCreationProgress({ isActive: true, step: "Weaving narrative scenario...", progress: 40 });
             const scenario = await generateStartingScenario(finalPlayerCharacter, gameData, selectedHook, finalCompanions);
 
-            // Check if player's coordinates exist in the mapZones (from SET_PRE_GAME_STATE)
-            // If not, we just use 0-0.
             const coords = '0-0';
 
             const startingZone: MapZone = {
@@ -449,12 +510,11 @@ export const useCharacterActions = (
                 } as LoreEntry);
             });
 
-            setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 60 });
+            setCreationProgress({ isActive: true, step: "Synthesizing initial timeline...", progress: 70 });
 
             const startPoiId = `know-start-${startTimestamp}-${scenario.selectedStartPoiIndex}`;
             const startPoiTitle = scenario.selectedStartPoi.title;
 
-            // Extract NPCs directly from the scenario response (no Auditor AI call needed)
             const introNpcs: NPC[] = (scenario.intro_npcs || []).map((n: any) => ({
                 id: `npc-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
                 name: n.name,
@@ -468,8 +528,10 @@ export const useCharacterActions = (
                 site_id: startPoiId
             } as NPC));
 
-            const startingFundsQty = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
-            const startingFundsName = gameData.playerInventory?.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
+            const startingFundsQty = finalPlayerInventory.carried?.find(i => i.tags?.includes('currency'))?.quantity || 100;
+            const startingFundsName = finalPlayerInventory.carried?.find(i => i.tags?.includes('currency'))?.name || 'Gold Pieces';
+
+            // --- STEP 3: FINAL SYNCHRONIZATION ---
 
             // SYSTEMIC HEAL: Ensure characters are fully healed upon beginning a new journey
             finalPlayerCharacter.currentHitPoints = finalPlayerCharacter.maxHitPoints;
@@ -486,9 +548,9 @@ export const useCharacterActions = (
 
             const restartPayload: Partial<GameData> = {
                 playerCharacter: finalPlayerCharacter,
-                playerInventory: gameData.playerInventory,
+                playerInventory: finalPlayerInventory,
                 companions: finalCompanions,
-                companionInventories: gameData.companionInventories || {},
+                companionInventories: finalCompanionInventories,
                 story: [{ id: `log-intro-${Date.now()}`, timestamp: gameData.currentTime, location: startPoiTitle, content: scenario.introNarrative, summary: scenario.introSummary, isNew: true }],
                 messages: [
                     { id: `sys-restart-${Date.now()}`, sender: 'system', content: `Journey synchronized. Party assembled. Initial wealth: ${startingFundsQty} ${startingFundsName}.`, type: 'neutral' },
