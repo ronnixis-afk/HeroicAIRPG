@@ -335,15 +335,15 @@ export const useCharacterActions = (
                 let basePowers = [...(gameData.playerCharacter.powers || [])];
                 
                 // Route all combat-tagged abilities out of abilities
-                const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
-                const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
+                const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('power-') || a.category === 'power');
+                const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
                 
                 const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
 
                 // Skin the primary combat ability if it exists
                 const finalPowers = allCombatPowers.map(a => {
-                    if (a.id === allCombatPowers.find(orig => orig.id.startsWith('combat-'))?.id) {
-                        return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
+                    if (a.id === allCombatPowers.find(orig => orig.id.startsWith('power-'))?.id) {
+                        return { ...wovenData.skinnedAbility, id: a.id, category: 'power' };
                     }
                     return a;
                 });
@@ -378,15 +378,15 @@ export const useCharacterActions = (
                     const baseAbilities = [...matchedComp.abilities];
                     let basePowers = [...(matchedComp.powers || [])];
 
-                    const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('combat-') || a.category === 'combat');
-                    const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('combat-') && a.category !== 'combat');
+                    const combatAbilitiesFromTraits = baseAbilities.filter(a => a.id.startsWith('power-') || a.category === 'power');
+                    const traitAbilities = baseAbilities.filter(a => !a.id.startsWith('power-') && a.category !== 'power');
 
                     const allCombatPowers = [...basePowers, ...combatAbilitiesFromTraits];
 
                     const finalPowers = allCombatPowers.map(a => {
                         // Priority: skin the primary combat blueprint
-                        if (a.id === allCombatPowers.find(orig => orig.id.startsWith('combat-'))?.id) {
-                            return { ...wovenData.skinnedAbility, id: a.id, category: 'combat' };
+                        if (a.id === allCombatPowers.find(orig => orig.id.startsWith('power-'))?.id) {
+                            return { ...wovenData.skinnedAbility, id: a.id, category: 'power' };
                         }
                         return a;
                     });
